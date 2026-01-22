@@ -1,4 +1,4 @@
-# Technical Research Summary: QBO Sync Engine
+# Technical Research Summary: Easy Bank Transactions Engine
 
 ## 1. QuickBooks Online API Detail
 - **Discovery**: The QBO API V3 is the current stable version.

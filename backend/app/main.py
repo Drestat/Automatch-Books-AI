@@ -21,4 +21,4 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def read_root():
-    return {"message": "QuickBooks AI Matcher API v3.0 (SaaS)"}
+    return {"message": "Easy Bank Transactions API v3.0 (SaaS)"}

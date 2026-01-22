@@ -1,4 +1,4 @@
-# SOP: Bank Transaction Matching Logic
+# SOP: Easy Bank Transactions Logic
 
 ## Overview
 This SOP defines the deterministic process for matching raw bank transactions to QuickBooks categories and records using a hybrid SQL + AI approach.

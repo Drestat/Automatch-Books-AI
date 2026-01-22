@@ -1,7 +1,7 @@
 # Gemini: Project Map & Source of Truth
 
 ## Project Overview
-- **Name**: QuickBooks Bank Transactions Automation
+- **Name**: Easy Bank Transactions
 - **Status**: Discovery / Phase 1: Blueprint
 - **Owner**: System Pilot (Antigravity)
 

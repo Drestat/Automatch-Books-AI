@@ -4,14 +4,14 @@ I have initialized a root-level git repository for this project. To finish the i
 
 ## 1. Create a New Repository on GitHub
 1. Go to [github.com/new](https://github.com/new).
-2. Name it `Quickbooks-Bank-Transactions`.
+2. Name it `Easy-Bank-Transactions`.
 3. Do **NOT** initialize it with a README, license, or gitignore (I have already created these locally).
 
 ## 2. Link your Local Repo to GitHub
 Run the following commands in your terminal:
 
 ```bash
-git remote add origin https://github.com/YOUR_USERNAME/Quickbooks-Bank-Transactions.git
+git remote add origin https://github.com/YOUR_USERNAME/Easy-Bank-Transactions.git
 git branch -M main
 git push -u origin main
 ```

@@ -1,6 +1,6 @@
-# Backend Plan: QuickBooks AI Matching Engine
+# Backend Plan: Easy Bank Transactions Engine
 
-This document outlines the architecture and implementation status of the "Engine" for the QuickBooks Bank Transactions application.
+This document outlines the architecture and implementation status of the "Engine" for the Easy Bank Transactions application.
 
 ## 1. Architecture Overview
 - **Core API**: FastAPI (Python) running in `backend/`.

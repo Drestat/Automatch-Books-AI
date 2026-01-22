@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # App Settings
-    PROJECT_NAME: str = "QuickBooks AI Matcher SaaS"
+    PROJECT_NAME: str = "Easy Bank Transactions"
     API_V1_STR: str = "/api/v1"
     
     # Database Settings
