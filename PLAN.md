@@ -41,3 +41,9 @@ Implemented in `backend/app/api/v1/endpoints/`:
 - [x] Integrate Gemini with batching and history context.
 - [ ] Add error handling for QBO API rate limits.
 - [ ] Implement secure webhook listener for real-time QBO updates.
+
+## 6. Version Control & CI/CD
+- **Git**: Local repository initialized at the root.
+- **Ignore**: Comprehensive `.gitignore` protecting secrets and large dependencies.
+- **CI**: GitHub Actions implemented for automated backend syntax checks.
+- **GitHub**: Remote setup instructions available in `GITHUB_SETUP.md`.
