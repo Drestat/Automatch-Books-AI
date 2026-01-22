@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+python-dotenv
+python-multipart
+intuit-oauth
+requests
+google-generativeai
+pydantic-settings
+modal

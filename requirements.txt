@@ -1,0 +1,5 @@
+python-quickbooks
+python-dotenv
+requests
+flask
+google-generativeai
