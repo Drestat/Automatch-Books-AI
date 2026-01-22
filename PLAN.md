@@ -46,4 +46,4 @@ Implemented in `backend/app/api/v1/endpoints/`:
 - **Git**: Local repository initialized at the root.
 - **Ignore**: Comprehensive `.gitignore` protecting secrets and large dependencies.
 - **CI**: GitHub Actions implemented for automated backend syntax checks.
-- **GitHub**: Remote setup instructions available in `GITHUB_SETUP.md`.
+- **GitHub**: Remote repository created and linked: [Drestat/Easy-Bank-Transactions](https://github.com/Drestat/Easy-Bank-Transactions).
