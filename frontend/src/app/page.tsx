@@ -18,7 +18,7 @@ export default function LandingPage() {
                         <span className="font-bold tracking-tight text-lg">MirrorSync</span>
                     </div>
                     <div className="flex items-center gap-6">
-                        <Link href="/sign-in" className="text-sm font-bold text-white/60 hover:text-white transition-colors">
+                        <Link href="/dashboard" className="text-sm font-bold text-white/60 hover:text-white transition-colors">
                             Log In
                         </Link>
                         <Link href="/sign-up" className="btn-primary px-6 py-2.5 text-sm">

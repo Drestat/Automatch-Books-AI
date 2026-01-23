@@ -123,7 +123,11 @@ class SyncService:
         }
 
     def analyze_transactions(self, limit: int = 20, tx_id: str = None):
-        """Uses Gemini to analyze unmatched transactions in batches or individually"""
+        """
+        Uses hybrid intelligence to categorize transactions:
+        1. Deterministic Match (History)
+        2. Generative AI (Gemini)
+        """
         if not self.model:
             return {"error": "Gemini API Key missing"}
 
@@ -135,21 +139,58 @@ class SyncService:
         if tx_id:
             query = query.filter(Transaction.id == tx_id)
         
+        # Order by date DESC to prioritize newest
         unmatched = query.order_by(Transaction.date.desc()).limit(limit).all()
 
         if not unmatched:
             return {"message": "No unmatched transactions found"}
 
         context = self.get_ai_context()
+        vendor_mapping = context['vendor_mapping']
         
-        # Token Optimization: Prune context to essential data
-        # Only send top 35 categories and top 15 history mappings
+        results = []
+        to_analyze_with_ai = []
+
+        # --- Rule 1: Exact Match (Deterministic) ---
+        for tx in unmatched:
+            if tx.description in vendor_mapping:
+                # Exact match found in history
+                confidence = 1.0
+                suggested_cat = vendor_mapping[tx.description]
+                
+                tx.suggested_category_name = suggested_cat
+                tx.reasoning = f"Exact match with history for '{tx.description}'"
+                tx.confidence = confidence
+                tx.status = 'pending_approval' # or 'approved' if auto-approve enabled
+                
+                self.db.add(tx)
+                results.append({
+                    "id": tx.id, 
+                    "analysis": {
+                        "suggested_category": suggested_cat, 
+                        "reasoning": tx.reasoning, 
+                        "confidence": confidence,
+                        "method": "deterministic"
+                    }
+                })
+            else:
+                to_analyze_with_ai.append(tx)
+        
+        self.db.commit() # Commit matches immediately
+
+        # If no transactions left for AI, return early
+        if not to_analyze_with_ai:
+            return results
+
+        # --- Rule 2: AI Guess (Gemini) ---
+        
+        # Token Optimization: Prune context
         category_list = context['categories'][:35]
-        history_list = list(context['vendor_mapping'].items())[:15]
+        history_list = list(vendor_mapping.items())[:15]
         
         tx_list_str = "\n".join([
             f"ID:{tx.id}|Desc:{tx.description}|Amt:{tx.amount}" 
-            for tx in unmatched
+            for tx in to_analyze_with_ai
         ])
 
         history_str = "\n".join([
@@ -176,15 +217,12 @@ class SyncService:
         
         try:
             response = self.model.generate_content(prompt)
-            # Remove markdown formatting if present
             raw_text = response.text.replace('```json', '').replace('```', '').strip()
             analyses = json.loads(raw_text)
             
-            # Map results back to transactions
             analysis_map = {a['id']: a for a in analyses}
             
-            results = []
-            for tx in unmatched:
+            for tx in to_analyze_with_ai:
                 analysis = analysis_map.get(tx.id)
                 if analysis:
                     tx.suggested_category_name = analysis.get('suggested_category')
@@ -192,7 +230,10 @@ class SyncService:
                     tx.confidence = analysis.get('confidence')
                     tx.status = 'pending_approval'
                     self.db.add(tx)
-                    results.append({"id": tx.id, "analysis": analysis})
+                    results.append({
+                        "id": tx.id, 
+                        "analysis": {**analysis, "method": "ai"}
+                    })
                 else:
                     print(f"⚠️ No analysis returned for TX {tx.id}")
             
@@ -200,6 +241,9 @@ class SyncService:
             return results
         except Exception as e:
             print(f"❌ Batch AI Error: {str(e)}")
+            # Return partial results if deterministic matches worked but AI failed
+            if results: 
+                return results
             return {"error": str(e)}
 
     def approve_transaction(self, tx_id: str):

@@ -7,6 +7,10 @@ class User(Base):
     __tablename__ = "users"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String, unique=True, index=True, nullable=False)
+    subscription_tier = Column(String, default="free")
+    stripe_customer_id = Column(String, nullable=True)
+    subscription_status = Column(String, default="inactive")
+    trial_ends_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class QBOConnection(Base):

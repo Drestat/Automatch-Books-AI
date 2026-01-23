@@ -51,9 +51,15 @@ export default function TransactionCard({ tx, onAccept }: TransactionCardProps) 
                     <div className="flex items-center gap-2 mb-2">
                         <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-brand">Suggested Category</span>
                         <div className="h-[1px] flex-1 bg-white/5" />
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20">
-                            <div className="w-1 h-1 rounded-full bg-brand animate-pulse" />
-                            <span className="text-[10px] font-bold text-brand">{Math.round(tx.confidence * 100)}% Match</span>
+                        <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border ${tx.confidence > 0.9 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+                                tx.confidence > 0.7 ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
+                                    'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                            }`}>
+                            <div className={`w-1 h-1 rounded-full animate-pulse ${tx.confidence > 0.9 ? 'bg-emerald-500' :
+                                    tx.confidence > 0.7 ? 'bg-amber-500' :
+                                        'bg-rose-500'
+                                }`} />
+                            <span className="text-[10px] font-bold">{Math.round(tx.confidence * 100)}% Match</span>
                         </div>
                     </div>
                     <div className="flex justify-between items-center">

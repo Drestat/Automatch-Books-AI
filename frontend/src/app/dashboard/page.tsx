@@ -4,58 +4,64 @@ import React, { useState } from 'react';
 import TransactionCard from '@/components/TransactionCard';
 import { BentoGrid } from '@/components/BentoGrid';
 import { BentoTile } from '@/components/BentoTile';
+import { useQBO } from '@/hooks/useQBO';
 import {
   TrendingUp,
   ShieldCheck,
   Zap,
   Clock,
   Layers,
-  Sparkles
+  Sparkles,
+  ArrowRight,
+  Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserButton } from "@clerk/nextjs";
 
-const MOCK_TRANSACTIONS = [
-  {
-    id: '1',
-    date: 'Jan 22, 2026',
-    description: 'Starbucks Coffee',
-    amount: -12.50,
-    currency: 'USD',
-    suggested_category_name: 'Meals & Entertainment',
-    reasoning: 'Merchant identified as food/beverage provider based on previous history.',
-    confidence: 0.95
-  },
-  {
-    id: '2',
-    date: 'Jan 21, 2026',
-    description: 'Amazon AWS Billing',
-    amount: -450.00,
-    currency: 'USD',
-    suggested_category_name: 'Software & Technology',
-    reasoning: 'Recurring payment detected for cloud infrastructure services.',
-    confidence: 0.88
-  },
-  {
-    id: '3',
-    date: 'Jan 20, 2026',
-    description: 'Zelle Payment: John Smith',
-    amount: 1500.00,
-    currency: 'USD',
-    suggested_category_name: 'Uncategorized Income',
-    reasoning: 'Peer-to-peer transfer received; likely customer payment or reimbursement.',
-    confidence: 0.65
-  }
-];
-
 export default function Home() {
   const [approvedCount, setApprovedCount] = useState(0);
-  const [transactions, setTransactions] = useState(MOCK_TRANSACTIONS);
+  const { isConnected, loading, transactions, connect, sync, approveMatch } = useQBO();
 
-  const handleAccept = (id: string) => {
-    setTransactions(prev => prev.filter(tx => tx.id !== id));
-    setApprovedCount(prev => prev + 1);
+  const handleAccept = async (id: string) => {
+    const success = await approveMatch(id);
+    if (success) {
+      setApprovedCount(prev => prev + 1);
+    }
   };
+
+  if (!isConnected && !loading) {
+    return (
+      <div className="min-h-screen py-12 px-6 lg:px-12 max-w-7xl mx-auto flex flex-col items-center justify-center text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-panel p-12 max-w-2xl w-full border-brand/20 relative overflow-hidden"
+        >
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand via-brand-secondary to-brand" />
+          <div className="w-20 h-20 rounded-3xl bg-brand/10 text-brand flex items-center justify-center mx-auto mb-8">
+            <Zap size={40} />
+          </div>
+          <h1 className="text-4xl font-black tracking-tight mb-4">Connect QuickBooks</h1>
+          <p className="text-white/40 text-lg mb-8 leading-relaxed">
+            To start the magic, we need access to your QuickBooks Online transaction feed.
+            We use a secure, read-only connection to mirror your data locally.
+          </p>
+          <button
+            onClick={connect}
+            className="btn-primary w-full py-4 text-lg flex items-center justify-center gap-3 group"
+          >
+            <Lock size={20} />
+            Secure Connect
+            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+          </button>
+          <p className="mt-6 text-xs text-white/20 flex items-center justify-center gap-2">
+            <ShieldCheck size={14} />
+            Bank-Grade Encryption • Read-Only Access
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen py-12 px-6 lg:px-12 max-w-7xl mx-auto">
@@ -97,9 +103,13 @@ export default function Home() {
             <span className="text-3xl font-black text-brand leading-none mb-1">{approvedCount}</span>
             <span className="text-[10px] uppercase tracking-[0.1em] font-bold text-white/30 text-center">Approved Today</span>
           </div>
-          <button className="btn-primary h-full min-h-[64px] px-8 flex items-center gap-3 group">
-            <Zap size={20} className="group-hover:animate-pulse" />
-            <span className="font-bold">Sync Now</span>
+          <button
+            onClick={sync}
+            disabled={loading}
+            className="btn-primary h-full min-h-[64px] px-8 flex items-center gap-3 group disabled:opacity-50"
+          >
+            <Zap size={20} className={`group-hover:animate-pulse ${loading ? 'animate-spin' : ''}`} />
+            <span className="font-bold">{loading ? 'Syncing...' : 'Sync Now'}</span>
           </button>
           <div className="ml-2">
             <UserButton afterSignOutUrl="/" />

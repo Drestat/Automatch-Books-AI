@@ -4,6 +4,10 @@
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email TEXT UNIQUE NOT NULL,
+    subscription_tier TEXT DEFAULT 'free', -- free, pro, enterprise
+    stripe_customer_id TEXT,
+    subscription_status TEXT DEFAULT 'inactive', -- active, past_due, canceled, trialing
+    trial_ends_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

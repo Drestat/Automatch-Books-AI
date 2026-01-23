@@ -25,7 +25,8 @@ Accounting should feel like a byproduct of doing business. This project isn't ju
 graph TD
     User["User (Web/Mobile)"] --> Public["Landing Page (Next.js)"]
     Public --> Auth["Clerk Auth"]
-    Auth --> Protected["Dashboard / Analytics"]
+    Auth --> Subscription["Stripe Paywall"]
+    Subscription --> Protected["Dashboard / Analytics"]
     Protected --> API["FastAPI Backend (Koyeb/Modal)"]
     API --> DB[("PostgreSQL Mirror (Supabase/Neon)")]
     
@@ -52,9 +53,15 @@ graph TD
 - [ ] Add error handling for QBO API rate limits.
 - [ ] Implement secure webhook listener for real-time updates.
 
+### Phase 1.5: Monetization (The Velvet Rope)
+- [ ] **Stripe Integration**: Setup Stripe Checkout for SaaS subscription management.
+- [ ] **Database Schema**: Add `subscription_tier`, `stripe_customer_id`, `subscription_status` to `users` table.
+- [ ] **Paywall UI**: Implement the "Good/Better/Best" pricing cards with "7-Day Free Trial" logic.
+- [ ] **Route Protection**: Middleware check for active subscription before allowing `/dashboard` access.
+
 ### Phase 2: AI & Interaction (The Magic)
 - [x] Integrate Gemini with batching (20 TXs/request).
-- [/] **[UX] Kinetic Feed**: Build the "Accept/Reject" feed with slide-out animations.
+- [x] **[UX] Kinetic Feed**: Build the "Accept/Reject" feed with slide-out animations. (Implemented via Framer Motion & Bento Grid)
 - [x] **[UX] "Hover to Trust"**: Hide reasoning narratives behind interactive triggers.
 - [x] **[UX] Bulk Intelligence**: Implement "Select All" and "High-Confidence Auto-Accept."
 
@@ -78,8 +85,18 @@ graph TD
 
 ---
 
-## 4. Technical Specs & Optimization
-- **Batching**: AI analyzes up to 20 transactions per request for token efficiency.
-- **History Context**: Pull approved mappings to provide cognitive grounding to the AI.
-- **Token Pruning**: Context is stripped to essential data to minimize costs.
-- **Mirror Sync**: Local storage allows fast UI performance without QBO API rate limit friction.
+## 4. Intelligence & Architecture Specs
+
+### Database (The Source of Truth)
+- **Schema**: Strictly follow `architecture/postgres_mirror_v3.sql`.
+- **Multi-tenancy**: All tables must include `realm_id` with RLS policies enabled.
+- **JSONB Strategy**: Store full QBO responses in `raw_json` for auditability.
+
+### AI Logic (SOP & Reasoning)
+- **Rule 1: Exact Match (Deterministic)**: Before calling AI, checking if the `description` matches a known vendor with a previously approved category. If yes, auto-categorize.
+- **Rule 2: AI Guess (Gemini 1.5 Pro)**: If no exact match, invoke Gemini to analyze and suggest a category.
+- **Rule 3: Confidence Threshold**:
+  - `> 0.8`: Mark as "High Confidence" (Green).
+  - `< 0.5`: Mark as "Needs Review" (Yellow/Red).
+- **Explainability**: Every AI suggestion must include a "reasoning narrative" explaining the "Why".
+- **Batching**: Process up to 20 TXs per request.

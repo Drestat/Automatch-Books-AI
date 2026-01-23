@@ -9,3 +9,4 @@ requests
 google-generativeai
 pydantic-settings
 modal
+stripe

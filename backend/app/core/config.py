@@ -21,6 +21,11 @@ class Settings(BaseSettings):
 
     # AI Settings
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    
+    # Stripe Settings
+    STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "")
+    STRIPE_WEBHOOK_SECRET: str = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+    STRIPE_MONTHLY_PRICE_ID: str = os.getenv("STRIPE_MONTHLY_PRICE_ID", "")
 
     class Config:
         case_sensitive = True
