@@ -5,13 +5,13 @@ export const revalidate = 3600;
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: 'https://easybanktransactions.app',
+      url: 'https://automatchbooks.ai',
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
     },
     {
-      url: 'https://easybanktransactions.app/analytics',
+      url: 'https://automatchbooks.ai/analytics',
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,

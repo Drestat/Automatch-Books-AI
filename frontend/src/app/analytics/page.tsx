@@ -6,11 +6,16 @@ import { BentoTile } from '@/components/BentoTile';
 import { SpendTrendChart } from '@/components/charts/SpendTrendChart';
 import { CategoryPieChart } from '@/components/charts/CategoryPieChart';
 import { motion } from 'framer-motion';
-import { TrendingUp, PieChart, BarChart2, Calendar, Link as LinkIcon, ArrowUpRight } from 'lucide-react';
+import { TrendingUp, PieChart, Calendar, ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import { UserButton } from "@clerk/nextjs";
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 export default function AnalyticsPage() {
+    const { spendTrend, categoryData, kpi, loading } = useAnalytics();
+
+    if (loading) return <div className="min-h-screen flex items-center justify-center text-white/40">Loading insights...</div>;
+
     return (
         <div className="min-h-screen py-12 px-6 lg:px-12 max-w-7xl mx-auto">
             {/* Header */}
@@ -54,7 +59,7 @@ export default function AnalyticsPage() {
                             <p className="text-xs text-white/40">Income vs Expenses (Daily)</p>
                         </div>
                     </div>
-                    <SpendTrendChart />
+                    <SpendTrendChart data={spendTrend} />
                 </BentoTile>
 
                 {/* Category Breakdown - Tall */}
@@ -69,12 +74,12 @@ export default function AnalyticsPage() {
                         </div>
                     </div>
                     <div className="flex-1 flex flex-col justify-center">
-                        <CategoryPieChart />
+                        <CategoryPieChart data={categoryData} />
                     </div>
                     <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/5 mx-2">
                         <p className="text-xs text-white/40 mb-2">Insight</p>
                         <p className="text-sm font-medium leading-relaxed">
-                            Software expenses are <span className="text-brand font-bold">12% higher</span> than last month due to new AWS instances.
+                            <span className="text-brand font-bold">{categoryData[0]?.name || 'Top Category'}</span> is your biggest expense driver this month, accounting for {(categoryData[0]?.value / kpi.totalSpend * 100 || 0).toFixed(1)}% of flow.
                         </p>
                     </div>
                 </BentoTile>
@@ -82,7 +87,7 @@ export default function AnalyticsPage() {
                 {/* KPI Cards */}
                 <BentoTile delay={0.1}>
                     <p className="text-sm text-white/40 font-bold uppercase tracking-wider mb-2">Total Spend</p>
-                    <h4 className="text-4xl font-black text-white mb-2">$9,450</h4>
+                    <h4 className="text-4xl font-black text-white mb-2">${kpi.totalSpend.toLocaleString()}</h4>
                     <div className="flex items-center gap-2 text-xs font-bold text-rose-400 bg-rose-400/10 px-2 py-1 rounded w-fit">
                         <TrendingUp size={12} /> +12.5% vs last month
                     </div>
@@ -90,7 +95,7 @@ export default function AnalyticsPage() {
 
                 <BentoTile delay={0.2} className="border-brand/20 bg-brand/5">
                     <p className="text-sm text-brand font-bold uppercase tracking-wider mb-2">Total Income</p>
-                    <h4 className="text-4xl font-black text-white mb-2">$14,200</h4>
+                    <h4 className="text-4xl font-black text-white mb-2">${kpi.totalIncome.toLocaleString()}</h4>
                     <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded w-fit">
                         <TrendingUp size={12} /> +5.2% vs last month
                     </div>
@@ -98,8 +103,12 @@ export default function AnalyticsPage() {
 
                 <BentoTile delay={0.3}>
                     <p className="text-sm text-white/40 font-bold uppercase tracking-wider mb-2">Net Cash Flow</p>
-                    <h4 className="text-4xl font-black text-white mb-2">+$4,750</h4>
-                    <p className="text-xs text-white/30 mt-2">Healthy margin maintained.</p>
+                    <h4 className="text-4xl font-black text-white mb-2">
+                        {kpi.netFlow >= 0 ? '+' : ''}${kpi.netFlow.toLocaleString()}
+                    </h4>
+                    <p className="text-xs text-white/30 mt-2">
+                        {kpi.netFlow >= 0 ? "Healthy margin maintained." : "Burn rate alert."}
+                    </p>
                 </BentoTile>
 
             </BentoGrid>

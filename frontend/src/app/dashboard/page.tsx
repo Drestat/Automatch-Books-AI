@@ -233,7 +233,7 @@ export default function Home() {
           <Sparkles className="text-brand animate-pulse" size={16} />
           <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
         </div>
-        <p className="text-white/20 text-xs">MirrorSync Engine &copy; 2026. Powered by Google Gemini 1.5 Pro.</p>
+        <p className="text-white/20 text-xs">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 1.5 Pro.</p>
       </footer>
     </div>
   );

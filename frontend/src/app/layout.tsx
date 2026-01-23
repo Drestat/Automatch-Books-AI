@@ -14,21 +14,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Easy Bank Transactions | AI-Powered QuickBooks Automation",
+  title: "AutoMatch Books AI | AI-Powered QuickBooks Automation",
   description: "Seamlessly match and sync your bank transactions with QuickBooks Online using Gemini 1.5 Pro. Next-generation financial intelligence for modern businesses.",
-  keywords: ["QuickBooks", "Bank Transactions", "AI Matching", "Easy Bank Transactions", "Financial Automation", "Gemini 1.5 Pro"],
+  keywords: ["QuickBooks", "Bank Transactions", "AI Matching", "AutoMatch Books AI", "Financial Automation", "Gemini 1.5 Pro"],
   authors: [{ name: "Andres" }],
   openGraph: {
-    title: "Easy Bank Transactions | AI-Powered QuickBooks Automation",
+    title: "AutoMatch Books AI | AI-Powered QuickBooks Automation",
     description: "Seamlessly match and sync your bank transactions with QuickBooks Online using Gemini 1.5 Pro.",
-    url: "https://easybanktransactions.app",
-    siteName: "Easy Bank Transactions",
+    url: "https://automatchbooks.ai",
+    siteName: "AutoMatch Books AI",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Easy Bank Transactions Dashboard Preview",
+        alt: "AutoMatch Books AI Dashboard Preview",
       },
     ],
     locale: "en_US",
@@ -36,11 +36,11 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Easy Bank Transactions | AI-Powered QuickBooks Automation",
+    title: "AutoMatch Books AI | AI-Powered QuickBooks Automation",
     description: "AI-powered transaction matching for QuickBooks Online.",
     images: ["/og-image.png"],
   },
-  metadataBase: new URL("https://easybanktransactions.app"),
+  metadataBase: new URL("https://automatchbooks.ai"),
 };
 
 export default function RootLayout({

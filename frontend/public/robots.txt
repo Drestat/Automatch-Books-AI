@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://easybanktransactions.app/sitemap.xml
+Sitemap: https://automatchbooks.ai/sitemap.xml

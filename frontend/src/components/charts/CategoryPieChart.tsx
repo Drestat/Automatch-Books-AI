@@ -1,17 +1,11 @@
 "use client";
 
-import React from 'react';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { CustomTooltip } from './CustomTooltip';
 
-const data = [
-    { name: 'Software', value: 4500, color: '#6366f1' },  // Brand
-    { name: 'Office', value: 1200, color: '#ec4899' },    // Pink
-    { name: 'Travel', value: 3400, color: '#a855f7' },    // Purple
-    { name: 'Meals', value: 800, color: '#10b981' },      // Emerald
-];
+const COLORS = ['#0070f3', '#7928ca', '#f5a623', '#10b981', '#ef4444'];
 
-export const CategoryPieChart = () => {
+export const CategoryPieChart = ({ data }: { data: any[] }) => {
     return (
         <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -27,20 +21,10 @@ export const CategoryPieChart = () => {
                         stroke="none"
                     >
                         {data.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                     </Pie>
                     <Tooltip content={<CustomTooltip />} />
-                    <Legend
-                        verticalAlign="middle"
-                        layout="vertical"
-                        align="right"
-                        iconType="circle"
-                        iconSize={8}
-                        formatter={(value, entry: any) => (
-                            <span className="text-white/60 text-xs font-bold ml-2">{value}</span>
-                        )}
-                    />
                 </PieChart>
             </ResponsiveContainer>
         </div>

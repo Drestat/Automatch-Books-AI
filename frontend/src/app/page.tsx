@@ -8,6 +8,24 @@ import { Sparkles, ShieldCheck, Zap, ArrowRight, CheckCircle } from 'lucide-reac
 export default function LandingPage() {
     return (
         <div className="min-h-screen bg-black text-white selection:bg-brand selection:text-white">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "SoftwareApplication",
+                        "name": "AutoMatch Books AI",
+                        "operatingSystem": "Web",
+                        "applicationCategory": "FinanceApplication",
+                        "description": "AI-powered transaction matching for QuickBooks Online.",
+                        "offers": {
+                            "@type": "Offer",
+                            "price": "0",
+                            "priceCurrency": "USD"
+                        }
+                    })
+                }}
+            />
             {/* Navigation */}
             <nav className="fixed top-0 w-full z-50 bg-black/50 backdrop-blur-xl border-b border-white/5">
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -15,7 +33,7 @@ export default function LandingPage() {
                         <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center">
                             <Sparkles className="text-white" size={16} />
                         </div>
-                        <span className="font-bold tracking-tight text-lg">MirrorSync</span>
+                        <span className="font-bold tracking-tight text-lg">AutoMatch Books AI</span>
                     </div>
                     <div className="flex items-center gap-6">
                         <Link href="/dashboard" className="text-sm font-bold text-white/60 hover:text-white transition-colors">
@@ -45,7 +63,7 @@ export default function LandingPage() {
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Autopilot.</span>
                         </h1>
                         <p className="text-lg md:text-xl text-white/40 max-w-2xl mx-auto mb-10 leading-relaxed">
-                            Stop categorizing transactions manually. MirrorSync uses Gemini 1.5 Pro to
+                            Stop categorizing transactions manually. AutoMatch Books AI uses Gemini 1.5 Pro to
                             match your bank feed to QuickBooks with 94% accuracy.
                         </p>
                         <div className="flex flex-col md:flex-row items-center justify-center gap-4">
@@ -113,7 +131,7 @@ export default function LandingPage() {
             </section>
 
             <footer className="py-12 px-6 border-t border-white/5 text-center text-white/20 text-sm">
-                <p>&copy; 2026 MirrorSync Engine. All rights reserved.</p>
+                <p>&copy; 2026 AutoMatch Books AI Engine. All rights reserved.</p>
             </footer>
         </div>
     );

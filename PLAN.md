@@ -1,4 +1,4 @@
-# Master Plan: Automatch Books AI
+# Master Plan: AutoMatch Books AI
 
 ## Core Philosophy: "The Magical Mirror"
 Accounting should feel like a byproduct of doing business. This project isn't just a data sync engine; it's an **Experience of Financial Clarity**. Every interaction must be kinetic, invisible, and accurate.
@@ -67,7 +67,7 @@ graph TD
 
 ### Phase 3: Insights & Visibility (The Clarity)
 - [ ] Analytics: Implement Recharts for spend analysis with fluid, responsive typography.
-- [ ] SEO: Achieve 100/100 Lighthouse score while maintaining premium glassmorphism.
+- [x] SEO: Achieve 100/100 Lighthouse score while maintaining premium glassmorphism.
 
 ---
 
