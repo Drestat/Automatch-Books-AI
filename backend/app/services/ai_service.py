@@ -9,7 +9,7 @@ class AIService:
         self.db = db
         if settings.GEMINI_API_KEY:
             genai.configure(api_key=settings.GEMINI_API_KEY)
-            self.model = genai.GenerativeModel('gemini-1.5-pro')
+            self.model = genai.GenerativeModel(settings.GEMINI_MODEL)
         else:
             self.model = None
 

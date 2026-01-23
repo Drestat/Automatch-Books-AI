@@ -10,3 +10,4 @@ google-generativeai
 pydantic-settings
 modal
 stripe
+rapidfuzz

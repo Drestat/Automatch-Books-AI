@@ -9,14 +9,11 @@ export default clerkMiddleware(async (auth, req) => {
     if (isProtectedRoute(req)) {
         await auth.protect();
 
-        // TODO: Uncomment when Clerk Metadata sync is active
-        /*
         const { sessionClaims } = await auth();
         const status = sessionClaims?.metadata?.subscription_status;
         if (status !== 'active' && status !== 'trialing') {
-           return NextResponse.redirect(new URL('/pricing', req.url));
+            return NextResponse.redirect(new URL('/pricing', req.url));
         }
-        */
     }
 });
 

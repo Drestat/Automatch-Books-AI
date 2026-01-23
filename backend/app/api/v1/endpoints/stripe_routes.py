@@ -1,9 +1,10 @@
 import stripe
+import requests
 from fastapi import APIRouter, Depends, HTTPException, Request, Header
 from sqlalchemy.orm import Session
 from app.api.v1.endpoints.qbo import get_db
 from app.api.deps import get_current_user
-from app.models.qbo import User
+from app.models.user import User
 from app.services.stripe_service import StripeService
 from app.core.config import settings
 from datetime import datetime
@@ -28,6 +29,31 @@ def create_portal(
 ):
     service = StripeService(db)
     return service.create_portal_session(current_user, return_url)
+
+def _sync_clerk_metadata(user_id: str, status: str, tier: str):
+    """
+    Syncs subscription status back to Clerk so the Next.js middleware knows the flow.
+    """
+    if not settings.CLERK_SECRET_KEY:
+        print("⚠️ CLERK_SECRET_KEY not set - skipping metadata sync")
+        return
+
+    try:
+        url = f"https://api.clerk.com/v1/users/{user_id}"
+        headers = {
+            "Authorization": f"Bearer {settings.CLERK_SECRET_KEY}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "public_metadata": {
+                "subscription_status": status,
+                "subscription_tier": tier
+            }
+        }
+        res = requests.patch(url, headers=headers, json=payload)
+        res.raise_for_status()
+    except Exception as e:
+        print(f"❌ Failed to sync Clerk metadata for user {user_id}: {str(e)}")
 
 @router.post("/webhook")
 async def stripe_webhook(request: Request, stripe_signature: str = Header(None), db: Session = Depends(get_db)):
@@ -61,6 +87,9 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None),
             db.add(user)
             db.commit()
             
+            # Sync to Clerk
+            _sync_clerk_metadata(user.id, user.subscription_status, user.subscription_tier)
+            
     elif event['type'] in ['customer.subscription.updated', 'customer.subscription.deleted']:
         sub = event['data']['object']
         customer_id = sub.get('customer')
@@ -69,5 +98,8 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None),
             user.subscription_status = sub.get('status') # active, past_due, canceled
             db.add(user)
             db.commit()
+            
+            # Sync to Clerk
+            _sync_clerk_metadata(user.id, user.subscription_status, user.subscription_tier)
 
     return {"status": "success"}

@@ -24,6 +24,12 @@ export default function TransactionCard({ tx, onAccept }: TransactionCardProps) 
     const isExpense = tx.amount < 0;
     const [showReasoning, setShowReasoning] = React.useState(false);
 
+    const handleAccept = async () => {
+        const { triggerHapticFeedback } = await import('@/lib/haptics');
+        triggerHapticFeedback();
+        onAccept(tx.id);
+    };
+
     return (
         <div className="glass-card overflow-hidden group">
             <div className="p-6">
@@ -52,12 +58,12 @@ export default function TransactionCard({ tx, onAccept }: TransactionCardProps) 
                         <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-brand">Suggested Category</span>
                         <div className="h-[1px] flex-1 bg-white/5" />
                         <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border ${tx.confidence > 0.9 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
-                                tx.confidence > 0.7 ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
-                                    'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                            tx.confidence > 0.7 ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
+                                'bg-rose-500/10 border-rose-500/20 text-rose-400'
                             }`}>
                             <div className={`w-1 h-1 rounded-full animate-pulse ${tx.confidence > 0.9 ? 'bg-emerald-500' :
-                                    tx.confidence > 0.7 ? 'bg-amber-500' :
-                                        'bg-rose-500'
+                                tx.confidence > 0.7 ? 'bg-amber-500' :
+                                    'bg-rose-500'
                                 }`} />
                             <span className="text-[10px] font-bold">{Math.round(tx.confidence * 100)}% Match</span>
                         </div>
@@ -93,7 +99,7 @@ export default function TransactionCard({ tx, onAccept }: TransactionCardProps) 
                 <div className="flex gap-3">
                     <motion.button
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => onAccept(tx.id)}
+                        onClick={handleAccept}
                         className="flex-1 bg-brand hover:bg-brand/90 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-brand/20 transition-all border border-white/10"
                     >
                         <Check size={18} />

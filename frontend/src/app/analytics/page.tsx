@@ -10,6 +10,15 @@ import { TrendingUp, PieChart, Calendar, ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import { UserButton } from "@clerk/nextjs";
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: "Analytics | Financial Insights",
+    robots: {
+        index: false,
+        follow: false,
+    }
+};
 
 export default function AnalyticsPage() {
     const { spendTrend, categoryData, kpi, loading } = useAnalytics();
@@ -69,18 +78,23 @@ export default function AnalyticsPage() {
                             <PieChart size={20} />
                         </div>
                         <div>
-                            <h3 className="text-xl font-bold">Spend by Category</h3>
-                            <p className="text-xs text-white/40">Where your money goes</p>
+                            <h3 className="text-xl font-bold">Spend Sources</h3>
+                            <p className="text-xs text-white/40">Category Distribution</p>
                         </div>
                     </div>
                     <div className="flex-1 flex flex-col justify-center">
                         <CategoryPieChart data={categoryData} />
                     </div>
-                    <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/5 mx-2">
-                        <p className="text-xs text-white/40 mb-2">Insight</p>
-                        <p className="text-sm font-medium leading-relaxed">
-                            <span className="text-brand font-bold">{categoryData[0]?.name || 'Top Category'}</span> is your biggest expense driver this month, accounting for {(categoryData[0]?.value / kpi.totalSpend * 100 || 0).toFixed(1)}% of flow.
-                        </p>
+                    <div className="mt-8 space-y-3">
+                        {categoryData.slice(0, 3).map((cat, i) => (
+                            <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 mx-2">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: ['#0070f3', '#7928ca', '#f5a623'][i] }} />
+                                    <span className="text-xs font-bold text-white/80">{cat.name}</span>
+                                </div>
+                                <span className="text-xs font-black">${cat.value.toLocaleString()}</span>
+                            </div>
+                        ))}
                     </div>
                 </BentoTile>
 

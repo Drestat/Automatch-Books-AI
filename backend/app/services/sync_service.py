@@ -1,10 +1,11 @@
-import os
-import json
 import requests
+import time
 from datetime import datetime
 from sqlalchemy.orm import Session
 import google.generativeai as genai
+from rapidfuzz import process, fuzz
 from app.models.qbo import Transaction, QBOConnection, Category, Customer
+from app.core.config import settings
 
 class SyncService:
     def __init__(self, db: Session, qbo_connection: QBOConnection):
@@ -20,7 +21,7 @@ class SyncService:
         )
         if settings.GEMINI_API_KEY:
             genai.configure(api_key=settings.GEMINI_API_KEY)
-            self.model = genai.GenerativeModel('gemini-1.5-pro')
+            self.model = genai.GenerativeModel(settings.GEMINI_MODEL)
         else:
             self.model = None
 
@@ -42,19 +43,42 @@ class SyncService:
         base_url = "https://sandbox-quickbooks.api.intuit.com" if settings.QBO_ENVIRONMENT == "sandbox" else "https://quickbooks.api.intuit.com"
         return f"{base_url}/v3/company/{self.connection.realm_id}/{endpoint}"
 
-    def _query_qbo(self, query_str):
-        url = self._get_api_url("query")
+    def _request_qbo(self, method: str, endpoint: str, params: dict = None, json_payload: dict = None):
+        """
+        Unified QBO request handler with:
+        - Auto-refresh for 401 Unauthorized
+        - Exponential backoff for 429 Rate Limits
+        """
+        url = self._get_api_url(endpoint)
         headers = {
             'Authorization': f'Bearer {self.connection.access_token}',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
         }
-        res = requests.get(url, headers=headers, params={'query': query_str})
-        if res.status_code == 401:
-            token = self._refresh_access_token()
-            headers['Authorization'] = f'Bearer {token}'
-            res = requests.get(url, headers=headers, params={'query': query_str})
-        res.raise_for_status()
-        return res.json()
+        
+        max_retries = 3
+        backoff_factor = 2
+        
+        for attempt in range(max_retries):
+            res = requests.request(method, url, headers=headers, params=params, json=json_payload)
+            
+            if res.status_code == 401:
+                token = self._refresh_access_token()
+                headers['Authorization'] = f'Bearer {token}'
+                continue # Retry with new token
+            
+            if res.status_code == 429:
+                if attempt < max_retries - 1:
+                    wait_time = backoff_factor ** attempt
+                    print(f"⚠️ QBO Rate Limit (429). Retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+                    continue
+            
+            res.raise_for_status()
+            return res.json()
+
+    def _query_qbo(self, query_str):
+        return self._request_qbo("GET", "query", params={'query': query_str})
 
     def sync_transactions(self):
         data = self._query_qbo("SELECT * FROM Purchase")
@@ -151,17 +175,42 @@ class SyncService:
         results = []
         to_analyze_with_ai = []
 
-        # --- Rule 1: Exact Match (Deterministic) ---
+        # --- Rule 1: Hybrid Match (Deterministic + Fuzzy History) ---
         for tx in unmatched:
+            # First try exact match
             if tx.description in vendor_mapping:
-                # Exact match found in history
                 confidence = 1.0
                 suggested_cat = vendor_mapping[tx.description]
-                
+                method = "deterministic"
+                reasoning = f"Exact match with history for '{tx.description}'"
+            else:
+                # Try fuzzy match against history
+                history_descriptions = list(vendor_mapping.keys())
+                if history_descriptions:
+                    match = process.extractOne(tx.description, history_descriptions, scorer=fuzz.WRatio)
+                    if match and match[1] > 85: # 85% confidence threshold for history
+                        suggested_cat = vendor_mapping[match[0]]
+                        confidence = match[1] / 100
+                        method = "fuzzy-history"
+                        reasoning = f"Fuzzy match ( {int(match[1])}% ) with historic vendor '{match[0]}'"
+                    else:
+                        suggested_cat = None
+                else:
+                    suggested_cat = None
+
+            if suggested_cat:
                 tx.suggested_category_name = suggested_cat
-                tx.reasoning = f"Exact match with history for '{tx.description}'"
+                # Try to find the category ID by name
+                cat_obj = self.db.query(Category).filter(
+                    Category.name == suggested_cat,
+                    Category.realm_id == self.connection.realm_id
+                ).first()
+                if cat_obj:
+                    tx.suggested_category_id = cat_obj.id
+
+                tx.reasoning = reasoning
                 tx.confidence = confidence
-                tx.status = 'pending_approval' # or 'approved' if auto-approve enabled
+                tx.status = 'pending_approval'
                 
                 self.db.add(tx)
                 results.append({
@@ -170,7 +219,7 @@ class SyncService:
                         "suggested_category": suggested_cat, 
                         "reasoning": tx.reasoning, 
                         "confidence": confidence,
-                        "method": "deterministic"
+                        "method": method
                     }
                 })
             else:
@@ -184,32 +233,42 @@ class SyncService:
 
         # --- Rule 2: AI Guess (Gemini) ---
         
-        # Token Optimization: Prune context
-        category_list = context['categories'][:35]
-        history_list = list(vendor_mapping.items())[:15]
+        # We provide ALL categories if the list is reasonable (Gemini 1.5 Pro handles this easily)
+        categories_obj = self.db.query(Category).filter(Category.realm_id == self.connection.realm_id).all()
+        category_list = [c.name for c in categories_obj]
+        
+        # Token Optimization: Prune history but provide high-signal examples
+        history_list = list(vendor_mapping.items())[:20]
         
         tx_list_str = "\n".join([
-            f"ID:{tx.id}|Desc:{tx.description}|Amt:{tx.amount}" 
+            f"ID:{tx.id}|Desc:{tx.description}|Amt:{tx.amount} {tx.currency}" 
             for tx in to_analyze_with_ai
         ])
 
         history_str = "\n".join([
-            f"{desc}->{cat}" 
+            f"HISTORIC: '{desc}' -> Category: {cat}" 
             for desc, cat in history_list
         ])
 
         prompt = f"""
-        Categorize these bank transactions for QuickBooks. 
-        Be efficient. Use only these categories: {', '.join(category_list)}
+        Role: Senior Accountant AI for QuickBooks.
+        Goal: Categorize bank transactions using the standard Chart of Accounts.
         
-        Recent mappings:
+        Available Categories:
+        {', '.join(category_list)}
+        
+        Historic Patterns (For Context):
         {history_str}
         
-        Transactions:
+        Transactions to Process:
         {tx_list_str}
         
-        Output JSON list. 
-        'reasoning' MUST be < 15 words.
+        Rules:
+        1. Select the MOST specific category from the list above.
+        2. reasoning: Brief, high-signal explanation (e.g. "Typical recurring SaaS pattern" or "Utility bill match"). Max 12 words.
+        3. confidence: 0.0 to 1.0 based on how sure you are.
+        
+        Output MUST be a valid JSON list of objects:
         [
             {{"id": "...", "suggested_category": "...", "reasoning": "...", "confidence": 0.0}}
         ]
@@ -225,10 +284,25 @@ class SyncService:
             for tx in to_analyze_with_ai:
                 analysis = analysis_map.get(tx.id)
                 if analysis:
-                    tx.suggested_category_name = analysis.get('suggested_category')
+                    suggested_name = analysis.get('suggested_category')
+                    tx.suggested_category_name = suggested_name
                     tx.reasoning = analysis.get('reasoning')
                     tx.confidence = analysis.get('confidence')
                     tx.status = 'pending_approval'
+
+                    # RESOLVE: Map suggested name to ID (Fuzzy match against real categories)
+                    if suggested_name:
+                        # Exact match first
+                        cat_match = next((c for c in categories_obj if c.name == suggested_name), None)
+                        if not cat_match:
+                            # Fuzzy match against valid category names
+                            f_match = process.extractOne(suggested_name, category_list, scorer=fuzz.WRatio)
+                            if f_match and f_match[1] > 80:
+                                cat_match = next((c for c in categories_obj if c.name == f_match[0]), None)
+                        
+                        if cat_match:
+                            tx.suggested_category_id = cat_match.id
+
                     self.db.add(tx)
                     results.append({
                         "id": tx.id, 
@@ -256,29 +330,15 @@ class SyncService:
         if not tx or not tx.suggested_category_id:
             raise ValueError(f"Transaction {tx_id} not found or has no suggested category")
 
-        # 1. Update QBO via API
-        url = self._get_api_url("purchase")
-        headers = {
-            'Authorization': f'Bearer {self.connection.access_token}',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
-        
-        # We use the raw_json stored in Postgres
+        # Update QBO via API
         payload = tx.raw_json
         payload["AccountRef"] = {"value": tx.suggested_category_id, "name": tx.suggested_category_name}
         
-        res = requests.post(url, headers=headers, json=payload, params={'operation': 'update'})
-        if res.status_code == 401:
-            token = self._refresh_access_token()
-            headers['Authorization'] = f'Bearer {token}'
-            res = requests.post(url, headers=headers, json=payload, params={'operation': 'update'})
-        
-        res.raise_for_status()
+        res_data = self._request_qbo("POST", "purchase", params={'operation': 'update'}, json_payload=payload)
 
-        # 2. Update Mirror Status
+        # Update Mirror Status
         tx.status = 'approved'
         self.db.add(tx)
         self.db.commit()
         
-        return res.json()
+        return res_data

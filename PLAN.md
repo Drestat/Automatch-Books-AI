@@ -42,22 +42,23 @@ graph TD
 ## 2. Implementation Roadmap
 
 ### Phase 0: SaaS Infrastructure (The Facade)
-- [ ] **Route Migration**: Move current app logic to `/dashboard`.
-- [ ] **Landing Page**: Build high-impact public home page with "Sign Up" flow.
-- [ ] **Authentication**: Implement Clerk for user management and route protection.
+- [x] **Route Migration**: Move current app logic to `/dashboard`.
+- [x] **Landing Page**: Build high-impact public home page with "Sign Up" flow.
+- [x] **Authentication**: Implement Clerk for user management and route protection.
 
 ### Phase 1: Foundation & Sync (The Mirror)
 - [x] Establish QBO OAuth 2.0 flow.
 - [x] Build multi-tenant PostgreSQL mirror.
 - [x] Implement Modal serverless functions for background sync.
-- [ ] Add error handling for QBO API rate limits.
-- [ ] Implement secure webhook listener for real-time updates.
+- [x] Add error handling for QBO API rate limits.
+- [x] Implement secure webhook listener for real-time updates.
 
 ### Phase 1.5: Monetization (The Velvet Rope)
-- [ ] **Stripe Integration**: Setup Stripe Checkout for SaaS subscription management.
-- [ ] **Database Schema**: Add `subscription_tier`, `stripe_customer_id`, `subscription_status` to `users` table.
-- [ ] **Paywall UI**: Implement the "Good/Better/Best" pricing cards with "7-Day Free Trial" logic.
-- [ ] **Route Protection**: Middleware check for active subscription before allowing `/dashboard` access.
+- [x] **Stripe Integration**: Setup Stripe Checkout for SaaS subscription management.
+- [x] **Database Schema**: Add `subscription_tier`, `stripe_customer_id`, `subscription_status` to `users` table.
+- [x] **Paywall UI**: Implement the "Good/Better/Best" pricing cards with "7-Day Free Trial" logic.
+- [x] **Subscription Gating**: Implement MiddleWare / Route protection to redirect unpaid users to `/pricing`.
+- [x] **Stripe Webhooks**: Finalize webhook handler to sync subscription state with DB & Clerk.
 
 ### Phase 2: AI & Interaction (The Magic)
 - [x] Integrate Gemini with batching (20 TXs/request).
@@ -66,8 +67,17 @@ graph TD
 - [x] **[UX] Bulk Intelligence**: Implement "Select All" and "High-Confidence Auto-Accept."
 
 ### Phase 3: Insights & Visibility (The Clarity)
-- [ ] Analytics: Implement Recharts for spend analysis with fluid, responsive typography.
+- [x] Analytics: Implement Recharts for spend analysis with fluid, responsive typography.
 - [x] SEO: Achieve 100/100 Lighthouse score while maintaining premium glassmorphism.
+
+### Phase 4: Architectural Cleanup (Maintenance)
+- [x] **Legacy Deprecation**: Remove/Migrate `sync_engine.py` and `navigation.py` from root.
+- [x] **Reliability**: Add error boundaries and fallback sync states for QBO API 401/429 errors.
+
+### Phase 5: The Last Mile (Mobile & Advanced AI)
+- [x] **Mobile Bridging**: Configure Capacitor for haptic-feedback support on iOS/Android.
+- [ ] **Transaction Splitting**: Implement AI logic to split bulk transactions into multiple categories.
+- [ ] **Receipt Mirroring**: Add support for matching scanned receipts to bank transactions.
 
 ---
 

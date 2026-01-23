@@ -41,6 +41,9 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   metadataBase: new URL("https://automatchbooks.ai"),
+  alternates: {
+    canonical: '/',
+  },
 };
 
 export default function RootLayout({

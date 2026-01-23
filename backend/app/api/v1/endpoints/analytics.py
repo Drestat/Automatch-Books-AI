@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.api.v1.endpoints.qbo import get_db
 from app.api.deps import get_current_user
-from app.models.qbo import User, QBOConnection
+from app.models.qbo import QBOConnection
+from app.models.user import User
 from app.services.analytics_service import AnalyticsService
 
 router = APIRouter()

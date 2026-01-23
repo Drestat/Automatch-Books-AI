@@ -11,6 +11,15 @@ import {
     Crown,
     ArrowRight
 } from 'lucide-react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: "Pricing | AutoMatch Books AI",
+    description: "Flexible pricing tiers for businesses of all sizes. Start your 14-day free trial of AI-powered QuickBooks automation today.",
+    alternates: {
+        canonical: '/pricing',
+    }
+};
 
 const TIERS = [
     {
@@ -67,6 +76,27 @@ const TIERS = [
 ];
 
 export default function PricingPage() {
+    const [loading, setLoading] = React.useState<string | null>(null);
+
+    const handleCheckout = async (tierName: string, priceId: string) => {
+        setLoading(tierName);
+        try {
+            const res = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ priceId, tierName }),
+            });
+            const data = await res.json();
+            if (data.url) {
+                window.location.href = data.url;
+            }
+        } catch (error) {
+            console.error('Checkout error:', error);
+        } finally {
+            setLoading(null);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-black text-white py-24 px-6 relative overflow-hidden">
             {/* Background Gradients */}
@@ -96,8 +126,8 @@ export default function PricingPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.1 * index }}
                             className={`relative glass-card p-8 rounded-3xl border transition-all duration-300 ${tier.highlight
-                                    ? 'border-brand/40 bg-brand/5 scale-105 shadow-2xl shadow-brand/20 z-10'
-                                    : 'border-white/5 hover:border-white/10'
+                                ? 'border-brand/40 bg-brand/5 scale-105 shadow-2xl shadow-brand/20 z-10'
+                                : 'border-white/5 hover:border-white/10'
                                 }`}
                         >
                             {tier.highlight && (
@@ -130,16 +160,16 @@ export default function PricingPage() {
                                 ))}
                             </ul>
 
-                            <Link
-                                href="/sign-up"
+                            <button
+                                onClick={() => handleCheckout(tier.name, tier.name === 'Freelancer' ? 'price_HB1_free' : tier.name === 'Founder' ? 'price_HB1_pro' : 'price_HB1_ent')}
                                 className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all group ${tier.highlight
-                                        ? 'bg-brand text-white hover:bg-brand-secondary hover:scale-[1.02]'
-                                        : 'bg-white/5 text-white hover:bg-white/10'
+                                    ? 'bg-brand text-white hover:bg-brand-secondary hover:scale-[1.02]'
+                                    : 'bg-white/5 text-white hover:bg-white/10'
                                     }`}
                             >
                                 {tier.cta}
                                 {tier.highlight && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
-                            </Link>
+                            </button>
 
                             {tier.highlight && (
                                 <p className="text-center text-xs text-white/30 mt-4 font-medium">

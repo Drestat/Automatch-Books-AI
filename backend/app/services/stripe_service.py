@@ -1,6 +1,6 @@
 import stripe
 from app.core.config import settings
-from app.models.qbo import User
+from app.models.user import User
 from sqlalchemy.orm import Session
 
 stripe.api_key = settings.STRIPE_SECRET_KEY

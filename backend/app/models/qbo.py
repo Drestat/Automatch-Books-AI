@@ -3,20 +3,11 @@ from sqlalchemy.sql import func
 from app.db.session import Base
 import uuid
 
-class User(Base):
-    __tablename__ = "users"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    email = Column(String, unique=True, index=True, nullable=False)
-    subscription_tier = Column(String, default="free")
-    stripe_customer_id = Column(String, nullable=True)
-    subscription_status = Column(String, default="inactive")
-    trial_ends_at = Column(DateTime(timezone=True), nullable=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class QBOConnection(Base):
     __tablename__ = "qbo_connections"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"))
     realm_id = Column(String, unique=True, index=True, nullable=False)
     refresh_token = Column(String, nullable=False)
     access_token = Column(String)

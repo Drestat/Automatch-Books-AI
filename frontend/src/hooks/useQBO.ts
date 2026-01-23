@@ -114,10 +114,22 @@ export const useQBO = () => {
     const approveMatch = async (txId: string) => {
         if (!realmId) return;
         try {
-            await fetch(`${API_BASE_URL}/transactions/${txId}/approve?realm_id=${realmId}`, { method: 'POST' });
-            // Optimistic update
-            setTransactions(prev => prev.filter(tx => tx.id !== txId));
-            return true;
+            const response = await fetch(`${API_BASE_URL}/transactions/${txId}/approve?realm_id=${realmId}`, { method: 'POST' });
+
+            if (response.ok) {
+                // Trigger Haptic Feedback for mobile users
+                try {
+                    const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
+                    await Haptics.impact({ style: ImpactStyle.Medium });
+                } catch (e) {
+                    // Ignore if not in a capacitor environment
+                }
+
+                // Optimistic update
+                setTransactions(prev => prev.filter(tx => tx.id !== txId));
+                return true;
+            }
+            return false;
         } catch (error) {
             console.error('Approve Error:', error);
             return false;

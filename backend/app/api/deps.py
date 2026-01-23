@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from app.db.session import get_db
-from app.models.qbo import User
+from app.models.user import User
 import uuid
 
 def get_current_user(x_user_id: str = Header(...), db: Session = Depends(get_db)) -> User:

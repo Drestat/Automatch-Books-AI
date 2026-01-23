@@ -12,6 +12,7 @@
     "@capacitor/android": "^8.0.1",
     "@capacitor/cli": "^8.0.1",
     "@capacitor/core": "^8.0.1",
+    "@capacitor/haptics": "^8.0.0",
     "@capacitor/ios": "^8.0.1",
     "@clerk/nextjs": "^6.36.9",
     "@stripe/stripe-js": "^8.6.4",
@@ -23,6 +24,7 @@
     "react-dom": "19.2.3",
     "recharts": "^3.7.0",
     "stripe": "^20.2.0",
+    "svix": "^1.84.1",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {

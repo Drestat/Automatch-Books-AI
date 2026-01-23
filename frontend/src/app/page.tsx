@@ -13,16 +13,32 @@ export default function LandingPage() {
                 dangerouslySetInnerHTML={{
                     __html: JSON.stringify({
                         "@context": "https://schema.org",
-                        "@type": "SoftwareApplication",
-                        "name": "AutoMatch Books AI",
-                        "operatingSystem": "Web",
-                        "applicationCategory": "FinanceApplication",
-                        "description": "AI-powered transaction matching for QuickBooks Online.",
-                        "offers": {
-                            "@type": "Offer",
-                            "price": "0",
-                            "priceCurrency": "USD"
-                        }
+                        "@graph": [
+                            {
+                                "@type": "Organization",
+                                "@id": "https://automatchbooks.ai/#organization",
+                                "name": "AutoMatch Books AI",
+                                "url": "https://automatchbooks.ai",
+                                "logo": {
+                                    "@type": "ImageObject",
+                                    "url": "https://automatchbooks.ai/logo.png"
+                                }
+                            },
+                            {
+                                "@type": "SoftwareApplication",
+                                "@id": "https://automatchbooks.ai/#application",
+                                "name": "AutoMatch Books AI",
+                                "operatingSystem": "Web",
+                                "applicationCategory": "FinanceApplication",
+                                "description": "AI-powered transaction matching for QuickBooks Online.",
+                                "publisher": { "@id": "https://automatchbooks.ai/#organization" },
+                                "offers": {
+                                    "@type": "Offer",
+                                    "price": "0",
+                                    "priceCurrency": "USD"
+                                }
+                            }
+                        ]
                     })
                 }}
             />
