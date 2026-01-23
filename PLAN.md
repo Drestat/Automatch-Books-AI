@@ -76,8 +76,8 @@ graph TD
 
 ### Phase 5: The Last Mile (Mobile & Advanced AI)
 - [x] **Mobile Bridging**: Configure Capacitor for haptic-feedback support on iOS/Android.
-- [ ] **Transaction Splitting**: Implement AI logic to split bulk transactions into multiple categories.
-- [ ] **Receipt Mirroring**: Add support for matching scanned receipts to bank transactions.
+- [x] **Transaction Splitting**: Implement AI logic to split bulk transactions into multiple categories.
+- [x] **Receipt Mirroring**: Add support for matching scanned receipts to bank transactions.
 
 ---
 

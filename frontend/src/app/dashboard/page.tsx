@@ -20,13 +20,17 @@ import { UserButton } from "@clerk/nextjs";
 
 export default function Home() {
   const [approvedCount, setApprovedCount] = useState(0);
-  const { isConnected, loading, transactions, connect, sync, approveMatch } = useQBO();
+  const { isConnected, loading, transactions, connect, sync, approveMatch, uploadReceipt } = useQBO();
 
   const handleAccept = async (id: string) => {
     const success = await approveMatch(id);
     if (success) {
       setApprovedCount(prev => prev + 1);
     }
+  };
+
+  const handleReceiptUpload = async (id: string, file: File) => {
+    await uploadReceipt(id, file);
   };
 
   if (!isConnected && !loading) {
@@ -205,7 +209,7 @@ export default function Home() {
                     exit={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}
                     transition={{ duration: 0.4, delay: index * 0.1 }}
                   >
-                    <TransactionCard tx={tx} onAccept={handleAccept} />
+                    <TransactionCard tx={tx} onAccept={handleAccept} onReceiptUpload={handleReceiptUpload} />
                   </motion.div>
                 ))}
               </AnimatePresence>

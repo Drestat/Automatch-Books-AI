@@ -1,4 +1,5 @@
 import requests
+import json
 import time
 from datetime import datetime
 from sqlalchemy.orm import Session
@@ -270,8 +271,20 @@ class SyncService:
         
         Output MUST be a valid JSON list of objects:
         [
-            {{"id": "...", "suggested_category": "...", "reasoning": "...", "confidence": 0.0}}
+            {
+                "id": "...", 
+                "suggested_category": "...", 
+                "reasoning": "...", 
+                "confidence": 0.0,
+                "splits": [
+                    {"category": "...", "amount": 0.0, "description": "..."}
+                ]
+            }
         ]
+        
+        Rule: If a transaction likely covers multiple categories (Amazon, Target, etc.), use the 'splits' array. 
+        If splits are provided, the sum of split amounts MUST equal the transaction total.
+        Otherwise, only 'suggested_category' is needed.
         """
         
         try:
@@ -303,6 +316,31 @@ class SyncService:
                         if cat_match:
                             tx.suggested_category_id = cat_match.id
 
+                    # --- Handle Splits ---
+                    splits_data = analysis.get('splits', [])
+                    if splits_data:
+                        from app.models.qbo import TransactionSplit
+                        tx.is_split = True
+                        for s in splits_data:
+                            # Resolve split category
+                            s_cat_name = s['category']
+                            s_cat_match = next((c for c in categories_obj if c.name == s_cat_name), None)
+                            if not s_cat_match:
+                                sf_match = process.extractOne(s_cat_name, category_list, scorer=fuzz.WRatio)
+                                if sf_match and sf_match[1] > 80:
+                                    s_cat_match = next((c for c in categories_obj if c.name == sf_match[0]), None)
+                            
+                            split = TransactionSplit(
+                                transaction_id=tx.id,
+                                category_name=s_cat_name,
+                                amount=s['amount'],
+                                description=s.get('description') or tx.description
+                            )
+                            if s_cat_match:
+                                split.category_id = s_cat_match.id
+                            
+                            tx.splits.append(split)
+
                     self.db.add(tx)
                     results.append({
                         "id": tx.id, 
@@ -327,12 +365,43 @@ class SyncService:
             Transaction.realm_id == self.connection.realm_id
         ).first()
 
-        if not tx or not tx.suggested_category_id:
-            raise ValueError(f"Transaction {tx_id} not found or has no suggested category")
+        if not tx:
+            raise ValueError(f"Transaction {tx_id} not found")
 
         # Update QBO via API
         payload = tx.raw_json
-        payload["AccountRef"] = {"value": tx.suggested_category_id, "name": tx.suggested_category_name}
+        
+        if tx.is_split and tx.splits:
+            # Multi-line split logic
+            new_lines = []
+            for s in tx.splits:
+                line = {
+                    "Description": s.description,
+                    "Amount": float(s.amount),
+                    "DetailType": "AccountBasedExpenseLineDetail",
+                    "AccountBasedExpenseLineDetail": {
+                        "AccountRef": {
+                            "value": s.category_id,
+                            "name": s.category_name
+                        }
+                    }
+                }
+                new_lines.append(line)
+            payload["Line"] = new_lines
+        else:
+            # Single category logic
+            if not tx.suggested_category_id:
+                 raise ValueError("Transaction has no suggested category")
+            
+            if "Line" in payload and len(payload["Line"]) > 0:
+                # Update first line (standard QBO Purchase pattern)
+                payload["Line"][0]["AccountBasedExpenseLineDetail"]["AccountRef"] = {
+                    "value": tx.suggested_category_id,
+                    "name": tx.suggested_category_name
+                }
+            else:
+                # Fallback to main AccountRef if lines are missing (rare)
+                payload["AccountRef"] = {"value": tx.suggested_category_id, "name": tx.suggested_category_name}
         
         res_data = self._request_qbo("POST", "purchase", params={'operation': 'update'}, json_payload=payload)
 
@@ -342,3 +411,58 @@ class SyncService:
         self.db.commit()
         
         return res_data
+
+    def process_receipt(self, file_content: bytes, filename: str):
+        """
+        Uses Gemini Vision to read a receipt and find the best transaction match.
+        """
+        # 1. Identify Receipt Content
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        prompt = """
+        Analyze this receipt image. 
+        Extract: 
+        1. Merchant Name
+        2. Date (YYYY-MM-DD)
+        3. Total Amount
+        4. Currency
+        5. Items (JSON list)
+        
+        Return JSON ONLY:
+        {"merchant": "...", "date": "...", "total": 0.0, "currency": "...", "items": [...]}
+        """
+        
+        # Prepare for Gemini
+        vision_result = model.generate_content([
+            prompt,
+            {"mime_type": "image/jpeg", "data": file_content}
+        ])
+        
+        try:
+            raw_text = vision_result.text.replace('```json', '').replace('```', '').strip()
+            extracted = json.loads(raw_text)
+        except Exception as e:
+            print(f"❌ AI Receipt Error: {str(e)}")
+            raise ValueError("Could not parse receipt data from AI")
+
+        # 2. Find Best Match in recent transactions
+        amount = float(extracted.get('total', 0))
+        txs = self.db.query(Transaction).filter(
+            Transaction.realm_id == self.connection.realm_id,
+            Transaction.status == 'unmatched'
+        ).all()
+        
+        best_match = None
+        for tx in txs:
+            merchant_score = fuzz.WRatio(extracted.get('merchant', ''), tx.description)
+            # Use abs(tx.amount) because bank feed often has negative for expenses
+            amount_diff = abs(abs(float(tx.amount)) - amount)
+            
+            if merchant_score > 70 and amount_diff < (amount * 0.1):
+                best_match = tx
+                break
+        
+        return {
+            "extracted": extracted,
+            "match": best_match
+        }

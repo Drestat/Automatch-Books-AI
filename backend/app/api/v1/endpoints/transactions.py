@@ -8,6 +8,14 @@ from typing import List
 
 router = APIRouter()
 
+class SplitSchema(BaseModel):
+    category_name: str
+    amount: float
+    description: str = None
+
+    class Config:
+        from_attributes = True
+
 class TransactionSchema(BaseModel):
     id: str
     date: str
@@ -18,6 +26,8 @@ class TransactionSchema(BaseModel):
     suggested_category_name: str = None
     reasoning: str = None
     confidence: float = None
+    is_split: bool = False
+    splits: List[SplitSchema] = []
 
     class Config:
         from_attributes = True
@@ -73,3 +83,46 @@ def approve_transaction(realm_id: str, tx_id: str, db: Session = Depends(get_db)
         return {"message": "Transaction approved and synced to QBO", "result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+from fastapi import File, UploadFile
+import os
+import shutil
+
+@router.post("/upload-receipt")
+def upload_receipt(
+    realm_id: str,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
+    if not connection:
+        raise HTTPException(status_code=404, detail="QBO Connection not found")
+    
+    # Save file locally
+    upload_dir = "uploads"
+    os.makedirs(upload_dir, exist_ok=True)
+    file_path = os.path.join(upload_dir, f"{realm_id}_{file.filename}")
+    
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    
+    # Process with AI
+    with open(file_path, "rb") as f:
+        content = f.read()
+    
+    sync_service = SyncService(db, connection)
+    result = sync_service.process_receipt(content, file.filename)
+    
+    # If match found, update the transaction
+    match = result.get('match')
+    if match:
+        match.receipt_url = file_path 
+        match.receipt_data = result.get('extracted')
+        db.add(match)
+        db.commit()
+    
+    return {
+        "message": "Receipt processed",
+        "extracted": result.get('extracted'),
+        "match_id": match.id if match else None
+    }

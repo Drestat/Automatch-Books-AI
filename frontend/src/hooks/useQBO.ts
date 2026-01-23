@@ -16,6 +16,9 @@ export interface Transaction {
     suggested_category_name: string;
     reasoning: string;
     confidence: number;
+    is_split?: boolean;
+    splits?: any[];
+    receipt_url?: string;
 }
 
 export const useQBO = () => {
@@ -136,6 +139,31 @@ export const useQBO = () => {
         }
     };
 
+    const uploadReceipt = async (txId: string, file: File) => {
+        if (!realmId) return;
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            setLoading(true);
+            const response = await fetch(`${API_BASE_URL}/transactions/upload-receipt?realm_id=${realmId}`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                // Refresh transactions to show the receipt link/badge
+                await fetchTransactions(realmId);
+                return data;
+            }
+        } catch (error) {
+            console.error('Upload Error:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return {
         isConnected,
         loading,
@@ -143,6 +171,7 @@ export const useQBO = () => {
         connect,
         sync,
         approveMatch,
+        uploadReceipt,
         user
     };
 };
