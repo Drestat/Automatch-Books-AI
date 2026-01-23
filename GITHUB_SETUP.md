@@ -3,7 +3,7 @@
 I have successfully created the repository and pushed your code to GitHub.
 
 ## Repository Details
-- **URL**: [https://github.com/Drestat/Easy-Bank-Transactions](https://github.com/Drestat/Easy-Bank-Transactions)
+- **URL**: [https://github.com/Drestat/Automatch-Books-AI](https://github.com/Drestat/Automatch-Books-AI)
 - **Primary Branch**: `main`
 
 ## GitHub Actions

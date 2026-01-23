@@ -1,226 +1,120 @@
 "use client";
 
-import React, { useState } from 'react';
-import TransactionCard from '@/components/TransactionCard';
-import { BentoGrid } from '@/components/BentoGrid';
-import { BentoTile } from '@/components/BentoTile';
-import {
-  TrendingUp,
-  ShieldCheck,
-  Zap,
-  Clock,
-  Layers,
-  Sparkles
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { Sparkles, ShieldCheck, Zap, ArrowRight, CheckCircle } from 'lucide-react';
 
-const MOCK_TRANSACTIONS = [
-  {
-    id: '1',
-    date: 'Jan 22, 2026',
-    description: 'Starbucks Coffee',
-    amount: -12.50,
-    currency: 'USD',
-    suggested_category_name: 'Meals & Entertainment',
-    reasoning: 'Merchant identified as food/beverage provider based on previous history.',
-    confidence: 0.95
-  },
-  {
-    id: '2',
-    date: 'Jan 21, 2026',
-    description: 'Amazon AWS Billing',
-    amount: -450.00,
-    currency: 'USD',
-    suggested_category_name: 'Software & Technology',
-    reasoning: 'Recurring payment detected for cloud infrastructure services.',
-    confidence: 0.88
-  },
-  {
-    id: '3',
-    date: 'Jan 20, 2026',
-    description: 'Zelle Payment: John Smith',
-    amount: 1500.00,
-    currency: 'USD',
-    suggested_category_name: 'Uncategorized Income',
-    reasoning: 'Peer-to-peer transfer received; likely customer payment or reimbursement.',
-    confidence: 0.65
-  }
-];
-
-export default function Home() {
-  const [approvedCount, setApprovedCount] = useState(0);
-  const [transactions, setTransactions] = useState(MOCK_TRANSACTIONS);
-
-  const handleAccept = (id: string) => {
-    setTransactions(prev => prev.filter(tx => tx.id !== id));
-    setApprovedCount(prev => prev + 1);
-  };
-
-  return (
-    <div className="min-h-screen py-12 px-6 lg:px-12 max-w-7xl mx-auto">
-      <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center">
-              <Sparkles className="text-white" size={16} />
-            </div>
-            <span className="text-sm font-bold tracking-[0.3em] uppercase text-brand">Mirror Sync Active</span>
-          </div>
-          <h1 className="text-[clamp(2.5rem,8vw,4rem)] font-black tracking-tight mb-4 leading-[1.1]">
-            Financial <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Intelligence</span>
-          </h1>
-          <p className="text-white/40 text-base md:text-lg max-w-md">
-            AI-powered transaction matching. Review and approve matches to keep your books perfect.
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="flex flex-wrap gap-4 items-center"
-        >
-          <button className="btn-glass px-6 py-4 flex items-center gap-3 group border-brand/30 hover:bg-brand/10">
-            <ShieldCheck size={20} className="text-brand" />
-            <div className="text-left">
-              <span className="block text-[10px] uppercase tracking-wider font-bold text-brand">Bulk Action</span>
-              <span className="text-xs font-bold text-white">Approve High Confidence</span>
-            </div>
-          </button>
-
-          <div className="glass-panel px-6 py-4 flex flex-col items-center min-w-[120px]">
-            <span className="text-3xl font-black text-brand leading-none mb-1">{approvedCount}</span>
-            <span className="text-[10px] uppercase tracking-[0.1em] font-bold text-white/30 text-center">Approved Today</span>
-          </div>
-          <button className="btn-primary h-full min-h-[64px] px-8 flex items-center gap-3 group">
-            <Zap size={20} className="group-hover:animate-pulse" />
-            <span className="font-bold">Sync Now</span>
-          </button>
-        </motion.div>
-      </header>
-
-      <main>
-        <BentoGrid>
-          {/* Quick Stats & Action Cards */}
-          <BentoTile className="md:col-span-1 bg-gradient-to-br from-brand/10 to-transparent border-brand/20">
-            <div className="flex flex-col h-full justify-between">
-              <div>
-                <ShieldCheck className="text-brand mb-4" size={32} />
-                <h3 className="text-xl font-bold mb-2">Automated Accuracy</h3>
-                <p className="text-sm text-white/50 leading-relaxed">
-                  Gemini 1.5 Pro is currently maintaining a <span className="text-brand font-bold">94.2%</span> accuracy rate across your vendor history.
-                </p>
-              </div>
-              <div className="mt-8">
-                <div className="flex justify-between items-end mb-2">
-                  <span className="text-xs font-bold text-white/30 uppercase tracking-wider">Historical Trend</span>
-                  <span className="text-xs font-bold text-emerald-400">+2.4%</span>
+export default function LandingPage() {
+    return (
+        <div className="min-h-screen bg-black text-white selection:bg-brand selection:text-white">
+            {/* Navigation */}
+            <nav className="fixed top-0 w-full z-50 bg-black/50 backdrop-blur-xl border-b border-white/5">
+                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center">
+                            <Sparkles className="text-white" size={16} />
+                        </div>
+                        <span className="font-bold tracking-tight text-lg">MirrorSync</span>
+                    </div>
+                    <div className="flex items-center gap-6">
+                        <Link href="/sign-in" className="text-sm font-bold text-white/60 hover:text-white transition-colors">
+                            Log In
+                        </Link>
+                        <Link href="/sign-up" className="btn-primary px-6 py-2.5 text-sm">
+                            Start Free Trial
+                        </Link>
+                    </div>
                 </div>
-                <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: "94.2%" }}
-                    transition={{ duration: 1.5, delay: 0.5 }}
-                    className="h-full bg-brand"
-                  />
+            </nav>
+
+            {/* Hero Section */}
+            <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 overflow-hidden">
+                <div className="max-w-7xl mx-auto text-center relative z-10">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                    >
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-8">
+                            <span className="w-2 h-2 rounded-full bg-brand animate-pulse" />
+                            <span className="text-xs font-bold tracking-wider uppercase text-brand">AI-Powered Accountability</span>
+                        </div>
+                        <h1 className="text-[clamp(3rem,8vw,6rem)] font-black tracking-tight leading-[1.1] mb-6">
+                            Accounting on <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Autopilot.</span>
+                        </h1>
+                        <p className="text-lg md:text-xl text-white/40 max-w-2xl mx-auto mb-10 leading-relaxed">
+                            Stop categorizing transactions manually. MirrorSync uses Gemini 1.5 Pro to
+                            match your bank feed to QuickBooks with 94% accuracy.
+                        </p>
+                        <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+                            <Link href="/sign-up" className="btn-primary px-8 py-4 text-lg w-full md:w-auto flex items-center justify-center gap-3 group">
+                                Start Syncing Now
+                                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                            </Link>
+                            <Link href="#how-it-works" className="px-8 py-4 text-lg font-bold text-white/60 hover:text-white transition-colors flex items-center gap-2">
+                                See How It Works
+                            </Link>
+                        </div>
+                    </motion.div>
                 </div>
-              </div>
-            </div>
-          </BentoTile>
 
-          <BentoTile className="md:col-span-1 border-white/5">
-            <div className="flex flex-col h-full justify-between">
-              <div>
-                <Clock className="text-brand-secondary mb-4" size={32} />
-                <h3 className="text-xl font-bold mb-2">Pending Review</h3>
-                <p className="text-sm text-white/50 leading-relaxed">
-                  You have <span className="text-white font-bold">{transactions.length}</span> transactions waiting for your confirmation.
-                </p>
-              </div>
-              <button className="btn-glass w-full text-xs font-bold py-3 mt-6">
-                View History
-              </button>
-            </div>
-          </BentoTile>
+                {/* Background Gradients */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-brand/20 rounded-full blur-[120px] -z-10 opacity-50" />
+            </section>
 
-          <BentoTile className="md:col-span-1 border-white/5 bg-white/[0.01]">
-            <div className="flex flex-col h-full justify-between">
-              <div>
-                <Layers className="text-brand-accent mb-4" size={32} />
-                <h3 className="text-xl font-bold mb-2">Multi-Factor Matching</h3>
-                <p className="text-sm text-white/50 leading-relaxed">
-                  Syncing across 3 checking accounts and 2 credit cards.
-                </p>
-              </div>
-              <div className="mt-6 flex -space-x-3">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="w-10 h-10 rounded-full border-2 border-slate-900 bg-white/10 flex items-center justify-center overflow-hidden">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-brand to-brand-accent opacity-50" />
-                  </div>
-                ))}
-                <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-white/5 flex items-center justify-center text-[10px] font-bold">
-                  +2
+            {/* Feature Grid */}
+            <section id="how-it-works" className="py-24 px-6 border-t border-white/5 bg-white/[0.02]">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid md:grid-cols-3 gap-8">
+                        <div className="glass-panel p-8">
+                            <Zap className="text-brand mb-6" size={40} />
+                            <h3 className="text-xl font-bold mb-3">Zero-Lag Sync</h3>
+                            <p className="text-white/40 leading-relaxed">
+                                We mirror your QuickBooks data locally so you can categorize instantly. No loading spinners, no waiting.
+                            </p>
+                        </div>
+                        <div className="glass-panel p-8">
+                            <ShieldCheck className="text-emerald-400 mb-6" size={40} />
+                            <h3 className="text-xl font-bold mb-3">Traffic Light Confidence</h3>
+                            <p className="text-white/40 leading-relaxed">
+                                Our AI assigns a confidence score to every match. Green means go, Amber means review.
+                            </p>
+                        </div>
+                        <div className="glass-panel p-8">
+                            <Sparkles className="text-brand-secondary mb-6" size={40} />
+                            <h3 className="text-xl font-bold mb-3">Reasoning Narratives</h3>
+                            <p className="text-white/40 leading-relaxed">
+                                Hover over any match to see *why* the AI chose it. Build trust with every transaction.
+                            </p>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-          </BentoTile>
+            </section>
 
-          {/* Transactions List */}
-          <div className="md:col-span-3 mt-8">
-            <div className="flex items-center gap-4 mb-8">
-              <h2 className="text-2xl font-black tracking-tight">Daily Matches</h2>
-              <div className="h-[1px] flex-1 bg-white/5" />
-              <div className="flex gap-2">
-                <button className="px-4 py-2 rounded-full border border-white/10 text-xs font-bold hover:bg-white/5 transition-colors">By Date</button>
-                <button className="px-4 py-2 rounded-full border border-brand/30 bg-brand/10 text-brand text-xs font-bold">By Confidence</button>
-              </div>
-            </div>
+            {/* Pricing CTA */}
+            <section className="py-32 px-6 text-center">
+                <div className="max-w-3xl mx-auto glass-card p-12 border-brand/20 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand via-brand-secondary to-brand" />
+                    <h2 className="text-4xl font-black tracking-tight mb-6">Ready for Clarity?</h2>
+                    <p className="text-white/50 mb-10 text-lg">
+                        Join 500+ businesses automating their bookkeeping today.
+                    </p>
+                    <ul className="flex flex-wrap justify-center gap-6 mb-10 text-sm font-bold text-white/80">
+                        <li className="flex items-center gap-2"><CheckCircle size={16} className="text-brand" /> 14-Day Free Trial</li>
+                        <li className="flex items-center gap-2"><CheckCircle size={16} className="text-brand" /> No Credit Card Required</li>
+                        <li className="flex items-center gap-2"><CheckCircle size={16} className="text-brand" /> Cancel Anytime</li>
+                    </ul>
+                    <Link href="/sign-up" className="btn-primary px-10 py-5 text-xl inline-flex items-center gap-3">
+                        Get Started Free
+                    </Link>
+                </div>
+            </section>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <AnimatePresence mode="popLayout">
-                {transactions.map((tx, index) => (
-                  <motion.div
-                    key={tx.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                  >
-                    <TransactionCard tx={tx} onAccept={handleAccept} />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-
-              {transactions.length === 0 && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="col-span-full py-20 flex flex-col items-center justify-center glass-panel"
-                >
-                  <div className="w-20 h-20 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-6">
-                    <ShieldCheck size={40} />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-2">All Caught Up!</h3>
-                  <p className="text-white/40">You've cleared all pending transactions for today.</p>
-                </motion.div>
-              )}
-            </div>
-          </div>
-        </BentoGrid>
-      </main>
-
-      <footer className="mt-24 border-t border-white/5 pt-12 text-center">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <Sparkles className="text-brand animate-pulse" size={16} />
-          <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
+            <footer className="py-12 px-6 border-t border-white/5 text-center text-white/20 text-sm">
+                <p>&copy; 2026 MirrorSync Engine. All rights reserved.</p>
+            </footer>
         </div>
-        <p className="text-white/20 text-xs">MirrorSync Engine &copy; 2026. Powered by Google Gemini 1.5 Pro.</p>
-      </footer>
-    </div>
-  );
+    );
 }

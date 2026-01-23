@@ -1,7 +1,7 @@
 # Gemini: Project Map & Source of Truth
 
 ## Project Overview
-- **Name**: Easy Bank Transactions
+- **Name**: Automatch Books AI
 - **Status**: Discovery / Phase 1: Blueprint
 - **Owner**: System Pilot (Antigravity)
 
