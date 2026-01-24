@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, Suspense } from 'react';
+import Link from 'next/link';
 // ... existing imports ...
 import TransactionCard from '@/components/TransactionCard';
 import { BentoGrid } from '@/components/BentoGrid';
@@ -13,7 +14,8 @@ import {
   Layers,
   Sparkles,
   ArrowRight,
-  Lock
+  Lock,
+  BarChart3
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserButton } from "@clerk/nextjs";
@@ -139,6 +141,16 @@ function DashboardContent() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="flex flex-wrap gap-4 items-center"
         >
+          <Link href="/analytics">
+            <button className="btn-glass px-6 py-4 flex items-center gap-3 group border-brand/30 hover:bg-brand/10">
+              <BarChart3 size={20} className="text-brand" />
+              <div className="text-left">
+                <span className="block text-[10px] uppercase tracking-wider font-bold text-brand">Insights</span>
+                <span className="text-xs font-bold text-white">View Analytics</span>
+              </div>
+            </button>
+          </Link>
+
           <button
             onClick={handleBulkApprove}
             disabled={loading || transactions.filter(tx => tx.confidence > 0.9 && tx.status !== 'approved').length === 0}
