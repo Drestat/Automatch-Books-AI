@@ -38,6 +38,32 @@ export const useAnalytics = () => {
         const fetchAnalytics = async () => {
             if (!isLoaded || !user) return;
 
+            // DEMO MODE CHECK
+            if (localStorage.getItem('is_demo_mode') === 'true') {
+                setSpendTrend([
+                    { name: 'Oct 01', income: 4500, expense: 3200 },
+                    { name: 'Oct 05', income: 1200, expense: 800 },
+                    { name: 'Oct 10', income: 5600, expense: 3400 },
+                    { name: 'Oct 15', income: 2800, expense: 1200 },
+                    { name: 'Oct 20', income: 3900, expense: 2100 },
+                    { name: 'Oct 25', income: 6200, expense: 4100 },
+                    { name: 'Oct 30', income: 4800, expense: 2900 },
+                ]);
+                setCategoryData([
+                    { name: 'Software', value: 2400, color: '#0070f3' },
+                    { name: 'Office', value: 1200, color: '#7928ca' },
+                    { name: 'Travel', value: 850, color: '#f5a623' },
+                    { name: 'Meals', value: 450, color: '#ff0080' },
+                ]);
+                setKpi({
+                    totalSpend: 15300,
+                    totalIncome: 28900,
+                    netFlow: 13600
+                });
+                setLoading(false);
+                return;
+            }
+
             try {
                 // In a real app we'd pass an auth token, but for now we rely on the backend finding the connection via user_id
                 const headers = { 'X-User-Id': user.id };

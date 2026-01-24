@@ -125,6 +125,7 @@ export const useQBO = () => {
 
     const enableDemo = () => {
         setIsDemo(true);
+        localStorage.setItem('is_demo_mode', 'true');
         setTransactions([
             { id: 'demo1', date: '2023-10-25', description: 'STARBUCKS STORE 192', amount: -6.45, currency: 'USD', status: 'unmatched', suggested_category_name: 'Meals & Entertainment', reasoning: 'Frequent coffee shop vendor', confidence: 0.95 },
             { id: 'demo2', date: '2023-10-26', description: 'APPLECARD GOOGLE PAYMENT', amount: -12.99, currency: 'USD', status: 'unmatched', suggested_category_name: 'Software & Subscriptions', reasoning: 'Matches known software subscription pattern', confidence: 0.88 },
