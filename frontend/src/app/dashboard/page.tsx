@@ -28,7 +28,9 @@ function DashboardContent() {
     approveMatch,
     bulkApprove,
     uploadReceipt,
-    user
+    isLoaded,
+    isDemo,
+    enableDemo
   } = useQBO();
 
   const [loading, setLoading] = useState(false); // Local loading for UI actions
@@ -55,7 +57,7 @@ function DashboardContent() {
 
   const approvedCount = transactions.filter(tx => tx.status === 'approved').length;
 
-  if (!isConnected) {
+  if (!isConnected && !isDemo) {
     // ... existing Connect UI ...
     return (
       <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
@@ -80,11 +82,11 @@ function DashboardContent() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={connect}
-            disabled={qboLoading}
-            className="w-full btn-primary py-4 text-lg font-bold flex items-center justify-center gap-3 group relative overflow-hidden"
+            disabled={qboLoading || !isLoaded}
+            className="w-full btn-primary py-4 text-lg font-bold flex items-center justify-center gap-3 group relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-            {qboLoading ? (
+            {qboLoading || !isLoaded ? (
               <div className="w-6 h-6 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
@@ -93,6 +95,14 @@ function DashboardContent() {
               </>
             )}
           </motion.button>
+
+          <button
+            onClick={enableDemo}
+            disabled={qboLoading || !isLoaded}
+            className="w-full py-4 text-sm font-bold text-white/40 hover:text-white transition-colors disabled:opacity-50"
+          >
+            Try Demo Mode
+          </button>
 
           <p className="text-center text-xs text-white/20 font-medium">
             Uses bank-grade 256-bit encryption.
@@ -110,8 +120,10 @@ function DashboardContent() {
           animate={{ opacity: 1, x: 0 }}
         >
           <div className="flex items-center gap-2 mb-2">
-            <span className="w-2 h-2 rounded-full bg-brand animate-pulse" />
-            <span className="text-xs font-bold tracking-[0.2em] text-brand uppercase">Live Sync Active</span>
+            <span className={`w-2 h-2 rounded-full ${isDemo ? 'bg-amber-400' : 'bg-brand'} animate-pulse`} />
+            <span className={`text-xs font-bold tracking-[0.2em] ${isDemo ? 'text-amber-400' : 'text-brand'} uppercase`}>
+              {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
+            </span>
           </div>
           <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">
             Financial <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Intelligence</span>

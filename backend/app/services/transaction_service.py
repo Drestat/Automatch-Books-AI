@@ -1,0 +1,139 @@
+from datetime import datetime
+from sqlalchemy.orm import Session
+
+from app.models.qbo import Transaction, QBOConnection, Category, Customer, SyncLog, TransactionSplit
+from app.services.qbo_client import QBOClient
+
+class TransactionService:
+    def __init__(self, db: Session, qbo_connection: QBOConnection):
+        self.db = db
+        self.connection = qbo_connection
+        self.client = QBOClient(db, qbo_connection)
+
+    def _log(self, operation: str, entity_type: str, count: int, status: str, details: dict = None):
+        log = SyncLog(
+            realm_id=self.connection.realm_id,
+            operation=operation,
+            entity_type=entity_type,
+            count=count,
+            status=status,
+            details=details
+        )
+        self.db.add(log)
+        self.db.commit()
+
+    def sync_all(self):
+        """Syncs all entities for the current connection"""
+        self.sync_categories()
+        self.sync_customers()
+        self.sync_transactions()
+
+    def sync_transactions(self):
+        data = self.client.query("SELECT * FROM Purchase")
+        purchases = data.get("QueryResponse", {}).get("Purchase", [])
+        for p in purchases:
+            tx = self.db.query(Transaction).filter(Transaction.id == p["Id"]).first()
+            if not tx:
+                tx = Transaction(id=p["Id"], realm_id=self.connection.realm_id)
+            
+            tx.date = datetime.strptime(p["TxnDate"], "%Y-%m-%d")
+            tx.description = p.get("AccountRef", {}).get("name", "Purchased Item")
+            tx.amount = p.get("TotalAmt", 0)
+            tx.currency = p.get("CurrencyRef", {}).get("value", "USD")
+            tx.raw_json = p
+            self.db.add(tx)
+        self.db.commit()
+        self._log("sync", "transaction", len(purchases), "success")
+
+    def sync_categories(self):
+        data = self.client.query("SELECT * FROM Account WHERE AccountType = 'Expense'")
+        accounts = data.get("QueryResponse", {}).get("Account", [])
+        for a in accounts:
+            cat = self.db.query(Category).filter(Category.id == a["Id"]).first()
+            if not cat:
+                cat = Category(id=a["Id"], realm_id=self.connection.realm_id)
+            cat.name = a["Name"]
+            cat.type = a["AccountType"]
+            self.db.add(cat)
+        self.db.commit()
+        self._log("sync", "category", len(accounts), "success")
+
+    def sync_customers(self):
+        data = self.client.query("SELECT * FROM Customer")
+        customers = data.get("QueryResponse", {}).get("Customer", [])
+        for c in customers:
+            cust = self.db.query(Customer).filter(Customer.id == c["Id"]).first()
+            if not cust:
+                cust = Customer(id=c["Id"], realm_id=self.connection.realm_id)
+            cust.display_name = c["DisplayName"]
+            cust.fully_qualified_name = c["FullyQualifiedName"]
+            self.db.add(cust)
+        self.db.commit()
+        self._log("sync", "customer", len(customers), "success")
+
+    def approve_transaction(self, tx_id: str):
+        """Finalizes a transaction and writes it back to QBO"""
+        tx = self.db.query(Transaction).filter(
+            Transaction.id == tx_id,
+            Transaction.realm_id == self.connection.realm_id
+        ).first()
+
+        if not tx:
+            raise ValueError(f"Transaction {tx_id} not found")
+
+        # Update QBO via API
+        payload = tx.raw_json
+        
+        if tx.is_split and tx.splits:
+            # Multi-line split logic
+            new_lines = []
+            for s in tx.splits:
+                line = {
+                    "Description": s.description,
+                    "Amount": float(s.amount),
+                    "DetailType": "AccountBasedExpenseLineDetail",
+                    "AccountBasedExpenseLineDetail": {
+                        "AccountRef": {
+                            "value": s.category_id,
+                            "name": s.category_name
+                        }
+                    }
+                }
+                new_lines.append(line)
+            payload["Line"] = new_lines
+        else:
+            # Single category logic
+            if not tx.suggested_category_id:
+                 raise ValueError("Transaction has no suggested category")
+            
+            if "Line" in payload and len(payload["Line"]) > 0:
+                payload["Line"][0]["AccountBasedExpenseLineDetail"]["AccountRef"] = {
+                    "value": tx.suggested_category_id,
+                    "name": tx.suggested_category_name
+                }
+            else:
+                payload["AccountRef"] = {"value": tx.suggested_category_id, "name": tx.suggested_category_name}
+        
+        res_data = self.client.request("POST", "purchase", params={'operation': 'update'}, json_payload=payload)
+
+        # Update Mirror Status
+        tx.status = 'approved'
+        self.db.add(tx)
+        self.db.commit()
+        
+        self._log("approve", "transaction", 1, "success", {"tx_id": tx_id})
+        return res_data
+
+    def bulk_approve(self, tx_ids: list[str]):
+        """Approves multiple transactions in a batch"""
+        results = []
+        for tx_id in tx_ids:
+            try:
+                self.approve_transaction(tx_id)
+                results.append({"id": tx_id, "status": "success"})
+            except Exception as e:
+                results.append({"id": tx_id, "status": "error", "message": str(e)})
+        
+        success_count = len([r for r in results if r["status"] == "success"])
+        self._log("bulk_approve", "transaction", success_count, "partial" if success_count < len(tx_ids) else "success", {"results": results})
+        return results

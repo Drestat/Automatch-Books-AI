@@ -8,7 +8,8 @@ from app.core.config import settings
 
 router = APIRouter()
 
-from app.services.sync_service import SyncService
+from app.services.transaction_service import TransactionService
+from app.services.analysis_service import AnalysisService
 from app.models.qbo import QBOConnection
 
 @router.post("/webhook")
@@ -41,11 +42,12 @@ async def qbo_webhook(
             # Trigger sync
             # In production, this should be a background task (Modal/Celery)
             try:
-                service = SyncService(db, connection)
-                service.sync_all() 
-                # This also triggers analyze_transactions in sync_all?
-                # Actually sync_all only does categories/customers/transactions.
-                service.analyze_transactions() # Hybrid Intelligence trigger
+                sync_service = TransactionService(db, connection)
+                sync_service.sync_all() 
+                
+                # Hybrid Intelligence trigger
+                analysis_service = AnalysisService(db, realm_id)
+                analysis_service.analyze_transactions()
             except Exception as e:
                 print(f"❌ Webhook Sync Error for realm {realm_id}: {str(e)}")
 

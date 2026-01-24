@@ -1,10 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from sqlalchemy.orm import Session
-from app.db.session import get_db
-from app.models.qbo import Transaction, QBOConnection
-from app.services.sync_service import SyncService
+from typing import List, Optional
+import os
+import shutil
+
+from app.api.v1.endpoints.qbo import get_db
+from app.models.qbo import QBOConnection, Transaction
+from app.services.transaction_service import TransactionService
+from app.services.analysis_service import AnalysisService
+from app.services.receipt_service import ReceiptService
 from pydantic import BaseModel
-from typing import List
 
 router = APIRouter()
 
@@ -52,8 +57,8 @@ def sync_user_transactions(realm_id: str, db: Session = Depends(get_db)):
         return {"message": "Background sync triggered successfully"}
     except Exception as e:
         # Fallback to synchronous sync if Modal is not configured or fails
-        sync_service = SyncService(db, connection)
-        sync_service.sync_all()
+        service = TransactionService(db, connection)
+        service.sync_all()
         return {"message": "Sync completed (synchronous fallback)", "error": str(e)}
 
 @router.post("/analyze")
@@ -67,9 +72,12 @@ def analyze_user_transactions(realm_id: str, tx_id: str = None, db: Session = De
         process_ai_categorization.spawn(realm_id, tx_id=tx_id)
         return {"message": f"AI categorization {'for ' + tx_id if tx_id else ''} triggered successfully"}
     except Exception as e:
-        sync_service = SyncService(db, connection)
-        results = sync_service.analyze_transactions(tx_id=tx_id)
-        return {"message": "AI analysis completed (synchronous fallback)", "count": len(results) if isinstance(results, list) else 0, "error": str(e)}
+        service = AnalysisService(db, realm_id)
+        try:
+            results = service.analyze_transactions(tx_id=tx_id)
+            return {"message": "AI analysis completed (synchronous fallback)", "count": len(results) if isinstance(results, list) else 0}
+        except Exception as inner_e:
+             return {"message": "AI analysis failed", "error": str(inner_e)}
 
 @router.post("/{tx_id}/approve")
 def approve_transaction(realm_id: str, tx_id: str, db: Session = Depends(get_db)):
@@ -77,16 +85,12 @@ def approve_transaction(realm_id: str, tx_id: str, db: Session = Depends(get_db)
     if not connection:
         raise HTTPException(status_code=404, detail="QBO Connection not found")
     
-    sync_service = SyncService(db, connection)
+    service = TransactionService(db, connection)
     try:
-        result = sync_service.approve_transaction(tx_id)
+        result = service.approve_transaction(tx_id)
         return {"message": "Transaction approved and synced to QBO", "result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-from fastapi import File, UploadFile
-import os
-import shutil
 
 @router.post("/upload-receipt")
 def upload_receipt(
@@ -110,8 +114,8 @@ def upload_receipt(
     with open(file_path, "rb") as f:
         content = f.read()
     
-    sync_service = SyncService(db, connection)
-    result = sync_service.process_receipt(content, file.filename)
+    service = ReceiptService(db, realm_id)
+    result = service.process_receipt(content, file.filename)
     
     # If match found, update the transaction
     match = result.get('match')
@@ -133,6 +137,6 @@ def bulk_approve_transactions(realm_id: str, tx_ids: List[str], db: Session = De
     if not connection:
         raise HTTPException(status_code=404, detail="QBO Connection not found")
     
-    sync_service = SyncService(db, connection)
-    results = sync_service.bulk_approve(tx_ids)
+    service = TransactionService(db, connection)
+    results = service.bulk_approve(tx_ids)
     return {"results": results}

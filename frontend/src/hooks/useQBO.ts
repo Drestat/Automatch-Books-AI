@@ -59,6 +59,7 @@ export const useQBO = () => {
 
     const [realmId, setRealmId] = useState<string | null>(null);
     const [isConnected, setIsConnected] = useState(false);
+    const [isDemo, setIsDemo] = useState(false);
     const [loading, setLoading] = useState(false);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
 
@@ -122,6 +123,18 @@ export const useQBO = () => {
         }
     };
 
+    const enableDemo = () => {
+        setIsDemo(true);
+        setTransactions([
+            { id: 'demo1', date: '2023-10-25', description: 'STARBUCKS STORE 192', amount: -6.45, currency: 'USD', status: 'unmatched', suggested_category_name: 'Meals & Entertainment', reasoning: 'Frequent coffee shop vendor', confidence: 0.95 },
+            { id: 'demo2', date: '2023-10-26', description: 'APPLECARD GOOGLE PAYMENT', amount: -12.99, currency: 'USD', status: 'unmatched', suggested_category_name: 'Software & Subscriptions', reasoning: 'Matches known software subscription pattern', confidence: 0.88 },
+            { id: 'demo3', date: '2023-10-27', description: 'UBER TRIP 8485', amount: -24.30, currency: 'USD', status: 'unmatched', suggested_category_name: 'Travel', reasoning: 'Rideshare service detected', confidence: 0.92 },
+            { id: 'demo4', date: '2023-10-28', description: 'OFFICE DEPOT 112', amount: -145.20, currency: 'USD', status: 'unmatched', suggested_category_name: 'Office Supplies', reasoning: 'Office supply store match', confidence: 0.98 },
+            { id: 'demo5', date: '2023-10-29', description: 'SHELL OIL 5235235', amount: -45.00, currency: 'USD', status: 'unmatched', suggested_category_name: 'Fuel', reasoning: 'Gas station vendor', confidence: 0.91 }
+        ]);
+        showToast('Demo Mode Activated', 'success');
+    };
+
     const fetchTransactions = async (realm: string) => {
         try {
             const response = await fetch(`${API_BASE_URL}/transactions/?realm_id=${realm}`);
@@ -135,13 +148,21 @@ export const useQBO = () => {
     };
 
     const sync = async () => {
-        if (!realmId) return;
+        if (!realmId && !isDemo) return;
         try {
+            if (isDemo) {
+                setLoading(true);
+                setTimeout(() => {
+                    setLoading(false);
+                    showToast('Demo Sync Complete', 'success');
+                }, 1500);
+                return;
+            }
             await fetch(`${API_BASE_URL}/transactions/sync?realm_id=${realmId}`, { method: 'POST' });
             showToast('Syncing with QuickBooks...', 'info');
             // Poll or re-fetch transactions
             setTimeout(() => {
-                fetchTransactions(realmId);
+                if (realmId) fetchTransactions(realmId);
                 showToast('Transactions mirrored successfully', 'success');
             }, 2000);
         } catch (error) {
@@ -151,8 +172,13 @@ export const useQBO = () => {
     };
 
     const approveMatch = async (txId: string) => {
-        if (!realmId) return;
+        if (!realmId && !isDemo) return;
         try {
+            if (isDemo) {
+                setTransactions(prev => prev.filter(tx => tx.id !== txId));
+                showToast('Demo: Transaction Approved', 'success');
+                return true;
+            }
             const response = await fetch(`${API_BASE_URL}/transactions/${txId}/approve?realm_id=${realmId}`, { method: 'POST' });
 
             if (response.ok) {
@@ -179,8 +205,16 @@ export const useQBO = () => {
     };
 
     const bulkApprove = async (txIds: string[]) => {
-        if (!realmId || txIds.length === 0) return;
+        if ((!realmId && !isDemo) || txIds.length === 0) return;
         setLoading(true);
+        if (isDemo) {
+            setTimeout(() => {
+                setTransactions(prev => prev.filter(tx => !txIds.includes(tx.id)));
+                setLoading(false);
+                showToast('Demo: Bulk Approved', 'success');
+            }, 1000);
+            return true;
+        }
         try {
             const response = await fetch(`${API_BASE_URL}/transactions/bulk-approve?realm_id=${realmId}`, {
                 method: 'POST',
@@ -238,11 +272,14 @@ export const useQBO = () => {
         isConnected,
         loading,
         transactions,
+        isDemo,
         connect,
+        enableDemo,
         sync,
         approveMatch,
         bulkApprove,
         uploadReceipt,
-        user
+        user,
+        isLoaded
     };
 };

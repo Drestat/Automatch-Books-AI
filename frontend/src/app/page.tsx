@@ -128,7 +128,7 @@ export default function LandingPage() {
                             <Sparkles className="text-brand-secondary mb-6" size={40} />
                             <h3 className="text-xl font-bold mb-3">Auditable Intelligence</h3>
                             <p className="text-white/40 leading-relaxed text-sm">
-                                Most AI tools are "black boxes." Our AI explains every transaction before you click **"Agree."** You are the final boss who validates the logic.
+                                Most AI tools are &quot;black boxes.&quot; Our AI explains every transaction before you click **&quot;Agree.&quot;** You are the final boss who validates the logic.
                             </p>
                         </div>
                     </div>

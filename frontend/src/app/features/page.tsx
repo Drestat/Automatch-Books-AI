@@ -58,21 +58,21 @@ export default function FeaturesPage() {
                         </div>
                         <h2 className="text-3xl font-black tracking-tight uppercase">The Trust Bridge</h2>
                     </div>
-                    <p className="text-white/40 text-sm mb-12 max-w-2xl font-medium">Why we're the human-in-the-loop layer business owners desperately need.</p>
+                    <p className="text-white/40 text-sm mb-12 max-w-2xl font-medium">Why we&apos;re the human-in-the-loop layer business owners desperately need.</p>
 
                     <div className="grid md:grid-cols-2 gap-8 mb-12">
                         <div className="glass-card p-8 border-white/5 relative overflow-hidden">
                             <div className="absolute -top-4 -right-4 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl" />
-                            <h3 className="text-xl font-bold mb-4 text-rose-400">The "Black Box" Problem</h3>
+                            <h3 className="text-xl font-bold mb-4 text-rose-400">The &quot;Black Box&quot; Problem</h3>
                             <p className="text-white/40 text-sm leading-relaxed">
-                                Most AI tools are "black boxes"—they do the work in the dark, and you just hope it's right. They guess, get it wrong, and leave you to clean up a forensic mess in your books.
+                                Most AI tools are &quot;black boxes&quot;—they do the work in the dark, and you just hope it&apos;s right. They guess, get it wrong, and leave you to clean up a forensic mess in your books.
                             </p>
                         </div>
                         <div className="glass-card p-8 border-brand/20 bg-brand/5 relative overflow-hidden">
                             <div className="absolute -top-4 -right-4 w-24 h-24 bg-brand/20 rounded-full blur-2xl" />
                             <h3 className="text-xl font-bold mb-4 text-brand">The Magical Mirror Solution</h3>
                             <p className="text-white/60 text-sm leading-relaxed">
-                                AutoMatch isn't just automation; it's <strong>auditable intelligence</strong>. The AI explains its logic for <em>every single transaction</em> before you click "Agree". We provide the trust bridge missing in fintech.
+                                AutoMatch isn&apos;t just automation; it&apos;s <strong>auditable intelligence</strong>. The AI explains its logic for <em>every single transaction</em> before you click &quot;Agree&quot;. We provide the trust bridge missing in fintech.
                             </p>
                         </div>
                     </div>
@@ -82,7 +82,7 @@ export default function FeaturesPage() {
                             <MessageSquareQuote size={40} className="text-brand" />
                         </div>
                         <p className="text-xl md:text-2xl text-white/80 leading-relaxed text-center py-4">
-                            “Existing tools are black boxes—they guess, get it wrong, and leave you to clean up the mess. Your concept of <strong>'Explainable AI'</strong> is the trust bridge missing in fintech.”
+                            &ldquo;Existing tools are black boxes—they guess, get it wrong, and leave you to clean up the mess. Your concept of <strong>&apos;Explainable AI&apos;</strong> is the trust bridge missing in fintech.&rdquo;
                         </p>
                     </div>
                 </section>
@@ -93,9 +93,9 @@ export default function FeaturesPage() {
                         <div className="w-10 h-10 rounded-full bg-brand-accent/20 text-brand-accent flex items-center justify-center">
                             <Eye size={20} />
                         </div>
-                        <h2 className="text-3xl font-black tracking-tight uppercase">The Designer's Vision</h2>
+                        <h2 className="text-3xl font-black tracking-tight uppercase">The Designer&apos;s Vision</h2>
                     </div>
-                    <p className="text-white/40 text-sm mb-12 max-w-2xl font-medium">Design Directives for maintaining the "Magical Mirror" aesthetic.</p>
+                    <p className="text-white/40 text-sm mb-12 max-w-2xl font-medium">Design Directives for maintaining the &quot;Magical Mirror&quot; aesthetic.</p>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <VisionCard
@@ -122,7 +122,7 @@ export default function FeaturesPage() {
                         <div className="w-10 h-10 rounded-full bg-emerald-400/20 text-emerald-400 flex items-center justify-center">
                             <Cpu size={20} />
                         </div>
-                        <h2 className="text-3xl font-black tracking-tight uppercase">The Builder's Engine</h2>
+                        <h2 className="text-3xl font-black tracking-tight uppercase">The Builder&apos;s Engine</h2>
                     </div>
                     <p className="text-white/40 text-sm mb-12 max-w-2xl font-medium">Technical specifications for the sync and AI matching core.</p>
 
@@ -137,7 +137,7 @@ export default function FeaturesPage() {
                                 <div className="space-y-6">
                                     <div className="p-4 rounded-xl bg-white/5 border border-white/5">
                                         <p className="text-xs font-bold text-white mb-2">Multi-Tenant Isolation</p>
-                                        <p className="text-xs text-white/40 leading-relaxed">All tables leverage <code className="text-emerald-400">realm_id</code> indexing. Row Level Security (RLS) ensures that even in shared clusters, a user's transactions are mathematically isolated.</p>
+                                        <p className="text-xs text-white/40 leading-relaxed">All tables leverage <code className="text-emerald-400">realm_id</code> indexing. Row Level Security (RLS) ensures that even in shared clusters, a user&apos;s transactions are mathematically isolated.</p>
                                     </div>
                                     <div className="p-4 rounded-xl bg-white/5 border border-white/5">
                                         <p className="text-xs font-bold text-white mb-2">Optimistic Sync</p>
@@ -150,7 +150,7 @@ export default function FeaturesPage() {
                                 <div className="space-y-6">
                                     <div className="p-4 rounded-xl bg-brand/5 border border-brand/20">
                                         <p className="text-xs font-bold text-brand mb-2">Explainable Reasoners</p>
-                                        <p className="text-xs text-white/60 leading-relaxed">The AI doesn't just categorize; it explains. "I categorized this as 'Job Materials' because the vendor is Home Depot." This turns automation into <strong>validation</strong>.</p>
+                                        <p className="text-xs text-white/60 leading-relaxed">The AI doesn&apos;t just categorize; it explains. &quot;I categorized this as &apos;Job Materials&apos; because the vendor is Home Depot.&quot; This turns automation into <strong>validation</strong>.</p>
                                     </div>
                                     <div className="p-4 rounded-xl bg-white/5 border border-white/5 font-mono text-[10px] text-white/30 truncate">
                                         {"const PROMPT = `Analyze vendor '${tx.vendor}' and explain the mapping...`"}
@@ -196,7 +196,7 @@ export default function FeaturesPage() {
                         <div className="w-10 h-10 rounded-full bg-brand/20 text-brand flex items-center justify-center">
                             <Smartphone size={20} />
                         </div>
-                        <h2 className="text-3xl font-black tracking-tight uppercase">Tester's A-Z Manual (15-Step Walkthrough)</h2>
+                        <h2 className="text-3xl font-black tracking-tight uppercase">Tester&apos;s A-Z Manual (15-Step Walkthrough)</h2>
                     </div>
                     <p className="text-white/40 text-sm mb-12 max-w-2xl font-medium">Follow these exact, simple steps to experience the full power of the platform.</p>
 
@@ -207,7 +207,7 @@ export default function FeaturesPage() {
                             icon={<Zap className="text-brand" />}
                             image="/screenshots/step_01_hero.png"
                         >
-                            Start at the beginning. Go to the main website and enjoy the "Magical Mirror" animations.
+                            Start at the beginning. Go to the main website and enjoy the &quot;Magical Mirror&quot; animations.
                         </TestStep>
 
                         <TestStep
@@ -215,7 +215,7 @@ export default function FeaturesPage() {
                             title="Start Free Trial"
                             icon={<ArrowRightCircle className="text-brand-secondary" />}
                         >
-                            Look for the bright button that says <strong>"Start Free Trial"</strong> in the center or top right and click it.
+                            Look for the bright button that says <strong>&quot;Start Free Trial&quot;</strong> in the center or top right and click it.
                             <div className="mt-4 p-8 rounded-xl bg-brand/5 border border-brand/20 flex items-center justify-center">
                                 <button className="btn-primary px-6 py-2">Start Free Trial</button>
                             </div>
@@ -227,7 +227,7 @@ export default function FeaturesPage() {
                             icon={<UserCheck className="text-brand" />}
                             image="/screenshots/step_03_login.png"
                         >
-                            You'll see a secure Sign-Up box. Enter any email address and a password. This is handled safely by Clerk.
+                            You&apos;ll see a secure Sign-Up box. Enter any email address and a password. This is handled safely by Clerk.
                         </TestStep>
 
                         <TestStep
@@ -236,12 +236,12 @@ export default function FeaturesPage() {
                             icon={<BarChart3 className="text-brand-accent" />}
                             image="/screenshots/step_04_pricing.png"
                         >
-                            Once logged in, if you aren't already there, go to the <strong>Pricing</strong> page to see the plan options.
+                            Once logged in, if you aren&apos;t already there, go to the <strong>Pricing</strong> page to see the plan options.
                         </TestStep>
 
                         <TestStep
                             number="05"
-                            title="Pick the 'Founder' Plan"
+                            title="Pick the &apos;Founder&apos; Plan"
                             icon={<CheckCircle2 className="text-emerald-400" />}
                         >
                             Find the middle card (the Founder plan) and click the button to select it. This is our most popular tier.
@@ -256,7 +256,7 @@ export default function FeaturesPage() {
                             title="Enter Test Card Details"
                             icon={<CreditCard className="text-brand" />}
                         >
-                            You'll be taken to a secure Stripe page. Do not use a real card! Use the number <strong>4242 4242 4242 4242</strong>.
+                            You&apos;ll be taken to a secure Stripe page. Do not use a real card! Use the number <strong>4242 4242 4242 4242</strong>.
                             <div className="mt-4 p-4 rounded-xl bg-white/5 border border-brand/20 flex flex-col gap-2">
                                 <div className="flex items-center justify-between">
                                     <span className="text-[10px] uppercase font-bold text-white/30">Visa Test Number</span>
@@ -285,7 +285,7 @@ export default function FeaturesPage() {
                             icon={<Layers className="text-brand-secondary" />}
                             image="/screenshots/step_08_dashboard.png"
                         >
-                            After payment, you'll be redirected back. You are now officially in the "Mirror" dashboard.
+                            After payment, you&apos;ll be redirected back. You are now officially in the &quot;Mirror&quot; dashboard.
                         </TestStep>
 
                         <TestStep
@@ -293,7 +293,7 @@ export default function FeaturesPage() {
                             title="Connect to QuickBooks"
                             icon={<Cpu className="text-brand" />}
                         >
-                            Click the big button that says <strong>"Sync with QuickBooks"</strong>. This links your financial data.
+                            Click the big button that says <strong>&quot;Sync with QuickBooks&quot;</strong>. This links your financial data.
                             <div className="mt-4 p-6 rounded-xl bg-brand/5 border border-brand/20 flex items-center justify-center gap-4">
                                 <img src="https://quickbooks.intuit.com/static/0724816c7fb4cc556a3108f9720f2694.svg" alt="QBO" className="h-6 invert opacity-50" />
                                 <ArrowRightCircle className="text-brand" />
@@ -328,15 +328,15 @@ export default function FeaturesPage() {
                             icon={<Eye className="text-brand-accent" />}
                             image="/screenshots/step_12_ai_card.png"
                         >
-                            Hover your mouse over the "Eye" or "Info" icon on a transaction. Read <em>why</em> the AI made its suggestion.
+                            Hover your mouse over the &quot;Eye&quot; or &quot;Info&quot; icon on a transaction. Read <em>why</em> the AI made its suggestion.
                         </TestStep>
 
                         <TestStep
                             number="13"
-                            title="Become the 'Final Boss'"
+                            title="Become the &apos;Final Boss&apos;"
                             icon={<Sparkles className="text-brand" />}
                         >
-                            When you see a suggestion that makes sense, click the <strong>Green Checkmark</strong> to "Agree."
+                            When you see a suggestion that makes sense, click the <strong>Green Checkmark</strong> to &quot;Agree.&quot;
                             <div className="mt-4 p-6 rounded-xl bg-brand/10 border border-brand/30 flex items-center justify-center">
                                 <div className="w-12 h-12 rounded-full bg-emerald-400 flex items-center justify-center text-black shadow-[0_0_20px_rgba(52,211,153,0.3)]">
                                     <CheckCircle2 size={32} />
@@ -349,7 +349,7 @@ export default function FeaturesPage() {
                             title="Master the Tag System"
                             icon={<Tags className="text-rose-400" />}
                         >
-                            Click the "Tag" icon to categorize expenses with granular precision. Select from 'Office', 'Travel', or 'Meals'.
+                            Click the &quot;Tag&quot; icon to categorize expenses with granular precision. Select from &apos;Office&apos;, &apos;Travel&apos;, or &apos;Meals&apos;.
                             <div className="mt-4 flex gap-2">
                                 <span className="px-3 py-1 rounded-full bg-brand/10 text-[10px] font-bold text-brand border border-brand/20">#Office</span>
                                 <span className="px-3 py-1 rounded-full bg-rose-500/10 text-[10px] font-bold text-rose-400 border border-rose-500/20">#Travel</span>
@@ -371,7 +371,7 @@ export default function FeaturesPage() {
                             title="Split a Transaction"
                             icon={<Split className="text-brand-accent" />}
                         >
-                            Have a receipt for both 'Meals' and 'Supplies'? Click the <strong>Split</strong> icon to divide the amount.
+                            Have a receipt for both &apos;Meals&apos; and &apos;Supplies&apos;? Click the <strong>Split</strong> icon to divide the amount.
                             <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
                                 <div className="flex justify-between text-[10px] text-white/60">
                                     <span>Total: <span className="text-white font-bold">$100.00</span></span>
@@ -388,7 +388,7 @@ export default function FeaturesPage() {
                             title="Receipt Mirroring"
                             icon={<ScanLine className="text-emerald-400" />}
                         >
-                            Upload a receipt image. Watch our engine "Mirror" it to the bank feed transaction automatically.
+                            Upload a receipt image. Watch our engine &quot;Mirror&quot; it to the bank feed transaction automatically.
                             <div className="mt-4 p-8 rounded-xl border border-dashed border-white/20 flex flex-col items-center justify-center text-white/30">
                                 <ScanLine size={24} className="mb-2 opacity-50" />
                                 <span className="text-[10px] uppercase font-bold">Drop Receipt Here</span>
@@ -413,7 +413,7 @@ export default function FeaturesPage() {
                             title="Verify Export Status"
                             icon={<Database className="text-brand" />}
                         >
-                            Check the "Exported" tab. Verify that your transactions have landed safely in your QBO Sandbox.
+                            Check the &quot;Exported&quot; tab. Verify that your transactions have landed safely in your QBO Sandbox.
                         </TestStep>
 
                         <TestStep
@@ -421,7 +421,7 @@ export default function FeaturesPage() {
                             title="Log Out Safely"
                             icon={<ArrowRightCircle className="text-white/20 rotate-180" />}
                         >
-                            Click your user profile icon and select <strong>Sign Out</strong>. You've completed the full Smart Autopilot loop!
+                            Click your user profile icon and select <strong>Sign Out</strong>. You&apos;ve completed the full Smart Autopilot loop!
                             <div className="mt-4 flex items-center justify-end">
                                 <div className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-white/40">
                                     Sign Out

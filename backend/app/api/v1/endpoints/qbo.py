@@ -20,7 +20,7 @@ def authorize(user_id: str):
         environment=settings.QBO_ENVIRONMENT,
     )
     scopes = [Scopes.ACCOUNTING]
-    auth_url = auth_client.get_authorization_url(scopes, state=user_id)
+    auth_url = auth_client.get_authorization_url(scopes, state_token=user_id)
     return {"auth_url": auth_url}
 
 @router.get("/callback")
