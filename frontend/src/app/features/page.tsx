@@ -207,18 +207,16 @@ export default function FeaturesPage() {
                             icon={<Zap className="text-brand" />}
                             image="/screenshots/step_01_hero.png"
                         >
-                            Start at the beginning. Go to the main website and enjoy the &quot;Magical Mirror&quot; animations.
+                            Start at the beginning. Go to the main website and enjoy the "Magical Mirror" animations.
                         </TestStep>
 
                         <TestStep
                             number="02"
                             title="Start Free Trial"
                             icon={<ArrowRightCircle className="text-brand-secondary" />}
+                            image="/screenshots/step_02_start_trial.png"
                         >
-                            Look for the bright button that says <strong>&quot;Start Free Trial&quot;</strong> in the center or top right and click it.
-                            <div className="mt-4 p-8 rounded-xl bg-brand/5 border border-brand/20 flex items-center justify-center">
-                                <button className="btn-primary px-6 py-2">Start Free Trial</button>
-                            </div>
+                            Look for the bright button that says <strong>"Start Free Trial"</strong> in the center or top right and click it.
                         </TestStep>
 
                         <TestStep
@@ -227,7 +225,7 @@ export default function FeaturesPage() {
                             icon={<UserCheck className="text-brand" />}
                             image="/screenshots/step_03_login.png"
                         >
-                            You&apos;ll see a secure Sign-Up box. Enter any email address and a password. This is handled safely by Clerk.
+                            You'll see a secure Sign-Up box. Enter any email address and a password. This is handled safely by Clerk.
                         </TestStep>
 
                         <TestStep
@@ -236,47 +234,34 @@ export default function FeaturesPage() {
                             icon={<BarChart3 className="text-brand-accent" />}
                             image="/screenshots/step_04_pricing.png"
                         >
-                            Once logged in, if you aren&apos;t already there, go to the <strong>Pricing</strong> page to see the plan options.
+                            Once logged in, if you aren't already there, go to the <strong>Pricing</strong> page to see the plan options.
                         </TestStep>
 
                         <TestStep
                             number="05"
-                            title="Pick the &apos;Founder&apos; Plan"
+                            title="Pick the 'Founder' Plan"
                             icon={<CheckCircle2 className="text-emerald-400" />}
+                            image="/screenshots/step_05_founder_plan.png"
                         >
                             Find the middle card (the Founder plan) and click the button to select it. This is our most popular tier.
-                            <div className="mt-4 p-6 rounded-xl bg-emerald-400/5 border border-emerald-400/20 flex flex-col items-center">
-                                <span className="text-xs uppercase font-bold text-emerald-400 mb-2">Recommended Plan</span>
-                                <div className="text-2xl font-black italic">$49/mo</div>
-                            </div>
                         </TestStep>
 
                         <TestStep
                             number="06"
                             title="Enter Test Card Details"
                             icon={<CreditCard className="text-brand" />}
+                            image="/screenshots/step_06_card_details.png"
                         >
-                            You&apos;ll be taken to a secure Stripe page. Do not use a real card! Use the number <strong>4242 4242 4242 4242</strong>.
-                            <div className="mt-4 p-4 rounded-xl bg-white/5 border border-brand/20 flex flex-col gap-2">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-[10px] uppercase font-bold text-white/30">Visa Test Number</span>
-                                    <span className="text-xs font-mono font-bold text-white">4242 4242 4242 4242</span>
-                                </div>
-                            </div>
+                            You'll be taken to a secure Stripe page. Use the test number <strong>4242 4242 4242 4242</strong> for a safe simulation.
                         </TestStep>
 
                         <TestStep
                             number="07"
                             title="Finish Payment Test"
                             icon={<ShieldCheck className="text-brand" />}
+                            image="/screenshots/step_07_payment_processing.png"
                         >
-                            Put in any future date (like 12/26) and any 3 numbers for the CVC. Click pay to simulate a real purchase.
-                            <div className="mt-4 flex items-center gap-4">
-                                <div className="flex-1 h-2 rounded-full bg-white/5 overflow-hidden">
-                                    <div className="w-full h-full bg-brand animate-pulse" />
-                                </div>
-                                <span className="text-[10px] font-bold text-brand uppercase">Processing...</span>
-                            </div>
+                            Put in any future date and 3 numbers for CVC. Click pay to experience the seamless transaction flow.
                         </TestStep>
 
                         <TestStep
@@ -285,32 +270,25 @@ export default function FeaturesPage() {
                             icon={<Layers className="text-brand-secondary" />}
                             image="/screenshots/step_08_dashboard.png"
                         >
-                            After payment, you&apos;ll be redirected back. You are now officially in the &quot;Mirror&quot; dashboard.
+                            After payment, you'll be redirected back. You are now officially in the "Mirror" dashboard.
                         </TestStep>
 
                         <TestStep
                             number="09"
                             title="Connect to QuickBooks"
                             icon={<Cpu className="text-brand" />}
+                            image="/screenshots/step_09_connect_qbo.png"
                         >
-                            Click the big button that says <strong>&quot;Sync with QuickBooks&quot;</strong>. This links your financial data.
-                            <div className="mt-4 p-6 rounded-xl bg-brand/5 border border-brand/20 flex items-center justify-center gap-4">
-                                <img src="https://quickbooks.intuit.com/static/0724816c7fb4cc556a3108f9720f2694.svg" alt="QBO" className="h-6 invert opacity-50" />
-                                <ArrowRightCircle className="text-brand" />
-                                <Sparkles className="text-brand" />
-                            </div>
+                            Click <strong>"Connect Securely"</strong> to link your QuickBooks Online account to the magical mirror.
                         </TestStep>
 
                         <TestStep
                             number="10"
                             title="Grant Secure Access"
                             icon={<Box className="text-emerald-400" />}
+                            image="/screenshots/step_10_grant_access.png"
                         >
-                            A QuickBooks login will pop up. Use your <strong>Sandbox Company</strong> credentials to authorize the connection.
-                            <div className="mt-4 p-4 rounded-xl bg-emerald-400/5 border border-emerald-400/20 flex items-center gap-3">
-                                <ShieldCheck className="text-emerald-400" size={20} />
-                                <span className="text-xs font-bold text-white/60">Connection Secure</span>
-                            </div>
+                            A QuickBooks login will appear. Use your Sandbox credentials to authorize the secure data bridge.
                         </TestStep>
 
                         <TestStep
@@ -328,105 +306,79 @@ export default function FeaturesPage() {
                             icon={<Eye className="text-brand-accent" />}
                             image="/screenshots/step_12_ai_card.png"
                         >
-                            Hover your mouse over the &quot;Eye&quot; or &quot;Info&quot; icon on a transaction. Read <em>why</em> the AI made its suggestion.
+                            Click the <strong>AI Insight</strong> icon to see the logic. "I categorized this because..." transparency is key.
                         </TestStep>
 
                         <TestStep
                             number="13"
-                            title="Become the &apos;Final Boss&apos;"
+                            title="Become the 'Final Boss'"
                             icon={<Sparkles className="text-brand" />}
+                            image="/screenshots/step_13_approval.png"
                         >
-                            When you see a suggestion that makes sense, click the <strong>Green Checkmark</strong> to &quot;Agree.&quot;
-                            <div className="mt-4 p-6 rounded-xl bg-brand/10 border border-brand/30 flex items-center justify-center">
-                                <div className="w-12 h-12 rounded-full bg-emerald-400 flex items-center justify-center text-black shadow-[0_0_20px_rgba(52,211,153,0.3)]">
-                                    <CheckCircle2 size={32} />
-                                </div>
-                            </div>
+                            When you see a suggestion that makes sense, click <strong>"Confirm Match"</strong> to finalize the entry.
                         </TestStep>
 
                         <TestStep
                             number="14"
                             title="Master the Tag System"
                             icon={<Tags className="text-rose-400" />}
+                            image="/screenshots/step_14_tags.png"
                         >
-                            Click the &quot;Tag&quot; icon to categorize expenses with granular precision. Select from &apos;Office&apos;, &apos;Travel&apos;, or &apos;Meals&apos;.
-                            <div className="mt-4 flex gap-2">
-                                <span className="px-3 py-1 rounded-full bg-brand/10 text-[10px] font-bold text-brand border border-brand/20">#Office</span>
-                                <span className="px-3 py-1 rounded-full bg-rose-500/10 text-[10px] font-bold text-rose-400 border border-rose-500/20">#Travel</span>
-                                <span className="px-3 py-1 rounded-full bg-amber-500/10 text-[10px] font-bold text-amber-500 border border-amber-500/20">#Meals</span>
-                            </div>
+                            Use the <strong>Tag</strong> icon to quickly organize transactions with custom labels for better tax reporting.
                         </TestStep>
 
                         <TestStep
                             number="15"
-                            title="Check Your Analytics"
+                            title="Advanced Analytics"
                             icon={<BarChart3 className="text-brand-secondary" />}
-                            image="/screenshots/step_14_analytics.png"
+                            image="/screenshots/step_15_analytics.png"
                         >
-                            Go to the <strong>Analytics</strong> page to see how your approved transactions are sorted into beautiful charts.
+                            Visit the <strong>Analytics</strong> tab to see your cash flow and spend distribution visualized in real-time.
                         </TestStep>
 
                         <TestStep
                             number="16"
                             title="Split a Transaction"
                             icon={<Split className="text-brand-accent" />}
+                            image="/screenshots/step_16_split.png"
                         >
-                            Have a receipt for both &apos;Meals&apos; and &apos;Supplies&apos;? Click the <strong>Split</strong> icon to divide the amount.
-                            <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
-                                <div className="flex justify-between text-[10px] text-white/60">
-                                    <span>Total: <span className="text-white font-bold">$100.00</span></span>
-                                </div>
-                                <div className="h-2 flex rounded-full overflow-hidden">
-                                    <div className="w-1/2 bg-brand" />
-                                    <div className="w-1/2 bg-rose-400" />
-                                </div>
-                            </div>
+                            For complex receipts, use the <strong>Split</strong> tool to allocate amounts across multiple categories perfectly.
                         </TestStep>
 
                         <TestStep
                             number="17"
                             title="Receipt Mirroring"
                             icon={<ScanLine className="text-emerald-400" />}
+                            image="/screenshots/step_17_receipt.png"
                         >
-                            Upload a receipt image. Watch our engine &quot;Mirror&quot; it to the bank feed transaction automatically.
-                            <div className="mt-4 p-8 rounded-xl border border-dashed border-white/20 flex flex-col items-center justify-center text-white/30">
-                                <ScanLine size={24} className="mb-2 opacity-50" />
-                                <span className="text-[10px] uppercase font-bold">Drop Receipt Here</span>
-                            </div>
+                            Upload or drop a receipt image. Our AI mirrors it to the corresponding bank entry in milliseconds.
                         </TestStep>
 
                         <TestStep
                             number="18"
-                            title="Feel the Pulse (Haptics)"
+                            title="Satisfying Haptics"
                             icon={<Vibrate className="text-brand-secondary" />}
+                            image="/screenshots/step_18_haptics.png"
                         >
-                            On mobile? Every successful approval sends a satisfying haptic vibration to confirm the action.
-                            <div className="mt-4 flex justify-center gap-1">
-                                <div className="w-1 h-6 bg-brand/40 rounded-full animate-bounce [animation-delay:0ms]" />
-                                <div className="w-1 h-8 bg-brand/80 rounded-full animate-bounce [animation-delay:100ms]" />
-                                <div className="w-1 h-6 bg-brand/40 rounded-full animate-bounce [animation-delay:200ms]" />
-                            </div>
+                            Experience physical confirmation on mobile. Every match sends a satisfying haptic pulse to your device.
                         </TestStep>
 
                         <TestStep
                             number="19"
                             title="Verify Export Status"
                             icon={<Database className="text-brand" />}
+                            image="/screenshots/step_19_export.png"
                         >
-                            Check the &quot;Exported&quot; tab. Verify that your transactions have landed safely in your QBO Sandbox.
+                            Once matched, check the <strong>"Exported to QBO"</strong> badge to confirm the data has safely landed in QuickBooks.
                         </TestStep>
 
                         <TestStep
                             number="20"
                             title="Log Out Safely"
                             icon={<ArrowRightCircle className="text-white/20 rotate-180" />}
+                            image="/screenshots/step_20_logout.png"
                         >
-                            Click your user profile icon and select <strong>Sign Out</strong>. You&apos;ve completed the full Smart Autopilot loop!
-                            <div className="mt-4 flex items-center justify-end">
-                                <div className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-white/40">
-                                    Sign Out
-                                </div>
-                            </div>
+                            Click your profile icon and <strong>Sign Out</strong>. You've completed the full Smart Autopilot financial loop!
                         </TestStep>
                     </div>
                 </section>

@@ -38,8 +38,18 @@ class TransactionSchema(BaseModel):
         from_attributes = True
 
 @router.get("/", response_model=List[TransactionSchema])
-def get_transactions(realm_id: str, db: Session = Depends(get_db)):
-    txs = db.query(Transaction).filter(Transaction.realm_id == realm_id).all()
+def get_transactions(
+    realm_id: str, 
+    account_ids: Optional[str] = Query(None, description="Comma-separated list of account IDs"),
+    db: Session = Depends(get_db)
+):
+    query = db.query(Transaction).filter(Transaction.realm_id == realm_id)
+    
+    if account_ids:
+        acc_id_list = account_ids.split(",")
+        query = query.filter(Transaction.account_id.in_(acc_id_list))
+        
+    txs = query.all()
     # Convert date to string for schema
     for tx in txs:
         tx.date = tx.date.strftime("%Y-%m-%d")

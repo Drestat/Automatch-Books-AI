@@ -1,7 +1,7 @@
 import google.generativeai as genai
 import json
 from app.core.config import settings
-from app.core.prompts import TRANSACTION_ANALYSIS_PROMPT, RECEIPT_ANALYSIS_PROMPT
+from app.core.prompts import TRANSACTION_ANALYSIS_PROMPT, RECEIPT_ANALYSIS_PROMPT, ANALYTICS_INSIGHTS_PROMPT
 from rapidfuzz import process, fuzz
 
 class AIAnalyzer:
@@ -64,3 +64,25 @@ class AIAnalyzer:
         except Exception as e:
             print(f"❌ AI Receipt Error: {str(e)}")
             raise ValueError("Could not parse receipt data from AI")
+
+    def generate_insights(self, events):
+        """
+        Analyzes user event logs to provide strategic insights.
+        """
+        if not self.model:
+            return {"error": "Gemini API Key missing"}
+
+        events_str = "\\n".join([
+            f"[{e.timestamp}] User:{e.user_id[:8]}.. Action:{e.event_name} Props:{e.properties}" 
+            for e in events
+        ])
+
+        prompt = ANALYTICS_INSIGHTS_PROMPT.format(events_str=events_str)
+        
+        try:
+            response = self.model.generate_content(prompt)
+            raw_text = response.text.replace('```json', '').replace('```', '').strip()
+            return json.loads(raw_text)
+        except Exception as e:
+            print(f"❌ AI Insights Error: {str(e)}")
+            return {"error": "Failed to generate insights"}

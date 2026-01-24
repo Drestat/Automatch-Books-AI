@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Check, Edit2, Info, ArrowUpRight, FilePlus } from 'lucide-react';
+import { Check, Edit2, Info, ArrowUpRight, FilePlus, Tags, Split as SplitIcon, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Split {
@@ -22,6 +22,11 @@ interface Transaction {
     is_split?: boolean;
     splits?: Split[];
     receipt_url?: string;
+    vendor_reasoning?: string;
+    category_reasoning?: string;
+    note_reasoning?: string;
+    is_exported?: boolean;
+    tags?: string[];
 }
 
 interface TransactionCardProps {
@@ -114,9 +119,10 @@ export default function TransactionCard({ tx, onAccept, onReceiptUpload }: Trans
                         </div>
                         <button
                             onClick={() => setShowReasoning(!showReasoning)}
-                            className="p-1 hover:bg-white/5 rounded-lg transition-colors text-white/20 hover:text-white/40 ml-4"
+                            className="p-1 hover:bg-white/5 rounded-lg transition-colors text-brand/80 hover:text-brand ml-4 flex items-center gap-1 group/info"
                             title="Toggle AI Reasoning"
                         >
+                            <span className="text-[10px] font-bold opacity-0 group-hover/info:opacity-100 transition-opacity whitespace-nowrap">AI Insight</span>
                             <Info size={16} />
                         </button>
                     </div>
@@ -130,8 +136,28 @@ export default function TransactionCard({ tx, onAccept, onReceiptUpload }: Trans
                                 transition={{ duration: 0.3, ease: 'easeInOut' }}
                                 className="overflow-hidden"
                             >
-                                <div className="mt-3 pt-3 border-t border-white/5 flex gap-2 items-start">
-                                    <p className="text-xs text-white/40 leading-relaxed italic">{tx.reasoning}</p>
+                                <div className="mt-3 pt-3 border-t border-white/5 flex flex-col gap-3">
+                                    {tx.vendor_reasoning && (
+                                        <div className="flex gap-2">
+                                            <span className="text-[10px] font-bold text-brand uppercase tracking-wider min-w-[60px] mt-0.5">Vendor</span>
+                                            <p className="text-xs text-white/60 leading-relaxed">{tx.vendor_reasoning}</p>
+                                        </div>
+                                    )}
+                                    {tx.category_reasoning && (
+                                        <div className="flex gap-2">
+                                            <span className="text-[10px] font-bold text-brand uppercase tracking-wider min-w-[60px] mt-0.5">Match</span>
+                                            <p className="text-xs text-white/60 leading-relaxed">{tx.category_reasoning}</p>
+                                        </div>
+                                    )}
+                                    {tx.note_reasoning && (
+                                        <div className="flex gap-2">
+                                            <span className="text-[10px] font-bold text-brand uppercase tracking-wider min-w-[60px] mt-0.5">Note</span>
+                                            <p className="text-xs text-white/60 leading-relaxed italic">"{tx.note_reasoning}"</p>
+                                        </div>
+                                    )}
+                                    {!tx.vendor_reasoning && !tx.category_reasoning && (
+                                        <p className="text-xs text-white/40 leading-relaxed italic">{tx.reasoning}</p>
+                                    )}
                                 </div>
                             </motion.div>
                         )}
@@ -173,10 +199,36 @@ export default function TransactionCard({ tx, onAccept, onReceiptUpload }: Trans
                     <motion.button
                         whileTap={{ scale: 0.95 }}
                         className="w-12 h-12 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center justify-center text-white/60 hover:text-white transition-all"
+                        title="Add Tags"
+                    >
+                        <Tags size={18} />
+                    </motion.button>
+
+                    <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        className="w-12 h-12 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center justify-center text-white/60 hover:text-white transition-all"
+                        title="Split Transaction"
+                    >
+                        <SplitIcon size={18} />
+                    </motion.button>
+
+                    <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        className="w-12 h-12 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center justify-center text-white/60 hover:text-white transition-all"
                     >
                         <Edit2 size={18} />
                     </motion.button>
                 </div>
+
+                {tx.is_exported && (
+                    <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-emerald-400">
+                            <CheckCircle2 size={14} />
+                            <span className="text-[10px] font-bold uppercase tracking-wider">Exported to QBO</span>
+                        </div>
+                        <ExternalLink size={12} className="text-white/20" />
+                    </div>
+                )}
             </div>
             <div className="h-1 w-full bg-gradient-to-r from-transparent via-brand/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>

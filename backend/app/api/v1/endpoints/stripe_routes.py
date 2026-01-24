@@ -84,6 +84,19 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None),
                  ts = session.get('subscription_data', {}).get('trial_end')
                  user.trial_ends_at = datetime.fromtimestamp(ts)
             
+            # Token Refill (Based on Tier)
+            # Hardcoded logic for now. Ideally fetched from price_id metadata.
+            if user.subscription_tier == 'pro':
+                user.monthly_token_allowance = 1000
+                user.token_balance = 1000
+            elif user.subscription_tier == 'business':
+                 user.monthly_token_allowance = 10000
+                 user.token_balance = 10000
+            else:
+                 user.monthly_token_allowance = 50
+                 user.token_balance = 50
+
+            
             db.add(user)
             db.commit()
             
@@ -96,6 +109,16 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None),
         user = db.query(User).filter(User.stripe_customer_id == customer_id).first()
         if user:
             user.subscription_status = sub.get('status') # active, past_due, canceled
+            
+            # Renewal Logic: If active, refill tokens
+            # Identify renewal by checking if billing period started recently? 
+            # Or simplified: if active, ensure balance is at least allowance.
+            if user.subscription_status == 'active':
+                  # In a robust system, we check invoice.payment_succeeded instead. 
+                  # But for MVP, if we get an update and it's active, let's just minimal check implementation.
+                  # Actually, let's leave renewal refill for 'invoice.payment_succeeded' event which we need to add.
+                  pass
+                  
             db.add(user)
             db.commit()
             

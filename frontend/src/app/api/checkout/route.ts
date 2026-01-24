@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import Stripe from 'stripe';
 
+// @ts-ignore - Some Stripe versions use custom identifiers
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2025-12-15.clover',
+    apiVersion: '2024-06-20' as any,
 });
 
 export async function POST(req: Request) {
@@ -12,14 +13,24 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { priceId, tierName } = await req.json();
+    const { tierName } = await req.json();
 
     try {
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [
                 {
-                    price: priceId,
+                    price_data: {
+                        currency: 'usd',
+                        product_data: {
+                            name: tierName || 'Founder Plan',
+                            description: 'AutoMatch Books AI Subscription',
+                        },
+                        unit_amount: tierName === 'Founder' ? 2900 : tierName === 'Empire' ? 7900 : 900,
+                        recurring: {
+                            interval: 'month',
+                        },
+                    },
                     quantity: 1,
                 },
             ],
