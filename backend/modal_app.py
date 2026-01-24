@@ -2,7 +2,8 @@ import modal
 from app.core.config import settings
 from app.db.session import SessionLocal
 from app.models.qbo import QBOConnection
-from app.services.sync_service import SyncService
+from app.services.transaction_service import TransactionService
+from app.services.analysis_service import AnalysisService
 
 # Define the image with necessary dependencies
 # Note: modal.Image.debian_slim() is a good default
@@ -41,7 +42,7 @@ def sync_user_data(realm_id: str):
             print(f"❌ No connection found for realm {realm_id}")
             return
         
-        sync_service = SyncService(db, connection)
+        sync_service = TransactionService(db, connection)
         print(f"🔄 Starting background sync for {realm_id}...")
         sync_service.sync_all()
         print(f"✅ Sync complete for {realm_id}")
@@ -58,9 +59,9 @@ def process_ai_categorization(realm_id: str, limit: int = 20, tx_id: str = None)
             print(f"❌ No connection found for realm {realm_id}")
             return
         
-        sync_service = SyncService(db, connection)
+        analysis_service = AnalysisService(db, connection.realm_id) # AnalysisService takes realm_id string, not connection obj
         print(f"🧠 Starting AI categorization for {realm_id} {'(specific ID: ' + tx_id + ')' if tx_id else ''}...")
-        results = sync_service.analyze_transactions(limit=limit, tx_id=tx_id)
+        results = analysis_service.analyze_transactions(limit=limit, tx_id=tx_id)
         print(f"✅ AI categorization complete for {realm_id}. Processed {len(results) if isinstance(results, list) else 0} TXs.")
     finally:
         db.close()
