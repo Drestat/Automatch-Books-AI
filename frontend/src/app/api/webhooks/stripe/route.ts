@@ -17,16 +17,19 @@ export async function POST(req: Request) {
 
     try {
         event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-    } catch (err: any) {
-        console.error(`Webhook signature verification failed: ${err.message}`);
-        return NextResponse.json({ error: err.message }, { status: 400 });
+    } catch (err: unknown) {
+        console.error(`Webhook signature verification failed: ${(err as Error).message}`);
+        return NextResponse.json({ error: (err as Error).message }, { status: 400 });
     }
 
-    const session = event.data.object as any;
+    const session = event.data.object as Stripe.Checkout.Session;
 
     // Handle specific events
     if (event.type === 'checkout.session.completed') {
-        const clerkId = session.metadata.clerkId;
+        const clerkId = session.metadata?.clerkId;
+        if (!clerkId) {
+            return NextResponse.json({ error: 'Missing clerkId' }, { status: 400 });
+        }
         const stripeCustomerId = session.customer as string;
         const subscriptionId = session.subscription as string;
 
@@ -56,7 +59,6 @@ export async function POST(req: Request) {
     }
 
     if (event.type === 'customer.subscription.deleted') {
-        const stripeCustomerId = session.customer as string;
 
         // We need to find the user by stripeCustomerId
         // In a real app, you'd probably have a search endpoint or local DB lookup

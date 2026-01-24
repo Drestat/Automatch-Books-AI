@@ -1,25 +1,18 @@
 "use client";
 
 import React from 'react';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
     Check,
     Sparkles,
-    Shield,
     Zap,
     Crown,
     ArrowRight
 } from 'lucide-react';
-import { Metadata } from 'next';
+import Footer from '@/components/Footer';
 
-export const metadata: Metadata = {
-    title: "Pricing | AutoMatch Books AI",
-    description: "Flexible pricing tiers for businesses of all sizes. Start your 14-day free trial of AI-powered QuickBooks automation today.",
-    alternates: {
-        canonical: '/pricing',
-    }
-};
+
+
 
 const TIERS = [
     {
@@ -76,10 +69,8 @@ const TIERS = [
 ];
 
 export default function PricingPage() {
-    const [loading, setLoading] = React.useState<string | null>(null);
 
     const handleCheckout = async (tierName: string, priceId: string) => {
-        setLoading(tierName);
         try {
             const res = await fetch('/api/checkout', {
                 method: 'POST',
@@ -88,12 +79,10 @@ export default function PricingPage() {
             });
             const data = await res.json();
             if (data.url) {
-                window.location.href = data.url;
+                window.location.assign(data.url);
             }
         } catch (error) {
             console.error('Checkout error:', error);
-        } finally {
-            setLoading(null);
         }
     };
 
@@ -179,18 +168,8 @@ export default function PricingPage() {
                         </motion.div>
                     ))}
                 </div>
-
-                <div className="mt-24 text-center border-t border-white/5 pt-12">
-                    <h4 className="text-lg font-bold mb-4">Enterprise Customization</h4>
-                    <p className="text-white/40 max-w-2xl mx-auto mb-8">
-                        Need on-premise deployment, custom Data Retention policies, or SSO?
-                        We offer bespoke engineering solutions for heavy-compliance industries.
-                    </p>
-                    <a href="mailto:sales@easymirror.app" className="text-brand font-bold hover:underline">
-                        Contact Enterprise Sales
-                    </a>
-                </div>
             </div>
+            <Footer />
         </div>
     );
 }

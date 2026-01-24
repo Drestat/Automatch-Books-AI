@@ -4,6 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Sparkles, ShieldCheck, Zap, ArrowRight, CheckCircle } from 'lucide-react';
+import { SignedIn, SignedOut } from '@clerk/nextjs';
+import Footer from '@/components/Footer';
 
 export default function LandingPage() {
     return (
@@ -44,20 +46,27 @@ export default function LandingPage() {
             />
             {/* Navigation */}
             <nav className="fixed top-0 w-full z-50 bg-black/50 backdrop-blur-xl border-b border-white/5">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center shrink-0">
                             <Sparkles className="text-white" size={16} />
                         </div>
-                        <span className="font-bold tracking-tight text-lg">AutoMatch Books AI</span>
+                        <span className="font-bold tracking-tight text-base sm:text-lg whitespace-nowrap">AutoMatch Books AI</span>
                     </div>
-                    <div className="flex items-center gap-6">
-                        <Link href="/dashboard" className="text-sm font-bold text-white/60 hover:text-white transition-colors">
-                            Log In
-                        </Link>
-                        <Link href="/sign-up" className="btn-primary px-6 py-2.5 text-sm">
-                            Start Free Trial
-                        </Link>
+                    <div className="flex items-center gap-3 sm:gap-6">
+                        <SignedOut>
+                            <Link href="/dashboard" className="text-xs sm:text-sm font-bold text-white/60 hover:text-white transition-colors">
+                                Log In
+                            </Link>
+                            <Link href="/sign-up" className="btn-primary px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm">
+                                Try Free
+                            </Link>
+                        </SignedOut>
+                        <SignedIn>
+                            <Link href="/dashboard" className="text-xs sm:text-sm font-bold text-brand hover:text-brand/80 transition-colors">
+                                Go to Dashboard
+                            </Link>
+                        </SignedIn>
                     </div>
                 </div>
             </nav>
@@ -75,12 +84,11 @@ export default function LandingPage() {
                             <span className="text-xs font-bold tracking-wider uppercase text-brand">AI-Powered Accountability</span>
                         </div>
                         <h1 className="text-[clamp(3rem,8vw,6rem)] font-black tracking-tight leading-[1.1] mb-6">
-                            Accounting on <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Autopilot.</span>
+                            Your Books, on <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Smart Autopilot.</span>
                         </h1>
                         <p className="text-lg md:text-xl text-white/40 max-w-2xl mx-auto mb-10 leading-relaxed">
-                            Stop categorizing transactions manually. AutoMatch Books AI uses Gemini 1.5 Pro to
-                            match your bank feed to QuickBooks with 94% accuracy.
+                            Stop categorizing transactions manually. AutoMatch is the **human-in-the-loop** financial layer that business owners desperately need. Auditable intelligence, not just automation.
                         </p>
                         <div className="flex flex-col md:flex-row items-center justify-center gap-4">
                             <Link href="/sign-up" className="btn-primary px-8 py-4 text-lg w-full md:w-auto flex items-center justify-center gap-3 group">
@@ -118,9 +126,9 @@ export default function LandingPage() {
                         </div>
                         <div className="glass-panel p-8">
                             <Sparkles className="text-brand-secondary mb-6" size={40} />
-                            <h3 className="text-xl font-bold mb-3">Reasoning Narratives</h3>
-                            <p className="text-white/40 leading-relaxed">
-                                Hover over any match to see *why* the AI chose it. Build trust with every transaction.
+                            <h3 className="text-xl font-bold mb-3">Auditable Intelligence</h3>
+                            <p className="text-white/40 leading-relaxed text-sm">
+                                Most AI tools are "black boxes." Our AI explains every transaction before you click **"Agree."** You are the final boss who validates the logic.
                             </p>
                         </div>
                     </div>
@@ -146,9 +154,7 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            <footer className="py-12 px-6 border-t border-white/5 text-center text-white/20 text-sm">
-                <p>&copy; 2026 AutoMatch Books AI Engine. All rights reserved.</p>
-            </footer>
+            <Footer />
         </div>
     );
 }

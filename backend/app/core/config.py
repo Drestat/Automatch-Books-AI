@@ -13,11 +13,15 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "localhost")
     DATABASE_URL: str = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}"
 
+    # Security
+    BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3001"]
+
     # QuickBooks Settings (Shared across SaaS)
     QBO_CLIENT_ID: str = os.getenv("QBO_CLIENT_ID", "")
     QBO_CLIENT_SECRET: str = os.getenv("QBO_CLIENT_SECRET", "")
     QBO_REDIRECT_URI: str = os.getenv("QBO_REDIRECT_URI", "http://localhost:3000/callback")
     QBO_ENVIRONMENT: str = os.getenv("QBO_ENVIRONMENT", "sandbox")
+    QBO_WEBHOOK_VERIFIER: str = os.getenv("QBO_WEBHOOK_VERIFIER", "")
 
     # AI Settings
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")

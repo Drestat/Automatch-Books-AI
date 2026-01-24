@@ -1,8 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-const isProtectedRoute = createRouteMatcher(['/dashboard(.*)']);
-const isPublicRoute = createRouteMatcher(['/pricing', '/', '/api/webhooks(.*)']);
+const isProtectedRoute = createRouteMatcher(['/dashboard(.*)', '/analytics(.*)']);
 
 export default clerkMiddleware(async (auth, req) => {
     // Protect dashboard routes
@@ -11,7 +10,9 @@ export default clerkMiddleware(async (auth, req) => {
 
         const { sessionClaims } = await auth();
         const status = sessionClaims?.metadata?.subscription_status;
-        if (status !== 'active' && status !== 'trialing') {
+
+        // Allow access if status is missing (new user) or if active/trialing
+        if (status && status !== 'active' && status !== 'trialing') {
             return NextResponse.redirect(new URL('/pricing', req.url));
         }
     }

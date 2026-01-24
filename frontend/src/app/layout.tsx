@@ -15,12 +15,12 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "AutoMatch Books AI | AI-Powered QuickBooks Automation",
-  description: "Seamlessly match and sync your bank transactions with QuickBooks Online using Gemini 1.5 Pro. Next-generation financial intelligence for modern businesses.",
-  keywords: ["QuickBooks", "Bank Transactions", "AI Matching", "AutoMatch Books AI", "Financial Automation", "Gemini 1.5 Pro"],
+  description: "Seamlessly match and sync your bank transactions with QuickBooks Online using Gemini 3 Flash. Next-generation financial intelligence for modern businesses.",
+  keywords: ["QuickBooks", "Bank Transactions", "AI Matching", "AutoMatch Books AI", "Financial Automation", "Gemini 3 Flash"],
   authors: [{ name: "Andres" }],
   openGraph: {
     title: "AutoMatch Books AI | AI-Powered QuickBooks Automation",
-    description: "Seamlessly match and sync your bank transactions with QuickBooks Online using Gemini 1.5 Pro.",
+    description: "Seamlessly match and sync your bank transactions with QuickBooks Online using Gemini 3 Flash.",
     url: "https://automatchbooks.ai",
     siteName: "AutoMatch Books AI",
     images: [
@@ -44,7 +44,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/',
   },
+  icons: {
+    icon: '/icon.png',
+    apple: '/icon.png',
+  },
 };
+
+import { ToastProvider } from "@/context/ToastContext";
 
 export default function RootLayout({
   children,
@@ -57,7 +63,9 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          {children}
+          <ToastProvider>
+            {children}
+          </ToastProvider>
         </body>
       </html>
     </ClerkProvider>

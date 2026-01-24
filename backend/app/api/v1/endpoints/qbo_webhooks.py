@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Header, HTTPException
+from fastapi import APIRouter, Request, Header, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.api.v1.endpoints.qbo import get_db
 import hashlib
@@ -24,10 +24,14 @@ async def qbo_webhook(
     data = await request.json()
     
     # Foundation: Signature verification (Production Ready)
-    # verifier = hmac.new(settings.QBO_WEBHOOK_VERIFIER.encode(), payload, hashlib.sha256)
-    # digest = base64.b64encode(verifier.digest()).decode()
-    # if digest != intuit_signature:
-    #     raise HTTPException(status_code=401, detail="Invalid signature")
+    # Foundation: Signature verification (Production Ready)
+    if not intuit_signature:
+        raise HTTPException(status_code=401, detail="Missing encoded signature")
+        
+    verifier = hmac.new(settings.QBO_WEBHOOK_VERIFIER.encode(), payload, hashlib.sha256)
+    digest = base64.b64encode(verifier.digest()).decode()
+    if digest != intuit_signature:
+        raise HTTPException(status_code=401, detail="Invalid signature")
 
     for notification in data.get("eventNotifications", []):
         realm_id = notification.get("realmId")
@@ -47,4 +51,3 @@ async def qbo_webhook(
 
     return {"status": "accepted"}
 
-from fastapi import Depends

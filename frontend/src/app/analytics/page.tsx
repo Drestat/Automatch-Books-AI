@@ -10,15 +10,8 @@ import { TrendingUp, PieChart, Calendar, ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import { UserButton } from "@clerk/nextjs";
 import { useAnalytics } from '@/hooks/useAnalytics';
-import { Metadata } from 'next';
+import Footer from '@/components/Footer';
 
-export const metadata: Metadata = {
-    title: "Analytics | Financial Insights",
-    robots: {
-        index: false,
-        follow: false,
-    }
-};
 
 export default function AnalyticsPage() {
     const { spendTrend, categoryData, kpi, loading } = useAnalytics();
@@ -126,6 +119,7 @@ export default function AnalyticsPage() {
                 </BentoTile>
 
             </BentoGrid>
+            <Footer />
         </div>
     );
 }

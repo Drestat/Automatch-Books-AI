@@ -33,8 +33,8 @@ export async function POST(req: Request) {
         });
 
         return NextResponse.json({ url: session.url });
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error('Error creating checkout session:', err);
-        return NextResponse.json({ error: err.message }, { status: 500 });
+        return NextResponse.json({ error: (err as Error).message }, { status: 500 });
     }
 }

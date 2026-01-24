@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
+// ... existing imports ...
 import TransactionCard from '@/components/TransactionCard';
 import { BentoGrid } from '@/components/BentoGrid';
 import { BentoTile } from '@/components/BentoTile';
 import { useQBO } from '@/hooks/useQBO';
 import {
-  TrendingUp,
   ShieldCheck,
   Zap,
   Clock,
@@ -18,70 +18,102 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserButton } from "@clerk/nextjs";
 
-export default function Home() {
-  const [approvedCount, setApprovedCount] = useState(0);
-  const { isConnected, loading, transactions, connect, sync, approveMatch, uploadReceipt } = useQBO();
+function DashboardContent() {
+  const {
+    isConnected,
+    loading: qboLoading,
+    transactions,
+    connect,
+    sync,
+    approveMatch,
+    bulkApprove,
+    uploadReceipt,
+    user
+  } = useQBO();
 
-  const handleAccept = async (id: string) => {
-    const success = await approveMatch(id);
-    if (success) {
-      setApprovedCount(prev => prev + 1);
+  const [loading, setLoading] = useState(false); // Local loading for UI actions
+
+  // ... handleAccept, handleReceiptUpload, handleBulkApprove same as before ...
+  const handleAccept = async (txId: string) => {
+    setLoading(true);
+    await approveMatch(txId);
+    setLoading(false);
+  };
+
+  const handleReceiptUpload = async (txId: string, file: File) => {
+    await uploadReceipt(txId, file);
+  };
+
+  const handleBulkApprove = async () => {
+    const highConfidence = transactions.filter(tx => tx.confidence > 0.9 && tx.status !== 'approved').map(tx => tx.id);
+    if (highConfidence.length > 0) {
+      setLoading(true);
+      await bulkApprove(highConfidence);
+      setLoading(false);
     }
   };
 
-  const handleReceiptUpload = async (id: string, file: File) => {
-    await uploadReceipt(id, file);
-  };
+  const approvedCount = transactions.filter(tx => tx.status === 'approved').length;
 
-  if (!isConnected && !loading) {
+  if (!isConnected) {
+    // ... existing Connect UI ...
     return (
-      <div className="min-h-screen py-12 px-6 lg:px-12 max-w-7xl mx-auto flex flex-col items-center justify-center text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-panel p-12 max-w-2xl w-full border-brand/20 relative overflow-hidden"
-        >
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand via-brand-secondary to-brand" />
-          <div className="w-20 h-20 rounded-3xl bg-brand/10 text-brand flex items-center justify-center mx-auto mb-8">
-            <Zap size={40} />
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full bg-grid-white/[0.02] -z-10" />
+        <div className="w-full max-w-md space-y-8 relative z-10">
+          <div className="text-center space-y-4">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="w-20 h-20 bg-brand/10 rounded-3xl flex items-center justify-center mx-auto ring-1 ring-brand/20 shadow-2xl shadow-brand/20"
+            >
+              <Lock size={32} className="text-brand" />
+            </motion.div>
+            <h1 className="text-4xl font-black tracking-tight">Connect QBO</h1>
+            <p className="text-white/40 text-lg">
+              Link your QuickBooks Online account to unlock the magical mirror.
+            </p>
           </div>
-          <h1 className="text-4xl font-black tracking-tight mb-4">Connect QuickBooks</h1>
-          <p className="text-white/40 text-lg mb-8 leading-relaxed">
-            To start the magic, we need access to your QuickBooks Online transaction feed.
-            We use a secure, read-only connection to mirror your data locally.
-          </p>
-          <button
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={connect}
-            className="btn-primary w-full py-4 text-lg flex items-center justify-center gap-3 group"
+            disabled={qboLoading}
+            className="w-full btn-primary py-4 text-lg font-bold flex items-center justify-center gap-3 group relative overflow-hidden"
           >
-            <Lock size={20} />
-            Secure Connect
-            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-          </button>
-          <p className="mt-6 text-xs text-white/20 flex items-center justify-center gap-2">
-            <ShieldCheck size={14} />
-            Bank-Grade Encryption • Read-Only Access
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+            {qboLoading ? (
+              <div className="w-6 h-6 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <>
+                Connect Securely
+                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
+          </motion.button>
+
+          <p className="text-center text-xs text-white/20 font-medium">
+            Uses bank-grade 256-bit encryption.
           </p>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-12 px-6 lg:px-12 max-w-7xl mx-auto">
-      <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
+    <div className="min-h-screen bg-black text-white selection:bg-brand selection:text-white pb-20">
+      <header className="pt-12 pb-8 px-6 md:px-12 max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
         >
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center">
-              <Sparkles className="text-white" size={16} />
-            </div>
-            <span className="text-sm font-bold tracking-[0.3em] uppercase text-brand">Mirror Sync Active</span>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-2 h-2 rounded-full bg-brand animate-pulse" />
+            <span className="text-xs font-bold tracking-[0.2em] text-brand uppercase">Live Sync Active</span>
           </div>
-          <h1 className="text-[clamp(2.5rem,8vw,4rem)] font-black tracking-tight mb-4 leading-[1.1]">
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">
             Financial <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Intelligence</span>
           </h1>
           <p className="text-white/40 text-base md:text-lg max-w-md">
@@ -95,7 +127,11 @@ export default function Home() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="flex flex-wrap gap-4 items-center"
         >
-          <button className="btn-glass px-6 py-4 flex items-center gap-3 group border-brand/30 hover:bg-brand/10">
+          <button
+            onClick={handleBulkApprove}
+            disabled={loading || transactions.filter(tx => tx.confidence > 0.9 && tx.status !== 'approved').length === 0}
+            className="btn-glass px-6 py-4 flex items-center gap-3 group border-brand/30 hover:bg-brand/10 disabled:opacity-50"
+          >
             <ShieldCheck size={20} className="text-brand" />
             <div className="text-left">
               <span className="block text-[10px] uppercase tracking-wider font-bold text-brand">Bulk Action</span>
@@ -130,7 +166,7 @@ export default function Home() {
                 <ShieldCheck className="text-brand mb-4" size={32} />
                 <h3 className="text-xl font-bold mb-2">Automated Accuracy</h3>
                 <p className="text-sm text-white/50 leading-relaxed">
-                  Gemini 1.5 Pro is currently maintaining a <span className="text-brand font-bold">94.2%</span> accuracy rate across your vendor history.
+                  Gemini 3 Flash is currently maintaining a <span className="text-brand font-bold">94.2%</span> accuracy rate across your vendor history.
                 </p>
               </div>
               <div className="mt-8">
@@ -224,7 +260,7 @@ export default function Home() {
                     <ShieldCheck size={40} />
                   </div>
                   <h3 className="text-2xl font-bold mb-2">All Caught Up!</h3>
-                  <p className="text-white/40">You've cleared all pending transactions for today.</p>
+                  <p className="text-white/40">You&apos;ve cleared all pending transactions for today.</p>
                 </motion.div>
               )}
             </div>
@@ -237,8 +273,17 @@ export default function Home() {
           <Sparkles className="text-brand animate-pulse" size={16} />
           <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
         </div>
-        <p className="text-white/20 text-xs">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 1.5 Pro.</p>
+        <p className="text-white/20 text-xs">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash.</p>
       </footer>
     </div>
   );
 }
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black" />}>
+      <DashboardContent />
+    </Suspense>
+  );
+}
+

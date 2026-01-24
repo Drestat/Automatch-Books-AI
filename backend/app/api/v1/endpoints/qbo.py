@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from app.db.session import get_db
-from app.models.qbo import QBOConnection, User
+from app.models.qbo import QBOConnection
+from app.models.user import User
 from app.core.config import settings
 from intuitlib.client import AuthClient
 from intuitlib.enums import Scopes

@@ -1,29 +1,54 @@
-import { useState, useEffect } from 'react';
+"use client";
 
-export function useAnalytics() {
-    const [spendTrend, setSpendTrend] = useState<any[]>([]);
-    const [categoryData, setCategoryData] = useState<any[]>([]);
-    const [kpi, setKpi] = useState({
+import { useState, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
+
+interface SpendTrendItem {
+    name: string;
+    income: number;
+    expense: number;
+}
+
+interface CategoryDataItem {
+    name: string;
+    value: number;
+    color: string;
+}
+
+interface KPI {
+    totalSpend: number;
+    totalIncome: number;
+    netFlow: number;
+}
+
+export const useAnalytics = () => {
+    const [loading, setLoading] = useState(true);
+    const [spendTrend, setSpendTrend] = useState<SpendTrendItem[]>([]);
+    const [categoryData, setCategoryData] = useState<CategoryDataItem[]>([]);
+    const [kpi, setKpi] = useState<KPI>({
         totalSpend: 0,
         totalIncome: 0,
         netFlow: 0
     });
-    const [loading, setLoading] = useState(true);
+
+    const { user, isLoaded } = useUser();
+    const API_BASE_URL = 'http://localhost:8000/api/v1';
 
     useEffect(() => {
         const fetchAnalytics = async () => {
-            try {
-                // In a real app, get token from AuthContext
-                const userId = localStorage.getItem('user_id');
-                const headers: any = {};
-                if (userId) headers['X-User-Id'] = userId;
+            if (!isLoaded || !user) return;
 
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/analytics`, {
-                    headers
-                });
+            try {
+                // In a real app we'd pass an auth token, but for now we rely on the backend finding the connection via user_id
+                const headers = { 'X-User-Id': user.id };
+                const res = await fetch(`${API_BASE_URL}/analytics`, { headers });
 
                 if (res.ok) {
                     const data = await res.json();
+                    if (data.error) {
+                        console.error('Analytics Error:', data.error);
+                        return;
+                    }
                     setSpendTrend(data.trend || []);
                     setCategoryData(data.categories || []);
                     setKpi(data.kpi || { totalSpend: 0, totalIncome: 0, netFlow: 0 });
@@ -36,7 +61,12 @@ export function useAnalytics() {
         };
 
         fetchAnalytics();
-    }, []);
+    }, [isLoaded, user]);
 
-    return { spendTrend, categoryData, kpi, loading };
-}
+    return {
+        spendTrend,
+        categoryData,
+        kpi,
+        loading
+    };
+};

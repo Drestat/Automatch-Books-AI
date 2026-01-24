@@ -72,3 +72,14 @@ class TransactionSplit(Base):
     description = Column(String)
     
     transaction = relationship("Transaction", back_populates="splits")
+
+class SyncLog(Base):
+    __tablename__ = "sync_logs"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    realm_id = Column(String, ForeignKey("qbo_connections.realm_id", ondelete="CASCADE"), index=True)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    entity_type = Column(String) # transactions, categories, customers
+    operation = Column(String) # sync, ai_analysis, receipt_match
+    count = Column(Numeric, default=0)
+    status = Column(String) # success, partial_failure, error
+    details = Column(JSON, nullable=True)

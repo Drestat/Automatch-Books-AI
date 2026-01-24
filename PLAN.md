@@ -110,3 +110,17 @@ graph TD
   - `< 0.5`: Mark as "Needs Review" (Yellow/Red).
 - **Explainability**: Every AI suggestion must include a "reasoning narrative" explaining the "Why".
 - **Batching**: Process up to 20 TXs per request.
+
+---
+
+## 5. Technical Debt & optimization Log
+### Critical (Must Fix)
+- [x] **Security**: `backend/app/main.py` has `allow_origins=["*"]`. This must be restricted to frontend domains.
+- [x] **Dead Code**: `backend/app/services/ai_service.py` is unused and redundant.
+- [x] **Hardcoded Prompts**: LLM prompts are buried in `sync_service.py`. Extract to `app/core/prompts.py`.
+- [x] **Type Safety**: Frontend has distinct `any` types that violate strict mode.
+- [x] **Performance**: `sync_service.py` does not use `requests.Session()` for connection pooling.
+
+### Maintenance
+- [ ] **Refactor**: `SyncService` is becoming a "God Class". Logic for Receipts, Sync, and AI should fundamentally be separated.
+

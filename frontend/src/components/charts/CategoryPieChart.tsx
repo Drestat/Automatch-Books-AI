@@ -5,7 +5,15 @@ import { CustomTooltip } from './CustomTooltip';
 
 const COLORS = ['#0070f3', '#7928ca', '#f5a623', '#10b981', '#ef4444'];
 
-export const CategoryPieChart = ({ data }: { data: any[] }) => {
+interface CategoryPieChartProps {
+    data: {
+        name: string;
+        value: number;
+        color?: string;
+    }[];
+}
+
+export const CategoryPieChart = ({ data }: CategoryPieChartProps) => {
     return (
         <div className="h-[300px] w-full relative">
             <ResponsiveContainer width="100%" height="100%">

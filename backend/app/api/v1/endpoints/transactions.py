@@ -126,3 +126,13 @@ def upload_receipt(
         "extracted": result.get('extracted'),
         "match_id": match.id if match else None
     }
+
+@router.post("/bulk-approve")
+def bulk_approve_transactions(realm_id: str, tx_ids: List[str], db: Session = Depends(get_db)):
+    connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
+    if not connection:
+        raise HTTPException(status_code=404, detail="QBO Connection not found")
+    
+    sync_service = SyncService(db, connection)
+    results = sync_service.bulk_approve(tx_ids)
+    return {"results": results}

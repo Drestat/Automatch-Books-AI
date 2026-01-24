@@ -5,13 +5,16 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 import google.generativeai as genai
 from rapidfuzz import process, fuzz
-from app.models.qbo import Transaction, QBOConnection, Category, Customer
+from app.models.qbo import Transaction, QBOConnection, Category, Customer, SyncLog
 from app.core.config import settings
+from app.core.prompts import TRANSACTION_ANALYSIS_PROMPT, RECEIPT_ANALYSIS_PROMPT
+from intuitlib.client import AuthClient
 
 class SyncService:
     def __init__(self, db: Session, qbo_connection: QBOConnection):
         self.db = db
         self.connection = qbo_connection
+        self.session = requests.Session()
         self.auth_client = AuthClient(
             client_id=settings.QBO_CLIENT_ID,
             client_secret=settings.QBO_CLIENT_SECRET,
@@ -25,6 +28,18 @@ class SyncService:
             self.model = genai.GenerativeModel(settings.GEMINI_MODEL)
         else:
             self.model = None
+
+    def _log(self, operation: str, entity_type: str, count: int, status: str, details: dict = None):
+        log = SyncLog(
+            realm_id=self.connection.realm_id,
+            operation=operation,
+            entity_type=entity_type,
+            count=count,
+            status=status,
+            details=details
+        )
+        self.db.add(log)
+        self.db.commit()
 
     def sync_all(self):
         """Syncs all entities for the current connection"""
@@ -49,6 +64,7 @@ class SyncService:
         Unified QBO request handler with:
         - Auto-refresh for 401 Unauthorized
         - Exponential backoff for 429 Rate Limits
+        - Session reuse for performance
         """
         url = self._get_api_url(endpoint)
         headers = {
@@ -61,7 +77,8 @@ class SyncService:
         backoff_factor = 2
         
         for attempt in range(max_retries):
-            res = requests.request(method, url, headers=headers, params=params, json=json_payload)
+            # Use self.session for connection pooling
+            res = self.session.request(method, url, headers=headers, params=params, json=json_payload)
             
             if res.status_code == 401:
                 token = self._refresh_access_token()
@@ -96,6 +113,7 @@ class SyncService:
             tx.raw_json = p
             self.db.add(tx)
         self.db.commit()
+        self._log("sync", "transaction", len(purchases), "success")
 
     def sync_categories(self):
         data = self._query_qbo("SELECT * FROM Account WHERE AccountType = 'Expense'")
@@ -108,6 +126,7 @@ class SyncService:
             cat.type = a["AccountType"]
             self.db.add(cat)
         self.db.commit()
+        self._log("sync", "category", len(accounts), "success")
 
     def sync_customers(self):
         data = self._query_qbo("SELECT * FROM Customer")
@@ -120,6 +139,7 @@ class SyncService:
             cust.fully_qualified_name = c["FullyQualifiedName"]
             self.db.add(cust)
         self.db.commit()
+        self._log("sync", "customer", len(customers), "success")
 
     def get_ai_context(self):
         """Fetches categories and customers for AI context"""
@@ -251,41 +271,11 @@ class SyncService:
             for desc, cat in history_list
         ])
 
-        prompt = f"""
-        Role: Senior Accountant AI for QuickBooks.
-        Goal: Categorize bank transactions using the standard Chart of Accounts.
-        
-        Available Categories:
-        {', '.join(category_list)}
-        
-        Historic Patterns (For Context):
-        {history_str}
-        
-        Transactions to Process:
-        {tx_list_str}
-        
-        Rules:
-        1. Select the MOST specific category from the list above.
-        2. reasoning: Brief, high-signal explanation (e.g. "Typical recurring SaaS pattern" or "Utility bill match"). Max 12 words.
-        3. confidence: 0.0 to 1.0 based on how sure you are.
-        
-        Output MUST be a valid JSON list of objects:
-        [
-            {
-                "id": "...", 
-                "suggested_category": "...", 
-                "reasoning": "...", 
-                "confidence": 0.0,
-                "splits": [
-                    {"category": "...", "amount": 0.0, "description": "..."}
-                ]
-            }
-        ]
-        
-        Rule: If a transaction likely covers multiple categories (Amazon, Target, etc.), use the 'splits' array. 
-        If splits are provided, the sum of split amounts MUST equal the transaction total.
-        Otherwise, only 'suggested_category' is needed.
-        """
+        prompt = TRANSACTION_ANALYSIS_PROMPT.format(
+            category_list=', '.join(category_list),
+            history_str=history_str,
+            tx_list_str=tx_list_str
+        )
         
         try:
             response = self.model.generate_content(prompt)
@@ -350,6 +340,7 @@ class SyncService:
                     print(f"⚠️ No analysis returned for TX {tx.id}")
             
             self.db.commit()
+            self._log("ai_analysis", "transaction", len(results), "success")
             return results
         except Exception as e:
             print(f"❌ Batch AI Error: {str(e)}")
@@ -410,27 +401,31 @@ class SyncService:
         self.db.add(tx)
         self.db.commit()
         
+        self._log("approve", "transaction", 1, "success", {"tx_id": tx_id})
         return res_data
+
+    def bulk_approve(self, tx_ids: list[str]):
+        """Approves multiple transactions in a batch"""
+        results = []
+        for tx_id in tx_ids:
+            try:
+                res = self.approve_transaction(tx_id)
+                results.append({"id": tx_id, "status": "success"})
+            except Exception as e:
+                results.append({"id": tx_id, "status": "error", "message": str(e)})
+        
+        success_count = len([r for r in results if r["status"] == "success"])
+        self._log("bulk_approve", "transaction", success_count, "partial" if success_count < len(tx_ids) else "success", {"results": results})
+        return results
 
     def process_receipt(self, file_content: bytes, filename: str):
         """
         Uses Gemini Vision to read a receipt and find the best transaction match.
         """
         # 1. Identify Receipt Content
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel(settings.GEMINI_MODEL)
         
-        prompt = """
-        Analyze this receipt image. 
-        Extract: 
-        1. Merchant Name
-        2. Date (YYYY-MM-DD)
-        3. Total Amount
-        4. Currency
-        5. Items (JSON list)
-        
-        Return JSON ONLY:
-        {"merchant": "...", "date": "...", "total": 0.0, "currency": "...", "items": [...]}
-        """
+        prompt = RECEIPT_ANALYSIS_PROMPT
         
         # Prepare for Gemini
         vision_result = model.generate_content([

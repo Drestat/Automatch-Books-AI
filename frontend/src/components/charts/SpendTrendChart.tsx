@@ -3,7 +3,15 @@
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { CustomTooltip } from './CustomTooltip';
 
-export const SpendTrendChart = ({ data }: { data: any[] }) => {
+interface SpendTrendChartProps {
+    data: {
+        name: string;
+        income: number;
+        expense: number;
+    }[];
+}
+
+export const SpendTrendChart = ({ data }: SpendTrendChartProps) => {
     return (
         <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
