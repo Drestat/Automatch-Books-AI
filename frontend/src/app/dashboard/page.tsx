@@ -160,7 +160,7 @@ function DashboardContent() {
               Financial <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Intelligence</span>
             </h1>
             <p className="text-white/40 text-base md:text-lg max-w-md">
-              Leverage <strong className="text-white/90">Gemini&apos;s brain</strong> to automatically categorize your transactions. Review and approve matches to keep your books perfect.
+              Leverage <strong className="text-white/90">Gemini 3 Flash&apos;s brain</strong> to automatically categorize your transactions. Review and approve matches to keep your books perfect.
             </p>
           </motion.div>
 
