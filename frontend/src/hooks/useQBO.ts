@@ -160,6 +160,7 @@ export const useQBO = () => {
             }
         } catch (error) {
             console.error('Connect Error:', error);
+            showToast('Connection failed. Please check network/console.', 'error');
         } finally {
             setLoading(false);
         }
