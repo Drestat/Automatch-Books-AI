@@ -169,8 +169,17 @@ export const useQBO = () => {
         setLoading(true);
         // DEBUG: Alert user to connection attempt
         alert(`Requesting Auth URL from: ${API_BASE_URL}/qbo/authorize?user_id=${user.id}`);
+
         try {
-            const response = await fetch(`${API_BASE_URL}/qbo/authorize?user_id=${user.id}`);
+            // Add a timeout to catch cold starts
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
+            const response = await fetch(`${API_BASE_URL}/qbo/authorize?user_id=${user.id}`, {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
             alert(`Response Status: ${response.status}`);
 
             if (!response.ok) {
