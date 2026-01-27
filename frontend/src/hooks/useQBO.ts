@@ -194,9 +194,12 @@ export const useQBO = () => {
             if (data.auth_url) {
                 window.location.href = data.auth_url;
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Connect Error:', error);
-            alert(`Network/Code Error: ${JSON.stringify(error)}`);
+            // DEBUG: Extract explicit error details because JSON.stringify(Error) returns {}
+            const errorMsg = error.message || 'Unknown Error';
+            const errorName = error.name || 'Error';
+            alert(`Network/Code Error: ${errorName} - ${errorMsg}`);
             showToast('Connection failed. Please check network/console.', 'error');
         } finally {
             setLoading(false);
