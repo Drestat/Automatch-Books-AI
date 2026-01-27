@@ -149,35 +149,17 @@ export const useQBO = () => {
     }, [isLoaded, user, searchParams, handleCallback]);
 
     const connect = async () => {
-        // DEBUG: Temporary alerts to diagnose user issue
-        if (!isLoaded) {
-            alert('Debug: Clerk is not loaded yet');
-            return;
-        }
-        if (!user) {
-            alert('Debug: No User found. Are you logged in?');
-            return;
-        }
-
+        if (!user) return;
+        track('sync_start', { type: 'connect_flow' }, user.id);
+        setLoading(true);
         try {
-            setLoading(true);
-            const url = `${API_BASE_URL}/qbo/authorize?user_id=${user.id}`;
-            // alert(`Debug: Fetching URL: ${url}`); // Optional: Uncomment if needed
-
-            track('sync_start', { type: 'connect_flow' }, user.id);
-
-            const response = await fetch(url);
+            const response = await fetch(`${API_BASE_URL}/qbo/authorize?user_id=${user.id}`);
             const data = await response.json() as ConnectResponse;
-
             if (data.auth_url) {
-                // alert(`Debug: Redirecting to ${data.auth_url}`);
                 window.location.href = data.auth_url;
-            } else {
-                alert('Debug: No auth_url returned from backend');
             }
         } catch (error) {
             console.error('Connect Error:', error);
-            alert(`Debug: Fetch failed. ${String(error)}`);
             showToast('Connection failed. Please check network/console.', 'error');
         } finally {
             setLoading(false);
