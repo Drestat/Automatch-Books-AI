@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
+from datetime import datetime, timedelta, timezone
 from app.api.v1.endpoints.qbo import get_db
 from app.models.user import User
 from app.schemas.user import UserSync
@@ -38,23 +40,18 @@ def get_user(user_id: str, db: Session = Depends(get_db)):
     No Plan -> New user
     """
     user = db.query(User).filter(User.id == user_id).first()
-    
-    # Mock data for dev if user missing (to unblock UI work)
     if not user:
-        # Simulate a trial user for now to show the UI
-        # In production, this would return 404 or a 'no_plan' user object
-        from datetime import datetime, timedelta
-        return {
-            "id": user_id,
-            "email": "test@example.com",
-            # Change this to 'expired' or 'no_plan' to test other states manually
-            "subscription_status": "trial", # This string doesn't matter much as logic below overrides it if we rely on date, but let's be consistent. Actually wait, the logic BELOW calculates status based on date for REAL users. For MOCK users, we return the dict directly.
-            "subscription_tier": "free",
-            "trial_ends_at": datetime.utcnow() + timedelta(days=5),
-            "days_remaining": 5,
-            "token_balance": 50,
-            "monthly_token_allowance": 50
-        }
+        # Lazy Registration: Create the user in Postgres if they exist in Clerk
+        # but haven't been synced yet (e.g. if webhooks are down)
+        user = User(
+            id=user_id,
+            email=f"{user_id}@clerk.internal", # Unique placeholder, will be updated on next sync
+            subscription_tier="free",
+            trial_ends_at=datetime.now(timezone.utc) + timedelta(days=7)
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
 
     # Calculate computed status
     current_time = func.now()
@@ -70,8 +67,7 @@ def get_user(user_id: str, db: Session = Depends(get_db)):
              # For simplicity here, we assume the frontend or a service handles the precise date diff
              # But let's verify if we can do it here. 
              # Since 'user' is an ORM object, we can do pythonic comparison if it's loaded.
-             import datetime
-             now = datetime.datetime.utcnow()
+             now = datetime.now(timezone.utc)
              # user.trial_ends_at is a datetime (timezone aware hopefully)
              
              # Naive check for now, assuming naive datetimes or compatible

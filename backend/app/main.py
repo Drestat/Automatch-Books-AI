@@ -11,9 +11,9 @@ app = FastAPI(
 from app.db.session import engine, Base
 from app.models import analytics, qbo  # Import models to register them
 
-@app.on_event("startup")
-def on_startup():
-    Base.metadata.create_all(bind=engine)
+# @app.on_event("startup")
+# def on_startup():
+#     Base.metadata.create_all(bind=engine)
 
 # Set all CORS enabled origins
 app.add_middleware(

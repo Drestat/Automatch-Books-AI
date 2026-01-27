@@ -7,7 +7,7 @@ import { track } from '@/lib/analytics';
 import { Bot, RefreshCw, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000') + '/api/v1';
 
 interface AnalyticsEvent {
     id: string;

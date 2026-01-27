@@ -78,3 +78,9 @@ def daily_maintenance():
             process_ai_categorization.remote(conn.realm_id)
     finally:
         db.close()
+
+@app.function(image=image, secrets=[secrets])
+@modal.asgi_app()
+def fastapi_app():
+    from app.main import app as main_app
+    return main_app

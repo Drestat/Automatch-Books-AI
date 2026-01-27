@@ -131,3 +131,11 @@ def generate_insights(
          token_service.deduct_tokens(current_user.id, COST, "AI Insights Report")
     
     return insights
+
+@router.get("/admin/usage")
+def get_all_usage(db: Session = Depends(get_db)):
+    """
+    Admin: Aggregated usage across all connected realms.
+    """
+    service = AnalyticsService(db, realm_id="") # realm_id not used for this method
+    return service.get_all_user_usage()

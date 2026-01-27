@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}"
 
     # Security
-    BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3001"]
+    BACKEND_CORS_ORIGINS: list[str] = ["*"]
 
     # QuickBooks Settings (Shared across SaaS)
     QBO_CLIENT_ID: str = os.getenv("QBO_CLIENT_ID", "")
@@ -37,5 +37,6 @@ class Settings(BaseSettings):
 
     class Config:
         case_sensitive = True
+        env_file = ".env"
 
 settings = Settings()

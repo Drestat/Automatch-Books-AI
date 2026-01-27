@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func
-from app.models.qbo import Transaction, Category
+from sqlalchemy import func, case
+from app.models.qbo import Transaction, Category, SyncLog, QBOConnection
 from datetime import datetime, timedelta
 
 class AnalyticsService:
@@ -89,3 +89,42 @@ class AnalyticsService:
             "trend": formatted_trend,
             "categories": formatted_cats
         }
+
+    def get_all_user_usage(self):
+        """Admin: Aggregates usage stats for all realms"""
+        # 1. Get transaction counts per realm
+        tx_stats = self.db.query(
+            Transaction.realm_id,
+            func.count(Transaction.id).label('tx_count')
+        ).group_by(Transaction.realm_id).subquery()
+
+        # 2. Aggregated Sync Logs
+        sync_stats = self.db.query(
+            SyncLog.realm_id,
+            func.count(case((SyncLog.operation == 'sync', 1))).label('total_syncs'),
+            func.sum(SyncLog.count).label('total_items')
+        ).group_by(SyncLog.realm_id).subquery()
+
+        # 3. Join with Connections to get names/dates
+        results = self.db.query(
+            QBOConnection.realm_id,
+            QBOConnection.updated_at,
+            func.coalesce(sync_stats.c.total_syncs, 0).label('syncs'),
+            func.coalesce(sync_stats.c.total_items, 0).label('items'),
+            func.coalesce(tx_stats.c.tx_count, 0).label('transactions')
+        ).outerjoin(
+            sync_stats, QBOConnection.realm_id == sync_stats.c.realm_id
+        ).outerjoin(
+            tx_stats, QBOConnection.realm_id == tx_stats.c.realm_id
+        ).all()
+
+        return [
+            {
+                "realmId": row.realm_id,
+                "lastActive": row.updated_at.isoformat() if row.updated_at else None,
+                "totalSyncs": int(row.syncs),
+                "totalItems": int(row.items),
+                "totalTransactions": int(row.transactions)
+            }
+            for row in results
+        ]

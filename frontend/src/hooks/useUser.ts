@@ -3,7 +3,7 @@
 import { useUser as useClerkUser } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000') + '/api/v1';
 
 export interface UserProfile {
     id: string;
