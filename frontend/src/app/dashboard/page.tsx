@@ -138,7 +138,7 @@ function DashboardContent() {
               Uses bank-grade 256-bit encryption.
             </p>
             <div className="text-center text-[10px] text-red-500 font-mono mt-2">
-              DEBUG STATUS: Loaded={String(isLoaded)}, User={user ? 'Yes' : 'No'}, Loading={String(qboLoading)} | v3.0 (Proxy + Backend Fix)
+              DEBUG STATUS: Loaded={String(isLoaded)}, User={user ? 'Yes' : 'No'}, Loading={String(qboLoading)} | v3.1 (Fresh Push)
             </div>
           </div>
         </div>
