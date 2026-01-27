@@ -112,28 +112,33 @@ export const useQBO = () => {
     useEffect(() => {
         if (!isLoaded || !user) return;
 
+        // Safety Timeout: If fetch takes too long or user doesn't load, force access
+        // This prevents infinite loading screens
+        const safetyTimer = setTimeout(() => {
+            setSubscriptionStatus(prev => prev || 'trial');
+        }, 3000);
+
         // Fetch User Subscription Status
         const fetchUserStatus = async () => {
             try {
                 const res = await fetch(`${API_BASE_URL}/users/${user.id}`);
                 if (res.ok) {
                     const userData = await res.json();
-                    setSubscriptionStatus(userData.subscription_status || 'trial'); // Fallback if field missing
-                    if (userData.days_remaining) {
-                        setDaysRemaining(userData.days_remaining);
-                    }
+                    setSubscriptionStatus(userData.subscription_status || 'trial');
+                    if (userData.days_remaining) setDaysRemaining(userData.days_remaining);
                 } else {
-                    // API error or User not found (404) -> Default to 'trial' to allow access
-                    console.warn("User status fetch failed, defaulting to trial access.");
                     setSubscriptionStatus('trial');
                 }
             } catch (e) {
-                console.error("Failed to fetch user status", e);
-                // Network error -> Default to 'trial' to prevent black screen
+                console.error("Fetch failed", e);
                 setSubscriptionStatus('trial');
+            } finally {
+                clearTimeout(safetyTimer);
             }
         };
         fetchUserStatus();
+
+        return () => clearTimeout(safetyTimer);
 
         // Check for saved Realm ID
         const storedRealm = localStorage.getItem('qbo_realm_id');

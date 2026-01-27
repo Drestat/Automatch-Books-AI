@@ -17,10 +17,23 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({ status, da
     if (!status) {
         // Loading state - maybe a skeleton or just null
         // Loading state
+        // Loading state
         return (
-            <div className="min-h-screen bg-black flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin" />
-                <span className="ml-3 text-white/50 font-mono text-sm">Loading Profile...</span>
+            <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin" />
+                    <span className="text-white/50 font-mono text-sm">Loading Profile...</span>
+                </div>
+                {/* Emergency Escape Hatch */}
+                <button
+                    onClick={() => {
+                        localStorage.clear();
+                        window.location.reload();
+                    }}
+                    className="text-xs text-red-500 hover:text-red-400 underline mt-4"
+                >
+                    Stuck? Click to Reset
+                </button>
             </div>
         );
     }
