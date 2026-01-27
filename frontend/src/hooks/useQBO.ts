@@ -145,8 +145,8 @@ export const useQBO = () => {
         if (storedRealm) {
             setRealmId(storedRealm);
             setIsConnected(true);
-            fetchAccounts(storedRealm); // Fetch accounts on initial load if connected
-            fetchTransactions(storedRealm);
+            fetchAccounts(storedRealm as string); // Fetch accounts on initial load if connected
+            fetchTransactions(storedRealm as string);
         }
 
         // Handle OAuth Callback
