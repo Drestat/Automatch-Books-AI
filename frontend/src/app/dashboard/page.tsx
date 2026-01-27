@@ -46,7 +46,6 @@ function DashboardContent() {
     subscriptionStatus,
     daysRemaining,
     accounts,
-    accounts,
     fetchTransactions,
     disconnect
   } = useQBO();

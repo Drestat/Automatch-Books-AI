@@ -457,9 +457,6 @@ export const useQBO = () => {
         subscriptionStatus,
         daysRemaining,
         accounts,
-        subscriptionStatus,
-        daysRemaining,
-        accounts,
         fetchTransactions,
         disconnect
     };
