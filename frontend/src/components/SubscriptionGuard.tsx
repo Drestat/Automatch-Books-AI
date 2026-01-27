@@ -16,7 +16,13 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({ status, da
 
     if (!status) {
         // Loading state - maybe a skeleton or just null
-        return <div className="min-h-screen bg-black" />;
+        // Loading state
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin" />
+                <span className="ml-3 text-white/50 font-mono text-sm">Loading Profile...</span>
+            </div>
+        );
     }
 
     // BLOCKING STATES
