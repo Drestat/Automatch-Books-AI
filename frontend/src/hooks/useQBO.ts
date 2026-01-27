@@ -118,13 +118,19 @@ export const useQBO = () => {
                 const res = await fetch(`${API_BASE_URL}/users/${user.id}`);
                 if (res.ok) {
                     const userData = await res.json();
-                    setSubscriptionStatus(userData.subscription_status);
+                    setSubscriptionStatus(userData.subscription_status || 'trial'); // Fallback if field missing
                     if (userData.days_remaining) {
                         setDaysRemaining(userData.days_remaining);
                     }
+                } else {
+                    // API error or User not found (404) -> Default to 'trial' to allow access
+                    console.warn("User status fetch failed, defaulting to trial access.");
+                    setSubscriptionStatus('trial');
                 }
             } catch (e) {
                 console.error("Failed to fetch user status", e);
+                // Network error -> Default to 'trial' to prevent black screen
+                setSubscriptionStatus('trial');
             }
         };
         fetchUserStatus();
