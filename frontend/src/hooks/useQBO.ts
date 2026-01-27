@@ -155,7 +155,7 @@ export const useQBO = () => {
         const realm = searchParams.get('realmId');
 
         if (code && realm && state) {
-            handleCallback(code, state, realm);
+            handleCallback(code as string, state as string, realm as string);
         }
     }, [isLoaded, user, searchParams, handleCallback]);
 
