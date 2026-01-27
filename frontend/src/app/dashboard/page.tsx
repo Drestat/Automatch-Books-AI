@@ -111,7 +111,7 @@ function DashboardContent() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => { alert('Button Clicked'); connect(); }}
+              onClick={connect}
               disabled={false} // DEBUG: Force enabled
               className="w-full btn-primary py-4 text-lg font-bold flex items-center justify-center gap-3 group relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
             >

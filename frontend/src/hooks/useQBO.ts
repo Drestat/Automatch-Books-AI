@@ -160,7 +160,11 @@ export const useQBO = () => {
     }, [isLoaded, user, searchParams, handleCallback]);
 
     const connect = async () => {
-        if (!user) return;
+        // DEBUG: Check user existence immediately
+        if (!user) {
+            alert('Connect Aborted: NO USER FOUND. You appear to be logged out or Clerk failed to load.');
+            return;
+        }
         track('sync_start', { type: 'connect_flow' }, user.id);
         setLoading(true);
         // DEBUG: Alert user to connection attempt
