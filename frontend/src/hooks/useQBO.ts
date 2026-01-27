@@ -172,10 +172,15 @@ export const useQBO = () => {
 
         try {
             // Add a timeout to catch cold starts
+            // Add a timeout to catch cold starts
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
 
-            const response = await fetch(`${API_BASE_URL}/qbo/authorize?user_id=${user.id}`, {
+            // USE PROXY to bypass CORS
+            // Was: ${API_BASE_URL}/qbo/authorize?user_id=${user.id}
+            const proxyUrl = `/api/qbo-proxy?endpoint=qbo/authorize&user_id=${user.id}`;
+
+            const response = await fetch(proxyUrl, {
                 signal: controller.signal
             });
             clearTimeout(timeoutId);
