@@ -32,7 +32,7 @@ export const useAnalytics = () => {
     });
 
     const { user, isLoaded } = useUser();
-    const API_BASE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000') + '/api/v1';
+    const API_BASE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run') + '/api/v1';
 
     useEffect(() => {
         const fetchAnalytics = async () => {

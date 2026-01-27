@@ -29,7 +29,7 @@ export const track = async (event: AnalyticsEvent, properties?: Record<string, u
     // We only track to backend if we have a userId to attribute it to
     if (userId) {
         try {
-            await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}/api/v1/analytics/track`, {
+            await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run'}/api/v1/analytics/track`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

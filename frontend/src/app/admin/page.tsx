@@ -6,7 +6,7 @@ import { BentoTile } from '@/components/BentoTile';
 import { Users, BarChart3, Database, RefreshCw, Trophy, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const API_BASE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000') + '/api/v1';
+const API_BASE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run') + '/api/v1';
 
 interface UserUsage {
     realmId: string;
