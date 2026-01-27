@@ -429,6 +429,18 @@ export const useQBO = () => {
         }
     };
 
+    const disconnect = () => {
+        localStorage.removeItem('qbo_realm_id');
+        localStorage.removeItem('is_demo_mode');
+        setRealmId(null);
+        setIsConnected(false);
+        setIsDemo(false);
+        setTransactions([]);
+        setAccounts([]);
+        showToast('Disconnected from QBO', 'info');
+        router.refresh();
+    };
+
     return {
         isConnected,
         loading,
@@ -445,6 +457,10 @@ export const useQBO = () => {
         subscriptionStatus,
         daysRemaining,
         accounts,
-        fetchTransactions
+        subscriptionStatus,
+        daysRemaining,
+        accounts,
+        fetchTransactions,
+        disconnect
     };
 };

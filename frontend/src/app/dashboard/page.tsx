@@ -46,7 +46,9 @@ function DashboardContent() {
     subscriptionStatus,
     daysRemaining,
     accounts,
-    fetchTransactions
+    accounts,
+    fetchTransactions,
+    disconnect
   } = useQBO();
 
   const [loading, setLoading] = useState(false); // Local loading for UI actions
@@ -250,7 +252,14 @@ function DashboardContent() {
               <Zap size={20} className={`group-hover:animate-pulse ${loading ? 'animate-spin' : ''}`} />
               <span className="font-bold">{loading ? 'Syncing...' : 'Sync Now'}</span>
             </button>
-            <div className="ml-2">
+            <div className="ml-2 flex items-center gap-2">
+              <button
+                onClick={disconnect}
+                className="p-2 text-white/20 hover:text-red-500 transition-colors rounded-full hover:bg-white/5"
+                title="Disconnect / Reset"
+              >
+                <Zap size={16} className="rotate-45" />
+              </button>
               <UserButton afterSignOutUrl="/" />
             </div>
           </motion.div>
