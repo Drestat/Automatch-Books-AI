@@ -163,14 +163,27 @@ export const useQBO = () => {
         if (!user) return;
         track('sync_start', { type: 'connect_flow' }, user.id);
         setLoading(true);
+        // DEBUG: Alert user to connection attempt
+        alert(`Requesting Auth URL from: ${API_BASE_URL}/qbo/authorize?user_id=${user.id}`);
         try {
             const response = await fetch(`${API_BASE_URL}/qbo/authorize?user_id=${user.id}`);
+            alert(`Response Status: ${response.status}`);
+
+            if (!response.ok) {
+                const text = await response.text();
+                alert(`Error Body: ${text}`);
+                throw new Error(`Server returned ${response.status}: ${text}`);
+            }
+
             const data = await response.json() as ConnectResponse;
+            alert(`Received Auth URL: ${data.auth_url || 'MISSING'}`);
+
             if (data.auth_url) {
                 window.location.href = data.auth_url;
             }
         } catch (error) {
             console.error('Connect Error:', error);
+            alert(`Network/Code Error: ${JSON.stringify(error)}`);
             showToast('Connection failed. Please check network/console.', 'error');
         } finally {
             setLoading(false);
