@@ -154,6 +154,8 @@ export const useQBO = () => {
         const code = searchParams.get('code');
         const realm = searchParams.get('realmId');
 
+        console.log('>>> [useQBO] Params Check:', { code, realm, path: window.location.pathname });
+
         if (code && realm) {
             handleSuccessRedirect(realm);
         }
