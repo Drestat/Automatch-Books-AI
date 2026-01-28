@@ -107,18 +107,66 @@ export const useQBO = () => {
         }
     }, [router]);
 
-    // Initialize state from local storage or URL params
+
+    // Helper: Fetch Accounts
+    const fetchAccounts = useCallback(async (realm: string) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/accounts/?realm_id=${realm}`);
+            if (response.ok) {
+                const data = await response.json();
+                setAccounts(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch accounts", error);
+        }
+    }, []);
+
+    // Helper: Fetch Transactions
+    const fetchTransactions = useCallback(async (realm: string, accountIds?: string[]) => {
+        setLoading(true);
+        try {
+            let url = `${API_BASE_URL}/transactions/?realm_id=${realm}`;
+            if (accountIds && accountIds.length > 0) {
+                url += `&account_ids=${accountIds.join(',')}`;
+            }
+
+            const response = await fetch(url);
+            if (response.ok) {
+                const data = await response.json();
+                setTransactions(data);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // Effect 1: Handle URL Params (QBO Connections) - INDEPENDENT of User Loading
+    // This ensures that even if Clerk is slow, we act on the redirect immediately.
+    useEffect(() => {
+        const code = searchParams.get('code');
+        const realm = searchParams.get('realmId');
+
+        // Only log if we actually see params to reduce noise
+        if (code && realm) {
+            console.log('>>> [useQBO] Params Check:', { code, realm, path: window.location.pathname });
+            handleSuccessRedirect(realm);
+        }
+    }, [searchParams, handleSuccessRedirect]);
+
+    // Effect 2: User-Dependent Data (Subscription, etc.)
     useEffect(() => {
         if (!isLoaded || !user) return;
 
-        // Safety Timeout: If fetch takes too long or user doesn't load, force access
-        // This prevents infinite loading screens
+        // ... rest of user fetch logic ...
         const safetyTimer = setTimeout(() => {
             setSubscriptionStatus(prev => prev || 'trial');
         }, 3000);
 
         // Fetch User Subscription Status
         const fetchUserStatus = async () => {
+            // ... existing fetch logic ...
             try {
                 const res = await fetch(`${API_BASE_URL}/users/${user.id}`);
                 if (res.ok) {
@@ -138,28 +186,18 @@ export const useQBO = () => {
         fetchUserStatus();
 
         return () => clearTimeout(safetyTimer);
+    }, [isLoaded, user]);
 
-        // Check for saved Realm ID
+    // Effect 3: Restore Session from LocalStorage
+    useEffect(() => {
         const storedRealm = localStorage.getItem('qbo_realm_id');
         if (storedRealm) {
             setRealmId(storedRealm);
             setIsConnected(true);
-            fetchAccounts(storedRealm as string); // Fetch accounts on initial load if connected
+            fetchAccounts(storedRealm as string);
             fetchTransactions(storedRealm as string);
         }
-
-        // Handle OAuth Callback Redirect (Success)
-        // Backend redirects to /dashboard?code=...&realmId=...&state=... on success
-        // We really only need to know that realmId exists and we are back on the dashboard.
-        const code = searchParams.get('code');
-        const realm = searchParams.get('realmId');
-
-        console.log('>>> [useQBO] Params Check:', { code, realm, path: window.location.pathname });
-
-        if (code && realm) {
-            handleSuccessRedirect(realm);
-        }
-    }, [isLoaded, user, searchParams, handleSuccessRedirect]);
+    }, [fetchTransactions]);
 
     const connect = async () => {
         // DEBUG: Check user existence immediately
@@ -311,37 +349,6 @@ export const useQBO = () => {
         showToast('Demo Mode Activated', 'success');
     };
 
-    const fetchAccounts = async (realm: string) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/accounts/?realm_id=${realm}`);
-            if (response.ok) {
-                const data = await response.json();
-                setAccounts(data);
-            }
-        } catch (error) {
-            console.error("Failed to fetch accounts", error);
-        }
-    };
-
-    const fetchTransactions = async (realm: string, accountIds?: string[]) => {
-        setLoading(true);
-        try {
-            let url = `${API_BASE_URL}/transactions/?realm_id=${realm}`;
-            if (accountIds && accountIds.length > 0) {
-                url += `&account_ids=${accountIds.join(',')}`;
-            }
-
-            const response = await fetch(url);
-            if (response.ok) {
-                const data = await response.json();
-                setTransactions(data);
-            }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const sync = async () => {
         if (!realmId && !isDemo) return;
