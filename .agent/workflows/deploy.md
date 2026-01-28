@@ -18,8 +18,13 @@ Follow these steps for every deployment to ensure production stability and visua
 3. **Deploy Backend**:
    - Run `modal deploy modal_app.py` from the `backend` directory.
 
-4. **Verify Health**:
-   - Run `curl https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run/health` to confirm the new version is live.
+4. **Sync Frontend (Vercel)**:
+   - Run `git add . && git commit -m "Deployment: v[Version] - [Short Summary]" && git push origin main`.
+   - Wait for Vercel build to complete (usually 1-2 mins).
+
+5. **Verify Health**:
+   - Run `curl https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run/health` to confirm the backend is alive.
+   - (Manual) Refresh the Vercel URL to confirm the frontend version stamp matches.
 
 5. **Notify User**:
    - Confirm the new version number in the `notify_user` call.
