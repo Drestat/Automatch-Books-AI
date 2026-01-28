@@ -138,8 +138,14 @@ function DashboardContent() {
               Uses bank-grade 256-bit encryption.
             </p>
             <div className="text-center text-[10px] text-red-500 font-mono mt-2">
-              DEBUG STATUS: Loaded={String(isLoaded)}, User={user ? 'Yes' : 'No'}, Loading={String(qboLoading)} | v3.9.1 (Sync Ready)
+              DEBUG STATUS: Loaded={String(isLoaded)}, User={user ? 'Yes' : 'No'}, Loading={String(qboLoading)} | v3.9.2 (Params Fix)
             </div>
+            {/* Visual Debugger for URL Params */}
+            {typeof window !== 'undefined' && window.location.search.includes('realmId') && (
+              <div className="bg-blue-600 text-white p-4 rounded-xl mt-4 animate-pulse">
+                Found QBO Params! Processing...
+              </div>
+            )}
           </div>
         </div>
       </SubscriptionGuard>
