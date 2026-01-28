@@ -301,6 +301,10 @@ function DashboardContent() {
                   <p className="text-sm text-white/50 leading-relaxed">
                     You have <span className="text-white font-bold">{transactions.length}</span> transactions waiting for your confirmation.
                   </p>
+                  {/* Debug Version Stamp */}
+                  <div className="text-[10px] text-zinc-500 font-mono mt-4 opacity-50">
+                    v3.8 (Production Ready)
+                  </div>
                 </div>
                 <button className="btn-glass w-full text-xs font-bold py-3 mt-6">
                   View History

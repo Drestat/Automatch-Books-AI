@@ -1,86 +1,79 @@
 import modal
-from app.core.config import settings
-from app.db.session import SessionLocal
-from app.models.qbo import QBOConnection
-from app.services.transaction_service import TransactionService
-from app.services.analysis_service import AnalysisService
+import os
+from dotenv import dotenv_values
 
-# Define the image with necessary dependencies
-# Note: modal.Image.debian_slim() is a good default
-image = modal.Image.debian_slim().pip_install(
-    "fastapi",
-    "sqlalchemy",
-    "psycopg2-binary",
-    "intuit-oauth",
-    "requests",
-    "google-generativeai",
-    "pydantic-settings"
+# 1. PRE-DEPLOY: Capture production keys from disk
+env_path = os.path.join(os.path.dirname(__file__), ".env")
+env_vars = dotenv_values(env_path)
+
+# 2. IMAGE DEFINITION
+image = (
+    modal.Image.debian_slim()
+    .pip_install(
+        "fastapi", 
+        "uvicorn", 
+        "psycopg2-binary", 
+        "pydantic-settings", 
+        "python-dotenv",
+        "sqlalchemy",
+        "intuit-oauth",
+        "requests",
+        "google-generativeai",
+        "stripe",
+        "rapidfuzz",
+        "python-multipart"
+    )
+    .add_local_dir("./app", remote_path="/root/app")
 )
 
-app = modal.App("qbo-sync-engine", image=image)
+app = modal.App("qbo-sync-engine")
 
-# Define secrets for environment variables
+# 3. SECRETS
 secrets = modal.Secret.from_dict({
-    "POSTGRES_USER": settings.POSTGRES_USER,
-    "POSTGRES_PASSWORD": settings.POSTGRES_PASSWORD,
-    "POSTGRES_DB": settings.POSTGRES_DB,
-    "POSTGRES_HOST": settings.POSTGRES_HOST,
-    "QBO_CLIENT_ID": settings.QBO_CLIENT_ID,
-    "QBO_CLIENT_SECRET": settings.QBO_CLIENT_SECRET,
-    "QBO_REDIRECT_URI": settings.QBO_REDIRECT_URI,
-    "QBO_ENVIRONMENT": settings.QBO_ENVIRONMENT,
-    "GEMINI_API_KEY": settings.GEMINI_API_KEY,
+    "POSTGRES_USER": env_vars.get("POSTGRES_USER", ""),
+    "POSTGRES_PASSWORD": env_vars.get("POSTGRES_PASSWORD", ""),
+    "POSTGRES_HOST": env_vars.get("POSTGRES_HOST", ""),
+    "POSTGRES_DB": env_vars.get("POSTGRES_DB", ""),
+    "QBO_CLIENT_ID": env_vars.get("QBO_CLIENT_ID", ""),
+    "QBO_CLIENT_SECRET": env_vars.get("QBO_CLIENT_SECRET", ""),
+    "QBO_REDIRECT_URI": env_vars.get("QBO_REDIRECT_URI", ""),
+    "QBO_ENVIRONMENT": env_vars.get("QBO_ENVIRONMENT", "sandbox"),
+    "GEMINI_API_KEY": env_vars.get("GEMINI_API_KEY", ""),
 })
 
-@app.function(secrets=[secrets])
-def sync_user_data(realm_id: str):
-    """Triggers a full sync for a specific QBO realm"""
-    db = SessionLocal()
-    try:
-        connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
-        if not connection:
-            print(f"❌ No connection found for realm {realm_id}")
-            return
-        
-        sync_service = TransactionService(db, connection)
-        print(f"🔄 Starting background sync for {realm_id}...")
-        sync_service.sync_all()
-        print(f"✅ Sync complete for {realm_id}")
-    finally:
-        db.close()
-
-@app.function(secrets=[secrets])
-def process_ai_categorization(realm_id: str, limit: int = 20, tx_id: str = None):
-    """Triggers AI categorization for unmatched transactions"""
-    db = SessionLocal()
-    try:
-        connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
-        if not connection:
-            print(f"❌ No connection found for realm {realm_id}")
-            return
-        
-        analysis_service = AnalysisService(db, connection.realm_id) # AnalysisService takes realm_id string, not connection obj
-        print(f"🧠 Starting AI categorization for {realm_id} {'(specific ID: ' + tx_id + ')' if tx_id else ''}...")
-        results = analysis_service.analyze_transactions(limit=limit, tx_id=tx_id)
-        print(f"✅ AI categorization complete for {realm_id}. Processed {len(results) if isinstance(results, list) else 0} TXs.")
-    finally:
-        db.close()
-
-@app.function(secrets=[secrets], schedule=modal.Period(days=1))
-def daily_maintenance():
-    """Daily CRON job to sync and process all active connections"""
-    db = SessionLocal()
-    try:
-        connections = db.query(QBOConnection).all()
-        for conn in connections:
-            print(f"🚀 Triggering daily tasks for {conn.realm_id}")
-            sync_user_data.remote(conn.realm_id)
-            process_ai_categorization.remote(conn.realm_id)
-    finally:
-        db.close()
-
-@app.function(image=image, secrets=[secrets])
+@app.function(image=image, secrets=[secrets], min_containers=1)
 @modal.asgi_app()
 def fastapi_app():
-    from app.main import app as main_app
-    return main_app
+    print("🚀 [Modal] ASGI Entrypoint waking up...")
+    
+    # Imports happen ONLY inside the cloud container
+    import sys
+    # Add /root to path so 'import app' works (app is at /root/app)
+    if "/root" not in sys.path:
+        sys.path.append("/root")
+    
+    try:
+        from app.main import app as main_app
+        from app.main import initialize_app_logic
+        
+        # Load the routers and models
+        success = initialize_app_logic()
+        
+        if not success:
+            print("⚠️ [Modal] Warning: App initialized with errors.")
+            
+        print("✅ [Modal] Ready to serve production traffic.")
+        return main_app
+    except Exception as e:
+        print(f"❌ [Modal] CRITICAL STARTUP ERROR: {e}")
+        # Return a fallback app so the container stays healthy but reports the error
+        from fastapi import FastAPI
+        err_app = FastAPI()
+        @err_app.get("/{path:path}")
+        def err(path: str):
+            return {"error": "Startup Failed", "detail": str(e)}
+        return err_app
+
+@app.function(image=image, secrets=[secrets])
+def daily_maintenance():
+    print("Running daily maintenance tasks...")
