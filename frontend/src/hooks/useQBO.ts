@@ -84,25 +84,24 @@ export const useQBO = () => {
         }
     }, []);
 
-    const handleCallback = useCallback(async (code: string, state: string, realm: string) => {
+    // Simplified: Backend now handles the full token exchange and redirects to dashboard on success.
+    // We just need to capture the realmId and update state.
+    const handleSuccessRedirect = useCallback((realm: string) => {
         setLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/qbo/callback?code=${code}&state=${state}&realmId=${realm}`);
-            const data = await response.json() as QBOCallbackResponse;
+            console.log('Processing QBO Success Redirect with Realm:', realm);
+            localStorage.setItem('qbo_realm_id', realm);
+            setRealmId(realm);
+            setIsConnected(true);
 
-            if (response.ok) {
-                localStorage.setItem('qbo_realm_id', realm);
-                setRealmId(realm);
-                setIsConnected(true);
-                fetchAccounts(realm); // Fetch accounts after successful connection
-                fetchTransactions(realm); // Fetch transactions after successful connection
-                // Clear URL params
-                router.replace('/dashboard');
-            } else {
-                console.error('QBO Callback Failed:', data);
-            }
+            // Immediate data fetch
+            fetchAccounts(realm);
+            fetchTransactions(realm);
+
+            // Clean URL
+            router.replace('/dashboard');
         } catch (error) {
-            console.error('QBO Callback Error:', error);
+            console.error('State Update Error:', error);
         } finally {
             setLoading(false);
         }
@@ -149,15 +148,16 @@ export const useQBO = () => {
             fetchTransactions(storedRealm as string);
         }
 
-        // Handle OAuth Callback
+        // Handle OAuth Callback Redirect (Success)
+        // Backend redirects to /dashboard?code=...&realmId=...&state=... on success
+        // We really only need to know that realmId exists and we are back on the dashboard.
         const code = searchParams.get('code');
-        const state = searchParams.get('state');
         const realm = searchParams.get('realmId');
 
-        if (code && realm && state) {
-            handleCallback(code as string, state as string, realm as string);
+        if (code && realm) {
+            handleSuccessRedirect(realm);
         }
-    }, [isLoaded, user, searchParams, handleCallback]);
+    }, [isLoaded, user, searchParams, handleSuccessRedirect]);
 
     const connect = async () => {
         // DEBUG: Check user existence immediately

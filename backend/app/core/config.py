@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     # App Settings
     PROJECT_NAME: str = "Automatch Books AI"
     API_V1_STR: str = "/api/v1"
+    NEXT_PUBLIC_APP_URL: str = os.getenv("NEXT_PUBLIC_APP_URL", "http://localhost:3000")
     
     # Database Settings
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")

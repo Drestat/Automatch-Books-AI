@@ -27,12 +27,8 @@ def authorize(user_id: str):
             redirect_uri=settings.QBO_REDIRECT_URI,
             environment=settings.QBO_ENVIRONMENT,
         )
-        scopes = [
-            Scopes.ACCOUNTING,
-            Scopes.OPENID,
-            Scopes.PROFILE,
-            Scopes.EMAIL
-        ]
+        scopes = [Scopes.ACCOUNTING]
+        print(f">>> [qbo.py] Requesting Scopes: {scopes}")
         auth_url = auth_client.get_authorization_url(scopes, state_token=user_id)
         return {"auth_url": auth_url}
     except Exception as e:
@@ -64,4 +60,5 @@ def callback(code: str, state: str, realmId: str, db: Session = Depends(get_db))
     db.add(connection)
     db.commit()
     
-    return {"message": "QuickBooks connected successfully", "realm_id": realmId}
+    redirect_url = f"{settings.NEXT_PUBLIC_APP_URL}/dashboard?code={code}&state={state}&realmId={realmId}"
+    return RedirectResponse(url=redirect_url)
