@@ -138,7 +138,7 @@ function DashboardContent() {
               Uses bank-grade 256-bit encryption.
             </p>
             <div className="text-center text-[10px] text-red-500 font-mono mt-2">
-              DEBUG STATUS: Loaded={String(isLoaded)}, User={user ? 'Yes' : 'No'}, Loading={String(qboLoading)} | v3.9 (Sync Ready)
+              DEBUG STATUS: Loaded={String(isLoaded)}, User={user ? 'Yes' : 'No'}, Loading={String(qboLoading)} | v3.9.1 (Sync Ready)
             </div>
           </div>
         </div>
@@ -303,7 +303,7 @@ function DashboardContent() {
                   </p>
                   {/* Debug Version Stamp */}
                   <div className="text-[10px] text-zinc-500 font-mono mt-4 opacity-50">
-                    v3.9 (Production Ready)
+                    v3.9.1 (Production Ready)
                   </div>
                 </div>
                 <button className="btn-glass w-full text-xs font-bold py-3 mt-6">
