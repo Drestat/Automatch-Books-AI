@@ -27,7 +27,12 @@ def authorize(user_id: str):
             redirect_uri=settings.QBO_REDIRECT_URI,
             environment=settings.QBO_ENVIRONMENT,
         )
-        scopes = [Scopes.ACCOUNTING]
+        scopes = [
+            Scopes.ACCOUNTING,
+            Scopes.OPENID,
+            Scopes.PROFILE,
+            Scopes.EMAIL
+        ]
         auth_url = auth_client.get_authorization_url(scopes, state_token=user_id)
         return {"auth_url": auth_url}
     except Exception as e:
