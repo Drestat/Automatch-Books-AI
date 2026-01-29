@@ -48,7 +48,8 @@ function DashboardContent() {
     accounts,
     fetchTransactions,
     disconnect,
-    realmId
+    realmId,
+    apiBaseUrl
   } = useQBO();
 
   const [loading, setLoading] = useState(false); // Local loading for UI actions
@@ -390,6 +391,7 @@ function DashboardContent() {
             <span>Accounts:</span> <span className="text-white">{accounts.length}</span>
             <span>Transactions:</span> <span className="text-white">{transactions.length}</span>
             <span>Is Loaded:</span> <span>{String(isLoaded)}</span>
+            <span className="col-span-2 text-[8px] text-zinc-600 mt-1 truncate">{apiBaseUrl}</span>
           </div>
         </div>
       </div>
