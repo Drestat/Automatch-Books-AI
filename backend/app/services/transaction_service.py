@@ -37,7 +37,32 @@ class TransactionService:
                 tx = Transaction(id=p["Id"], realm_id=self.connection.realm_id)
             
             tx.date = datetime.strptime(p["TxnDate"], "%Y-%m-%d")
-            tx.description = p.get("AccountRef", {}).get("name", "Purchased Item")
+            
+            # Map Account (Source)
+            account_ref = p.get("AccountRef", {})
+            tx.account_id = account_ref.get("value")
+            tx.account_name = account_ref.get("name", "Unknown Account")
+
+            # Map Description (Vendor + Memo)
+            entity_ref = p.get("EntityRef", {})
+            vendor_name = entity_ref.get("name")
+            memo = p.get("PrivateNote") # QBO 'Memo' is often in PrivateNote or Line items
+            
+            # Construct a rich description for AI
+            desc_parts = []
+            if vendor_name:
+                desc_parts.append(vendor_name)
+            if memo:
+                 desc_parts.append(memo)
+            
+            # Fallback to Line description if main description is empty
+            if not desc_parts and "Line" in p and len(p["Line"]) > 0:
+                line_desc = p["Line"][0].get("Description")
+                if line_desc:
+                    desc_parts.append(line_desc)
+
+            tx.description = " - ".join(desc_parts) if desc_parts else "Uncategorized Expense"
+
             tx.amount = p.get("TotalAmt", 0)
             tx.currency = p.get("CurrencyRef", {}).get("value", "USD")
             tx.raw_json = p

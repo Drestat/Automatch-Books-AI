@@ -98,6 +98,9 @@ export const useQBO = () => {
             fetchAccounts(realm);
             fetchTransactions(realm);
 
+            // Auto-trigger Sync to ensure DB is populated
+            sync(realm);
+
             // Clean URL
             router.replace('/dashboard');
         } catch (error) {
@@ -148,9 +151,7 @@ export const useQBO = () => {
         const code = searchParams.get('code');
         const realm = searchParams.get('realmId');
 
-        // Only log if we actually see params to reduce noise
         if (code && realm) {
-            console.log('>>> [useQBO] Params Check:', { code, realm, path: window.location.pathname });
             handleSuccessRedirect(realm);
         }
     }, [searchParams, handleSuccessRedirect]);
@@ -350,8 +351,10 @@ export const useQBO = () => {
     };
 
 
-    const sync = async () => {
-        if (!realmId && !isDemo) return;
+    const sync = async (overrideRealm?: string) => {
+        const targetRealm = overrideRealm || realmId;
+        if (!targetRealm && !isDemo) return;
+
         try {
             if (isDemo) {
                 setLoading(true);
@@ -362,12 +365,17 @@ export const useQBO = () => {
                 }, 1500);
                 return;
             }
-            track('sync_start', { mode: 'live', realmId }, user?.id);
-            await fetch(`${API_BASE_URL}/transactions/sync?realm_id=${realmId}`, { method: 'POST' });
+
+            track('sync_start', { mode: 'live', realmId: targetRealm }, user?.id);
+            await fetch(`${API_BASE_URL}/transactions/sync?realm_id=${targetRealm}`, { method: 'POST' });
             showToast('Syncing with QuickBooks...', 'info');
-            // Poll or re-fetch transactions
+
+            // Poll or re-fetch transactions AND accounts
             setTimeout(() => {
-                if (realmId) fetchTransactions(realmId);
+                if (targetRealm) {
+                    fetchTransactions(targetRealm);
+                    fetchAccounts(targetRealm);
+                }
                 showToast('Transactions mirrored successfully', 'success');
             }, 2000);
         } catch (error) {

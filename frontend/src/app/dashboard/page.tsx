@@ -137,15 +137,6 @@ function DashboardContent() {
             <p className="text-center text-xs text-white/20 font-medium">
               Uses bank-grade 256-bit encryption.
             </p>
-            <div className="text-center text-[10px] text-red-500 font-mono mt-2">
-              DEBUG STATUS: Loaded={String(isLoaded)}, User={user ? 'Yes' : 'No'}, Loading={String(qboLoading)} | v3.9.2 (Params Fix)
-            </div>
-            {/* Visual Debugger for URL Params */}
-            {typeof window !== 'undefined' && window.location.search.includes('realmId') && (
-              <div className="bg-blue-600 text-white p-4 rounded-xl mt-4 animate-pulse">
-                Found QBO Params! Processing...
-              </div>
-            )}
           </div>
         </div>
       </SubscriptionGuard>
@@ -307,10 +298,6 @@ function DashboardContent() {
                   <p className="text-sm text-white/50 leading-relaxed">
                     You have <span className="text-white font-bold">{transactions.length}</span> transactions waiting for your confirmation.
                   </p>
-                  {/* Debug Version Stamp */}
-                  <div className="text-[10px] text-zinc-500 font-mono mt-4 opacity-50">
-                    v3.9.1 (Production Ready)
-                  </div>
                 </div>
                 <button className="btn-glass w-full text-xs font-bold py-3 mt-6">
                   View History
