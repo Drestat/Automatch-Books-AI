@@ -47,9 +47,7 @@ function DashboardContent() {
     daysRemaining,
     accounts,
     fetchTransactions,
-    disconnect,
-    realmId,
-    apiBaseUrl
+    disconnect
   } = useQBO();
 
   const [loading, setLoading] = useState(false); // Local loading for UI actions
@@ -382,18 +380,6 @@ function DashboardContent() {
           <p className="text-white/20 text-xs">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash.</p>
         </footer>
 
-        {/* Data Diagnostic Overlay - REMOVE BEFORE FINAL PROD */}
-        <div className="fixed bottom-4 right-4 bg-zinc-900 border border-zinc-800 p-4 rounded-lg shadow-2xl z-50 text-[10px] font-mono text-zinc-500 opacity-75 hover:opacity-100 transition-opacity">
-          <h4 className="text-zinc-300 font-bold mb-2">DATA DIAGNOSTIC</h4>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-            <span>Realm ID:</span> <span className="text-blue-400">{realmId || 'NULL'}</span>
-            <span>Connected:</span> <span className={isConnected ? "text-green-400" : "text-red-400"}>{String(isConnected)}</span>
-            <span>Accounts:</span> <span className="text-white">{accounts.length}</span>
-            <span>Transactions:</span> <span className="text-white">{transactions.length}</span>
-            <span>Is Loaded:</span> <span>{String(isLoaded)}</span>
-            <span className="col-span-2 text-[8px] text-zinc-600 mt-1 truncate">{apiBaseUrl}</span>
-          </div>
-        </div>
       </div>
     </SubscriptionGuard>
   );

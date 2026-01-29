@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 import os
 import shutil
+from datetime import datetime
 
 from app.api.v1.endpoints.qbo import get_db
 from app.models.qbo import QBOConnection, Transaction
@@ -23,14 +24,14 @@ class SplitSchema(BaseModel):
 
 class TransactionSchema(BaseModel):
     id: str
-    date: str
+    date: datetime
     description: str
     amount: float
     currency: str
     status: str
-    suggested_category_name: str = None
-    reasoning: str = None
-    confidence: float = None
+    suggested_category_name: Optional[str] = None
+    reasoning: Optional[str] = None
+    confidence: Optional[float] = None
     is_split: bool = False
     splits: List[SplitSchema] = []
 
@@ -50,9 +51,6 @@ def get_transactions(
         query = query.filter(Transaction.account_id.in_(acc_id_list))
         
     txs = query.all()
-    # Convert date to string for schema
-    for tx in txs:
-        tx.date = tx.date.strftime("%Y-%m-%d")
     return txs
 
 @router.post("/sync")
