@@ -55,6 +55,7 @@ export interface Transaction {
     receipt_url?: string;
     is_exported?: boolean;
     tags?: string[];
+    suggested_tags?: string[];
     transaction_type?: string;
     note?: string;
 }

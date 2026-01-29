@@ -37,6 +37,7 @@ class TransactionSchema(BaseModel):
     transaction_type: Optional[str] = None
     note: Optional[str] = None
     tags: List[str] = []
+    suggested_tags: List[str] = []
     status: str
     suggested_category_name: Optional[str] = None
     reasoning: Optional[str] = None

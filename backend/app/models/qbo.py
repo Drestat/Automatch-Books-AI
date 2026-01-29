@@ -64,6 +64,7 @@ class Transaction(Base):
     transaction_type = Column(String) # Expense, Check, CreditCard, etc.
     note = Column(String) # User editable note (initially from Memo)
     tags = Column(JSON, default=[]) # List of strings
+    suggested_tags = Column(JSON, default=[]) # AI suggested tags
     status = Column(String, default="unmatched") # unmatched, pending_approval, approved
     
     # AI Suggestions (Main / Single)

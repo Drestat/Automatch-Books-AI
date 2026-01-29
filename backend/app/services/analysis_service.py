@@ -162,6 +162,11 @@ class AnalysisService:
             if cat_match:
                 tx.suggested_category_id = cat_match.id
 
+        # Capture AI Suggested Tags
+        suggested_tags = analysis.get('tags', [])
+        if suggested_tags:
+            tx.suggested_tags = suggested_tags
+
         # Handle Splits
         splits_data = analysis.get('splits', [])
         if splits_data:

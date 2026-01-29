@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Check, Edit2, Info, ArrowUpRight, FilePlus, Tags, Split as SplitIcon, ExternalLink, CheckCircle2 } from 'lucide-react';
+import { Check, Edit2, Info, ArrowUpRight, FilePlus, Tags, Split as SplitIcon, ExternalLink, CheckCircle2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Split {
@@ -29,6 +29,7 @@ interface Transaction {
     transaction_type?: string;
     note?: string;
     tags?: string[];
+    suggested_tags?: string[];
     status: string;
     reasoning: string;
     confidence: number;
@@ -251,6 +252,23 @@ export default function TransactionCard({
                                     )}
                                 </span>
                             ))}
+
+                            {/* AI Suggested Tags */}
+                            {tx.suggested_tags && tx.suggested_tags.length > 0 && tx.suggested_tags.map((tag, i) => {
+                                // Only show if not already in active tags
+                                if (tx.tags && tx.tags.includes(tag)) return null;
+                                return (
+                                    <button
+                                        key={`suggest-${i}`}
+                                        onClick={() => onTagAdd && onTagAdd(tx.id, tag)}
+                                        className="px-2 py-1 rounded border border-dashed border-brand/50 text-[10px] text-brand/80 hover:bg-brand/10 transition-colors flex items-center gap-1 group/suggest"
+                                        title="Click to add suggested tag"
+                                    >
+                                        <Sparkles size={8} /> {tag}
+                                    </button>
+                                );
+                            })}
+
                             {isAddingTag ? (
                                 <form
                                     onSubmit={(e) => {

@@ -112,8 +112,41 @@ class TransactionService:
                 tx.suggested_category_name = qbo_category_name
                 tx.suggested_category_id = qbo_category_id
                 tx.confidence = 1.0
+                tx.confidence = 1.0
                 tx.reasoning = "Imported from QBO History"
             
+            # --- Smart Tagging Logic (Historical) ---
+            # Try to find a recent approved transaction with same Vendor/Description to copy tags
+            if not tx.tags:
+                historical_tx_query = self.db.query(Transaction).filter(
+                    Transaction.realm_id == self.connection.realm_id,
+                    Transaction.status == 'approved',
+                )
+                
+                # Filter by description or vendor name match
+                # Using simple description match for now as 'vendor_name' is derived
+                match_desc = vendor_name if vendor_name else tx.description
+                # We need to match somewhat loosely or strictly? Let's try strict description match first
+                # or strict vendor match if available.
+                
+                # Ideally we check: if we found a vendor name, match other txs with that vendor.
+                # But 'vendor_name' isn't a column on Transaction (it's embedded or looked up).
+                # So we match on description.
+                historical_tx_query = historical_tx_query.filter(Transaction.description == tx.description)
+                
+                # Ensure it has tags
+                # JSON/Array check in SQL Alchemy can be tricky depending on backend, 
+                # but checking for non-empty list in python after fetch is safer if volume is low,
+                # or using proper JSON operators. 
+                # For simplicity/compatibility, let's just order by date and check in python.
+                historical_tx_query = historical_tx_query.order_by(Transaction.date.desc())
+                
+                candidate = historical_tx_query.first()
+                if candidate and candidate.tags:
+                    tx.tags = candidate.tags
+                    # If we auto-tagged, append to reasoning
+                    tx.reasoning = (tx.reasoning or "") + " [Auto-Tagged from History]"
+
             self.db.add(tx)
         self.db.commit()
         self._log("sync", "transaction", len(purchases), "success")
