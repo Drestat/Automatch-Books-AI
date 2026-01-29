@@ -10,13 +10,26 @@ interface Split {
     description: string;
 }
 
+interface Category {
+    id: string;
+    name: string;
+}
+
+interface Tag {
+    id: string;
+    name: string;
+}
+
 interface Transaction {
     id: string;
     date: string;
     description: string;
     amount: number;
     currency: string;
-    suggested_category_name: string;
+    transaction_type?: string;
+    note?: string;
+    tags?: string[];
+    status: string;
     reasoning: string;
     confidence: number;
     is_split?: boolean;
@@ -26,19 +39,36 @@ interface Transaction {
     category_reasoning?: string;
     note_reasoning?: string;
     is_exported?: boolean;
-    tags?: string[];
+    suggested_category_name: string;
 }
 
 interface TransactionCardProps {
     tx: Transaction;
     onAccept: (id: string) => void;
     onReceiptUpload?: (id: string, file: File) => void;
+    availableCategories?: Category[];
+    availableTags?: Tag[];
+    onCategoryChange?: (txId: string, categoryId: string, categoryName: string) => void;
+    onTagAdd?: (txId: string, tagName: string) => void;
+    onTagRemove?: (txId: string, tagName: string) => void;
 }
 
-export default function TransactionCard({ tx, onAccept, onReceiptUpload }: TransactionCardProps) {
+export default function TransactionCard({
+    tx,
+    onAccept,
+    onReceiptUpload,
+    availableCategories = [],
+    availableTags = [],
+    onCategoryChange,
+    onTagAdd,
+    onTagRemove
+}: TransactionCardProps) {
     const isExpense = tx.amount < 0;
-    const [showReasoning, setShowReasoning] = React.useState(false);
+    const [showReasoning, setShowReasoning] = React.useState(true);
     const [isUploading, setIsUploading] = React.useState(false);
+    const [isEditingCategory, setIsEditingCategory] = React.useState(false);
+    const [isAddingTag, setIsAddingTag] = React.useState(false);
+    const [newTag, setNewTag] = React.useState("");
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const handleAccept = async () => {
@@ -67,6 +97,10 @@ export default function TransactionCard({ tx, onAccept, onReceiptUpload }: Trans
                         </div>
                         <div>
                             <div className="flex items-center gap-2 mb-1">
+                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider border border-white/10 px-1.5 py-0.5 rounded">{tx.transaction_type || 'TRANSACTION'}</span>
+                                <span className="text-[10px] text-white/40">{tx.date}</span>
+                            </div>
+                            <div className="flex items-center gap-2 mb-1">
                                 <h3 className="text-lg font-bold tracking-tight text-white group-hover:text-brand transition-colors">
                                     {tx.description}
                                 </h3>
@@ -74,7 +108,8 @@ export default function TransactionCard({ tx, onAccept, onReceiptUpload }: Trans
                                     <span className="px-1.5 py-0.5 rounded-md bg-brand/20 border border-brand/30 text-[8px] font-black uppercase tracking-widest text-brand">Split</span>
                                 )}
                             </div>
-                            <p className="text-sm text-white/40">{tx.date}</p>
+                            <p className="text-xs text-brand/80 font-mono">My Bank • {tx.id.slice(-4)}</p>
+
                         </div>
                     </div>
                     <div className="text-right">
@@ -114,7 +149,33 @@ export default function TransactionCard({ tx, onAccept, onReceiptUpload }: Trans
                                     ))}
                                 </div>
                             ) : (
-                                <p className="text-lg font-medium text-white/90">{tx.suggested_category_name}</p>
+                                isEditingCategory ? (
+                                    <div className="relative">
+                                        <select
+                                            className="w-full bg-black border border-brand/50 rounded px-2 py-1 text-sm text-white focus:outline-none"
+                                            onChange={(e) => {
+                                                const cat = availableCategories.find(c => c.id === e.target.value);
+                                                if (cat && onCategoryChange) {
+                                                    onCategoryChange(tx.id, cat.id, cat.name);
+                                                    setIsEditingCategory(false);
+                                                }
+                                            }}
+                                            defaultValue=""
+                                        >
+                                            <option value="" disabled>Select Category...</option>
+                                            {availableCategories.map(c => (
+                                                <option key={c.id} value={c.id}>{c.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2 group/edit cursor-pointer" onClick={() => setIsEditingCategory(true)}>
+                                        <p className="text-lg font-medium text-white/90 hover:text-brand transition-colors border-b border-dashed border-white/20 hover:border-brand/50">
+                                            {tx.suggested_category_name}
+                                        </p>
+                                        <Edit2 size={12} className="text-white/20 group-hover/edit:text-brand opacity-0 group-hover/edit:opacity-100 transition-all" />
+                                    </div>
+                                )
                             )}
                         </div>
                         <button
@@ -162,6 +223,68 @@ export default function TransactionCard({ tx, onAccept, onReceiptUpload }: Trans
                             </motion.div>
                         )}
                     </AnimatePresence>
+
+                    {/* Editable Note & Tags Section */}
+                    <div className="mt-4 pt-4 border-t border-white/5">
+                        <label className="block text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">Note for Team</label>
+                        <div className="relative">
+                            <input
+                                type="text"
+                                defaultValue={tx.note || ''}
+                                placeholder="Add a note..."
+                                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-brand/50 transition-colors"
+                            />
+                        </div>
+
+                        {/* Tags Display */}
+                        {tx.tags && tx.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-3 items-center">
+                                {tx.tags.map((tag, i) => (
+                                    <span key={i} className="px-2 py-1 rounded bg-white/5 border border-white/10 text-[10px] text-white/60 flex items-center gap-1 group/tag">
+                                        <Tags size={10} /> {tag}
+                                        {onTagRemove && (
+                                            <button
+                                                onClick={() => onTagRemove(tx.id, tag)}
+                                                className="hover:text-rose-400 ml-1 opacity-0 group-hover/tag:opacity-100 transition-opacity"
+                                            >
+                                                ×
+                                            </button>
+                                        )}
+                                    </span>
+                                ))}
+                                {isAddingTag ? (
+                                    <form
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            if (newTag && onTagAdd) {
+                                                onTagAdd(tx.id, newTag);
+                                                setNewTag("");
+                                                setIsAddingTag(false);
+                                            }
+                                        }}
+                                        className="flex items-center gap-1"
+                                    >
+                                        <input
+                                            type="text"
+                                            autoFocus
+                                            value={newTag}
+                                            onChange={(e) => setNewTag(e.target.value)}
+                                            placeholder="Tag..."
+                                            className="w-20 bg-black/20 border border-brand/50 rounded px-1.5 py-0.5 text-[10px] text-white focus:outline-none"
+                                            onBlur={() => setTimeout(() => setIsAddingTag(false), 200)}
+                                        />
+                                    </form>
+                                ) : (
+                                    <button
+                                        onClick={() => setIsAddingTag(true)}
+                                        className="px-2 py-1 rounded border border-dashed border-white/10 text-[10px] text-white/30 hover:text-brand hover:border-brand/30 transition-colors"
+                                    >
+                                        + Tag
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div className="flex gap-3">

@@ -54,11 +54,28 @@ export interface Transaction {
     splits?: TransactionSplit[];
     receipt_url?: string;
     is_exported?: boolean;
+    tags?: string[];
+    transaction_type?: string;
+    note?: string;
 }
 
 export interface Account {
     id: string;
     name: string;
+    nickname?: string;
+    balance?: number;
+    currency?: string;
+}
+
+export interface Tag {
+    id: string;
+    name: string;
+}
+
+export interface Category {
+    id: string;
+    name: string;
+    type: string;
 }
 
 export const useQBO = () => {
@@ -73,6 +90,8 @@ export const useQBO = () => {
     const [loading, setLoading] = useState(false);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [accounts, setAccounts] = useState<Account[]>([]);
+    const [tags, setTags] = useState<Tag[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [subscriptionStatus, setSubscriptionStatus] = useState<'active' | 'inactive' | 'free' | 'expired' | 'trial' | 'no_plan' | null>(null);
     const [daysRemaining, setDaysRemaining] = useState<number>(0);
 
@@ -145,6 +164,28 @@ export const useQBO = () => {
         }
     }, []);
 
+    const fetchTags = useCallback(async (realm: string) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/accounts/tags?realm_id=${realm}`);
+            if (response.ok) {
+                setTags(await response.json());
+            }
+        } catch (error) {
+            console.error("Failed to fetch tags", error);
+        }
+    }, []);
+
+    const fetchCategories = useCallback(async (realm: string) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/accounts/categories?realm_id=${realm}`);
+            if (response.ok) {
+                setCategories(await response.json());
+            }
+        } catch (error) {
+            console.error("Failed to fetch categories", error);
+        }
+    }, []);
+
     // Effect 1: Handle URL Params (QBO Connections) - INDEPENDENT of User Loading
     // This ensures that even if Clerk is slow, we act on the redirect immediately.
     useEffect(() => {
@@ -197,6 +238,8 @@ export const useQBO = () => {
             setIsConnected(true);
             fetchAccounts(storedRealm as string);
             fetchTransactions(storedRealm as string);
+            fetchTags(storedRealm as string);
+            fetchCategories(storedRealm as string);
         }
     }, [fetchTransactions]);
 
@@ -485,6 +528,59 @@ export const useQBO = () => {
         }
     };
 
+    const updateTransaction = async (txId: string, updates: any) => {
+        if (!realmId) return;
+        try {
+            const response = await fetch(`${API_BASE_URL}/transactions/${txId}?realm_id=${realmId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updates)
+            });
+            if (response.ok) {
+                const updatedTx = await response.json();
+                setTransactions(prev => prev.map(tx => tx.id === txId ? updatedTx : tx));
+                return updatedTx;
+            }
+        } catch (e) {
+            console.error("Update Transaction Failed", e);
+        }
+    };
+
+    const createTag = async (name: string) => {
+        if (!realmId) return;
+        try {
+            const response = await fetch(`${API_BASE_URL}/accounts/tags?realm_id=${realmId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            if (response.ok) {
+                const newTag = await response.json();
+                setTags(prev => [...prev, newTag]);
+                return newTag;
+            }
+        } catch (e) {
+            console.error("Create Tag Failed", e);
+        }
+    };
+
+    const updateBankNickname = async (accountId: string, nickname: string) => {
+        if (!realmId) return;
+        try {
+            const response = await fetch(`${API_BASE_URL}/accounts/accounts/${accountId}?realm_id=${realmId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nickname })
+            });
+            if (response.ok) {
+                setAccounts(prev => prev.map(a => a.id === accountId ? { ...a, nickname } : a));
+                showToast('Nickname updated', 'success');
+            }
+        } catch (e) {
+            console.error("Update Nickname Failed", e);
+        }
+    };
+
     const disconnect = () => {
         localStorage.removeItem('qbo_realm_id');
         localStorage.removeItem('is_demo_mode');
@@ -513,7 +609,12 @@ export const useQBO = () => {
         subscriptionStatus,
         daysRemaining,
         accounts,
+        tags,
+        categories,
         fetchTransactions,
+        updateTransaction,
+        createTag,
+        updateBankNickname,
         disconnect
     };
 };

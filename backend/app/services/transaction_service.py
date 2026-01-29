@@ -1,8 +1,9 @@
 from datetime import datetime
 from sqlalchemy.orm import Session
 
-from app.models.qbo import Transaction, QBOConnection, Category, Customer, SyncLog, TransactionSplit
+from app.models.qbo import Transaction, QBOConnection, Category, Customer, SyncLog, TransactionSplit, BankAccount, Tag
 from app.services.qbo_client import QBOClient
+import uuid
 
 class TransactionService:
     def __init__(self, db: Session, qbo_connection: QBOConnection):
@@ -26,7 +27,31 @@ class TransactionService:
         """Syncs all entities for the current connection"""
         self.sync_categories()
         self.sync_customers()
+        self.sync_categories()
+        self.sync_customers()
+        self.sync_bank_accounts()
+        # self.sync_tags() # Disabled until we confirm API support
         self.sync_transactions()
+
+    def sync_bank_accounts(self):
+        # Query for Bank and Credit Card accounts
+        query = "SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')"
+        data = self.client.query(query)
+        accounts = data.get("QueryResponse", {}).get("Account", [])
+        
+        for a in accounts:
+            bank = self.db.query(BankAccount).filter(BankAccount.id == a["Id"]).first()
+            if not bank:
+                bank = BankAccount(id=a["Id"], realm_id=self.connection.realm_id)
+            
+            bank.name = a["Name"]
+            bank.currency = a.get("CurrencyRef", {}).get("value", "USD")
+            bank.balance = a.get("CurrentBalance", 0)
+            # nickname is left alone as it's user defined locally
+            
+            self.db.add(bank)
+        self.db.commit()
+        self._log("sync", "bank_account", len(accounts), "success")
 
     def sync_transactions(self):
         data = self.client.query("SELECT * FROM Purchase")
@@ -65,7 +90,30 @@ class TransactionService:
 
             tx.amount = p.get("TotalAmt", 0)
             tx.currency = p.get("CurrencyRef", {}).get("value", "USD")
+            tx.transaction_type = p.get("PaymentType", "Expense") # Default to Expense if missing
+            tx.note = p.get("PrivateNote")
             tx.raw_json = p
+            # Extract Expense Category from Lines (for History/Training)
+            qbo_category_name = None
+            qbo_category_id = None
+            
+            if "Line" in p:
+                for line in p["Line"]:
+                    if "AccountBasedExpenseLineDetail" in line:
+                        detail = line["AccountBasedExpenseLineDetail"]
+                        if "AccountRef" in detail:
+                            qbo_category_name = detail["AccountRef"].get("name")
+                            qbo_category_id = detail["AccountRef"].get("value")
+                            break # Just grab the first one for now
+            
+            # Logic: If QBO has a valid category (not Uncategorized), treat as Approved History
+            if qbo_category_name and "Uncategorized" not in qbo_category_name:
+                tx.status = 'approved'
+                tx.suggested_category_name = qbo_category_name
+                tx.suggested_category_id = qbo_category_id
+                tx.confidence = 1.0
+                tx.reasoning = "Imported from QBO History"
+            
             self.db.add(tx)
         self.db.commit()
         self._log("sync", "transaction", len(purchases), "success")

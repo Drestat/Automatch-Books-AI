@@ -22,12 +22,21 @@ class SplitSchema(BaseModel):
     class Config:
         from_attributes = True
 
+class TransactionUpdate(BaseModel):
+    note: Optional[str] = None
+    tags: Optional[List[str]] = None
+    suggested_category_id: Optional[str] = None
+    suggested_category_name: Optional[str] = None
+
 class TransactionSchema(BaseModel):
     id: str
     date: datetime
     description: str
     amount: float
     currency: str
+    transaction_type: Optional[str] = None
+    note: Optional[str] = None
+    tags: List[str] = []
     status: str
     suggested_category_name: Optional[str] = None
     reasoning: Optional[str] = None
@@ -99,6 +108,29 @@ def approve_transaction(realm_id: str, tx_id: str, db: Session = Depends(get_db)
         return {"message": "Transaction approved and synced to QBO", "result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.patch("/{tx_id}", response_model=TransactionSchema)
+def update_transaction(realm_id: str, tx_id: str, update: TransactionUpdate, db: Session = Depends(get_db)):
+    tx = db.query(Transaction).filter(Transaction.id == tx_id, Transaction.realm_id == realm_id).first()
+    if not tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    # We update fields if they are explicitly sent (even empty strings or lists)
+    # But checks for None to respect partial updates
+    if update.note is not None:
+        tx.note = update.note
+    if update.tags is not None:
+        tx.tags = update.tags
+    if update.suggested_category_id is not None:
+        tx.suggested_category_id = update.suggested_category_id
+        tx.suggested_category_name = update.suggested_category_name or tx.suggested_category_name
+        # Reset approval status if category changes
+        if tx.status == 'approved':
+             tx.status = 'pending_approval'
+        
+    db.commit()
+    db.refresh(tx)
+    return tx
 
 @router.post("/upload-receipt")
 def upload_receipt(

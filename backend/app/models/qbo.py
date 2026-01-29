@@ -32,6 +32,24 @@ class Customer(Base):
     fully_qualified_name = Column(String)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
+class BankAccount(Base):
+    __tablename__ = "bank_accounts"
+    id = Column(String, primary_key=True) # QBO Account Id
+    realm_id = Column(String, ForeignKey("qbo_connections.realm_id", ondelete="CASCADE"), index=True)
+    name = Column(String) # Official QBO Name
+    nickname = Column(String, nullable=True) # User defined nickname
+    currency = Column(String, default="USD")
+    balance = Column(Numeric(15, 2), default=0)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+class Tag(Base):
+    __tablename__ = "tags"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    realm_id = Column(String, ForeignKey("qbo_connections.realm_id", ondelete="CASCADE"), index=True)
+    name = Column(String, nullable=False)
+    qbo_tag_id = Column(String, nullable=True) # If synced from QBO
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 class Transaction(Base):
     __tablename__ = "transactions"
     id = Column(String, primary_key=True) # QBO Id
@@ -42,6 +60,10 @@ class Transaction(Base):
     currency = Column(String)
     account_id = Column(String)
     account_name = Column(String)
+    account_name = Column(String)
+    transaction_type = Column(String) # Expense, Check, CreditCard, etc.
+    note = Column(String) # User editable note (initially from Memo)
+    tags = Column(JSON, default=[]) # List of strings
     status = Column(String, default="unmatched") # unmatched, pending_approval, approved
     
     # AI Suggestions (Main / Single)

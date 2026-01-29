@@ -75,6 +75,57 @@ def fastapi_app():
             return {"error": "Startup Failed", "detail": str(e)}
         return err_app
 
+@app.function(image=image, secrets=[secrets], timeout=600)
+def sync_user_data(realm_id: str):
+    print(f"🔄 [Modal] Starting background sync for {realm_id}")
+    import sys
+    if "/root" not in sys.path:
+        sys.path.append("/root")
+
+    from app.services.transaction_service import TransactionService
+    from app.models.qbo import QBOConnection
+    from app.db.session import SessionLocal
+    
+    db = SessionLocal()
+    try:
+        connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
+        if not connection:
+            print("❌ Connection not found")
+            return
+            
+        service = TransactionService(db, connection)
+        service.sync_all()
+        print("✅ Sync complete")
+        
+        # CHAIN TO AI
+        print("🧠 Triggering AI Analysis...")
+        process_ai_categorization.spawn(realm_id)
+        
+    except Exception as e:
+        print(f"❌ Sync failed: {e}")
+    finally:
+        db.close()
+
+@app.function(image=image, secrets=[secrets], timeout=600)
+def process_ai_categorization(realm_id: str, tx_id: str = None):
+    print(f"🧠 [Modal] Starting AI Analysis for {realm_id}")
+    import sys
+    if "/root" not in sys.path:
+        sys.path.append("/root")
+
+    from app.db.session import SessionLocal
+    from app.services.analysis_service import AnalysisService
+    
+    db = SessionLocal()
+    try:
+        service = AnalysisService(db, realm_id)
+        results = service.analyze_transactions(tx_id=tx_id)
+        print(f"✅ Analysis complete. Processed {len(results)} transactions.")
+    except Exception as e:
+        print(f"❌ Analysis failed: {e}")
+    finally:
+        db.close()
+
 @app.function(image=image, secrets=[secrets])
 def daily_maintenance():
     print("Running daily maintenance tasks...")

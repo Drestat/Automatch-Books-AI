@@ -32,9 +32,9 @@ def inspect_qbo_data(realm_id: str):
         print(f"Total Transactions in DB: {count}")
         
         if count > 0:
-            txs = db.query(Transaction).filter(Transaction.realm_id == realm_id).limit(3).all()
+            txs = db.query(Transaction).filter(Transaction.realm_id == realm_id).limit(5).all()
             for t in txs:
-                print(f" - Tx: {t.description} | Amt: {t.amount} | AcctID: {t.account_id} | AcctName: {t.account_name}")
+                print(f" - Tx: {t.description} | Amt: {t.amount} | AI: {t.suggested_category_name} | Conf: {t.confidence}")
         else:
             print("DB is EMPTY. Sync didn't work or hasn't finished.")
 

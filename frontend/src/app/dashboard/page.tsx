@@ -16,7 +16,8 @@ import {
   Lock,
   BarChart3,
   Coins,
-  Filter
+  Filter,
+  Edit2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserButton } from "@clerk/nextjs";
@@ -47,6 +48,11 @@ function DashboardContent() {
     daysRemaining,
     accounts,
     fetchTransactions,
+    updateTransaction,
+    updateBankNickname,
+    createTag,
+    tags,
+    categories,
     disconnect
   } = useQBO();
 
@@ -192,14 +198,27 @@ function DashboardContent() {
                 <div className="absolute top-full right-0 mt-2 w-56 bg-[#0a0a0a] border border-white/10 rounded-xl shadow-xl overflow-hidden hidden group-hover/filter:block z-50">
                   <div className="p-2 space-y-1">
                     {accounts.map(acc => (
-                      <button
+                      <div
                         key={acc.id}
-                        onClick={() => toggleAccount(acc.id)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-xs flex items-center justify-between transition-colors ${selectedAccounts.includes(acc.id) ? 'bg-brand/20 text-brand' : 'hover:bg-white/5 text-white/60'}`}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs flex items-center justify-between transition-colors group/acc ${selectedAccounts.includes(acc.id) ? 'bg-brand/20 text-brand' : 'hover:bg-white/5 text-white/60'}`}
                       >
-                        <span className="truncate">{acc.name}</span>
-                        {selectedAccounts.includes(acc.id) && <div className="w-2 h-2 rounded-full bg-brand" />}
-                      </button>
+                        <button onClick={() => toggleAccount(acc.id)} className="flex-1 text-left truncate">
+                          {acc.nickname || acc.name}
+                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newName = window.prompt("Rename this account (Nickname):", acc.nickname || acc.name);
+                              if (newName) updateBankNickname(acc.id, newName);
+                            }}
+                            className="opacity-0 group-hover/acc:opacity-100 hover:text-white transition-opacity text-white/40"
+                          >
+                            <Edit2 size={10} />
+                          </button>
+                          {selectedAccounts.includes(acc.id) && <div className="w-2 h-2 rounded-full bg-brand" />}
+                        </div>
+                      </div>
                     ))}
                     {selectedAccounts.length > 0 && (
                       <button
@@ -349,7 +368,30 @@ function DashboardContent() {
                       exit={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}
                       transition={{ duration: 0.4, delay: index * 0.1 }}
                     >
-                      <TransactionCard tx={tx} onAccept={handleAccept} onReceiptUpload={handleReceiptUpload} />
+                      <TransactionCard
+                        tx={tx}
+                        onAccept={handleAccept}
+                        onReceiptUpload={handleReceiptUpload}
+                        availableTags={tags}
+                        availableCategories={categories}
+                        onCategoryChange={async (txId, catId, catName) => {
+                          await updateTransaction(txId, { suggested_category_id: catId, suggested_category_name: catName });
+                        }}
+                        onTagAdd={async (txId, tag) => {
+                          const currentTags = tx.tags || [];
+                          if (!currentTags.includes(tag)) {
+                            await updateTransaction(txId, { tags: [...currentTags, tag] });
+                            // Create global tag if new
+                            if (!tags.find(t => t.name === tag)) {
+                              createTag(tag);
+                            }
+                          }
+                        }}
+                        onTagRemove={async (txId, tag) => {
+                          const currentTags = tx.tags || [];
+                          await updateTransaction(txId, { tags: currentTags.filter(t => t !== tag) });
+                        }}
+                      />
                     </motion.div>
                   ))}
                 </AnimatePresence>
