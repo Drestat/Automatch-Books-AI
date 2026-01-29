@@ -514,6 +514,7 @@ export const useQBO = () => {
         daysRemaining,
         accounts,
         fetchTransactions,
-        disconnect
+        disconnect,
+        realmId // Exporting for debug
     };
 };
