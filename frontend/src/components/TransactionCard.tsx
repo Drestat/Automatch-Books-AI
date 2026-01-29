@@ -237,53 +237,51 @@ export default function TransactionCard({
                         </div>
 
                         {/* Tags Display */}
-                        {tx.tags && tx.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-3 items-center">
-                                {tx.tags.map((tag, i) => (
-                                    <span key={i} className="px-2 py-1 rounded bg-white/5 border border-white/10 text-[10px] text-white/60 flex items-center gap-1 group/tag">
-                                        <Tags size={10} /> {tag}
-                                        {onTagRemove && (
-                                            <button
-                                                onClick={() => onTagRemove(tx.id, tag)}
-                                                className="hover:text-rose-400 ml-1 opacity-0 group-hover/tag:opacity-100 transition-opacity"
-                                            >
-                                                ×
-                                            </button>
-                                        )}
-                                    </span>
-                                ))}
-                                {isAddingTag ? (
-                                    <form
-                                        onSubmit={(e) => {
-                                            e.preventDefault();
-                                            if (newTag && onTagAdd) {
-                                                onTagAdd(tx.id, newTag);
-                                                setNewTag("");
-                                                setIsAddingTag(false);
-                                            }
-                                        }}
-                                        className="flex items-center gap-1"
-                                    >
-                                        <input
-                                            type="text"
-                                            autoFocus
-                                            value={newTag}
-                                            onChange={(e) => setNewTag(e.target.value)}
-                                            placeholder="Tag..."
-                                            className="w-20 bg-black/20 border border-brand/50 rounded px-1.5 py-0.5 text-[10px] text-white focus:outline-none"
-                                            onBlur={() => setTimeout(() => setIsAddingTag(false), 200)}
-                                        />
-                                    </form>
-                                ) : (
-                                    <button
-                                        onClick={() => setIsAddingTag(true)}
-                                        className="px-2 py-1 rounded border border-dashed border-white/10 text-[10px] text-white/30 hover:text-brand hover:border-brand/30 transition-colors"
-                                    >
-                                        + Tag
-                                    </button>
-                                )}
-                            </div>
-                        )}
+                        <div className="flex flex-wrap gap-2 mt-3 items-center">
+                            {tx.tags && tx.tags.map((tag, i) => (
+                                <span key={i} className="px-2 py-1 rounded bg-white/5 border border-white/10 text-[10px] text-white/60 flex items-center gap-1 group/tag">
+                                    <Tags size={10} /> {tag}
+                                    {onTagRemove && (
+                                        <button
+                                            onClick={() => onTagRemove(tx.id, tag)}
+                                            className="hover:text-rose-400 ml-1 opacity-0 group-hover/tag:opacity-100 transition-opacity"
+                                        >
+                                            ×
+                                        </button>
+                                    )}
+                                </span>
+                            ))}
+                            {isAddingTag ? (
+                                <form
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                        if (newTag && onTagAdd) {
+                                            onTagAdd(tx.id, newTag);
+                                            setNewTag("");
+                                            setIsAddingTag(false);
+                                        }
+                                    }}
+                                    className="flex items-center gap-1"
+                                >
+                                    <input
+                                        type="text"
+                                        autoFocus
+                                        value={newTag}
+                                        onChange={(e) => setNewTag(e.target.value)}
+                                        placeholder="Tag..."
+                                        className="w-20 bg-black/20 border border-brand/50 rounded px-1.5 py-0.5 text-[10px] text-white focus:outline-none"
+                                        onBlur={() => setTimeout(() => setIsAddingTag(false), 200)}
+                                    />
+                                </form>
+                            ) : (
+                                <button
+                                    onClick={() => setIsAddingTag(true)}
+                                    className="px-2 py-1 rounded border border-dashed border-white/10 text-[10px] text-white/30 hover:text-brand hover:border-brand/30 transition-colors"
+                                >
+                                    + Tag
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -321,7 +319,8 @@ export default function TransactionCard({
 
                     <motion.button
                         whileTap={{ scale: 0.95 }}
-                        className="w-12 h-12 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center justify-center text-white/60 hover:text-white transition-all"
+                        onClick={() => setIsAddingTag(true)}
+                        className={`w-12 h-12 ${isAddingTag ? 'bg-brand/20 text-brand border-brand/30' : 'bg-white/5 hover:bg-white/10'} border border-white/10 rounded-xl flex items-center justify-center text-white/60 hover:text-white transition-all`}
                         title="Add Tags"
                     >
                         <Tags size={18} />
