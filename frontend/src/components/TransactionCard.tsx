@@ -276,9 +276,9 @@ export default function TransactionCard({
                             ) : (
                                 <button
                                     onClick={() => setIsAddingTag(true)}
-                                    className="px-2 py-1 rounded border border-dashed border-white/10 text-[10px] text-white/30 hover:text-brand hover:border-brand/30 transition-colors"
+                                    className="px-2 py-1 rounded border border-dashed border-brand/30 text-[10px] text-brand hover:bg-brand/10 transition-colors"
                                 >
-                                    + Tag
+                                    + Add Tag
                                 </button>
                             )}
                         </div>
