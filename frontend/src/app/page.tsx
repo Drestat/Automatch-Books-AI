@@ -52,6 +52,7 @@ export default function LandingPage() {
                             <Sparkles className="text-white" size={16} />
                         </div>
                         <span className="font-bold tracking-tight text-base sm:text-lg whitespace-nowrap">AutoMatch Books AI</span>
+                        <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/40 font-mono">f3.10.2</span>
                     </div>
                     <div className="flex items-center gap-3 sm:gap-6">
                         <SignedOut>
