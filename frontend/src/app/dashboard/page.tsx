@@ -66,8 +66,12 @@ function DashboardContent() {
   useEffect(() => {
     if (isConnected && !isDemo && isLoaded) {
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('code') && urlParams.get('realmId')) {
+      const isNewConnection = localStorage.getItem('is_new_connection') === 'true';
+
+      if ((urlParams.get('code') && urlParams.get('realmId')) || isNewConnection) {
         setShowAccountModal(true);
+        // Clear the flag so it doesn't re-trigger
+        localStorage.removeItem('is_new_connection');
       }
     }
   }, [isConnected, isDemo, isLoaded]);
@@ -194,7 +198,7 @@ function DashboardContent() {
                 {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
               </span>
               <span className="px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] uppercase font-bold tracking-wider ml-2">
-                v3.9.6 | f3.11.9
+                v3.9.6 | f3.11.10
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">

@@ -111,6 +111,7 @@ export const useQBO = () => {
         try {
             console.log('Processing QBO Success Redirect with Realm:', realm);
             localStorage.setItem('qbo_realm_id', realm);
+            localStorage.setItem('is_new_connection', 'true');
             setRealmId(realm);
             setIsConnected(true);
 
