@@ -221,16 +221,21 @@ export default function TransactionCard({
                                         </div>
                                     )}
                                     {tx.tax_deduction_note && (
-                                        <div className="mt-2 p-2 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <Sparkles size={10} className="text-emerald-400" />
-                                                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Tax Professional Tip</span>
+                                        <div className="mt-2 p-3 rounded-xl bg-brand/5 border border-brand/20 relative overflow-hidden group/tip">
+                                            <div className="absolute inset-0 bg-gradient-to-r from-brand/10 to-transparent opacity-0 group-hover/tip:opacity-100 transition-opacity" />
+                                            <div className="flex items-center gap-2 mb-1.5 relative z-10">
+                                                <div className="p-1 rounded-md bg-brand/20 text-brand">
+                                                    <Sparkles size={12} />
+                                                </div>
+                                                <span className="text-[10px] font-black text-brand uppercase tracking-[0.2em]">CPA Tax Strategy</span>
                                             </div>
-                                            <p className="text-[11px] text-white/70 leading-relaxed">{tx.tax_deduction_note}</p>
+                                            <p className="text-[11px] text-white/80 leading-relaxed font-medium relative z-10">{tx.tax_deduction_note}</p>
                                         </div>
                                     )}
-                                    {!tx.vendor_reasoning && !tx.category_reasoning && !tx.tax_deduction_note && (
-                                        <p className="text-xs text-white/40 leading-relaxed italic">{tx.reasoning}</p>
+                                    {!tx.vendor_reasoning && !tx.category_reasoning && !tx.tax_deduction_note && tx.reasoning && (
+                                        <div className="p-2 rounded-lg bg-white/5 border border-white/10">
+                                            <p className="text-xs text-white/40 leading-relaxed italic">{tx.reasoning}</p>
+                                        </div>
                                     )}
                                 </div>
                             </motion.div>
