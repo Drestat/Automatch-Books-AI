@@ -44,35 +44,50 @@ class TransactionService:
         return 1 # Tier 1 / Free
 
     def sync_bank_accounts(self):
-        # Query for Bank and Credit Card accounts
-        query = "SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')"
-        data = self.client.query(query)
-        accounts = data.get("QueryResponse", {}).get("Account", [])
+        print(f"🔄 [sync_bank_accounts] Starting for realm_id: {self.connection.realm_id}")
         
-        # Sort for display stability
-        accounts.sort(key=lambda x: x["Name"])
+        try:
+            # Query for Bank and Credit Card accounts
+            query = "SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')"
+            print(f"📝 [sync_bank_accounts] Executing query: {query}")
+            
+            data = self.client.query(query)
+            print(f"✅ [sync_bank_accounts] Query successful, response: {data}")
+            
+            accounts = data.get("QueryResponse", {}).get("Account", [])
+            print(f"📊 [sync_bank_accounts] Found {len(accounts)} accounts from QBO")
+            
+            # Sort for display stability
+            accounts.sort(key=lambda x: x["Name"])
 
-        # Sync ALL accounts so user can see them to select
-        # All default to is_active=False - user must choose
-        for a in accounts:
-            bank = self.db.query(BankAccount).filter(
-                BankAccount.id == a["Id"],
-                BankAccount.realm_id == self.connection.realm_id
-            ).first()
+            # Sync ALL accounts so user can see them to select
+            # All default to is_active=False - user must choose
+            for a in accounts:
+                bank = self.db.query(BankAccount).filter(
+                    BankAccount.id == a["Id"],
+                    BankAccount.realm_id == self.connection.realm_id
+                ).first()
+                
+                if not bank:
+                    bank = BankAccount(id=a["Id"], realm_id=self.connection.realm_id)
+                    bank.is_active = False  # User must explicitly activate
+                
+                bank.name = a["Name"]
+                bank.currency = a.get("CurrencyRef", {}).get("value", "USD")
+                bank.balance = a.get("CurrentBalance", 0)
+                
+                self.db.add(bank)
+                print(f"💾 [sync_bank_accounts] Saved account: {bank.name} (ID: {bank.id})")
+                
+            self.db.commit()
+            print(f"✅ [sync_bank_accounts] Committed {len(accounts)} accounts to database")
             
-            if not bank:
-                bank = BankAccount(id=a["Id"], realm_id=self.connection.realm_id)
-                bank.is_active = False  # User must explicitly activate
-            
-            bank.name = a["Name"]
-            bank.currency = a.get("CurrencyRef", {}).get("value", "USD")
-            bank.balance = a.get("CurrentBalance", 0)
-            
-            self.db.add(bank)
-            
-        self.db.commit()
-        
-        self._log("sync", "bank_account", len(accounts), "success", {"synced_metadata": len(accounts)})
+            self._log("sync", "bank_account", len(accounts), "success", {"synced_metadata": len(accounts)})
+        except Exception as e:
+            print(f"❌ [sync_bank_accounts] Error: {e}")
+            import traceback
+            print(f"📋 [sync_bank_accounts] Traceback: {traceback.format_exc()}")
+            raise  # Re-raise to let caller handle it
 
     def sync_transactions(self):
         # Only sync active accounts

@@ -155,24 +155,34 @@ def disconnect_qbo(realm_id: str, db: Session = Depends(get_db)):
     Disconnect from QuickBooks and delete all associated data.
     This removes the connection, transactions, bank accounts, and sync logs.
     """
+    print(f"🔌 [disconnect] Called with realm_id: {realm_id}")
     from app.models.qbo import Transaction, BankAccount, SyncLog, Category, Customer
     
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
     if not connection:
+        print(f"❌ [disconnect] No connection found for realm_id: {realm_id}")
         raise HTTPException(status_code=404, detail="Connection not found")
+    
+    print(f"✅ [disconnect] Found connection for user: {connection.user_id}")
     
     try:
         # Delete all associated data
-        db.query(Transaction).filter(Transaction.realm_id == realm_id).delete()
-        db.query(BankAccount).filter(BankAccount.realm_id == realm_id).delete()
-        db.query(SyncLog).filter(SyncLog.realm_id == realm_id).delete()
+        tx_count = db.query(Transaction).filter(Transaction.realm_id == realm_id).delete()
+        acc_count = db.query(BankAccount).filter(BankAccount.realm_id == realm_id).delete()
+        log_count = db.query(SyncLog).filter(SyncLog.realm_id == realm_id).delete()
+        
+        print(f"🗑️ [disconnect] Deleted: {tx_count} transactions, {acc_count} accounts, {log_count} logs")
         
         # Delete the connection itself
         db.delete(connection)
         db.commit()
         
+        print(f"✅ [disconnect] Successfully disconnected realm_id: {realm_id}")
         return {"status": "success", "message": "Disconnected from QuickBooks"}
     except Exception as e:
+        print(f"❌ [disconnect] Error: {e}")
+        import traceback
+        print(f"📋 [disconnect] Traceback: {traceback.format_exc()}")
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to disconnect: {str(e)}")
 
