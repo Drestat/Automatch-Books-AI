@@ -138,6 +138,11 @@ class AnalysisService:
         tx.confidence = confidence
         tx.status = 'pending_approval'
         
+        # Reset deeper reasoning for non-AI matches (or we could clear them)
+        tx.vendor_reasoning = reasoning
+        tx.category_reasoning = f"Suggested based on {method} matching history."
+        tx.tax_deduction_note = None
+        
         # Resolve ID
         cat_obj = next((c for c in categories_obj if c.name == suggested_cat), None)
         if cat_obj:
@@ -149,6 +154,10 @@ class AnalysisService:
         suggested_name = analysis.get('suggested_category')
         tx.suggested_category_name = suggested_name
         tx.reasoning = analysis.get('reasoning')
+        tx.vendor_reasoning = analysis.get('vendor_reasoning')
+        tx.category_reasoning = analysis.get('category_reasoning')
+        tx.note_reasoning = analysis.get('note_reasoning')
+        tx.tax_deduction_note = analysis.get('tax_deduction_note')
         tx.confidence = analysis.get('confidence')
         tx.status = 'pending_approval'
 

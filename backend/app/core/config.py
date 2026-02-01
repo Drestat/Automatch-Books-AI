@@ -12,7 +12,17 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "qbo_mirror")
     POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "localhost")
-    DATABASE_URL: str = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}?sslmode=require"
+    
+    # Priority: Env variable > Calculated slug
+    # Using a field that will be overridden by env if present
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+
+    def __init__(self, **values):
+        super().__init__(**values)
+        if not self.DATABASE_URL:
+            # Default for local dev (no SSL by default unless specified)
+            ssl_mode = "require" if self.POSTGRES_HOST != "localhost" else "prefer"
+            self.DATABASE_URL = f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}/{self.POSTGRES_DB}?sslmode={ssl_mode}"
 
     # Security
     BACKEND_CORS_ORIGINS: list[str] = ["*"]

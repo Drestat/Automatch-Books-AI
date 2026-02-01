@@ -39,6 +39,7 @@ interface Transaction {
     vendor_reasoning?: string;
     category_reasoning?: string;
     note_reasoning?: string;
+    tax_deduction_note?: string;
     is_exported?: boolean;
     suggested_category_name: string;
 }
@@ -217,7 +218,16 @@ export default function TransactionCard({
                                             <p className="text-xs text-white/60 leading-relaxed italic">"{tx.note_reasoning}"</p>
                                         </div>
                                     )}
-                                    {!tx.vendor_reasoning && !tx.category_reasoning && (
+                                    {tx.tax_deduction_note && (
+                                        <div className="mt-2 p-2 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <Sparkles size={10} className="text-emerald-400" />
+                                                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Tax Professional Tip</span>
+                                            </div>
+                                            <p className="text-[11px] text-white/70 leading-relaxed">{tx.tax_deduction_note}</p>
+                                        </div>
+                                    )}
+                                    {!tx.vendor_reasoning && !tx.category_reasoning && !tx.tax_deduction_note && (
                                         <p className="text-xs text-white/40 leading-relaxed italic">{tx.reasoning}</p>
                                     )}
                                 </div>

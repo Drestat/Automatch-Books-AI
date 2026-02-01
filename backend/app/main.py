@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import time
 
-# v3.9.2 - PRODUCTION DEPLOYMENT
+# v3.9.3 - AI REASONING POLISHED
 app = FastAPI(title="Automatch Books AI")
 
 # CORS - Allow All for Production Resilience
@@ -16,13 +16,13 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.9.2-prod"}
+    return {"status": "ok", "version": "3.9.3-prod"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.9.2",
+        "version": "3.9.3",
         "status": "ready"
     }
 

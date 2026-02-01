@@ -18,6 +18,7 @@ Rules:
    - vendor_reasoning: Explain how you identified the merchant (e.g., "SBUX" -> Starbucks).
    - category_reasoning: Why is this category correct? (e.g., "Coffee shop visit under $15 is typically Meals").
    - note_reasoning: Any additional context or flags (e.g., "High value for this vendor, flagged for review").
+   - tax_deduction_note: Is this tax deductible? Provide a brief accountant's tip (e.g., "Generally 50% deductible as a business meal").
 4. tags: Generate 1-3 tags for project/job costing if applicable. Examples: "Materials", "Travel", "Office", "Subcontractor".
 5. confidence: 0.0 to 1.0 based on how sure you are.
 
@@ -30,6 +31,7 @@ Output MUST be a valid JSON list of objects:
         "vendor_reasoning": "...",
         "category_reasoning": "...",
         "note_reasoning": "...",
+        "tax_deduction_note": "...",
         "tags": ["Tag1", "Tag2"],
         "confidence": 0.0,
         "is_split": boolean,

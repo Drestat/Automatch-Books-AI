@@ -71,6 +71,10 @@ class Transaction(Base):
     suggested_category_id = Column(String)
     suggested_category_name = Column(String)
     reasoning = Column(String)
+    vendor_reasoning = Column(String)
+    category_reasoning = Column(String)
+    note_reasoning = Column(String)
+    tax_deduction_note = Column(String)
     confidence = Column(Numeric(3, 2))
     
     # Splitting support
