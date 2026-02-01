@@ -69,9 +69,6 @@ app.add_middleware(
 def health_check():
     return {"status": "ok", "version": "3.10.2"}
 
-# Include the main API router
-app.include_router(api_router, prefix=settings.API_V1_STR)
-
 @app.get("/")
 def read_root():
     return {
@@ -79,3 +76,13 @@ def read_root():
         "version": "3.10.2",
         "status": "ready"
     }
+
+# Include the main API router
+print("🔌 [main.py] Including API router...")
+try:
+    app.include_router(api_router, prefix=settings.API_V1_STR)
+    print("✅ [main.py] API router included successfully.")
+except Exception as e:
+    print(f"❌ [main.py] FAILED to include API router: {e}")
+    import traceback
+    print(traceback.format_exc())
