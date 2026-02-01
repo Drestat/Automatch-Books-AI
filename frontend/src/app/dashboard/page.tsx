@@ -166,7 +166,7 @@ function DashboardContent() {
                 {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
               </span>
               <span className="px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] uppercase font-bold tracking-wider ml-2">
-                v3.9.3 | f3.10.4
+                v3.9.4 | f3.11.6
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">
@@ -321,8 +321,9 @@ function DashboardContent() {
                   <Clock className="text-brand-secondary mb-4" size={32} />
                   <h3 className="text-xl font-bold mb-2">Pending Review</h3>
                   <p className="text-sm text-white/50 leading-relaxed">
-                    You have <span className="text-white font-bold">{transactions.length}</span> transactions waiting for your confirmation.
+                    You have <span className="text-white font-bold">{transactions.filter(t => t.status !== 'approved').length}</span> transactions waiting for your confirmation.
                   </p>
+
                 </div>
                 <button className="btn-glass w-full text-xs font-bold py-3 mt-6">
                   View History
