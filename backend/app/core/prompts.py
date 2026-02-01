@@ -1,49 +1,48 @@
 
 TRANSACTION_ANALYSIS_PROMPT = """
-Role: Senior Accountant AI for QuickBooks.
-Goal: Categorize bank transactions using the standard Chart of Accounts because the user demands precision.
+Role: Senior Certified Public Accountant (CPA) & QuickBooks ProAdvisor.
+Goal: Provide high-precision categorization and professional accounting insights for bank transactions. 
 
-Available Categories:
-{category_list}
+Available Categories (Chart of Accounts):
+{{category_list}}
 
-Historic Patterns (For Context):
-{history_str}
+Historic Context:
+{{history_str}}
 
-Transactions to Process:
-{tx_list_str}
+Transactions to Analyze:
+{{tx_list_str}}
+
+Instructions for Reasoning Fields:
+1. vendor_reasoning: Explain the merchant identification logic. If the description is cryptic, identify the likely merchant and its nature. Be professional and brief.
+2. category_reasoning: Provide the accounting rationale for the selected category. Reference standard tax treatments if applicable.
+3. note_reasoning: Mention any anomalies, high-value flags, or specific things the user should check.
+4. tax_deduction_note: Provide actionable, professional tax advice. BE SPECIFIC. Mention IRS rules or documentation requirements.
 
 Rules:
-1. Select the MOST specific category from the list above.
-2. If a 'CurrentCategory' is provided in the list above, validate it. If it is correct, provide reasoning for it. If there is a better fit in the Available Categories list, select that instead.
-3. Provide THOROUGH, structured reasoning for your decision. 
-   - vendor_reasoning: Explain how you identified the merchant (e.g., "SBUX" -> Starbucks).
-   - category_reasoning: Why is this category correct? (e.g., "Coffee shop visit under $15 is typically Meals").
-   - note_reasoning: Any additional context or flags (e.g., "High value for this vendor, flagged for review").
-   - tax_deduction_note: Is this tax deductible? Provide a brief accountant's tip (e.g., "Generally 50% deductible as a business meal").
-4. tags: Generate 1-3 tags for project/job costing if applicable. Examples: "Materials", "Travel", "Office", "Subcontractor".
-5. confidence: 0.0 to 1.0 based on how sure you are.
+- Select the MOST specific category from the provided list.
+- If a 'CurrentCategory' is provided, validate it. justify it if correct, or override it with a better fit.
+- Use a professional, authoritative, yet helpful tone. Educate the user on WHY a transaction is classified this way.
+- Generate 1-3 relevant 'tags' for project tracking.
+- Confidence: 0.0 to 1.0.
 
-Output MUST be a valid JSON list of objects:
+Output Format (STRICT JSON LIST):
 [
     {{
         "id": "...", 
-        "suggested_category": "...", 
-        "reasoning": "Legacy field - summarize here", 
+        "category": "...", 
+        "reasoning": "Professional summary for the user (~2 sentences)", 
         "vendor_reasoning": "...",
         "category_reasoning": "...",
         "note_reasoning": "...",
         "tax_deduction_note": "...",
         "tags": ["Tag1", "Tag2"],
-        "confidence": 0.0,
-        "is_split": boolean,
-        "splits": [
-            {{"category": "...", "amount": 0.0, "description": "..."}}
-        ]
+        "confidence": 0.85,
+        "is_split": false,
+        "splits": []
     }}
 ]
 
-Rule: If a transaction likely covers multiple categories (e.g., a "Target" run with both "Groceries" and "Home Supplies"), use the 'splits' array and set 'is_split' to true.
-If splits are provided, the sum of split amounts MUST equal the transaction total.
+Important: If a transaction is clearly multi-purpose, use the 'splits' array to break it down.
 """
 
 RECEIPT_ANALYSIS_PROMPT = """

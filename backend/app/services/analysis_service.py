@@ -159,7 +159,7 @@ class AnalysisService:
         self.db.add(tx)
 
     def _apply_ai_suggestion(self, tx, analysis, categories_obj, category_list):
-        suggested_name = analysis.get('suggested_category')
+        suggested_name = analysis.get('category')
         tx.suggested_category_name = suggested_name
         tx.reasoning = analysis.get('reasoning')
         tx.vendor_reasoning = analysis.get('vendor_reasoning')
