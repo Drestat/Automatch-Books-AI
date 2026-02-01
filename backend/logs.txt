@@ -1,0 +1,1977 @@
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🔌 [main.py] Including API router...
+✅ [main.py] API router included successfully.
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+🚀 [Modal] ASGI Entrypoint waking up...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🔌 [main.py] Including API router...
+✅ [main.py] API router included successfully.
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+🚀 [force_analyze] Spawning AI Analysis for realm: 123 
+    GET /api/v1/qbo/analyze -> 200 OK  (duration: 215.4 ms, execution: 126.7 ms)
+🧠 [Modal] Starting AI Analysis for 123
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🔍 [AnalysisService] Starting analysis for realm 123...
+🧠 [AnalysisService] Found 0 unmatched transactions to analyze (Limit: 100)
+🧠 [AnalysisService] No unmatched transactions found.
+✅ Analysis complete. Processed 1 transactions.
+>>> [qbo.py] Authorize request for user: test_user
+>>> [qbo.py] Using Redirect URI: https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run/api/v1/qbo/callback
+>>> [qbo.py] Environment: sandbox
+>>> [qbo.py] Requesting Scopes: [<Scopes.ACCOUNTING: 'com.intuit.quickbooks.accounting'>]
+    GET /api/v1/qbo/authorize -> 200 OK  (duration: 453.5 ms, execution: 382.3 ms)
+🚀 [Modal] ASGI Entrypoint waking up...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+🚀 [Modal] ASGI Entrypoint waking up...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+OPTIONS /api/v1/analytics/track -> 200 OK  (duration: 761.5 ms, execution: 546.0 ms)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.OperationalError: SSL connection has been closed unexpectedly
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/pkg/modal/_runtime/container_io_manager.py", line 946, in handle_input_exception
+    yield
+  File "/pkg/modal/_container_entrypoint.py", line 126, in run_input_async
+    async for value in gen:
+  File "/pkg/modal/_runtime/container_io_manager.py", line 276, in call_generator_async
+    async for result in gen:
+  File "/pkg/modal/_runtime/asgi.py", line 227, in fn
+    app_task.result()  # consume/raise exceptions if there are any!
+  File "/usr/local/lib/python3.9/site-packages/fastapi/applications.py", line 1135, in __call__
+    await super().__call__(scope, receive, send)
+  File "/usr/local/lib/python3.9/site-packages/starlette/applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/usr/local/lib/python3.9/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/usr/local/lib/python3.9/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/usr/local/lib/python3.9/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/usr/local/lib/python3.9/site-packages/starlette/middleware/cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "/usr/local/lib/python3.9/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/usr/local/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/usr/local/lib/python3.9/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/usr/local/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/usr/local/lib/python3.9/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/usr/local/lib/python3.9/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/usr/local/lib/python3.9/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/usr/local/lib/python3.9/site-packages/fastapi/routing.py", line 115, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/usr/local/lib/python3.9/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/usr/local/lib/python3.9/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/usr/local/lib/python3.9/site-packages/fastapi/routing.py", line 101, in app
+    response = await f(request)
+  File "/usr/local/lib/python3.9/site-packages/fastapi/routing.py", line 355, in app
+    raw_response = await run_endpoint_function(
+  File "/usr/local/lib/python3.9/site-packages/fastapi/routing.py", line 245, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+  File "/usr/local/lib/python3.9/site-packages/starlette/concurrency.py", line 38, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+  File "/usr/local/lib/python3.9/site-packages/anyio/to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+  File "/usr/local/lib/python3.9/site-packages/anyio/_backends/_asyncio.py", line 2502, in run_sync_in_worker_thread
+    return await future
+  File "/usr/local/lib/python3.9/site-packages/anyio/_backends/_asyncio.py", line 986, in run
+    result = context.run(func, *args)
+  File "/root/app/api/v1/endpoints/analytics.py", line 82, in track_event
+    db.commit()
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 1311, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 1286, in _prepare_impl
+    self.session.flush()
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 4331, in flush
+    self._flush(objects)
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 4467, in _flush
+    transaction.rollback(_capture_exception=True)
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/util/langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 4427, in _flush
+    flush_context.execute()
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) SSL connection has been closed unexpectedly
+
+[SQL: INSERT INTO analytics_events (id, user_id, event_name, properties, ip_address, user_agent) VALUES (%(id)s::UUID, %(user_id)s, %(event_name)s, %(properties)s::JSON, %(ip_address)s, %(user_agent)s) RETURNING analytics_events.timestamp]
+[parameters: {'id': UUID('41d71f73-cde4-42bb-bd36-4ee4b2d61ea1'), 'user_id': 'user_38gfoio189CGrr2AO1a9ssier7w', 'event_name': 'sync_start', 'properties': '{"type": "connect_flow"}', 'ip_address': '76.128.117.253', 'user_agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36'}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+
+   POST /api/v1/analytics/track -> 500 Internal Server Error  (duration: 709.3 ms, execution: 348.2 ms)
+🚀 [Modal] ASGI Entrypoint waking up...
+>>> [qbo.py] Authorize request for user: user_38gfoio189CGrr2AO1a9ssier7w
+>>> [qbo.py] Using Redirect URI: https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run/api/v1/qbo/callback
+>>> [qbo.py] Environment: sandbox
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+>>> [qbo.py] Requesting Scopes: [<Scopes.ACCOUNTING: 'com.intuit.quickbooks.accounting'>]
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+    GET /api/v1/qbo/authorize -> 200 OK  (duration: 1.30 s, execution: 1.11 s)
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+    GET /api/v1/qbo/callback -> 307 Temporary Redirect  (duration: 3.17 s, execution: 2.98 s)
+🚀 [Modal] ASGI Entrypoint waking up...
+🚀 [Modal] ASGI Entrypoint waking up...
+    GET /api/v1/transactions/ -> 200 OK  (duration: 2.86 s, execution: 2.68 s)
+🚀 [Modal] ASGI Entrypoint waking up...
+🚀 [Modal] ASGI Entrypoint waking up...
+🚀 [Modal] ASGI Entrypoint waking up...
+    GET /api/v1/accounts/categories -> 200 OK  (duration: 3.42 s, execution: 441.7 ms)
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+🚀 [Modal] ASGI Entrypoint waking up...
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+   POST /api/v1/transactions/sync -> 200 OK  (duration: 4.07 s, execution: 490.6 ms)
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+    GET /api/v1/accounts/tags -> 200 OK  (duration: 4.62 s, execution: 435.0 ms)
+🏗️ [main.py] Running manual schema patches...
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+✅ [main.py] Schema repair complete.
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+✅ [main.py] Database initialized.
+    GET /api/v1/users/user_38gfoio189CGrr2AO1a9ssier7w -> 200 OK  (duration: 4.52 s, execution: 62.8 ms)
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+    GET /api/v1/users/me -> 200 OK  (duration: 4.60 s, execution: 53.5 ms)
+🏗️ [main.py] Running manual schema patches...
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+    GET /api/v1/transactions/ -> 200 OK  (duration: 2.51 s, execution: 183.4 ms)
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+🏗️ [main.py] Running manual schema patches...
+🏗️ [main.py] Running manual schema patches...
+🔄 [Modal] Starting background sync for 9341456245321396
+🏗️ [main.py] Running manual schema patches...
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T11:42:54.917-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+❌ [main.py] Database error during startup: (psycopg2.errors.DeadlockDetected) deadlock detected
+DETAIL:  Process 662 waits for AccessExclusiveLock on relation 57344 of database 16391; blocked by process 590.
+Process 590 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 658.
+Process 658 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 662.
+HINT:  See server log for query details.
+
+[SQL: ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT FALSE;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.DeadlockDetected: deadlock detected
+DETAIL:  Process 662 waits for AccessExclusiveLock on relation 57344 of database 16391; blocked by process 590.
+Process 590 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 658.
+Process 658 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 662.
+HINT:  See server log for query details.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/app/main.py", line 32, in lifespan
+    conn.execute(text("ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT FALSE;"))
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (psycopg2.errors.DeadlockDetected) deadlock detected
+DETAIL:  Process 662 waits for AccessExclusiveLock on relation 57344 of database 16391; blocked by process 590.
+Process 590 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 658.
+Process 658 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 662.
+HINT:  See server log for query details.
+
+[SQL: ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT FALSE;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+❌ [sync_bank_accounts] Error: (psycopg2.errors.DeadlockDetected) deadlock detected
+LINE 2: FROM bank_accounts 
+             ^
+DETAIL:  Process 658 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 590.
+Process 590 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 658.
+HINT:  See server log for query details.
+
+[SQL: SELECT bank_accounts.id AS bank_accounts_id, bank_accounts.realm_id AS bank_accounts_realm_id, bank_accounts.name AS bank_accounts_name, bank_accounts.nickname AS bank_accounts_nickname, bank_accounts.currency AS bank_accounts_currency, bank_accounts.balance AS bank_accounts_balance, bank_accounts.is_active AS bank_accounts_is_active, bank_accounts.updated_at AS bank_accounts_updated_at 
+FROM bank_accounts 
+WHERE bank_accounts.id = %(id_1)s AND bank_accounts.realm_id = %(realm_id_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'id_1': '35', 'realm_id_1': '9341456245321396', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+❌ [main.py] Database error during startup: (psycopg2.errors.DeadlockDetected) deadlock detected
+DETAIL:  Process 660 waits for AccessExclusiveLock on relation 57344 of database 16391; blocked by process 590.
+Process 590 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 658.
+Process 658 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 660.
+HINT:  See server log for query details.
+
+[SQL: ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT FALSE;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.DeadlockDetected: deadlock detected
+DETAIL:  Process 660 waits for AccessExclusiveLock on relation 57344 of database 16391; blocked by process 590.
+Process 590 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 658.
+Process 658 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 660.
+HINT:  See server log for query details.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/app/main.py", line 32, in lifespan
+    conn.execute(text("ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT FALSE;"))
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (psycopg2.errors.DeadlockDetected) deadlock detected
+DETAIL:  Process 660 waits for AccessExclusiveLock on relation 57344 of database 16391; blocked by process 590.
+Process 590 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 658.
+Process 658 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 660.
+HINT:  See server log for query details.
+
+[SQL: ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT FALSE;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+
+    GET /api/v1/transactions/ -> 200 OK  (duration: 2.31 s, execution: 2.21 s)
+📋 [sync_bank_accounts] Traceback: Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.DeadlockDetected: deadlock detected
+LINE 2: FROM bank_accounts 
+             ^
+DETAIL:  Process 658 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 590.
+Process 590 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 658.
+HINT:  See server log for query details.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/app/services/transaction_service.py", line 66, in sync_bank_accounts
+    bank = self.db.query(BankAccount).filter(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/query.py", line 2759, in first
+    return self.limit(1)._iter().first()  # type: ignore
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/query.py", line 2857, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 2351, in execute
+    return self._execute_internal(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (psycopg2.errors.DeadlockDetected) deadlock detected
+LINE 2: FROM bank_accounts 
+             ^
+DETAIL:  Process 658 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 590.
+Process 590 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 658.
+HINT:  See server log for query details.
+
+[SQL: SELECT bank_accounts.id AS bank_accounts_id, bank_accounts.realm_id AS bank_accounts_realm_id, bank_accounts.name AS bank_accounts_name, bank_accounts.nickname AS bank_accounts_nickname, bank_accounts.currency AS bank_accounts_currency, bank_accounts.balance AS bank_accounts_balance, bank_accounts.is_active AS bank_accounts_is_active, bank_accounts.updated_at AS bank_accounts_updated_at 
+FROM bank_accounts 
+WHERE bank_accounts.id = %(id_1)s AND bank_accounts.realm_id = %(realm_id_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'id_1': '35', 'realm_id_1': '9341456245321396', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+
+⚠️ [get_accounts] Sync failed: (psycopg2.errors.DeadlockDetected) deadlock detected
+LINE 2: FROM bank_accounts 
+             ^
+DETAIL:  Process 658 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 590.
+Process 590 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 658.
+HINT:  See server log for query details.
+
+[SQL: SELECT bank_accounts.id AS bank_accounts_id, bank_accounts.realm_id AS bank_accounts_realm_id, bank_accounts.name AS bank_accounts_name, bank_accounts.nickname AS bank_accounts_nickname, bank_accounts.currency AS bank_accounts_currency, bank_accounts.balance AS bank_accounts_balance, bank_accounts.is_active AS bank_accounts_is_active, bank_accounts.updated_at AS bank_accounts_updated_at 
+FROM bank_accounts 
+WHERE bank_accounts.id = %(id_1)s AND bank_accounts.realm_id = %(realm_id_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'id_1': '35', 'realm_id_1': '9341456245321396', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+📋 [get_accounts] Traceback: Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.DeadlockDetected: deadlock detected
+LINE 2: FROM bank_accounts 
+             ^
+DETAIL:  Process 658 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 590.
+Process 590 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 658.
+HINT:  See server log for query details.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/app/api/v1/endpoints/qbo.py", line 90, in get_accounts
+    service.sync_bank_accounts() # This syncs all without limit
+  File "/root/app/services/transaction_service.py", line 66, in sync_bank_accounts
+    bank = self.db.query(BankAccount).filter(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/query.py", line 2759, in first
+    return self.limit(1)._iter().first()  # type: ignore
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/query.py", line 2857, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 2351, in execute
+    return self._execute_internal(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (psycopg2.errors.DeadlockDetected) deadlock detected
+LINE 2: FROM bank_accounts 
+             ^
+DETAIL:  Process 658 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 590.
+Process 590 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 658.
+HINT:  See server log for query details.
+
+[SQL: SELECT bank_accounts.id AS bank_accounts_id, bank_accounts.realm_id AS bank_accounts_realm_id, bank_accounts.name AS bank_accounts_name, bank_accounts.nickname AS bank_accounts_nickname, bank_accounts.currency AS bank_accounts_currency, bank_accounts.balance AS bank_accounts_balance, bank_accounts.is_active AS bank_accounts_is_active, bank_accounts.updated_at AS bank_accounts_updated_at 
+FROM bank_accounts 
+WHERE bank_accounts.id = %(id_1)s AND bank_accounts.realm_id = %(realm_id_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'id_1': '35', 'realm_id_1': '9341456245321396', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+📊 [get_accounts] Found 4 accounts in database
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 10.4 s, execution: 5.67 s)
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T11:42:59.253-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+✅ [sync_bank_accounts] Committed 4 accounts to database
+✅ [get_accounts] sync_bank_accounts completed
+📊 [get_accounts] Found 4 accounts in database
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T11:43:00.137-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+✅ [sync_bank_accounts] Committed 4 accounts to database
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 2.00 s, execution: 1.83 s)
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T11:43:01.436-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+✅ [sync_bank_accounts] Committed 4 accounts to database
+✅ [get_accounts] sync_bank_accounts completed
+📊 [get_accounts] Found 4 accounts in database
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 1.38 s, execution: 1.30 s)
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+✅ Sync complete
+🧠 Triggering AI Analysis...
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T11:43:02.369-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+✅ [sync_bank_accounts] Committed 4 accounts to database
+✅ [get_accounts] sync_bank_accounts completed
+📊 [get_accounts] Found 4 accounts in database
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 1.83 s, execution: 1.70 s)
+🧠 [Modal] Starting AI Analysis for 9341456245321396
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🔍 [AnalysisService] Starting analysis for realm 9341456245321396...
+🧠 [AnalysisService] Found 21 unmatched transactions to analyze (Limit: 100)
+💰 Tokens deducted: 21 for 'AI Analysis: 21 txs'. New Balance: 979
+OPTIONS /api/v1/qbo/accounts/select -> 200 OK  (duration: 299.7 ms, execution: 146.2 ms)
+   POST /api/v1/qbo/accounts/select -> 200 OK  (duration: 639.7 ms, execution: 521.8 ms)
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+    GET /api/v1/accounts/tags -> 200 OK  (duration: 330.6 ms, execution: 205.4 ms)
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+    GET /api/v1/accounts/categories -> 200 OK  (duration: 779.0 ms, execution: 332.2 ms)
+    GET /api/v1/users/me -> 200 OK  (duration: 944.8 ms, execution: 203.8 ms)
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T11:43:20.740-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+✅ [sync_bank_accounts] Committed 4 accounts to database
+✅ [get_accounts] sync_bank_accounts completed
+📊 [get_accounts] Found 4 accounts in database
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 1.26 s, execution: 1.18 s)
+    GET /api/v1/users/user_38gfoio189CGrr2AO1a9ssier7w -> 200 OK  (duration: 1.24 s, execution: 201.2 ms)
+    GET /api/v1/transactions/ -> 200 OK  (duration: 2.68 s, execution: 2.52 s)
+🚀 [Modal] ASGI Entrypoint waking up...
+🚀 [Modal] ASGI Entrypoint waking up...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+🏗️ [main.py] Running manual schema patches...
+🧠 [AnalysisService] AI returned 21 analyses. Applying to database...
+❌ Batch AI Error: 'str' object has no attribute 'name'
+✅ Analysis complete. Processed 1 transactions.
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+    GET /api/v1/accounts/tags -> 200 OK  (duration: 324.1 ms, execution: 203.9 ms)
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+    GET /api/v1/accounts/categories -> 200 OK  (duration: 602.8 ms, execution: 417.5 ms)
+    GET /api/v1/users/me -> 200 OK  (duration: 950.0 ms, execution: 335.9 ms)
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T11:43:54.832-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+✅ [sync_bank_accounts] Committed 4 accounts to database
+✅ [get_accounts] sync_bank_accounts completed
+📊 [get_accounts] Found 4 accounts in database
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 1.25 s, execution: 1.17 s)
+    GET /api/v1/users/user_38gfoio189CGrr2AO1a9ssier7w -> 200 OK  (duration: 1.38 s, execution: 318.5 ms)
+    GET /api/v1/transactions/ -> 200 OK  (duration: 1.99 s, execution: 1.57 s)
+🚀 [Modal] ASGI Entrypoint waking up...
+🚀 [Modal] ASGI Entrypoint waking up...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+🚀 [Modal] ASGI Entrypoint waking up...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+OPTIONS /api/v1/qbo/disconnect -> 200 OK  (duration: 238.7 ms, execution: 159.4 ms)
+🔌 [disconnect] Called with realm_id: 9341456245321396
+✅ [disconnect] Found connection for user: user_38gfoio189CGrr2AO1a9ssier7w
+🔌 [QBOClient] Revoking token for realm_id: 9341456245321396
+✅ [QBOClient] Token revoked successfully.
+🗑️ [disconnect] Deleted: 21 transactions, 4 accounts, 20 logs
+✅ [disconnect] Successfully disconnected realm_id: 9341456245321396
+ DELETE /api/v1/qbo/disconnect -> 200 OK  (duration: 1.81 s, execution: 1.74 s)
+    GET /api/v1/users/user_38gfoio189CGrr2AO1a9ssier7w -> 200 OK  (duration: 148.0 ms, execution: 69.6 ms)
+    GET /api/v1/users/me -> 200 OK  (duration: 244.5 ms, execution: 62.6 ms)
+    GET /api/v1/users/me -> 200 OK  (duration: 126.2 ms, execution: 43.6 ms)
+    GET /api/v1/users/user_38gfoio189CGrr2AO1a9ssier7w -> 200 OK  (duration: 325.3 ms, execution: 40.7 ms)
+    GET /api/v1/users/me -> 200 OK  (duration: 106.9 ms, execution: 33.4 ms)
+    GET /api/v1/users/user_38gfoio189CGrr2AO1a9ssier7w -> 200 OK  (duration: 169.8 ms, execution: 33.7 ms)
+OPTIONS /api/v1/analytics/track -> 200 OK  (duration: 184.6 ms, execution: 79.6 ms)
+   POST /api/v1/analytics/track -> 200 OK  (duration: 221.9 ms, execution: 89.6 ms)
+>>> [qbo.py] Authorize request for user: user_38gfoio189CGrr2AO1a9ssier7w
+>>> [qbo.py] Using Redirect URI: https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run/api/v1/qbo/callback
+>>> [qbo.py] Environment: sandbox
+>>> [qbo.py] Requesting Scopes: [<Scopes.ACCOUNTING: 'com.intuit.quickbooks.accounting'>]
+    GET /api/v1/qbo/authorize -> 200 OK  (duration: 517.7 ms, execution: 404.2 ms)
+    GET /api/v1/qbo/callback -> 307 Temporary Redirect  (duration: 1.07 s, execution: 988.8 ms)
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T11:55:20.680-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+✅ [sync_bank_accounts] Committed 4 accounts to database
+✅ [get_accounts] sync_bank_accounts completed
+📊 [get_accounts] Found 4 accounts in database
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 1.37 s, execution: 1.30 s)
+    GET /api/v1/transactions/ -> 200 OK  (duration: 1.44 s, execution: 39.6 ms)
+    GET /api/v1/accounts/tags -> 200 OK  (duration: 1.54 s, execution: 37.3 ms)
+    GET /api/v1/accounts/categories -> 200 OK  (duration: 1.58 s, execution: 35.7 ms)
+   POST /api/v1/transactions/sync -> 200 OK  (duration: 1.89 s, execution: 236.0 ms)
+    GET /api/v1/users/me -> 200 OK  (duration: 1.67 s, execution: 35.4 ms)
+    GET /api/v1/users/user_38gfoio189CGrr2AO1a9ssier7w -> 200 OK  (duration: 1.81 s, execution: 31.5 ms)
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+🚀 [Modal] ASGI Entrypoint waking up...
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T11:55:22.530-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+✅ [sync_bank_accounts] Committed 4 accounts to database
+✅ [get_accounts] sync_bank_accounts completed
+📊 [get_accounts] Found 4 accounts in database
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 1.81 s, execution: 1.04 s)
+    GET /api/v1/transactions/ -> 200 OK  (duration: 1.80 s, execution: 35.3 ms)
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+🚀 [Modal] ASGI Entrypoint waking up...
+🚀 [Modal] ASGI Entrypoint waking up...
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+🚀 [Modal] ASGI Entrypoint waking up...
+🚀 [Modal] ASGI Entrypoint waking up...
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T11:55:23.697-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+✅ [sync_bank_accounts] Committed 4 accounts to database
+✅ [get_accounts] sync_bank_accounts completed
+📊 [get_accounts] Found 4 accounts in database
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 1.19 s, execution: 1.09 s)
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+    GET /api/v1/transactions/ -> 200 OK  (duration: 652.0 ms, execution: 115.7 ms)
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+🏗️ [main.py] Running manual schema patches...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+🚀 [Modal] ASGI Entrypoint waking up...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+🔄 [Modal] Starting background sync for 9341456245321396
+🏗️ [main.py] Running manual schema patches...
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T11:55:25.093-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+❌ [main.py] Database error during startup: (psycopg2.errors.DeadlockDetected) deadlock detected
+DETAIL:  Process 2697 waits for AccessExclusiveLock on relation 57344 of database 16391; blocked by process 2692.
+Process 2692 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 661.
+Process 661 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 2697.
+HINT:  See server log for query details.
+
+[SQL: ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT FALSE;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.DeadlockDetected: deadlock detected
+DETAIL:  Process 2697 waits for AccessExclusiveLock on relation 57344 of database 16391; blocked by process 2692.
+Process 2692 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 661.
+Process 661 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 2697.
+HINT:  See server log for query details.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/app/main.py", line 32, in lifespan
+    conn.execute(text("ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT FALSE;"))
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (psycopg2.errors.DeadlockDetected) deadlock detected
+DETAIL:  Process 2697 waits for AccessExclusiveLock on relation 57344 of database 16391; blocked by process 2692.
+Process 2692 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 661.
+Process 661 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 2697.
+HINT:  See server log for query details.
+
+[SQL: ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT FALSE;]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+❌ [sync_bank_accounts] Error: (psycopg2.errors.DeadlockDetected) deadlock detected
+LINE 2: FROM bank_accounts 
+             ^
+DETAIL:  Process 661 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 2692.
+Process 2692 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 661.
+HINT:  See server log for query details.
+
+[SQL: SELECT bank_accounts.id AS bank_accounts_id, bank_accounts.realm_id AS bank_accounts_realm_id, bank_accounts.name AS bank_accounts_name, bank_accounts.nickname AS bank_accounts_nickname, bank_accounts.currency AS bank_accounts_currency, bank_accounts.balance AS bank_accounts_balance, bank_accounts.is_active AS bank_accounts_is_active, bank_accounts.updated_at AS bank_accounts_updated_at 
+FROM bank_accounts 
+WHERE bank_accounts.id = %(id_1)s AND bank_accounts.realm_id = %(realm_id_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'id_1': '35', 'realm_id_1': '9341456245321396', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+📋 [sync_bank_accounts] Traceback: Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.DeadlockDetected: deadlock detected
+LINE 2: FROM bank_accounts 
+             ^
+DETAIL:  Process 661 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 2692.
+Process 2692 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 661.
+HINT:  See server log for query details.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/app/services/transaction_service.py", line 66, in sync_bank_accounts
+    bank = self.db.query(BankAccount).filter(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/query.py", line 2759, in first
+    return self.limit(1)._iter().first()  # type: ignore
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/query.py", line 2857, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 2351, in execute
+    return self._execute_internal(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (psycopg2.errors.DeadlockDetected) deadlock detected
+LINE 2: FROM bank_accounts 
+             ^
+DETAIL:  Process 661 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 2692.
+Process 2692 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 661.
+HINT:  See server log for query details.
+
+[SQL: SELECT bank_accounts.id AS bank_accounts_id, bank_accounts.realm_id AS bank_accounts_realm_id, bank_accounts.name AS bank_accounts_name, bank_accounts.nickname AS bank_accounts_nickname, bank_accounts.currency AS bank_accounts_currency, bank_accounts.balance AS bank_accounts_balance, bank_accounts.is_active AS bank_accounts_is_active, bank_accounts.updated_at AS bank_accounts_updated_at 
+FROM bank_accounts 
+WHERE bank_accounts.id = %(id_1)s AND bank_accounts.realm_id = %(realm_id_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'id_1': '35', 'realm_id_1': '9341456245321396', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+
+⚠️ [get_accounts] Sync failed: (psycopg2.errors.DeadlockDetected) deadlock detected
+LINE 2: FROM bank_accounts 
+             ^
+DETAIL:  Process 661 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 2692.
+Process 2692 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 661.
+HINT:  See server log for query details.
+
+[SQL: SELECT bank_accounts.id AS bank_accounts_id, bank_accounts.realm_id AS bank_accounts_realm_id, bank_accounts.name AS bank_accounts_name, bank_accounts.nickname AS bank_accounts_nickname, bank_accounts.currency AS bank_accounts_currency, bank_accounts.balance AS bank_accounts_balance, bank_accounts.is_active AS bank_accounts_is_active, bank_accounts.updated_at AS bank_accounts_updated_at 
+FROM bank_accounts 
+WHERE bank_accounts.id = %(id_1)s AND bank_accounts.realm_id = %(realm_id_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'id_1': '35', 'realm_id_1': '9341456245321396', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+📋 [get_accounts] Traceback: Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.DeadlockDetected: deadlock detected
+LINE 2: FROM bank_accounts 
+             ^
+DETAIL:  Process 661 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 2692.
+Process 2692 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 661.
+HINT:  See server log for query details.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/app/api/v1/endpoints/qbo.py", line 90, in get_accounts
+    service.sync_bank_accounts() # This syncs all without limit
+  File "/root/app/services/transaction_service.py", line 66, in sync_bank_accounts
+    bank = self.db.query(BankAccount).filter(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/query.py", line 2759, in first
+    return self.limit(1)._iter().first()  # type: ignore
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/query.py", line 2857, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 2351, in execute
+    return self._execute_internal(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (psycopg2.errors.DeadlockDetected) deadlock detected
+LINE 2: FROM bank_accounts 
+             ^
+DETAIL:  Process 661 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 2692.
+Process 2692 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 661.
+HINT:  See server log for query details.
+
+[SQL: SELECT bank_accounts.id AS bank_accounts_id, bank_accounts.realm_id AS bank_accounts_realm_id, bank_accounts.name AS bank_accounts_name, bank_accounts.nickname AS bank_accounts_nickname, bank_accounts.currency AS bank_accounts_currency, bank_accounts.balance AS bank_accounts_balance, bank_accounts.is_active AS bank_accounts_is_active, bank_accounts.updated_at AS bank_accounts_updated_at 
+FROM bank_accounts 
+WHERE bank_accounts.id = %(id_1)s AND bank_accounts.realm_id = %(realm_id_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'id_1': '35', 'realm_id_1': '9341456245321396', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+📊 [get_accounts] Found 4 accounts in database
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 3.66 s, execution: 3.47 s)
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+✅ [main.py] Schema repair complete.
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+✅ [main.py] Database initialized.
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T11:55:30.382-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+✅ [sync_bank_accounts] Committed 4 accounts to database
+⚠️ No active accounts selected. Skipping transaction sync.
+✅ Sync complete
+🧠 Triggering AI Analysis...
+🧠 [Modal] Starting AI Analysis for 9341456245321396
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🔍 [AnalysisService] Starting analysis for realm 9341456245321396...
+OPTIONS /api/v1/qbo/accounts/select -> 200 OK  (duration: 293.2 ms, execution: 128.7 ms)
+🧠 [AnalysisService] Found 0 unmatched transactions to analyze (Limit: 100)
+🧠 [AnalysisService] No unmatched transactions found.
+✅ Analysis complete. Processed 1 transactions.
+🚀 [update_account_selection] Spawning AI Analysis for realm: 9341456245321396
+   POST /api/v1/qbo/accounts/select -> 200 OK  (duration: 2.14 s, execution: 2.07 s)
+🧠 [Modal] Starting AI Analysis for 9341456245321396
+🔍 [AnalysisService] Starting analysis for realm 9341456245321396...
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+🧠 [AnalysisService] Found 21 unmatched transactions to analyze (Limit: 100)
+    GET /api/v1/accounts/categories -> 200 OK  (duration: 141.3 ms, execution: 66.5 ms)
+    GET /api/v1/accounts/tags -> 200 OK  (duration: 213.0 ms, execution: 35.7 ms)
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+    GET /api/v1/transactions/ -> 200 OK  (duration: 382.8 ms, execution: 135.6 ms)
+    GET /api/v1/users/me -> 200 OK  (duration: 312.1 ms, execution: 36.4 ms)
+    GET /api/v1/users/user_38gfoio189CGrr2AO1a9ssier7w -> 200 OK  (duration: 413.5 ms, execution: 33.4 ms)
+💰 Tokens deducted: 21 for 'AI Analysis: 21 txs'. New Balance: 958
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+🚀 [Modal] ASGI Entrypoint waking up...
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T11:55:42.286-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+✅ [sync_bank_accounts] Committed 4 accounts to database
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+✅ [get_accounts] sync_bank_accounts completed
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+📊 [get_accounts] Found 4 accounts in database
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 3.88 s, execution: 3.77 s)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+    GET /api/v1/accounts/categories -> 200 OK  (duration: 124.8 ms, execution: 45.9 ms)
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T11:55:58.368-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+❌ Batch AI Error: Expecting value: line 1 column 1 (char 0)
+❌ Batch AI Error: Expecting value: line 1 column 1 (char 0)
+✅ Analysis complete. Processed 1 transactions.
+🚀 [Modal] ASGI Entrypoint waking up...
+🚀 [Modal] ASGI Entrypoint waking up...
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+❌ [main.py] Database error during startup: (psycopg2.errors.DeadlockDetected) deadlock detected
+DETAIL:  Process 661 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 2701.
+Process 2701 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 661.
+HINT:  See server log for query details.
+
+[SQL: ALTER TABLE qbo_connections ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT now();]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+✅ [sync_bank_accounts] Committed 4 accounts to database
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.DeadlockDetected: deadlock detected
+DETAIL:  Process 661 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 2701.
+Process 2701 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 661.
+HINT:  See server log for query details.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/app/main.py", line 42, in lifespan
+    conn.execute(text("ALTER TABLE qbo_connections ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT now();"))
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (psycopg2.errors.DeadlockDetected) deadlock detected
+DETAIL:  Process 661 waits for AccessExclusiveLock on relation 40970 of database 16391; blocked by process 2701.
+Process 2701 waits for AccessShareLock on relation 57344 of database 16391; blocked by process 661.
+HINT:  See server log for query details.
+
+[SQL: ALTER TABLE qbo_connections ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT now();]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+
+✅ [get_accounts] sync_bank_accounts completed
+📊 [get_accounts] Found 4 accounts in database
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 4.02 s, execution: 3.82 s)
+    GET /api/v1/users/me -> 200 OK  (duration: 3.83 s, execution: 58.4 ms)
+    GET /api/v1/accounts/tags -> 200 OK  (duration: 4.15 s, execution: 140.8 ms)
+    GET /api/v1/users/user_38gfoio189CGrr2AO1a9ssier7w -> 200 OK  (duration: 3.92 s, execution: 51.3 ms)
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+    GET /api/v1/transactions/ -> 200 OK  (duration: 5.20 s, execution: 5.08 s)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+    GET /api/v1/transactions/ -> 200 OK  (duration: 209.8 ms, execution: 144.6 ms)
+    GET /api/v1/accounts/tags -> 200 OK  (duration: 292.9 ms, execution: 32.2 ms)
+    GET /api/v1/accounts/categories -> 200 OK  (duration: 384.5 ms, execution: 41.3 ms)
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T11:59:32.308-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+✅ [sync_bank_accounts] Committed 4 accounts to database
+✅ [get_accounts] sync_bank_accounts completed
+📊 [get_accounts] Found 4 accounts in database
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 1.54 s, execution: 1.12 s)
+    GET /api/v1/users/me -> 200 OK  (duration: 1.34 s, execution: 48.5 ms)
+    GET /api/v1/users/user_38gfoio189CGrr2AO1a9ssier7w -> 200 OK  (duration: 1.39 s, execution: 33.1 ms)
+🚀 [Modal] ASGI Entrypoint waking up...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🚀 [Modal] ASGI Entrypoint waking up...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T12:02:54.194-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+✅ [sync_bank_accounts] Committed 4 accounts to database
+✅ [get_accounts] sync_bank_accounts completed
+📊 [get_accounts] Found 4 accounts in database
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 1.21 s, execution: 1.14 s)
+    GET /api/v1/accounts/tags -> 200 OK  (duration: 1.29 s, execution: 43.3 ms)
+    GET /api/v1/transactions/ -> 200 OK  (duration: 1.46 s, execution: 126.3 ms)
+    GET /api/v1/accounts/categories -> 200 OK  (duration: 1.53 s, execution: 34.6 ms)
+    GET /api/v1/users/user_38gfoio189CGrr2AO1a9ssier7w -> 200 OK  (duration: 1.38 s, execution: 27.5 ms)
+    GET /api/v1/users/me -> 200 OK  (duration: 1.47 s, execution: 33.4 ms)
+🚀 [Modal] ASGI Entrypoint waking up...
+🚀 [Modal] ASGI Entrypoint waking up...
+🚀 [Modal] ASGI Entrypoint waking up...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+🚀 [Modal] ASGI Entrypoint waking up...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+🚀 [Modal] ASGI Entrypoint waking up...
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+🏗️ [main.py] Running manual schema patches...
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+✅ [main.py] Database initialized.
+🏗️ [main.py] Running manual schema patches...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T12:03:10.232-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+✅ [sync_bank_accounts] Committed 4 accounts to database
+✅ [get_accounts] sync_bank_accounts completed
+📊 [get_accounts] Found 4 accounts in database
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 1.23 s, execution: 1.11 s)
+    GET /api/v1/accounts/categories -> 200 OK  (duration: 107.1 ms, execution: 36.9 ms)
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T12:03:22.675-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+✅ [sync_bank_accounts] Committed 4 accounts to database
+✅ [get_accounts] sync_bank_accounts completed
+📊 [get_accounts] Found 4 accounts in database
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 1.28 s, execution: 1.08 s)
+    GET /api/v1/accounts/tags -> 200 OK  (duration: 1.35 s, execution: 53.5 ms)
+    GET /api/v1/users/me -> 200 OK  (duration: 1.53 s, execution: 35.5 ms)
+    GET /api/v1/transactions/ -> 200 OK  (duration: 1.61 s, execution: 128.7 ms)
+    GET /api/v1/users/user_38gfoio189CGrr2AO1a9ssier7w -> 200 OK  (duration: 1.64 s, execution: 32.2 ms)
+🚀 [Modal] ASGI Entrypoint waking up...
+🚀 [Modal] ASGI Entrypoint waking up...
+🚀 [Modal] ASGI Entrypoint waking up...
+🚀 [Modal] ASGI Entrypoint waking up...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+🏗️ [main.py] Running manual schema patches...
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+🚀 [force_analyze] Resetting status and re-analyzing tx: 138
+🚀 [force_analyze] Spawning AI Analysis for realm: 9341456245321396 (tx: 138)
+    GET /api/v1/qbo/analyze -> 200 OK  (duration: 315.1 ms, execution: 162.2 ms)
+OPTIONS /api/v1/analytics/track -> 200 OK  (duration: 168.6 ms, execution: 46.4 ms)
+   POST /api/v1/analytics/track -> 200 OK  (duration: 186.2 ms, execution: 61.6 ms)
+🧠 [Modal] Starting AI Analysis for 9341456245321396
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+    GET /api/v1/transactions/ -> 200 OK  (duration: 245.2 ms, execution: 137.2 ms)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🔍 [AnalysisService] Starting analysis for realm 9341456245321396...
+🧠 [AnalysisService] Found 1 unmatched transactions to analyze (Limit: 100)
+💰 Tokens deducted: 1 for 'AI Analysis: 1 txs'. New Balance: 957
+🚀 [force_analyze] Resetting status and re-analyzing tx: 137
+🚀 [force_analyze] Spawning AI Analysis for realm: 9341456245321396 (tx: 137)
+    GET /api/v1/qbo/analyze -> 200 OK  (duration: 276.7 ms, execution: 120.1 ms)
+   POST /api/v1/analytics/track -> 200 OK  (duration: 173.1 ms, execution: 62.5 ms)
+    GET /api/v1/transactions/ -> 200 OK  (duration: 274.0 ms, execution: 171.0 ms)
+❌ Batch AI Error: Expecting value: line 1 column 1 (char 0)
+❌ Batch AI Error: Expecting value: line 1 column 1 (char 0)
+✅ Analysis complete. Processed 1 transactions.
+🧠 [Modal] Starting AI Analysis for 9341456245321396
+🔍 [AnalysisService] Starting analysis for realm 9341456245321396...
+🧠 [AnalysisService] Found 1 unmatched transactions to analyze (Limit: 100)
+💰 Tokens deducted: 1 for 'AI Analysis: 1 txs'. New Balance: 956
+❌ Batch AI Error: Expecting value: line 1 column 1 (char 0)
+❌ Batch AI Error: Expecting value: line 1 column 1 (char 0)
+✅ Analysis complete. Processed 1 transactions.
+🚀 [Modal] ASGI Entrypoint waking up...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+    GET /api/v1/users/user_38gfoio189CGrr2AO1a9ssier7w -> 200 OK  (duration: 340.6 ms, execution: 220.4 ms)
+    GET /api/v1/accounts/tags -> 200 OK  (duration: 638.2 ms, execution: 197.9 ms)
+    GET /api/v1/users/me -> 200 OK  (duration: 930.1 ms, execution: 201.4 ms)
+🔍 [get_accounts] Starting for realm_id: 9341456245321396
+✅ [get_accounts] Connection found for user: user_38gfoio189CGrr2AO1a9ssier7w
+🔄 [get_accounts] Starting sync_bank_accounts...
+🔄 [sync_bank_accounts] Starting for realm_id: 9341456245321396
+📝 [sync_bank_accounts] Executing query: SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')
+✅ [sync_bank_accounts] Query successful, response: {'QueryResponse': {'Account': [{'Name': 'Checking', 'SubAccount': False, 'FullyQualifiedName': 'Checking', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Checking', 'CurrentBalance': 1201.0, 'CurrentBalanceWithSubAccounts': 1201.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '35', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:08:20-08:00', 'LastUpdatedTime': '2026-01-15T14:35:37-08:00'}}, {'Name': 'Mastercard', 'SubAccount': False, 'FullyQualifiedName': 'Mastercard', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': -157.72, 'CurrentBalanceWithSubAccounts': -157.72, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '41', 'SyncToken': '1', 'MetaData': {'CreateTime': '2025-12-29T09:59:08-08:00', 'LastUpdatedTime': '2026-03-03T22:59:57-08:00'}}, {'Name': 'Savings', 'SubAccount': False, 'FullyQualifiedName': 'Savings', 'Active': True, 'Classification': 'Asset', 'AccountType': 'Bank', 'AccountSubType': 'Savings', 'CurrentBalance': 800.0, 'CurrentBalanceWithSubAccounts': 800.0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '36', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-28T12:09:00-08:00', 'LastUpdatedTime': '2026-01-01T13:00:56-08:00'}}, {'Name': 'Visa', 'SubAccount': False, 'FullyQualifiedName': 'Visa', 'Active': True, 'Classification': 'Liability', 'AccountType': 'Credit Card', 'AccountSubType': 'CreditCard', 'CurrentBalance': 0, 'CurrentBalanceWithSubAccounts': 0, 'CurrencyRef': {'value': 'USD', 'name': 'United States Dollar'}, 'domain': 'QBO', 'sparse': False, 'Id': '42', 'SyncToken': '0', 'MetaData': {'CreateTime': '2025-12-29T10:00:09-08:00', 'LastUpdatedTime': '2025-12-29T10:00:09-08:00'}}], 'startPosition': 1, 'maxResults': 4}, 'time': '2026-02-01T12:13:13.312-08:00'}
+📊 [sync_bank_accounts] Found 4 accounts from QBO
+💾 [sync_bank_accounts] Saved account: Checking (ID: 35)
+💾 [sync_bank_accounts] Saved account: Mastercard (ID: 41)
+💾 [sync_bank_accounts] Saved account: Savings (ID: 36)
+💾 [sync_bank_accounts] Saved account: Visa (ID: 42)
+✅ [sync_bank_accounts] Committed 4 accounts to database
+✅ [get_accounts] sync_bank_accounts completed
+📊 [get_accounts] Found 4 accounts in database
+🚀 [Modal] ASGI Entrypoint waking up...
+    GET /api/v1/qbo/accounts -> 200 OK  (duration: 2.80 s, execution: 1.77 s)
+    GET /api/v1/accounts/categories -> 200 OK  (duration: 3.13 s, execution: 254.3 ms)
+🚀 [Modal] ASGI Entrypoint waking up...
+🚀 [Modal] ASGI Entrypoint waking up...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+🏗️ [main.py] Running manual schema patches...
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+    GET /api/v1/transactions/ -> 200 OK  (duration: 4.69 s, execution: 1.48 s)
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🚀 [main.py] initialize_app_logic called (Compatibility Mode)
+✅ [Modal] Ready to serve production traffic.
+>>> [main.py] Initializing and Repairing Models...
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+🏗️ [main.py] Running manual schema patches...
+✅ [main.py] Schema repair complete.
+✅ [main.py] Database initialized.
+🚀 [force_analyze] Resetting status and re-analyzing tx: 137
+🚀 [force_analyze] Spawning AI Analysis for realm: 9341456245321396 (tx: 137)
+    GET /api/v1/qbo/analyze -> 200 OK  (duration: 703.6 ms, execution: 412.6 ms)
+   POST /api/v1/analytics/track -> 200 OK  (duration: 560.1 ms, execution: 434.8 ms)
+🧠 [Modal] Starting AI Analysis for 9341456245321396
+/usr/local/lib/python3.9/site-packages/google/api_core/_python_version_support.py:246: FutureWarning: You are using a non-supported Python version (3.9.22). Google will not post any further updates to google.api_core supporting this Python version. Please upgrade to the latest Python version, or at least Python 3.10, and then update google.api_core.
+  warnings.warn(message, FutureWarning)
+/usr/local/lib/python3.9/site-packages/google/auth/__init__.py:54: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+    GET /api/v1/transactions/ -> 200 OK  (duration: 1.61 s, execution: 1.50 s)
+/usr/local/lib/python3.9/site-packages/google/oauth2/__init__.py:40: FutureWarning: You are using a Python version 3.9 past its end of life. Google will update google-auth with critical bug fixes on a best-effort basis, but not with any other fixes or features. Please upgrade your Python version, and then update google-auth.
+  warnings.warn(eol_message.format("3.9"), FutureWarning)
+/root/app/services/ai_analyzer.py:1: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+🔍 [AnalysisService] Starting analysis for realm 9341456245321396...
+🧠 [AnalysisService] Found 1 unmatched transactions to analyze (Limit: 100)
+💰 Tokens deducted: 1 for 'AI Analysis: 1 txs'. New Balance: 955
+❌ Batch AI Error: Expecting value: line 1 column 1 (char 0)
+❌ Batch AI Error: Expecting value: line 1 column 1 (char 0)
+✅ Analysis complete. Processed 1 transactions.

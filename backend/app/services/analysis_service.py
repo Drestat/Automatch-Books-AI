@@ -159,6 +159,10 @@ class AnalysisService:
         self.db.add(tx)
 
     def _apply_ai_suggestion(self, tx, analysis, categories_obj, category_list):
+        print(f"🐛 [DEBUG] Applying AI analysis for tx {tx.id}. Keys received: {list(analysis.keys())}")
+        print(f"🐛 [DEBUG] AI Reasoning payload: {analysis.get('reasoning')}")
+        print(f"🐛 [DEBUG] tax_deduction_note payload: {analysis.get('tax_deduction_note')}")
+        
         suggested_name = analysis.get('category')
         tx.suggested_category_name = suggested_name
         tx.reasoning = analysis.get('reasoning')

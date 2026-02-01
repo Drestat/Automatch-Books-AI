@@ -165,13 +165,26 @@ class TransactionService:
                             qbo_category_id = detail["AccountRef"].get("value")
                             break # Just grab the first one for now
             
-            # Logic: If QBO has a valid category (not Uncategorized), treat as Suggestion but keep Unmatched for AI
+            # Logic: If QBO has a valid category (not Uncategorized), treat as Suggestion but keep unmatched for AI?
+            # UPDATED LOGIC: Only apply "Imported existing" if we haven't already enriched it with AI.
+            # If current status is 'pending_approval' or 'approved', DO NOT OVERWRITE category/reasoning.
             if qbo_category_name and "Uncategorized" not in qbo_category_name:
-                tx.status = 'unmatched' # Keep unmatched so AnalysisService picks it up
-                tx.suggested_category_name = qbo_category_name
-                tx.suggested_category_id = qbo_category_id
-                tx.confidence = 0.9 # High confidence but not 1.0 (to allow AI override/polishing)
-                tx.reasoning = f"Imported existing category '{qbo_category_name}' from QuickBooks."
+                # Check if we should overwrite
+                should_overwrite = True
+                if tx.status in ['pending_approval', 'approved']:
+                    should_overwrite = False
+                elif tx.vendor_reasoning: # Has AI data
+                    should_overwrite = False
+                
+                if should_overwrite:
+                    tx.status = 'unmatched' # Keep unmatched so AnalysisService picks it up (if we want AI to verify)
+                    # Actually, if we want AI to verify, we should leave it as 'unmatched' but maybe NOT set the reasoning yet?
+                    # Or set it as a baseline.
+                    
+                    tx.suggested_category_name = qbo_category_name
+                    tx.suggested_category_id = qbo_category_id
+                    tx.confidence = 0.9 
+                    tx.reasoning = f"Imported existing category '{qbo_category_name}' from QuickBooks."
             
             # --- Smart Tagging Logic (Historical) ---
             # Try to find a recent approved transaction with same Vendor/Description to copy tags

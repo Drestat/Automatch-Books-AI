@@ -35,13 +35,19 @@ class AIAnalyzer:
         )
         
         try:
-            response = self.model.generate_content(prompt)
+            # Force JSON mode
+            response = self.model.generate_content(
+                prompt,
+                generation_config={"response_mime_type": "application/json"}
+            )
             raw_text = response.text.replace('```json', '').replace('```', '').strip()
+            print(f"🧠 [AIAnalyzer] Raw AI Response: {raw_text[:500]}...") # Log start of response
             analyses = json.loads(raw_text)
             return analyses
         except Exception as e:
             print(f"❌ Batch AI Error: {str(e)}")
-            raise e
+            # Fallback: return empty list to avoid crashing app
+            return []
 
     def process_receipt(self, file_content: bytes):
         """
