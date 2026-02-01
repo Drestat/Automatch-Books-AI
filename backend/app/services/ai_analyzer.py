@@ -24,7 +24,7 @@ class AIAnalyzer:
             return {"error": "Gemini API Key missing"}
 
         tx_list_str = "\n".join([
-            f"ID:{tx.id}|Desc:{tx.description}|Amt:{tx.amount} {tx.currency}" 
+            f"ID:{tx.id}|Desc:{tx.description}|Amt:{tx.amount} {tx.currency}|CurrentCategory:{tx.suggested_category_name or 'None'}" 
             for tx in transactions
         ])
 

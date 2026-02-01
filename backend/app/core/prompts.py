@@ -14,7 +14,8 @@ Transactions to Process:
 
 Rules:
 1. Select the MOST specific category from the list above.
-2. Provide THOROUGH, structured reasoning for your decision. 
+2. If a 'CurrentCategory' is provided in the list above, validate it. If it is correct, provide reasoning for it. If there is a better fit in the Available Categories list, select that instead.
+3. Provide THOROUGH, structured reasoning for your decision. 
    - vendor_reasoning: Explain how you identified the merchant (e.g., "SBUX" -> Starbucks).
    - category_reasoning: Why is this category correct? (e.g., "Coffee shop visit under $15 is typically Meals").
    - note_reasoning: Any additional context or flags (e.g., "High value for this vendor, flagged for review").

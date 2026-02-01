@@ -165,14 +165,13 @@ class TransactionService:
                             qbo_category_id = detail["AccountRef"].get("value")
                             break # Just grab the first one for now
             
-            # Logic: If QBO has a valid category (not Uncategorized), treat as Approved History
+            # Logic: If QBO has a valid category (not Uncategorized), treat as Suggestion but keep Unmatched for AI
             if qbo_category_name and "Uncategorized" not in qbo_category_name:
-                tx.status = 'approved'
+                tx.status = 'unmatched' # Keep unmatched so AnalysisService picks it up
                 tx.suggested_category_name = qbo_category_name
                 tx.suggested_category_id = qbo_category_id
-                tx.confidence = 1.0
-                tx.confidence = 1.0
-                tx.reasoning = "Imported from QBO History"
+                tx.confidence = 0.9 # High confidence but not 1.0 (to allow AI override/polishing)
+                tx.reasoning = f"Imported existing category '{qbo_category_name}' from QuickBooks."
             
             # --- Smart Tagging Logic (Historical) ---
             # Try to find a recent approved transaction with same Vendor/Description to copy tags
