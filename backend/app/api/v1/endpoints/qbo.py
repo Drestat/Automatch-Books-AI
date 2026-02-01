@@ -167,6 +167,14 @@ def disconnect_qbo(realm_id: str, db: Session = Depends(get_db)):
     print(f"✅ [disconnect] Found connection for user: {connection.user_id}")
     
     try:
+        # Revoke tokens on Intuit side first
+        from app.services.qbo_client import QBOClient
+        try:
+            client = QBOClient(db, connection)
+            client.revoke()
+        except Exception as e:
+            print(f"⚠️ [disconnect] Revocation failed during disconnect (continuing anyway): {e}")
+
         # Delete all associated data
         tx_count = db.query(Transaction).filter(Transaction.realm_id == realm_id).delete()
         acc_count = db.query(BankAccount).filter(BankAccount.realm_id == realm_id).delete()

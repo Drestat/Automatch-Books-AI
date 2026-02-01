@@ -67,3 +67,16 @@ class QBOClient:
 
     def query(self, query_str):
         return self.request("GET", "query", params={'query': query_str})
+
+    def revoke(self):
+        """
+        Revoke the refresh token on the Intuit side to terminate the connection.
+        """
+        try:
+            print(f"🔌 [QBOClient] Revoking token for realm_id: {self.connection.realm_id}")
+            self.auth_client.revoke(token=self.connection.refresh_token)
+            print(f"✅ [QBOClient] Token revoked successfully.")
+            return True
+        except Exception as e:
+            print(f"⚠️ [QBOClient] Revocation failed or already revoked: {e}")
+            return False
