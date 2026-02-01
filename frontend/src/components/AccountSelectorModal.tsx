@@ -166,6 +166,14 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
                                         );
                                     })}
 
+                                    {accounts.length === 0 && !loading && (
+                                        <div className="py-8 text-center space-y-2">
+                                            <Building2 size={40} className="mx-auto text-white/20" />
+                                            <p className="text-white/60 text-sm">No bank accounts found</p>
+                                            <p className="text-white/40 text-xs">Make sure your QuickBooks has bank or credit card accounts.</p>
+                                        </div>
+                                    )}
+
                                     {isLimitReached && (
                                         <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-200 flex items-start gap-3">
                                             <Crown className="h-5 w-5 shrink-0 mt-0.5" />

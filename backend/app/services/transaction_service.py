@@ -52,7 +52,8 @@ class TransactionService:
         # Sort for display stability
         accounts.sort(key=lambda x: x["Name"])
 
-        # We sync ALL accounts so user can see them to select
+        # Sync ALL accounts so user can see them to select
+        # All default to is_active=False - user must choose
         for a in accounts:
             bank = self.db.query(BankAccount).filter(
                 BankAccount.id == a["Id"],
@@ -61,7 +62,7 @@ class TransactionService:
             
             if not bank:
                 bank = BankAccount(id=a["Id"], realm_id=self.connection.realm_id)
-                # Default is_active=False, logic elsewhere will prompt user
+                bank.is_active = False  # User must explicitly activate
             
             bank.name = a["Name"]
             bank.currency = a.get("CurrencyRef", {}).get("value", "USD")
