@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 const isProtectedRoute = createRouteMatcher(['/dashboard(.*)', '/analytics(.*)']);
 
-export default clerkMiddleware(async (auth, req) => {
+export const proxy = clerkMiddleware(async (auth, req) => {
     // Protect dashboard routes
     if (isProtectedRoute(req)) {
         await auth.protect();
