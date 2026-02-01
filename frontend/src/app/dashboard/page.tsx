@@ -194,7 +194,7 @@ function DashboardContent() {
                 {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
               </span>
               <span className="px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] uppercase font-bold tracking-wider ml-2">
-                v3.9.5 | f3.11.7
+                v3.9.6 | f3.11.8
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">

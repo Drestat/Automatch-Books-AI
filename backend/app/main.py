@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.9.5 - ACCOUNT SELECTION (DEPLOYED)
+# v3.9.6 - ACCOUNT SYNC DEBUGGING + DB CLEANUP
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
