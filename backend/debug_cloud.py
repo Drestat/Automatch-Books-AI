@@ -78,11 +78,17 @@ def debug_live_state():
         tx = db.query(Transaction).filter(Transaction.id == "137").first()
         if tx:
             print(f"   🆔 {tx.id} | Desc: {tx.description}")
-            print(f"   ♻️ RESETTING Status to 'unmatched' for debugging visibility...")
-            tx.status = 'unmatched'
-            # tx.confidence = 0.0 # Optional: keep confidence to see if it shows up
-            db.commit()
-            print("   ✅ Status Reset Complete.")
+            print(f"      Realm ID: {tx.realm_id}")
+            print(f"      Status: {tx.status}")
+            print(f"      Confidence: {tx.confidence}")
+
+        # 4. Check & Upgrade Users
+        from app.models.user import User
+        print("\n👥 Checking Users...")
+        users = db.query(User).all()
+        for u in users:
+            print(f"   User: {u.id} | Email: {u.email} | Tier: {u.subscription_tier} | Status: {u.subscription_status}")
+            
         else:
             print("❌ Transaction 137 NOT FOUND in DB.")
         

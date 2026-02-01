@@ -59,7 +59,7 @@ def get_user(user_id: str, db: Session = Depends(get_db)):
     status = "no_plan"
     days_remaining = 0
     
-    if user.subscription_tier in ['founder', 'empire']:
+    if user.subscription_tier in ['pro', 'founder', 'empire']:
         status = "active"
     elif user.subscription_tier == 'free':
         if user.trial_ends_at:

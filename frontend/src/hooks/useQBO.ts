@@ -592,7 +592,7 @@ export const useQBO = () => {
             setTransactions(prev => prev.map(t => t.id === txId ? { ...t, status: 'unmatched', confidence: 0 } : t));
             showToast('Starting AI re-analysis...', 'info');
 
-            const response = await fetch(`${API_BASE_URL}/qbo/analyze?realm_id=${targetRealm}&transaction_id=${txId}`);
+            const response = await fetch(`${API_BASE_URL}/qbo/analyze?realm_id=${targetRealm}&tx_id=${txId}`);
             if (response.ok) {
                 showToast('AI analysis triggered', 'success');
                 track('re_analyze_start', { txId, realmId: targetRealm }, user?.id);
