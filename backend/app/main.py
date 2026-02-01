@@ -65,12 +65,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include the main API router IMMEDIATELY
-app.include_router(api_router, prefix=settings.API_V1_STR)
-
 @app.get("/health")
 def health_check():
     return {"status": "ok", "version": "3.10.2"}
+
+# Include the main API router
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def read_root():

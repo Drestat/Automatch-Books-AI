@@ -45,7 +45,7 @@ class AnalysisService:
             "categories": [c.name for c in categories],
             "customers": [c.display_name for c in customers],
             "vendor_mapping": vendor_mapping,
-            "category_objs": categories
+            "category_objs": {c.name: c for c in categories}
         }
 
     def analyze_transactions(self, limit: int = 100, tx_id: str = None):
