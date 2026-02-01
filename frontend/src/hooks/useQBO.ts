@@ -588,7 +588,7 @@ export const useQBO = () => {
             localStorage.removeItem('is_demo_mode');
             setIsDemo(false);
             showToast('Demo mode cleared', 'info');
-            router.refresh();
+            window.location.reload();
             return;
         }
 
@@ -615,7 +615,9 @@ export const useQBO = () => {
             setTransactions([]);
             setAccounts([]);
             showToast('Disconnected from QuickBooks', 'success');
-            router.refresh();
+
+            // Hard reload to ensure clean state
+            window.location.reload();
         } catch (error) {
             console.error('Disconnect error:', error);
             showToast('Failed to disconnect. Please try again.', 'error');
