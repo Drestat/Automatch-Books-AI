@@ -601,7 +601,8 @@ export const useQBO = () => {
                     method: 'DELETE'
                 });
 
-                if (!response.ok) {
+                // 404 means connection already deleted - treat as success
+                if (!response.ok && response.status !== 404) {
                     throw new Error('Failed to disconnect from backend');
                 }
             }
@@ -620,7 +621,18 @@ export const useQBO = () => {
             window.location.reload();
         } catch (error) {
             console.error('Disconnect error:', error);
-            showToast('Failed to disconnect. Please try again.', 'error');
+
+            // Even if backend fails, clear local state
+            localStorage.removeItem('qbo_realm_id');
+            localStorage.removeItem('is_demo_mode');
+            setRealmId(null);
+            setIsConnected(false);
+            setIsDemo(false);
+            setTransactions([]);
+            setAccounts([]);
+
+            showToast('Disconnected locally (backend error)', 'info');
+            window.location.reload();
         } finally {
             setLoading(false);
         }
