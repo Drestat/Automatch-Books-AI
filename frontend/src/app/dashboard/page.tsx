@@ -62,7 +62,7 @@ function DashboardContent() {
   // Refetch when filters change
   useEffect(() => {
     // Check for Demo Mode flag on mount
-    console.log("VERSION CHECK: f3.10.2 loaded");
+    console.log("VERSION CHECK: f3.10.3 loaded");
     const demoFlag = localStorage.getItem('is_demo_mode');
     if (isConnected && !isDemo) {
       fetchTransactions(localStorage.getItem('qbo_realm_id') || '', selectedAccounts);
@@ -166,7 +166,7 @@ function DashboardContent() {
                 {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
               </span>
               <span className="px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] uppercase font-bold tracking-wider ml-2">
-                Ver f3.10.2
+                Ver f3.10.3
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">
