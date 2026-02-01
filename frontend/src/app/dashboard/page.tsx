@@ -18,7 +18,9 @@ import {
   Coins,
   Filter,
   Edit2,
-  Building2
+  Building2,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 import { AccountSelectorModal } from '@/components/AccountSelectorModal';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -62,6 +64,24 @@ function DashboardContent() {
   const [loading, setLoading] = useState(false); // Local loading for UI actions
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
   const [showAccountModal, setShowAccountModal] = useState(false);
+  const [sortConfig, setSortConfig] = useState<{ key: 'date' | 'confidence', direction: 'asc' | 'desc' }>({ key: 'date', direction: 'desc' });
+
+  const toggleSort = (key: 'date' | 'confidence') => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'desc' ? 'asc' : 'desc'
+    }));
+  };
+
+  const sortedTransactions = [...transactions].sort((a, b) => {
+    let comparison = 0;
+    if (sortConfig.key === 'date') {
+      comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+    } else if (sortConfig.key === 'confidence') {
+      comparison = (a.confidence || 0) - (b.confidence || 0);
+    }
+    return sortConfig.direction === 'asc' ? comparison : -comparison;
+  });
 
   // Auto-open modal if connected but no accounts active (and not demo)
   useEffect(() => {
@@ -404,14 +424,36 @@ function DashboardContent() {
                 <h2 className="text-2xl font-black tracking-tight">Daily Matches</h2>
                 <div className="h-[1px] flex-1 bg-white/5" />
                 <div className="flex gap-2">
-                  <button className="px-4 py-2 rounded-full border border-white/10 text-xs font-bold hover:bg-white/5 transition-colors">By Date</button>
-                  <button className="px-4 py-2 rounded-full border border-brand/30 bg-brand/10 text-brand text-xs font-bold">By Confidence</button>
+                  <button
+                    onClick={() => toggleSort('date')}
+                    className={`px-4 py-2 rounded-full border text-xs font-bold transition-colors flex items-center gap-2 ${sortConfig.key === 'date'
+                        ? 'border-brand/30 bg-brand/10 text-brand'
+                        : 'border-white/10 hover:bg-white/5 text-white/60'
+                      }`}
+                  >
+                    By Date
+                    {sortConfig.key === 'date' && (
+                      sortConfig.direction === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => toggleSort('confidence')}
+                    className={`px-4 py-2 rounded-full border text-xs font-bold transition-colors flex items-center gap-2 ${sortConfig.key === 'confidence'
+                        ? 'border-brand/30 bg-brand/10 text-brand'
+                        : 'border-white/10 hover:bg-white/5 text-white/60'
+                      }`}
+                  >
+                    By Confidence
+                    {sortConfig.key === 'confidence' && (
+                      sortConfig.direction === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />
+                    )}
+                  </button>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <AnimatePresence mode="popLayout">
-                  {transactions.map((tx, index) => (
+                  {sortedTransactions.map((tx, index) => (
                     <motion.div
                       key={tx.id}
                       layout

@@ -177,7 +177,7 @@ class AnalysisService:
         tx.note_reasoning = analysis.get('note_reasoning')
         tx.tax_deduction_note = analysis.get('tax_deduction_note')
         tx.confidence = analysis.get('confidence')
-        tx.status = 'pending_approval'
+        tx.status = 'unmatched' # Keep as unmatched so it shows in the list
 
         # Resolve ID (Exact or Fuzzy)
         if suggested_name:

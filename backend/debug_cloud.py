@@ -73,20 +73,18 @@ def debug_live_state():
             print(f"   Tax Note: {tx.tax_deduction_note}")
             print("   ---")
             
-        # 3. Check All Transactions with Vendor Reasoning
-        print("\n🧠 Transactions with AI Reasoning Populated:")
-        # Check if vendor_reasoning is not null
-        analyzed_txs = db.query(Transaction).filter(Transaction.vendor_reasoning != None).all()
-        
-        if not analyzed_txs:
-            print("❌ NO transactions have vendor_reasoning occupied.")
+        # 3. Check Specific Transaction 137
+        print("\n🕵️ Msg from User: Transaction 137 Disappeared")
+        tx = db.query(Transaction).filter(Transaction.id == "137").first()
+        if tx:
+            print(f"   🆔 {tx.id} | Desc: {tx.description}")
+            print(f"   ♻️ RESETTING Status to 'unmatched' for debugging visibility...")
+            tx.status = 'unmatched'
+            # tx.confidence = 0.0 # Optional: keep confidence to see if it shows up
+            db.commit()
+            print("   ✅ Status Reset Complete.")
         else:
-            print(f"✅ Found {len(analyzed_txs)} analyzed transactions.")
-            for tx in analyzed_txs:
-                print(f"   🆔 {tx.id} | Desc: {tx.description}")
-                print(f"      Vendor Reasoning: {str(tx.vendor_reasoning)[:50]}...")
-                print(f"      Tax Note: {str(tx.tax_deduction_note)[:50]}...")
-                print("   ---")
+            print("❌ Transaction 137 NOT FOUND in DB.")
         
         db.close()
 
