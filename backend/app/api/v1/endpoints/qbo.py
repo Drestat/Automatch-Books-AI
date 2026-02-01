@@ -155,6 +155,73 @@ def update_account_selection(payload: AccountSelectionSchema, db: Session = Depe
         
     return {"status": "success", "message": f"Updated {updated_count} accounts"}
 
+@router.post("/accounts/preview")
+def preview_account_sync(payload: AccountSelectionSchema, db: Session = Depends(get_db)):
+    realm_id = payload.realm_id
+    selected_ids = payload.active_account_ids
+    
+    connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
+    if not connection:
+         raise HTTPException(status_code=404, detail="QBO Connection not found")
+
+    client = AuthClient(
+        client_id=settings.QBO_CLIENT_ID,
+        client_secret=settings.QBO_CLIENT_SECRET,
+        redirect_uri=settings.QBO_REDIRECT_URI,
+        environment=settings.QBO_ENVIRONMENT,
+    )
+    # Refresh token if needed (simplified, usually done in QBOClient)
+    # We'll use the QBOClient service for convenience if possible, or manual 
+    from app.services.qbo_client import QBOClient
+    qbo_client = QBOClient(db, connection) # Handles refresh automatically
+
+    # Fetch Transactions (Mirroring sync logic)
+    # Limit to 1000 for preview speed
+    query = "SELECT * FROM Purchase MAXRESULTS 1000"
+    data = qbo_client.query(query)
+    purchases = data.get("QueryResponse", {}).get("Purchase", [])
+
+    total_count = 0
+    matched_count = 0
+    unmatched_count = 0
+
+    for p in purchases:
+        # Filter by Selected Accounts
+        account_ref = p.get("AccountRef", {})
+        acc_id = account_ref.get("value")
+        
+        if acc_id not in selected_ids:
+            continue
+
+        total_count += 1
+        
+        # Determine Status
+        # Check if it has a valid category (AccountRef in Line items)
+        has_category = False
+        if "Line" in p:
+            for line in p["Line"]:
+                if "AccountBasedExpenseLineDetail" in line:
+                    detail = line["AccountBasedExpenseLineDetail"]
+                    if "AccountRef" in detail:
+                        cat_name = detail["AccountRef"].get("name", "")
+                        # Check for "Uncategorized" keyword
+                        if "Uncategorized" not in cat_name:
+                            has_category = True
+                        break
+        
+        if has_category:
+            matched_count += 1
+        else:
+            unmatched_count += 1
+
+    return {
+        "realm_id": realm_id,
+        "selected_count": len(selected_ids),
+        "total_transactions": total_count,
+        "already_matched": matched_count,
+        "to_analyze": unmatched_count
+    }
+
 @router.get("/analyze")
 def force_analyze(realm_id: str, transaction_id: str = None, db: Session = Depends(get_db)):
     """Manual trigger for AI analysis. Can target a specific transaction for re-analysis."""
