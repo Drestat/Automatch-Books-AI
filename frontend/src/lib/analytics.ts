@@ -3,6 +3,7 @@ export type AnalyticsEvent =
     | 'match_reject'
     | 'sync_start'
     | 'demo_start'
+    | 're_analyze_start'
     | 'nav_analytics';
 
 declare global {

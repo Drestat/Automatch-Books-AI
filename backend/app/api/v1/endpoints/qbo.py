@@ -156,11 +156,22 @@ def update_account_selection(payload: AccountSelectionSchema, db: Session = Depe
     return {"status": "success", "message": f"Updated {updated_count} accounts"}
 
 @router.get("/analyze")
-def force_analyze(realm_id: str, db: Session = Depends(get_db)):
-    """Manual trigger for AI analysis."""
+def force_analyze(realm_id: str, transaction_id: str = None, db: Session = Depends(get_db)):
+    """Manual trigger for AI analysis. Can target a specific transaction for re-analysis."""
     from modal_app import process_ai_categorization
-    print(f"🚀 [force_analyze] Manually spawning AI Analysis for realm: {realm_id}")
-    process_ai_categorization.spawn(realm_id)
+    
+    if transaction_id:
+        print(f"🚀 [force_analyze] Resetting status and re-analyzing tx: {transaction_id}")
+        from app.models.qbo import Transaction
+        tx = db.query(Transaction).filter(Transaction.id == transaction_id, Transaction.realm_id == realm_id).first()
+        if tx:
+            tx.status = 'unmatched'
+            db.commit()
+        else:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    print(f"🚀 [force_analyze] Spawning AI Analysis for realm: {realm_id} {'(tx: ' + transaction_id + ')' if transaction_id else ''}")
+    process_ai_categorization.spawn(realm_id, tx_id=transaction_id)
     return {"status": "success", "message": "AI analysis triggered"}
 
 @router.delete("/disconnect")

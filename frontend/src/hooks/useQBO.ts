@@ -583,6 +583,33 @@ export const useQBO = () => {
         }
     };
 
+    const reAnalyze = async (txId: string) => {
+        const targetRealm = realmId;
+        if (!targetRealm) return;
+
+        try {
+            // Optimistic update: set status back to unmatched
+            setTransactions(prev => prev.map(t => t.id === txId ? { ...t, status: 'unmatched', confidence: 0 } : t));
+            showToast('Starting AI re-analysis...', 'info');
+
+            const response = await fetch(`${API_BASE_URL}/qbo/analyze?realm_id=${targetRealm}&transaction_id=${txId}`);
+            if (response.ok) {
+                showToast('AI analysis triggered', 'success');
+                track('re_analyze_start', { txId, realmId: targetRealm }, user?.id);
+
+                // Fetch fresh data after a short delay to let the background job process
+                setTimeout(() => {
+                    fetchTransactions(targetRealm);
+                }, 3000);
+            } else {
+                showToast('Failed to trigger re-analysis', 'error');
+            }
+        } catch (error) {
+            console.error('Re-analyze error:', error);
+            showToast('Communication error', 'error');
+        }
+    };
+
     const disconnect = async () => {
         if (!realmId && !isDemo) {
             // Just clear demo mode
@@ -661,6 +688,7 @@ export const useQBO = () => {
         updateTransaction,
         createTag,
         updateBankNickname,
+        reAnalyze,
         disconnect
     };
 };

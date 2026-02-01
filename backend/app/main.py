@@ -62,12 +62,12 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.10.1"}
+    return {"status": "ok", "version": "3.10.2"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.10.1",
+        "version": "3.10.2",
         "status": "ready"
     }

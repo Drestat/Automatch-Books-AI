@@ -53,6 +53,7 @@ interface TransactionCardProps {
     onCategoryChange?: (txId: string, categoryId: string, categoryName: string) => void;
     onTagAdd?: (txId: string, tagName: string) => void;
     onTagRemove?: (txId: string, tagName: string) => void;
+    onAnalyze?: (id: string) => void;
 }
 
 export default function TransactionCard({
@@ -63,7 +64,8 @@ export default function TransactionCard({
     availableTags = [],
     onCategoryChange,
     onTagAdd,
-    onTagRemove
+    onTagRemove,
+    onAnalyze
 }: TransactionCardProps) {
     const isExpense = tx.amount < 0;
     const [showReasoning, setShowReasoning] = React.useState(true);
@@ -367,6 +369,15 @@ export default function TransactionCard({
                         className="w-12 h-12 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center justify-center text-white/60 hover:text-white transition-all"
                     >
                         <Edit2 size={18} />
+                    </motion.button>
+
+                    <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => onAnalyze && onAnalyze(tx.id)}
+                        className="w-12 h-12 bg-brand/10 hover:bg-brand/20 border border-brand/20 rounded-xl flex items-center justify-center text-brand transition-all"
+                        title="Re-analyze with AI (Deducts 1 Token)"
+                    >
+                        <Sparkles size={18} />
                     </motion.button>
                 </div>
 

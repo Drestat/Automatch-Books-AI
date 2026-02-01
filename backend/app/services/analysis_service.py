@@ -72,41 +72,13 @@ class AnalysisService:
             return {"message": "No unmatched transactions found"}
 
         context = self.get_ai_context()
-        vendor_mapping = context['vendor_mapping']
         categories_obj = context['category_objs']
         category_list = context['categories']
+        vendor_mapping = context['vendor_mapping']
         
         results = []
-        to_analyze_with_ai = []
-
-        # --- Rule 1: Hybrid Match ---
-        for tx in unmatched:
-            suggested_cat = None
-            # Exact Match
-            if tx.description in vendor_mapping:
-                suggested_cat = vendor_mapping[tx.description]
-                confidence = 1.0
-                method = "deterministic"
-                reasoning = f"Exact match with history for '{tx.description}'"
-            else:
-                # Fuzzy Match
-                history_descriptions = list(vendor_mapping.keys())
-                if history_descriptions:
-                    match = process.extractOne(tx.description, history_descriptions, scorer=fuzz.WRatio)
-                    if match and match[1] > 85:
-                        suggested_cat = vendor_mapping[match[0]]
-                        confidence = match[1] / 100
-                        method = "fuzzy-history"
-                        reasoning = f"Fuzzy match ({int(match[1])}%) with historic vendor '{match[0]}'"
-
-            if suggested_cat:
-                self._apply_suggestion(tx, suggested_cat, reasoning, confidence, method, categories_obj)
-                results.append({"id": tx.id, "analysis": {"method": method, "confidence": confidence}})
-            else:
-                to_analyze_with_ai.append(tx)
+        to_analyze_with_ai = unmatched # 100% AI Coverage requested by user
         
-        self.db.commit()
-
         if not to_analyze_with_ai:
             return results
 

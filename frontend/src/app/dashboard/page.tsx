@@ -55,6 +55,7 @@ function DashboardContent() {
     createTag,
     tags,
     categories,
+    reAnalyze,
     disconnect
   } = useQBO();
 
@@ -198,7 +199,7 @@ function DashboardContent() {
                 {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
               </span>
               <span className="px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] uppercase font-bold tracking-wider ml-2">
-                v3.10.1 | f3.12.1
+                v3.10.2 | f3.12.2
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">
@@ -423,6 +424,7 @@ function DashboardContent() {
                         tx={tx}
                         onAccept={handleAccept}
                         onReceiptUpload={handleReceiptUpload}
+                        onAnalyze={reAnalyze}
                         availableTags={tags}
                         availableCategories={categories}
                         onCategoryChange={async (txId, catId, catName) => {
