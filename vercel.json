@@ -1,6 +1,6 @@
 {
     "version": 2,
-    "installCommand": "cp frontend/package.json . && cp frontend/package-lock.json . && npm install",
-    "buildCommand": "cd frontend && npm run build && rm -rf ../.next && mv .next ../.next",
+    "installCommand": "cp -R frontend/. . && npm install",
+    "buildCommand": "npm run build",
     "framework": "nextjs"
 }
