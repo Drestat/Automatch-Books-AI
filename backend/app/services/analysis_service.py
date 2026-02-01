@@ -48,12 +48,13 @@ class AnalysisService:
             "category_objs": categories
         }
 
-    def analyze_transactions(self, limit: int = 50, tx_id: str = None):
+    def analyze_transactions(self, limit: int = 100, tx_id: str = None):
         """
         Orchestrates hybrid intelligence:
         1. Deterministic Match (History)
         2. Generative AI (Gemini) via AIAnalyzer
         """
+        print(f"🔍 [AnalysisService] Starting analysis for realm {self.realm_id}...")
         query = self.db.query(Transaction).filter(
             Transaction.realm_id == self.realm_id,
             Transaction.status == 'unmatched'
@@ -147,13 +148,18 @@ class AnalysisService:
             analyses = self.analyzer.analyze_batch(to_analyze_with_ai, ai_context)
             analysis_map = {a['id']: a for a in analyses}
 
+            print(f"🧠 [AnalysisService] AI returned {len(analyses)} analyses. Applying to database...")
+
             for tx in to_analyze_with_ai:
                 analysis = analysis_map.get(tx.id)
                 if analysis:
                     self._apply_ai_suggestion(tx, analysis, categories_obj, category_list)
                     results.append({"id": tx.id, "analysis": {**analysis, "method": "ai"}})
+                else:
+                    print(f"⚠️ [AnalysisService] No AI analysis found for tx: {tx.description} ({tx.id})")
             
             self.db.commit()
+            print(f"✅ [AnalysisService] AI enrichment complete for {len(results)} transactions.")
             self._log("ai_analysis", "transaction", len(results), "success")
             return results
         except Exception as e:

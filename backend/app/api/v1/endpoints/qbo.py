@@ -150,10 +150,18 @@ def update_account_selection(payload: AccountSelectionSchema, db: Session = Depe
         
         # Trigger AI Analysis background job immediately
         from modal_app import process_ai_categorization
-        print(f"🧠 [update_account_selection] Triggering AI Analysis for {realm_id}")
+        print(f"🚀 [update_account_selection] Spawning AI Analysis for realm: {realm_id}")
         process_ai_categorization.spawn(realm_id)
         
     return {"status": "success", "message": f"Updated {updated_count} accounts"}
+
+@router.get("/analyze")
+def force_analyze(realm_id: str, db: Session = Depends(get_db)):
+    """Manual trigger for AI analysis."""
+    from modal_app import process_ai_categorization
+    print(f"🚀 [force_analyze] Manually spawning AI Analysis for realm: {realm_id}")
+    process_ai_categorization.spawn(realm_id)
+    return {"status": "success", "message": "AI analysis triggered"}
 
 @router.delete("/disconnect")
 def disconnect_qbo(realm_id: str, db: Session = Depends(get_db)):

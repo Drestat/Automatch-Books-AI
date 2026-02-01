@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.10.0 - SMART ENRICHMENT FOR QBO IMPORTS (ENHANCED AI)
+# v3.10.1 - TOKEN REFILL + MANUAL AI TRIGGER + BATCH FIX
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -62,18 +62,12 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.9.5-prod"}
+    return {"status": "ok", "version": "3.10.1"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.9.5",
+        "version": "3.10.1",
         "status": "ready"
     }
-
-def initialize_app_logic():
-    return True
-
-
-
