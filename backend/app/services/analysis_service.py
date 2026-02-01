@@ -48,7 +48,7 @@ class AnalysisService:
             "category_objs": categories
         }
 
-    def analyze_transactions(self, limit: int = 20, tx_id: str = None):
+    def analyze_transactions(self, limit: int = 50, tx_id: str = None):
         """
         Orchestrates hybrid intelligence:
         1. Deterministic Match (History)
@@ -63,8 +63,11 @@ class AnalysisService:
             query = query.filter(Transaction.id == tx_id)
         
         unmatched = query.order_by(Transaction.date.desc()).limit(limit).all()
+        
+        print(f"🧠 [AnalysisService] Found {len(unmatched)} unmatched transactions to analyze (Limit: {limit})")
 
         if not unmatched:
+            print("🧠 [AnalysisService] No unmatched transactions found.")
             return {"message": "No unmatched transactions found"}
 
         context = self.get_ai_context()

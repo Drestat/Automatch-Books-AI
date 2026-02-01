@@ -148,7 +148,12 @@ def update_account_selection(payload: AccountSelectionSchema, db: Session = Depe
     if updated_count > 0:
         service.sync_transactions() # Will only pick active ones
         
-    return {"status": "success", "updated": updated_count}
+        # Trigger AI Analysis background job immediately
+        from modal_app import process_ai_categorization
+        print(f"🧠 [update_account_selection] Triggering AI Analysis for {realm_id}")
+        process_ai_categorization.spawn(realm_id)
+        
+    return {"status": "success", "message": f"Updated {updated_count} accounts"}
 
 @router.delete("/disconnect")
 def disconnect_qbo(realm_id: str, db: Session = Depends(get_db)):

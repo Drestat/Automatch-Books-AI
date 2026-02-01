@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.9.8 - TOKEN REVOCATION ON DISCONNECT (STABLE)
+# v3.9.9 - AI REASONING FIX & INCREASED BATCH LIMIT
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
