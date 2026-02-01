@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Building2, Crown, Check, X } from 'lucide-react';
+import { Loader2, Building2, Crown, Check, X, Sparkles } from 'lucide-react';
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run') + '/api/v1';
 
@@ -28,6 +28,11 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
     const [submitting, setSubmitting] = useState(false);
     const [limit, setLimit] = useState(1);
     const [tier, setTier] = useState("free");
+
+    // Preview State
+    const [step, setStep] = useState<'select' | 'preview'>('select');
+    const [previewLoading, setPreviewLoading] = useState(false);
+    const [previewStats, setPreviewStats] = useState<{ total_transactions: number, already_matched: number, to_analyze: number } | null>(null);
 
     useEffect(() => {
         if (isOpen && realmId) {
@@ -60,6 +65,25 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
             setSelectedIds([...selectedIds, id]);
         } else {
             setSelectedIds(selectedIds.filter(sid => sid !== id));
+        }
+    };
+
+    const handlePreview = async () => {
+        setPreviewLoading(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/qbo/accounts/preview`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ realm_id: realmId, active_account_ids: selectedIds })
+            });
+            const data = await res.json();
+            setPreviewStats(data);
+            setStep('preview');
+        } catch (error) {
+            console.error("Preview error:", error);
+            alert("Failed to generating preview.");
+        } finally {
+            setPreviewLoading(false);
         }
     };
 
@@ -186,22 +210,77 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
                             )}
                         </div>
 
-                        <div className="p-4 bg-white/5 flex justify-end gap-3 border-t border-white/5">
-                            <button
-                                onClick={onClose}
-                                className="px-4 py-2 text-sm font-medium text-white/50 hover:text-white transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleSave}
-                                disabled={loading || submitting}
-                                className="px-6 py-2 rounded-lg bg-brand hover:bg-brand/90 text-black font-bold text-sm flex items-center gap-2 disabled:opacity-50 transition-colors"
-                            >
-                                {submitting ? <Loader2 className="animate-spin h-4 w-4" /> : null}
-                                {submitting ? 'Saving...' : 'Confirm Selection'}
-                            </button>
-                        </div>
+                        {step === 'preview' && previewStats && (
+                            <div className="absolute inset-0 bg-[#0a0a0a] z-10 flex flex-col p-6 animate-in slide-in-from-right-4">
+                                <h3 className="text-xl font-bold text-white mb-6">Import Summary</h3>
+
+                                <div className="space-y-4 flex-1">
+                                    <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                                        <p className="text-sm text-white/50">Total Transactions Found</p>
+                                        <p className="text-3xl font-mono font-bold text-white">{previewStats.total_transactions}</p>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-1">
+                                            <p className="text-xs text-emerald-400 font-bold uppercase tracking-wider">Matched</p>
+                                            <p className="text-2xl font-mono font-bold text-white">{previewStats.already_matched}</p>
+                                            <p className="text-[10px] text-white/40">Already categorized</p>
+                                        </div>
+                                        <div className="p-4 rounded-xl bg-brand/10 border border-brand/20 space-y-1">
+                                            <p className="text-xs text-brand font-bold uppercase tracking-wider">To Analyze</p>
+                                            <p className="text-2xl font-mono font-bold text-white">{previewStats.to_analyze}</p>
+                                            <p className="text-[10px] text-white/40">New for AI</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 flex gap-3 items-start">
+                                        <div className="bg-blue-500/20 p-1.5 rounded text-blue-400 mt-0.5">
+                                            <Sparkles size={14} />
+                                        </div>
+                                        <p className="text-xs text-blue-200 leading-relaxed">
+                                            Importing is free. You can later use the <strong>AI Sparkles</strong> on individual transactions to analyze them (1 token each).
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end gap-3 mt-auto pt-6 border-t border-white/5">
+                                    <button
+                                        onClick={() => setStep('select')}
+                                        className="px-4 py-2 text-sm font-medium text-white/50 hover:text-white transition-colors"
+                                    >
+                                        Back
+                                    </button>
+                                    <button
+                                        onClick={handleSave}
+                                        disabled={submitting}
+                                        className="px-6 py-2 rounded-lg bg-brand hover:bg-brand/90 text-black font-bold text-sm flex items-center gap-2 disabled:opacity-50 transition-colors"
+                                    >
+                                        {submitting ? <Loader2 className="animate-spin h-4 w-4" /> : null}
+                                        {submitting ? 'Importing...' : 'Confirm Import'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {step === 'select' && (
+                            <div className="p-4 bg-white/5 flex justify-end gap-3 border-t border-white/5">
+                                <button
+                                    onClick={onClose}
+                                    disabled={previewLoading}
+                                    className="px-4 py-2 text-sm font-medium text-white/50 hover:text-white transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handlePreview}
+                                    disabled={loading || previewLoading || selectedIds.length === 0}
+                                    className="px-6 py-2 rounded-lg bg-brand hover:bg-brand/90 text-black font-bold text-sm flex items-center gap-2 disabled:opacity-50 transition-colors"
+                                >
+                                    {previewLoading ? <Loader2 className="animate-spin h-4 w-4" /> : null}
+                                    {previewLoading ? 'Analyzing...' : 'Review Import'}
+                                </button>
+                            </div>
+                        )}
                     </motion.div>
                 </div>
             )}

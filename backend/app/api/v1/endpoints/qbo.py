@@ -148,11 +148,6 @@ def update_account_selection(payload: AccountSelectionSchema, db: Session = Depe
     if updated_count > 0:
         service.sync_transactions() # Will only pick active ones
         
-        # Trigger AI Analysis background job immediately
-        from modal_app import process_ai_categorization
-        print(f"🚀 [update_account_selection] Spawning AI Analysis for realm: {realm_id}")
-        process_ai_categorization.spawn(realm_id)
-        
     return {"status": "success", "message": f"Updated {updated_count} accounts"}
 
 @router.post("/accounts/preview")
