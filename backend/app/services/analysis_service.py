@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from rapidfuzz import process, fuzz
-from app.models.qbo import Transaction, Category, Customer, TransactionSplit, SyncLog
+from app.models.qbo import Transaction, Category, Customer, TransactionSplit, SyncLog, QBOConnection
 from app.services.ai_analyzer import AIAnalyzer
 import json
 

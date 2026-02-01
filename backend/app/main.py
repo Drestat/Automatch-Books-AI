@@ -4,7 +4,15 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.10.1 - TOKEN REFILL + MANUAL AI TRIGGER + BATCH FIX
+# v3.10.2 - 100% AI ANALYSIS + MANUAL RE-ANALYZE REPAIR
+
+def initialize_app_logic():
+    """Compatibility wrapper for Modal cloud deployment.
+    Signal that the app module has loaded correctly.
+    Startup logic is now handled in the lifespan context manager.
+    """
+    print("🚀 [main.py] initialize_app_logic called (Compatibility Mode)")
+    return True
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
