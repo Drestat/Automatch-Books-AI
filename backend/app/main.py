@@ -1,9 +1,29 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import time
+from contextlib import asynccontextmanager
+from app.core.config import settings
+from app.api.v1.api import api_router
 
-# v3.9.3 - AI REASONING POLISHED
-app = FastAPI(title="Automatch Books AI")
+# v3.9.5 - ACCOUNT SELECTION (DEPLOYED)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup logic
+    print(">>> [main.py] Initializing Models...")
+    try:
+        from app.db.session import engine, Base
+        # Ensure tables exist (including new columns)
+        Base.metadata.create_all(bind=engine)
+        print("✅ [main.py] Database initialized.")
+    except Exception as e:
+        print(f"❌ [main.py] Database error during startup: {e}")
+    
+    yield
+
+app = FastAPI(
+    title="Automatch Books AI",
+    lifespan=lifespan
+)
 
 # CORS - Allow All for Production Resilience
 app.add_middleware(
@@ -14,36 +34,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include the main API router IMMEDIATELY
+app.include_router(api_router, prefix=settings.API_V1_STR)
+
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.9.3-prod"}
+    return {"status": "ok", "version": "3.9.5-prod"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.9.3",
+        "version": "3.9.5",
         "status": "ready"
     }
 
-# Heavy lifting moves into a helper called by the entrypoint
 def initialize_app_logic():
-    print(">>> [main.py] Initializing API Routes and Models...")
-    start_time = time.time()
-    try:
-        from app.core.config import settings
-        from app.api.v1.api import api_router
-        from app.db.session import engine, Base
-        
-        # Ensure tables exist (including new columns)
-        Base.metadata.create_all(bind=engine)
-        
-        # Include the main API router
-        app.include_router(api_router, prefix=settings.API_V1_STR)
-        
-        duration = time.time() - start_time
-        print(f"✅ [main.py] App logic initialized in {duration:.2f}s")
-        return True
-    except Exception as e:
-        print(f"❌ [main.py] FAILED to initialize logic: {e}")
-        return False
+    return True
+
+
+

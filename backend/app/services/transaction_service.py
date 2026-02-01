@@ -2,6 +2,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 
 from app.models.qbo import Transaction, QBOConnection, Category, Customer, SyncLog, TransactionSplit, BankAccount, Tag
+from app.models.user import User
 from app.services.qbo_client import QBOClient
 import uuid
 
@@ -33,30 +34,73 @@ class TransactionService:
         # self.sync_tags() # Disabled until we confirm API support
         self.sync_transactions()
 
+    def _get_account_limit(self):
+        user = self.db.query(User).filter(User.id == self.connection.user_id).first()
+        if not user: return 1 # Default strict
+        
+        tier = user.subscription_tier.lower()
+        if "tier_3" in tier or "enterprise" in tier: return 10
+        if "tier_2" in tier or "pro" in tier: return 4
+        return 1 # Tier 1 / Free
+
     def sync_bank_accounts(self):
         # Query for Bank and Credit Card accounts
         query = "SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')"
         data = self.client.query(query)
         accounts = data.get("QueryResponse", {}).get("Account", [])
         
+        # Sort for display stability
+        accounts.sort(key=lambda x: x["Name"])
+
+        # We sync ALL accounts so user can see them to select
         for a in accounts:
-            bank = self.db.query(BankAccount).filter(BankAccount.id == a["Id"]).first()
+            bank = self.db.query(BankAccount).filter(
+                BankAccount.id == a["Id"],
+                BankAccount.realm_id == self.connection.realm_id
+            ).first()
+            
             if not bank:
                 bank = BankAccount(id=a["Id"], realm_id=self.connection.realm_id)
+                # Default is_active=False, logic elsewhere will prompt user
             
             bank.name = a["Name"]
             bank.currency = a.get("CurrencyRef", {}).get("value", "USD")
             bank.balance = a.get("CurrentBalance", 0)
-            # nickname is left alone as it's user defined locally
             
             self.db.add(bank)
+            
         self.db.commit()
-        self._log("sync", "bank_account", len(accounts), "success")
+        
+        self._log("sync", "bank_account", len(accounts), "success", {"synced_metadata": len(accounts)})
 
     def sync_transactions(self):
+        # Only sync active accounts
+        active_banks = self.db.query(BankAccount).filter(
+            BankAccount.realm_id == self.connection.realm_id,
+            BankAccount.is_active == True
+        ).all()
+        
+        if not active_banks:
+            print("⚠️ No active accounts selected. Skipping transaction sync.")
+            return
+
+        self.active_account_ids = [b.id for b in active_banks]
+
         data = self.client.query("SELECT * FROM Purchase")
         purchases = data.get("QueryResponse", {}).get("Purchase", [])
+        
+        valid_purchases = []
+        
         for p in purchases:
+            # Filter by Account Limit
+            account_ref = p.get("AccountRef", {})
+            acc_id = account_ref.get("value")
+            
+            if acc_id not in self.active_account_ids:
+                continue
+
+            valid_purchases.append(p)
+            
             tx = self.db.query(Transaction).filter(Transaction.id == p["Id"]).first()
             if not tx:
                 tx = Transaction(id=p["Id"], realm_id=self.connection.realm_id)
@@ -64,8 +108,7 @@ class TransactionService:
             tx.date = datetime.strptime(p["TxnDate"], "%Y-%m-%d")
             
             # Map Account (Source)
-            account_ref = p.get("AccountRef", {})
-            tx.account_id = account_ref.get("value")
+            tx.account_id = acc_id
             tx.account_name = account_ref.get("name", "Unknown Account")
 
             # Map Description (Vendor + Memo)
@@ -149,7 +192,7 @@ class TransactionService:
 
             self.db.add(tx)
         self.db.commit()
-        self._log("sync", "transaction", len(purchases), "success")
+        self._log("sync", "transaction", len(valid_purchases), "success")
 
     def sync_categories(self):
         data = self.client.query("SELECT * FROM Account WHERE AccountType = 'Expense'")

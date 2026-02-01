@@ -41,6 +41,10 @@ class TransactionSchema(BaseModel):
     status: str
     suggested_category_name: Optional[str] = None
     reasoning: Optional[str] = None
+    vendor_reasoning: Optional[str] = None
+    category_reasoning: Optional[str] = None
+    note_reasoning: Optional[str] = None
+    tax_deduction_note: Optional[str] = None
     confidence: Optional[float] = None
     is_split: bool = False
     splits: List[SplitSchema] = []
@@ -152,6 +156,19 @@ def upload_receipt(
         shutil.copyfileobj(file.file, buffer)
     
     # Process with AI
+    from app.services.token_service import TokenService
+    from app.models.user import User # Ensure User is imported if needed, although user_id is from connection
+    
+    token_service = TokenService(db)
+    receipt_cost = 5
+    
+    if not token_service.has_sufficient_tokens(connection.user_id, receipt_cost):
+        # Clean up file
+        os.remove(file_path)
+        raise HTTPException(status_code=402, detail="Insufficient tokens for receipt scan (Cost: 5 tokens)")
+    
+    token_service.deduct_tokens(connection.user_id, receipt_cost, reason="Receipt Scan")
+
     with open(file_path, "rb") as f:
         content = f.read()
     

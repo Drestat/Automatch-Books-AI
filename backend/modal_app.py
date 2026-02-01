@@ -3,10 +3,13 @@ import os
 from dotenv import dotenv_values
 
 # 1. PRE-DEPLOY: Capture production keys from disk
-env_path = os.path.join(os.path.dirname(__file__), ".env")
+base_dir = os.path.dirname(os.path.abspath(__file__))
+# Check if .env is in backend/ or root
+env_path = os.path.join(base_dir, ".env")
+if not os.path.exists(env_path):
+    env_path = os.path.join(os.path.dirname(base_dir), ".env")
 env_vars = dotenv_values(env_path)
 
-# 2. IMAGE DEFINITION
 image = (
     modal.Image.debian_slim()
     .pip_install(
@@ -21,12 +24,15 @@ image = (
         "google-generativeai",
         "stripe",
         "rapidfuzz",
-        "python-multipart"
+        "python-multipart",
+        "pytz"
     )
-    .add_local_dir("./app", remote_path="/root/app")
+    .add_local_dir(os.path.join(base_dir, "app"), remote_path="/root/app")
 )
 
 app = modal.App("qbo-sync-engine")
+
+
 
 # 3. SECRETS
 secrets = modal.Secret.from_dict({
@@ -34,6 +40,7 @@ secrets = modal.Secret.from_dict({
     "POSTGRES_PASSWORD": env_vars.get("POSTGRES_PASSWORD", ""),
     "POSTGRES_HOST": env_vars.get("POSTGRES_HOST", ""),
     "POSTGRES_DB": env_vars.get("POSTGRES_DB", ""),
+    "DATABASE_URL": env_vars.get("DATABASE_URL", ""),
     "QBO_CLIENT_ID": env_vars.get("QBO_CLIENT_ID", ""),
     "QBO_CLIENT_SECRET": env_vars.get("QBO_CLIENT_SECRET", ""),
     "QBO_REDIRECT_URI": env_vars.get("QBO_REDIRECT_URI", ""),

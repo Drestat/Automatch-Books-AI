@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, ForeignKey, Numeric, JSON, UUID
+from sqlalchemy import Column, String, DateTime, ForeignKey, Numeric, JSON, UUID, Boolean
 from sqlalchemy.sql import func
 from app.db.session import Base
 import uuid
@@ -40,6 +40,7 @@ class BankAccount(Base):
     nickname = Column(String, nullable=True) # User defined nickname
     currency = Column(String, default="USD")
     balance = Column(Numeric(15, 2), default=0)
+    is_active = Column(Boolean, default=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 class Tag(Base):

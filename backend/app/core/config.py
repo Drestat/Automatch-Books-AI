@@ -41,7 +41,12 @@ class Settings(BaseSettings):
     # Stripe Settings
     STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "")
     STRIPE_WEBHOOK_SECRET: str = os.getenv("STRIPE_WEBHOOK_SECRET", "")
-    STRIPE_MONTHLY_PRICE_ID: str = os.getenv("STRIPE_MONTHLY_PRICE_ID", "")
+    STRIPE_MONTHLY_PRICE_ID: str = os.getenv("STRIPE_MONTHLY_PRICE_ID", "") # Legacy/Default
+    
+    # Tiered Pricing
+    STRIPE_PRICE_ID_TIER_1: str = os.getenv("STRIPE_PRICE_ID_TIER_1", "") # 1 Account
+    STRIPE_PRICE_ID_TIER_2: str = os.getenv("STRIPE_PRICE_ID_TIER_2", "") # 4 Accounts
+    STRIPE_PRICE_ID_TIER_3: str = os.getenv("STRIPE_PRICE_ID_TIER_3", "") # 10 Accounts
     
     # Clerk Settings
     CLERK_SECRET_KEY: str = os.getenv("CLERK_SECRET_KEY", "")

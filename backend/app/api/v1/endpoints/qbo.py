@@ -62,3 +62,75 @@ def callback(code: str, state: str, realmId: str, db: Session = Depends(get_db))
     
     redirect_url = f"{settings.NEXT_PUBLIC_APP_URL}/dashboard?code={code}&state={state}&realmId={realmId}"
     return RedirectResponse(url=redirect_url)
+
+from app.models.qbo import BankAccount
+from app.services.transaction_service import TransactionService
+from typing import List
+from pydantic import BaseModel
+
+class AccountSelectionSchema(BaseModel):
+    realm_id: str
+    active_account_ids: List[str]
+
+@router.get("/accounts")
+def get_accounts(realm_id: str, db: Session = Depends(get_db)):
+    connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
+    if not connection:
+        return {"accounts": [], "limit": 0, "active_count": 0}
+    
+    # Ensure accounts are synced first (at least metadata)
+    service = TransactionService(db, connection)
+    service.sync_bank_accounts() # This syncs all without limit
+    
+    accounts = db.query(BankAccount).filter(BankAccount.realm_id == realm_id).order_by(BankAccount.name).all()
+    
+    # Determine limit
+    limit = service._get_account_limit()
+    
+    return {
+        "accounts": [
+            {
+                "id": a.id, 
+                "name": a.name, 
+                "balance": float(a.balance), 
+                "is_active": a.is_active, 
+                "currency": a.currency
+            } 
+            for a in accounts
+        ],
+        "limit": limit,
+        "active_count": len([a for a in accounts if a.is_active]),
+        "tier": db.query(User).filter(User.id == connection.user_id).first().subscription_tier
+    }
+
+@router.post("/accounts/select")
+def update_account_selection(payload: AccountSelectionSchema, db: Session = Depends(get_db)):
+    realm_id = payload.realm_id
+    selected_ids = payload.active_account_ids
+    
+    connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
+    if not connection:
+         raise HTTPException(status_code=404, detail="QBO Connection not found")
+         
+    service = TransactionService(db, connection)
+    limit = service._get_account_limit()
+    
+    if len(selected_ids) > limit:
+        raise HTTPException(status_code=402, detail=f"Selection exceeds analytics limit of {limit} accounts. Please upgrade.")
+        
+    all_accounts = db.query(BankAccount).filter(BankAccount.realm_id == realm_id).all()
+    
+    updated_count = 0
+    for acc in all_accounts:
+        is_selected = acc.id in selected_ids
+        if acc.is_active != is_selected:
+            acc.is_active = is_selected
+            updated_count += 1
+            
+    db.commit()
+    
+    # Trigger sync if changes made
+    if updated_count > 0:
+        service.sync_transactions() # Will only pick active ones
+        
+    return {"status": "success", "updated": updated_count}

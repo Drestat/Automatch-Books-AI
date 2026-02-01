@@ -17,8 +17,10 @@ import {
   BarChart3,
   Coins,
   Filter,
-  Edit2
+  Edit2,
+  Building2
 } from 'lucide-react';
+import { AccountSelectorModal } from '@/components/AccountSelectorModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserButton } from "@clerk/nextjs";
 import { track } from '@/lib/analytics';
@@ -58,6 +60,17 @@ function DashboardContent() {
 
   const [loading, setLoading] = useState(false); // Local loading for UI actions
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
+  const [showAccountModal, setShowAccountModal] = useState(false);
+
+  // Auto-open modal if connected but no accounts active (and not demo)
+  useEffect(() => {
+    if (isConnected && !isDemo && isLoaded) {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('code') && urlParams.get('realmId')) {
+        setShowAccountModal(true);
+      }
+    }
+  }, [isConnected, isDemo, isLoaded]);
 
   // Refetch when filters change
   useEffect(() => {
@@ -155,6 +168,21 @@ function DashboardContent() {
   return (
     <SubscriptionGuard status={subscriptionStatus} daysRemaining={daysRemaining}>
       <div className="min-h-screen bg-black text-white selection:bg-brand selection:text-white pb-20">
+
+        <AccountSelectorModal
+          isOpen={showAccountModal}
+          onClose={() => setShowAccountModal(false)}
+          onSuccess={() => {
+            // Refresh data
+            const realm = localStorage.getItem('qbo_realm_id');
+            if (realm) {
+              // Force refresh of accounts and transactions
+              window.location.reload(); // Simplest way to refresh everything including hook state
+            }
+          }}
+          realmId={localStorage.getItem('qbo_realm_id') || ''}
+        />
+
         <header className="pt-12 pb-8 px-6 md:px-12 max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -166,7 +194,7 @@ function DashboardContent() {
                 {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
               </span>
               <span className="px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] uppercase font-bold tracking-wider ml-2">
-                v3.9.4 | f3.11.6
+                v3.9.5 | f3.11.7
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">
@@ -191,6 +219,17 @@ function DashboardContent() {
                   <p className="font-mono font-bold text-white/90 leading-none">{profile.token_balance.toLocaleString()} <span className="text-xs text-white/40">/ {profile.monthly_token_allowance.toLocaleString()}</span></p>
                 </div>
               </div>
+            )}
+
+            {/* Manage Accounts Button */}
+            {isConnected && !isDemo && (
+              <button
+                onClick={() => setShowAccountModal(true)}
+                className="btn-glass px-4 py-3 flex items-center gap-2 border-brand/30 hover:bg-brand/10 text-sm"
+              >
+                <Building2 size={16} className="text-brand" />
+                <span>Manage Accounts</span>
+              </button>
             )}
 
             {/* Account Filter */}

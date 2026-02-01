@@ -114,7 +114,33 @@ class AnalysisService:
             "history_str": history_str
         }
 
+        # Token Logic
+        from app.services.token_service import TokenService
+        token_service = TokenService(self.db)
+        
+        # Determine cost (e.g., 1 token per transaction)
+        cost_per_tx = 1
+        total_cost = len(to_analyze_with_ai) * cost_per_tx
+        
+        user_id = self.db.query(QBOConnection).filter(QBOConnection.realm_id == self.realm_id).first().user_id
+        
+        if not token_service.has_sufficient_tokens(user_id, total_cost):
+            # Partial processing or hard stop? Let's do partial or just return limitation message
+            # For now, let's hard stop or process what we can
+            available = token_service.get_balance(user_id)
+            can_process_count = available // cost_per_tx
+            if can_process_count == 0:
+                return {"message": "Insufficient tokens for AI analysis. Please upgrade or wait for refresh."}
+            
+            to_analyze_with_ai = to_analyze_with_ai[:can_process_count]
+            total_cost = can_process_count * cost_per_tx
+            # Log warning or return info
+            print(f"⚠️ Limited AI analysis to {can_process_count} transactions due to token balance.")
+
         try:
+            # Deduct tokens upfront
+            token_service.deduct_tokens(user_id, total_cost, reason=f"AI Analysis: {len(to_analyze_with_ai)} txs")
+            
             analyses = self.analyzer.analyze_batch(to_analyze_with_ai, ai_context)
             analysis_map = {a['id']: a for a in analyses}
 
@@ -128,6 +154,7 @@ class AnalysisService:
             self._log("ai_analysis", "transaction", len(results), "success")
             return results
         except Exception as e:
+            # Refund if failed? In complex systems yes, here simplification
             print(f"❌ Batch AI Error: {str(e)}")
             if results: return results
             return {"error": str(e)}
