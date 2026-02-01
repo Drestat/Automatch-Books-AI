@@ -65,6 +65,7 @@ function DashboardContent() {
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [sortConfig, setSortConfig] = useState<{ key: 'date' | 'confidence', direction: 'asc' | 'desc' }>({ key: 'date', direction: 'desc' });
+  const [activeTab, setActiveTab] = useState<'review' | 'matched'>('review');
 
   const toggleSort = (key: 'date' | 'confidence') => {
     setSortConfig(prev => ({
@@ -73,7 +74,21 @@ function DashboardContent() {
     }));
   };
 
-  const sortedTransactions = [...transactions].sort((a, b) => {
+  // Logic to separate "To Review" vs "Already Matched"
+  // Already matched = items imported from QBO with a valid category (reasoning starts with "Imported...")
+  const toReviewTxs = transactions.filter(tx =>
+    tx.status !== 'approved' &&
+    !(tx.reasoning && tx.reasoning.includes("Imported existing category"))
+  );
+
+  const alreadyMatchedTxs = transactions.filter(tx =>
+    tx.status !== 'approved' &&
+    tx.reasoning && tx.reasoning.includes("Imported existing category")
+  );
+
+  const currentTabTransactions = activeTab === 'review' ? toReviewTxs : alreadyMatchedTxs;
+
+  const sortedTransactions = [...currentTabTransactions].sort((a, b) => {
     let comparison = 0;
     if (sortConfig.key === 'date') {
       comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -420,15 +435,41 @@ function DashboardContent() {
 
             {/* Transactions List */}
             <div className="md:col-span-3 mt-8">
-              <div className="flex items-center gap-4 mb-8">
-                <h2 className="text-2xl font-black tracking-tight">Daily Matches</h2>
-                <div className="h-[1px] flex-1 bg-white/5" />
+              <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8">
+                <div className="flex p-1 bg-white/5 border border-white/10 rounded-xl">
+                  <button
+                    onClick={() => setActiveTab('review')}
+                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'review'
+                      ? 'bg-brand text-black shadow-lg shadow-brand/20'
+                      : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                  >
+                    To Review
+                    <div className={`px-1.5 py-0.5 rounded-md text-[10px] ${activeTab === 'review' ? 'bg-black/20' : 'bg-white/10'}`}>
+                      {toReviewTxs.length}
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('matched')}
+                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'matched'
+                      ? 'bg-brand text-black shadow-lg shadow-brand/20'
+                      : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                  >
+                    Already Matched
+                    <div className={`px-1.5 py-0.5 rounded-md text-[10px] ${activeTab === 'matched' ? 'bg-black/20' : 'bg-white/10'}`}>
+                      {alreadyMatchedTxs.length}
+                    </div>
+                  </button>
+                </div>
+
+                <div className="h-[1px] md:hidden bg-white/5" />
+                <div className="hidden md:block h-[1px] flex-1 bg-white/5" />
+
                 <div className="flex gap-2">
                   <button
                     onClick={() => toggleSort('date')}
                     className={`px-4 py-2 rounded-full border text-xs font-bold transition-colors flex items-center gap-2 ${sortConfig.key === 'date'
-                        ? 'border-brand/30 bg-brand/10 text-brand'
-                        : 'border-white/10 hover:bg-white/5 text-white/60'
+                      ? 'border-brand/30 bg-brand/10 text-brand'
+                      : 'border-white/10 hover:bg-white/5 text-white/60'
                       }`}
                   >
                     By Date
@@ -439,8 +480,8 @@ function DashboardContent() {
                   <button
                     onClick={() => toggleSort('confidence')}
                     className={`px-4 py-2 rounded-full border text-xs font-bold transition-colors flex items-center gap-2 ${sortConfig.key === 'confidence'
-                        ? 'border-brand/30 bg-brand/10 text-brand'
-                        : 'border-white/10 hover:bg-white/5 text-white/60'
+                      ? 'border-brand/30 bg-brand/10 text-brand'
+                      : 'border-white/10 hover:bg-white/5 text-white/60'
                       }`}
                   >
                     By Confidence
@@ -491,17 +532,23 @@ function DashboardContent() {
                   ))}
                 </AnimatePresence>
 
-                {transactions.length === 0 && (
+                {currentTabTransactions.length === 0 && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     className="col-span-full py-20 flex flex-col items-center justify-center glass-panel"
                   >
-                    <div className="w-20 h-20 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-6">
-                      <ShieldCheck size={40} />
+                    <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${activeTab === 'review' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-brand/10 text-brand'}`}>
+                      {activeTab === 'review' ? <ShieldCheck size={40} /> : <Building2 size={40} />}
                     </div>
-                    <h3 className="text-2xl font-bold mb-2">All Caught Up!</h3>
-                    <p className="text-white/40">You&apos;ve cleared all pending transactions for today.</p>
+                    <h3 className="text-2xl font-bold mb-2">
+                      {activeTab === 'review' ? 'All Caught Up!' : 'No Matches Found'}
+                    </h3>
+                    <p className="text-white/40">
+                      {activeTab === 'review'
+                        ? "You've cleared all pending transactions for today."
+                        : "No transactions were automatically matched by QuickBooks."}
+                    </p>
                   </motion.div>
                 )}
               </div>
