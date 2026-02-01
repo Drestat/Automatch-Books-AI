@@ -134,10 +134,10 @@ export const useQBO = () => {
     // Helper: Fetch Accounts
     const fetchAccounts = useCallback(async (realm: string) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/accounts/?realm_id=${realm}`);
+            const response = await fetch(`${API_BASE_URL}/qbo/accounts?realm_id=${realm}`);
             if (response.ok) {
                 const data = await response.json();
-                setAccounts(data);
+                setAccounts(data.accounts); // Extract accounts array from response
             }
         } catch (error) {
             console.error("Failed to fetch accounts", error);

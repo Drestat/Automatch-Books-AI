@@ -74,19 +74,29 @@ class AccountSelectionSchema(BaseModel):
 
 @router.get("/accounts")
 def get_accounts(realm_id: str, db: Session = Depends(get_db)):
+    print(f"🔍 [get_accounts] Starting for realm_id: {realm_id}")
+    
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
     if not connection:
+        print(f"❌ [get_accounts] No connection found for realm_id: {realm_id}")
         return {"accounts": [], "limit": 0, "active_count": 0}
+    
+    print(f"✅ [get_accounts] Connection found for user: {connection.user_id}")
     
     # Ensure accounts are synced first (at least metadata)
     service = TransactionService(db, connection)
     try:
+        print(f"🔄 [get_accounts] Starting sync_bank_accounts...")
         service.sync_bank_accounts() # This syncs all without limit
+        print(f"✅ [get_accounts] sync_bank_accounts completed")
     except Exception as e:
         print(f"⚠️ [get_accounts] Sync failed: {e}")
+        import traceback
+        print(f"📋 [get_accounts] Traceback: {traceback.format_exc()}")
         # Continue to return what we have in DB
     
     accounts = db.query(BankAccount).filter(BankAccount.realm_id == realm_id).order_by(BankAccount.name).all()
+    print(f"📊 [get_accounts] Found {len(accounts)} accounts in database")
     
     # Determine limit
     limit = service._get_account_limit()
