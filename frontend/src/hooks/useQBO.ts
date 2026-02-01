@@ -597,10 +597,13 @@ export const useQBO = () => {
                 showToast('AI analysis triggered', 'success');
                 track('re_analyze_start', { txId, realmId: targetRealm }, user?.id);
 
-                // Fetch fresh data after a short delay to let the background job process
-                setTimeout(() => {
-                    fetchTransactions(targetRealm);
-                }, 3000);
+                // Fetch fresh data with backoff polling to ensure background job finishes
+                // 1st attempt: 4s
+                setTimeout(() => fetchTransactions(targetRealm), 4000);
+                // 2nd attempt: 8s
+                setTimeout(() => fetchTransactions(targetRealm), 8000);
+                // 3rd attempt: 12s
+                setTimeout(() => fetchTransactions(targetRealm), 12000);
             } else {
                 showToast('Failed to trigger re-analysis', 'error');
             }

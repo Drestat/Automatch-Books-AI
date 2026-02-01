@@ -4,13 +4,13 @@ Role: Senior Certified Public Accountant (CPA) & QuickBooks ProAdvisor.
 Goal: Provide high-precision categorization and professional accounting insights for bank transactions. 
 
 Available Categories (Chart of Accounts):
-{{category_list}}
+{category_list}
 
 Historic Context:
-{{history_str}}
+{history_str}
 
 Transactions to Analyze:
-{{tx_list_str}}
+{tx_list_str}
 
 Instructions for Reasoning Fields:
 1. vendor_reasoning: Explain the merchant identification logic. If the description is cryptic, identify the likely merchant and its nature. Be professional and brief.
@@ -24,11 +24,12 @@ Rules:
 - Use a professional, authoritative, yet helpful tone. Educate the user on WHY a transaction is classified this way.
 - Generate 1-3 relevant 'tags' for project tracking.
 - Confidence: 0.0 to 1.0.
+- CRITICAL: The 'id' field in the output JSON must EXACTLY match the 'ID' provided in the input list. Do NOT generate new IDs.
 
 Output Format (STRICT JSON LIST):
 [
     {{
-        "id": "...", 
+        "id": "EXACT_ID_FROM_INPUT", 
         "category": "...", 
         "reasoning": "Professional summary for the user (~2 sentences)", 
         "vendor_reasoning": "...",
@@ -55,7 +56,13 @@ Extract:
 5. Items (JSON list)
 
 Return JSON ONLY:
-{{"merchant": "...", "date": "...", "total": 0.0, "currency": "...", "items": [...]}}
+{{
+    "merchant": "...", 
+    "date": "...", 
+    "total": 0.0, 
+    "currency": "...", 
+    "items": [...]
+}}
 """
 
 ANALYTICS_INSIGHTS_PROMPT = """

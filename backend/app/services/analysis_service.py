@@ -118,17 +118,23 @@ class AnalysisService:
             token_service.deduct_tokens(user_id, total_cost, reason=f"AI Analysis: {len(to_analyze_with_ai)} txs")
             
             analyses = self.analyzer.analyze_batch(to_analyze_with_ai, ai_context)
-            analysis_map = {a['id']: a for a in analyses}
+            
+            # Robust mapping: Ensure ID is string to match DB text column
+            analysis_map = {}
+            for a in analyses:
+                if 'id' in a:
+                    analysis_map[str(a['id'])] = a
 
-            print(f"🧠 [AnalysisService] AI returned {len(analyses)} analyses. Applying to database...")
+            print(f"🧠 [AnalysisService] AI returned {len(analyses)} analyses. Map keys: {list(analysis_map.keys())}")
 
             for tx in to_analyze_with_ai:
-                analysis = analysis_map.get(tx.id)
+                # DB ID is string, so we lookup with string
+                analysis = analysis_map.get(str(tx.id))
                 if analysis:
                     self._apply_ai_suggestion(tx, analysis, categories_obj, category_list)
                     results.append({"id": tx.id, "analysis": {**analysis, "method": "ai"}})
                 else:
-                    print(f"⚠️ [AnalysisService] No AI analysis found for tx: {tx.description} ({tx.id})")
+                    print(f"⚠️ [AnalysisService] No AI analysis found for tx: {tx.description} ({tx.id}) - Expected ID: {tx.id}")
             
             self.db.commit()
             print(f"✅ [AnalysisService] AI enrichment complete for {len(results)} transactions.")
@@ -175,11 +181,11 @@ class AnalysisService:
 
         # Resolve ID (Exact or Fuzzy)
         if suggested_name:
-            cat_match = next((c for c in categories_obj if c.name == suggested_name), None)
+            cat_match = categories_obj.get(suggested_name)
             if not cat_match:
                 f_match = process.extractOne(suggested_name, category_list, scorer=fuzz.WRatio)
                 if f_match and f_match[1] > 80:
-                    cat_match = next((c for c in categories_obj if c.name == f_match[0]), None)
+                    cat_match = categories_obj.get(f_match[0])
             if cat_match:
                 tx.suggested_category_id = cat_match.id
 

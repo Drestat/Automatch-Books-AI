@@ -13,16 +13,13 @@ def debug_analysis():
     # But for now, let's just inspect the AnalysisService logic dry.
     # Actually I need a real transaction to run AI against.
     
-    # Let's find a transaction that corresponds to "Squeaky Kleen Car Wash"
-    tx = db.query(Transaction).filter(Transaction.description.ilike('%Squeaky Kleen%')).first()
+    # Target specific ID found in previous step
+    target_id = "138" 
+    tx = db.query(Transaction).filter(Transaction.id == target_id).first()
     
     if not tx:
-        print("❌ Could not find Squeaky Kleen transaction locally to test.")
-        # Try to find ANY transaction
-        tx = db.query(Transaction).first()
-        if not tx:
-            print("❌ No transactions in local DB.")
-            return
+        print(f"❌ Could not find transaction {target_id} locally.")
+        return
 
     print(f"✅ Found transaction: {tx.description} (ID: {tx.id})")
     print(f"   Current Reasoning: {tx.reasoning}")

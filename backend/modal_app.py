@@ -49,6 +49,7 @@ secrets = modal.Secret.from_dict({
     "QBO_REDIRECT_URI": env_vars.get("QBO_REDIRECT_URI", ""),
     "QBO_ENVIRONMENT": env_vars.get("QBO_ENVIRONMENT", "sandbox"),
     "GEMINI_API_KEY": env_vars.get("GEMINI_API_KEY", ""),
+    "GEMINI_MODEL": env_vars.get("GEMINI_MODEL", "gemini-1.5-flash"), # Fallback to stable 1.5 if missing
     "NEXT_PUBLIC_APP_URL": env_vars.get("NEXT_PUBLIC_APP_URL", ""),
 })
 
