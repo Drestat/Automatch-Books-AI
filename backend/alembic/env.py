@@ -66,8 +66,19 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    section = config.get_section(config.config_ini_section, {})
+    
+    # Allow DATABASE_URL environment variable to override .ini setting
+    db_url = os.environ.get("DATABASE_URL")
+    if db_url:
+        # If the URL starts with postgres:// (old style), replace with postgresql:// for SQLAlchemy 1.4+
+        if db_url.startswith("postgres://"):
+            db_url = db_url.replace("postgres://", "postgresql://", 1)
+        section["sqlalchemy.url"] = db_url
+        print(f"📡 [Alembic] Using Database URL from Environment")
+
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        section,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )

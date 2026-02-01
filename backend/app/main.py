@@ -4,19 +4,42 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.9.6 - ACCOUNT SYNC DEBUGGING + DB CLEANUP
+# v3.9.7 - SCHEMA REPAIR + STABLE SYNC
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup logic
-    print(">>> [main.py] Initializing Models...")
+    print(">>> [main.py] Initializing and Repairing Models...")
     try:
         from app.db.session import engine, Base
-        # Ensure tables exist (including new columns)
+        from sqlalchemy import text
+        
+        # Ensure tables exist (for new tables)
         Base.metadata.create_all(bind=engine)
+        
+        # Repair Schema (Alembic might have missed these if create_all was used first)
+        with engine.begin() as conn:
+            print("🏗️ [main.py] Running manual schema patches...")
+            # BankAccount additions
+            conn.execute(text("ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT FALSE;"))
+            conn.execute(text("ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS nickname VARCHAR;"))
+            
+            # Transactions reasoning (added in previous migration attempts)
+            conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS vendor_reasoning VARCHAR;"))
+            conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS category_reasoning VARCHAR;"))
+            conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS note_reasoning VARCHAR;"))
+            conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS tax_deduction_note VARCHAR;"))
+            
+            # QBO Connection updates
+            conn.execute(text("ALTER TABLE qbo_connections ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT now();"))
+            
+            print("✅ [main.py] Schema repair complete.")
+            
         print("✅ [main.py] Database initialized.")
     except Exception as e:
         print(f"❌ [main.py] Database error during startup: {e}")
+        import traceback
+        print(traceback.format_exc())
     
     yield
 

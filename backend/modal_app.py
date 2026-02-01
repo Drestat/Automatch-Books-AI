@@ -25,9 +25,12 @@ image = (
         "stripe",
         "rapidfuzz",
         "python-multipart",
-        "pytz"
+        "pytz",
+        "alembic"
     )
     .add_local_dir(os.path.join(base_dir, "app"), remote_path="/root/app")
+    .add_local_dir(os.path.join(base_dir, "alembic"), remote_path="/root/alembic")
+    .add_local_file(os.path.join(base_dir, "alembic.ini"), remote_path="/root/alembic.ini")
 )
 
 app = modal.App("qbo-sync-engine")
@@ -136,3 +139,34 @@ def process_ai_categorization(realm_id: str, tx_id: str = None):
 @app.function(image=image, secrets=[secrets])
 def daily_maintenance():
     print("Running daily maintenance tasks...")
+
+@app.function(image=image, secrets=[secrets])
+def run_migrations():
+    import subprocess
+    import os
+    print("🏗️ [Modal] Running database migrations...")
+    
+    # Alembic needs to find the config relative to its execution
+    # We set sqlalchemy.url dynamically if needed or rely on env vars in env.py
+    try:
+        # Check if DATABASE_URL is set
+        db_url = os.environ.get("DATABASE_URL")
+        if not db_url:
+             print("❌ DATABASE_URL not set in environment.")
+             return
+             
+        result = subprocess.run(
+            ["alembic", "upgrade", "head"],
+            cwd="/root",
+            capture_output=True,
+            text=True
+        )
+        print(f"STDOUT: {result.stdout}")
+        print(f"STDERR: {result.stderr}")
+        
+        if result.returncode == 0:
+            print("✅ Migrations applied successfully.")
+        else:
+            print("❌ Migration failed.")
+    except Exception as e:
+        print(f"❌ Error during migration: {str(e)}")

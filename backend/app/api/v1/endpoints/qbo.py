@@ -93,6 +93,7 @@ def get_accounts(realm_id: str, db: Session = Depends(get_db)):
         print(f"⚠️ [get_accounts] Sync failed: {e}")
         import traceback
         print(f"📋 [get_accounts] Traceback: {traceback.format_exc()}")
+        db.rollback()
         # Continue to return what we have in DB
     
     accounts = db.query(BankAccount).filter(BankAccount.realm_id == realm_id).order_by(BankAccount.name).all()
@@ -186,3 +187,18 @@ def disconnect_qbo(realm_id: str, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to disconnect: {str(e)}")
 
+@router.get("/logs")
+def get_sync_logs(realm_id: str, db: Session = Depends(get_db)):
+    """
+    Retrieve the latest sync logs for debugging.
+    """
+    from app.models.qbo import SyncLog
+    logs = db.query(SyncLog).filter(SyncLog.realm_id == realm_id).order_by(SyncLog.timestamp.desc()).limit(20).all()
+    return [{
+        "timestamp": log.timestamp,
+        "entity": log.entity_type,
+        "op": log.operation,
+        "count": log.count,
+        "status": log.status,
+        "details": log.details
+    } for log in logs]
