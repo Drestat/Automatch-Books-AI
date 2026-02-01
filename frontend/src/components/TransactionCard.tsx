@@ -72,6 +72,7 @@ export default function TransactionCard({
     const [isUploading, setIsUploading] = React.useState(false);
     const [isEditingCategory, setIsEditingCategory] = React.useState(false);
     const [isAddingTag, setIsAddingTag] = React.useState(false);
+    const [isSyncing, setIsSyncing] = React.useState(false);
     const [newTag, setNewTag] = React.useState("");
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -323,11 +324,22 @@ export default function TransactionCard({
                 <div className="flex gap-3">
                     <motion.button
                         whileTap={{ scale: 0.95 }}
-                        onClick={handleAccept}
-                        className="flex-1 bg-brand hover:bg-brand/90 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-brand/20 transition-all border border-white/10"
+                        onClick={async () => {
+                            setIsSyncing(true);
+                            await handleAccept();
+                            setIsSyncing(false);
+                        }}
+                        disabled={isSyncing}
+                        className={`flex-1 ${isSyncing ? 'bg-brand/50 cursor-wait' : 'bg-brand hover:bg-brand/90'} text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-brand/20 transition-all border border-white/10`}
                     >
-                        <Check size={18} />
-                        Confirm Match
+                        {isSyncing ? (
+                            <div className="w-4 h-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                            <>
+                                <Check size={18} />
+                                Confirm Match
+                            </>
+                        )}
                     </motion.button>
 
                     <input
