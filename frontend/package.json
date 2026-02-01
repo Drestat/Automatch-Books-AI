@@ -16,6 +16,7 @@
     "@capacitor/ios": "^8.0.1",
     "@clerk/nextjs": "^6.36.9",
     "@stripe/stripe-js": "^8.6.4",
+    "client-only": "^0.0.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.29.0",
     "lucide-react": "^0.562.0",
