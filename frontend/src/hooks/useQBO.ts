@@ -582,16 +582,46 @@ export const useQBO = () => {
         }
     };
 
-    const disconnect = () => {
-        localStorage.removeItem('qbo_realm_id');
-        localStorage.removeItem('is_demo_mode');
-        setRealmId(null);
-        setIsConnected(false);
-        setIsDemo(false);
-        setTransactions([]);
-        setAccounts([]);
-        showToast('Disconnected from QBO', 'info');
-        router.refresh();
+    const disconnect = async () => {
+        if (!realmId && !isDemo) {
+            // Just clear demo mode
+            localStorage.removeItem('is_demo_mode');
+            setIsDemo(false);
+            showToast('Demo mode cleared', 'info');
+            router.refresh();
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            // Call backend to delete connection and data
+            if (realmId) {
+                const response = await fetch(`${API_BASE_URL}/qbo/disconnect?realm_id=${realmId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to disconnect from backend');
+                }
+            }
+
+            // Clear local state
+            localStorage.removeItem('qbo_realm_id');
+            localStorage.removeItem('is_demo_mode');
+            setRealmId(null);
+            setIsConnected(false);
+            setIsDemo(false);
+            setTransactions([]);
+            setAccounts([]);
+            showToast('Disconnected from QuickBooks', 'success');
+            router.refresh();
+        } catch (error) {
+            console.error('Disconnect error:', error);
+            showToast('Failed to disconnect. Please try again.', 'error');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return {

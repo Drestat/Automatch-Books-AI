@@ -312,13 +312,14 @@ function DashboardContent() {
               <Zap size={20} className={`group-hover:animate-pulse ${loading ? 'animate-spin' : ''}`} />
               <span className="font-bold">{loading ? 'Syncing...' : 'Sync Now'}</span>
             </button>
-            <div className="ml-2 flex items-center gap-2">
+            <div className="ml-2 flex items-center gap-3">
               <button
                 onClick={disconnect}
-                className="p-2 text-white/20 hover:text-red-500 transition-colors rounded-full hover:bg-white/5"
-                title="Disconnect / Reset"
+                className="px-4 py-2 text-red-400 hover:text-red-300 transition-colors rounded-lg hover:bg-red-500/10 border border-red-500/20 hover:border-red-500/40 flex items-center gap-2"
+                title="Disconnect from QuickBooks"
               >
-                <Zap size={16} className="rotate-45" />
+                <Zap size={14} className="rotate-45" />
+                <span className="text-sm font-medium">Disconnect</span>
               </button>
               <UserButton afterSignOutUrl="/" />
             </div>

@@ -80,7 +80,11 @@ def get_accounts(realm_id: str, db: Session = Depends(get_db)):
     
     # Ensure accounts are synced first (at least metadata)
     service = TransactionService(db, connection)
-    service.sync_bank_accounts() # This syncs all without limit
+    try:
+        service.sync_bank_accounts() # This syncs all without limit
+    except Exception as e:
+        print(f"⚠️ [get_accounts] Sync failed: {e}")
+        # Continue to return what we have in DB
     
     accounts = db.query(BankAccount).filter(BankAccount.realm_id == realm_id).order_by(BankAccount.name).all()
     
@@ -134,3 +138,31 @@ def update_account_selection(payload: AccountSelectionSchema, db: Session = Depe
         service.sync_transactions() # Will only pick active ones
         
     return {"status": "success", "updated": updated_count}
+
+@router.delete("/disconnect")
+def disconnect_qbo(realm_id: str, db: Session = Depends(get_db)):
+    """
+    Disconnect from QuickBooks and delete all associated data.
+    This removes the connection, transactions, bank accounts, and sync logs.
+    """
+    from app.models.qbo import Transaction, BankAccount, SyncLog, Category, Customer
+    
+    connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
+    if not connection:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    
+    try:
+        # Delete all associated data
+        db.query(Transaction).filter(Transaction.realm_id == realm_id).delete()
+        db.query(BankAccount).filter(BankAccount.realm_id == realm_id).delete()
+        db.query(SyncLog).filter(SyncLog.realm_id == realm_id).delete()
+        
+        # Delete the connection itself
+        db.delete(connection)
+        db.commit()
+        
+        return {"status": "success", "message": "Disconnected from QuickBooks"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to disconnect: {str(e)}")
+
