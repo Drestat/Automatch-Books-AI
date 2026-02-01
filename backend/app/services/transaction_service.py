@@ -178,8 +178,7 @@ class TransactionService:
                 
                 if should_overwrite:
                     tx.status = 'unmatched' # Keep unmatched so AnalysisService picks it up (if we want AI to verify)
-                    # Actually, if we want AI to verify, we should leave it as 'unmatched' but maybe NOT set the reasoning yet?
-                    # Or set it as a baseline.
+                    tx.is_qbo_matched = True # Mark that it was already matched in QBO
                     
                     tx.suggested_category_name = qbo_category_name
                     tx.suggested_category_id = qbo_category_id

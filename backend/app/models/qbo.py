@@ -61,7 +61,7 @@ class Transaction(Base):
     currency = Column(String)
     account_id = Column(String)
     account_name = Column(String)
-    account_name = Column(String)
+    is_qbo_matched = Column(Boolean, default=False)
     transaction_type = Column(String) # Expense, Check, CreditCard, etc.
     note = Column(String) # User editable note (initially from Memo)
     tags = Column(JSON, default=[]) # List of strings

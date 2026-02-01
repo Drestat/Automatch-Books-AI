@@ -75,15 +75,13 @@ function DashboardContent() {
   };
 
   // Logic to separate "To Review" vs "Already Matched"
-  // Already matched = items imported from QBO with a valid category (reasoning starts with "Imported...")
+  // Already matched = items imported from QBO with a valid category (is_qbo_matched flag)
   const toReviewTxs = transactions.filter(tx =>
-    tx.status !== 'approved' &&
-    !(tx.reasoning && tx.reasoning.includes("Imported existing category"))
+    tx.status !== 'approved' && !tx.is_qbo_matched
   );
 
   const alreadyMatchedTxs = transactions.filter(tx =>
-    tx.status !== 'approved' &&
-    tx.reasoning && tx.reasoning.includes("Imported existing category")
+    tx.status !== 'approved' && tx.is_qbo_matched
   );
 
   const currentTabTransactions = activeTab === 'review' ? toReviewTxs : alreadyMatchedTxs;
