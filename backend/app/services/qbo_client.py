@@ -68,6 +68,50 @@ class QBOClient:
     def query(self, query_str):
         return self.request("GET", "query", params={'query': query_str})
 
+    def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str):
+        """
+        Update a Purchase entity in QBO to set the category and mark as manually categorized.
+        
+        Args:
+            purchase_id: The QBO Purchase ID
+            category_id: The QBO Account ID for the category
+            category_name: The name of the category (for reference)
+            sync_token: The current SyncToken for optimistic locking
+            
+        Returns:
+            dict: The updated Purchase object from QBO
+            
+        Raises:
+            Exception: If the update fails
+        """
+        # Construct sparse update payload
+        # We only need to update the Line array and PurchaseEx
+        update_payload = {
+            "Id": purchase_id,
+            "SyncToken": sync_token,
+            "sparse": True,
+            "Line": [
+                {
+                    "Id": "1",  # Bank transactions typically have a single line with Id=1
+                    "DetailType": "AccountBasedExpenseLineDetail",
+                    "AccountBasedExpenseLineDetail": {
+                        "AccountRef": {
+                            "value": category_id,
+                            "name": category_name
+                        }
+                    }
+                }
+            ]
+        }
+        
+        print(f"📝 [QBOClient] Updating Purchase {purchase_id} with category {category_name} (ID: {category_id})")
+        
+        # Make the update request
+        result = self.request("POST", "purchase", json_payload=update_payload)
+        
+        print(f"✅ [QBOClient] Purchase {purchase_id} updated successfully")
+        return result.get("Purchase", {})
+
     def revoke(self):
         """
         Revoke the refresh token on the Intuit side to terminate the connection.

@@ -77,19 +77,19 @@ function DashboardContent() {
   };
 
   // Logic to separate "For review" vs "Categorized"
-  // Already matched = items imported from QBO with a valid category (is_qbo_matched flag)
-  const toReviewTxs = transactions.filter(tx =>
-    !tx.is_excluded &&
-    tx.status !== 'approved' &&
-    (tx.status === 'pending_approval' || !tx.is_qbo_matched || tx.forced_review)
-  );
+  // ELEGANT STRATEGY: Backend now computes NEEDS_REVIEW vs CATEGORIZED status
+  // based on QBO Account (Uncategorized vs Expense) and Recency.
+  const toReviewTxs = transactions.filter(tx => {
+    // DEBUG LOGGING
+    if (tx.description.includes("Lara")) {
+      console.log(`[DEBUG UI] Lara Status: ${tx.status}, Excluded: ${tx.is_excluded}`);
+    }
+    return !tx.is_excluded && tx.status === 'NEEDS_REVIEW';
+  });
 
   const alreadyMatchedTxs = transactions.filter(tx =>
     !tx.is_excluded &&
-    (
-      (tx.is_qbo_matched && !tx.forced_review) ||
-      tx.status === 'approved'
-    )
+    tx.status === 'CATEGORIZED'
   );
 
   const excludedTxs = transactions.filter(tx => tx.is_excluded === true);
@@ -126,7 +126,7 @@ function DashboardContent() {
   // Refetch when filters change
   useEffect(() => {
     // Check for Demo Mode flag on mount
-    console.log("VERSION CHECK: f3.10.3 loaded");
+    console.log("VERSION CHECK: f3.17.1 Elegant Logic loaded");
     const demoFlag = localStorage.getItem('is_demo_mode');
     if (isConnected && !isDemo) {
       fetchTransactions(localStorage.getItem('qbo_realm_id') || '', selectedAccounts);
@@ -150,7 +150,12 @@ function DashboardContent() {
   };
 
   const handleBulkApprove = async () => {
-    const highConfidence = transactions.filter(tx => tx.confidence > 0.9 && tx.status !== 'approved').map(tx => tx.id);
+    // Bulk approve high confidence items in NEEDS_REVIEW
+    const highConfidence = transactions.filter(tx =>
+      tx.confidence > 0.9 &&
+      tx.status === 'NEEDS_REVIEW' // Only approve things needing review
+    ).map(tx => tx.id);
+
     if (highConfidence.length > 0) {
       setLoading(true);
       await bulkApprove(highConfidence);
@@ -158,7 +163,7 @@ function DashboardContent() {
     }
   };
 
-  const approvedCount = transactions.filter(tx => tx.status === 'approved').length;
+  const approvedCount = transactions.filter(tx => tx.status === 'CATEGORIZED').length;
 
   if (!isConnected && !isDemo) {
     return (

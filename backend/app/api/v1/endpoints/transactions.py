@@ -68,6 +68,53 @@ def get_transactions(
         query = query.filter(Transaction.account_id.in_(acc_id_list))
         
     txs = query.all()
+    
+    # ============================================================================
+    # ELEGANT STRATEGY: View-Time Status Computation
+    # We mirror QBO Banking by using Account + Date as the source of truth.
+    # ============================================================================
+    from datetime import datetime, timedelta, timezone
+    
+    # Cutoff for "Recent" vs "Archived" (45 Days - Strict to hide migration history)
+    # Using naive UTC now to match likely naive DB dates or timezone-aware if DB is aware
+    now_utc = datetime.now(timezone.utc)
+    cutoff_date = now_utc - timedelta(days=45)
+    
+    print(f"🔍 [View Logic] Computing statuses. Cutoff: {cutoff_date}")
+    
+    for tx in txs:
+        # 1. Determine Recency
+        tx_date = tx.date
+        if tx_date and tx_date.tzinfo is None:
+            tx_date = tx_date.replace(tzinfo=timezone.utc)
+            
+        is_recent = tx_date >= cutoff_date
+        
+        # 2. Determine Category Status
+        expense_acc_name = (tx.suggested_category_name or "").lower()
+        
+        is_uncategorized_account = (
+            "uncategorized" in expense_acc_name 
+            or "ask my accountant" in expense_acc_name
+            or not tx.suggested_category_name 
+        )
+        
+        # 3. Apply Hierarchical Logic
+        # CRITICAL UPDATE: Prioritize "Work to be Done" over "Age".
+        # User explicitly requested to see ALL history (even old categorized items) to allow re-analysis.
+        
+        if is_uncategorized_account:
+            # Matches "For Review" - The user needs to work on this.
+            tx.status = "NEEDS_REVIEW"
+        else:
+            # Matches "Categorized" - Visible history (no matter how old).
+            tx.status = "CATEGORIZED"
+            
+        # DEBUG INJECTION
+        tx.reasoning = (tx.reasoning or "") + f" [DBG: Cat='{tx.suggested_category_name}' Status={tx.status}]"
+        
+        print(f"👉 Tx: {tx.description[:20]} | Cat: {expense_acc_name[:20]} | Date: {tx_date} | -> {tx.status}")
+
     return txs
 
 @router.post("/sync")

@@ -171,3 +171,40 @@ def run_migrations():
             print("❌ Migration failed.")
     except Exception as e:
         print(f"❌ Error during migration: {str(e)}")
+
+@app.function(image=image, secrets=[secrets], timeout=300)
+def add_sync_token_column():
+    """Add sync_token column to transactions table for QBO optimistic locking"""
+    from sqlalchemy import create_engine, text
+    import os
+    
+    print("🔄 Adding sync_token column to transactions table...")
+    
+    database_url = os.environ.get("DATABASE_URL")
+    engine = create_engine(database_url)
+    
+    try:
+        with engine.connect() as conn:
+            # Check if column already exists
+            result = conn.execute(text("""
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name='transactions' AND column_name='sync_token'
+            """))
+            
+            if result.fetchone():
+                print("✅ Column sync_token already exists")
+                return {"status": "success", "message": "Column already exists"}
+            
+            # Add the column
+            conn.execute(text("ALTER TABLE transactions ADD COLUMN sync_token VARCHAR"))
+            conn.commit()
+            
+            print("✅ Successfully added sync_token column to transactions table")
+            return {"status": "success", "message": "Column added successfully"}
+            
+    except Exception as e:
+        print(f"❌ Error adding column: {e}")
+        raise
+    finally:
+        engine.dispose()

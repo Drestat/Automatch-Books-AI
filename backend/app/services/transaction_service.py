@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from app.models.qbo import Transaction, QBOConnection, Category, Customer, SyncLog, TransactionSplit, BankAccount, Tag
@@ -105,26 +105,54 @@ class TransactionService:
         self.active_account_ids = [b.id for b in active_banks]
 
         # Fetch from multiple sources: Purchase, Deposit, CreditCardCredit, JournalEntry, Transfer
-        queries = [
-            "SELECT * FROM Purchase",
-            "SELECT * FROM Deposit",
-            "SELECT * FROM CreditCardCredit",
-            "SELECT * FROM JournalEntry",
-            "SELECT * FROM Transfer"
-        ]
-
+        # Fetch from multiple sources: Purchase, Deposit, CreditCardCredit, JournalEntry, Transfer
+        # We must sync EVERYTHING to safely prune deleted items.
+        entity_types = ["Purchase", "Deposit", "CreditCardCredit", "JournalEntry", "Transfer"]
+        
         all_txs = []
-        for q in queries:
-            try:
-                res = self.client.query(q)
-                entity = q.split()[3]
-                txs = res.get("QueryResponse", {}).get(entity, [])
-                all_txs.extend(txs)
-            except Exception as e:
-                print(f"⚠️ Error querying {q}: {e}")
-                continue
+        paginated_batch_size = 1000
+        
+        print(f"🔄 [sync_transactions] Starting full sync for {len(entity_types)} entity types...")
+        
+        sync_failed = False
+        
+        for entity in entity_types:
+            start_position = 1
+            while True:
+                # Pagination Loop
+                query = f"SELECT * FROM {entity} STARTPOSITION {start_position} MAXRESULTS {paginated_batch_size}"
+                
+                try:
+                    res = self.client.query(query)
+                    batch = res.get("QueryResponse", {}).get(entity, [])
+                    
+                    if not batch:
+                        break
+                        
+                    all_txs.extend(batch)
+                    
+                    if len(batch) < paginated_batch_size:
+                        break # End of results
+                        
+                    start_position += len(batch)
+                    
+                except Exception as e:
+                     print(f"⚠️ Error querying {entity} at start_position {start_position}: {e}")
+                     sync_failed = True
+                     break
+            
+            if sync_failed:
+                break
+        
+        print(f"📊 [sync_transactions] Fetched total of {len(all_txs)} transactions from QBO.")
         
         valid_purchases = []
+        synced_qbo_ids = set() 
+        
+        for p in all_txs:
+            qbo_id = p.get("Id")
+            if qbo_id:
+                synced_qbo_ids.add(str(qbo_id))
         
         for p in all_txs:
             # Skip voided or deleted transactions
@@ -165,6 +193,11 @@ class TransactionService:
 
             valid_purchases.append(p)
             
+            # ============================================================================
+            # NO FILTER: Sync ALL transactions for data integrity.
+            # Filtering is handled by the "View Status" logic in the frontend.
+            # ============================================================================
+            
             tx = self.db.query(Transaction).filter(Transaction.id == p["Id"]).first()
             if not tx:
                 tx = Transaction(id=p["Id"], realm_id=self.connection.realm_id)
@@ -199,7 +232,10 @@ class TransactionService:
 
             tx.amount = p.get("TotalAmt", 0)
             tx.currency = p.get("CurrencyRef", {}).get("value", "USD")
-            tx.transaction_type = p.get("PaymentType", "Expense") # Default to Expense if missing
+            tx.transaction_type = p.get("PaymentType", "Expense")
+            
+            # Store SyncToken for future updates
+            tx.sync_token = p.get("SyncToken") # Default to Expense if missing
             tx.note = p.get("PrivateNote")
             tx.raw_json = p
             # Extract Expense Category from Lines (for History/Training)
@@ -238,22 +274,54 @@ class TransactionService:
                             qbo_category_name = detail["ItemRef"].get("name")
                             qbo_category_id = detail["ItemRef"].get("value")
                             break
+                # EXTRACT Transaction Type and Metadata
+                txn_type = None
+                doc_number = p.get("DocNumber")
+                private_note = p.get("PrivateNote")
+                entity_ref = p.get("EntityRef")
+                metadata = p.get("MetaData", {})
+                create_time_str = metadata.get("CreateTime", "")
                 
-                # 6 vs 34 LOGIC REFINED:
-                # User report: "For Review" items in QBO often have categories!
-                # We typically only confirm "Already Matched" if there is a concrete LINK (LinkedTxn) 
-                # or if the user has explicitly approved it in our app (checked elsewhere).
+                # Check if created today (within last 24h of sync)
+                is_created_today = False
+                if create_time_str:
+                    try:
+                        create_dt = datetime.fromisoformat(create_time_str.replace('Z', '+00:00'))
+                        now = datetime.now(timezone.utc)
+                        # Relaxed today check: same calendar day or < 24h
+                        if (now - create_dt).total_seconds() < 86400:
+                            is_created_today = True
+                    except: pass
+
+                purchase_ex = p.get("PurchaseEx", {})
+                if "any" in purchase_ex:
+                    for item in purchase_ex["any"]:
+                        if item.get("value", {}).get("Name") == "TxnType":
+                            txn_type = item.get("value", {}).get("Value")
+                            break
+
+
+                # Check if the category is specific (not generic "Uncategorized")
+                is_specific_category = False
+                if qbo_category_name:
+                    cat_lower = qbo_category_name.lower()
+                    if "uncategorized" not in cat_lower and "ask my accountant" not in cat_lower:
+                        is_specific_category = True
                 
-                desc_upper = (tx.description or "").upper()
-                is_weak_desc = "UNCATEGORIZED" in desc_upper or "OPENING BALANCE" in desc_upper
+                # CATEGORIZED vs FOR REVIEW DISCRIMINATOR:
+                # To match QBO, an item is ONLY "Categorized" if it has been "processed":
+                # 1. It has an explicit link (LinkedTxn)
+                # 2. OR it was just "Added" (Created Today).
                 
-                if has_linked_txn and not is_weak_desc:
-                    tx.is_qbo_matched = True
-                    if not qbo_category_name:
-                        qbo_category_name = "Matched to QBO Entry"
+                is_categorized_in_qbo = has_linked_txn or is_created_today
+                
+                if is_specific_category and is_categorized_in_qbo:
+                     tx.is_qbo_matched = True
+                     if not qbo_category_name:
+                         qbo_category_name = "Matched to QBO Entry"
                 else:
-                    # Even if qbo_category_name exists, if there's no link, we treat it as a "Suggestion"
-                    # and force it to "To Review" so the user can Confirm or Change it.
+                    # Everything else is 'For Review', even if it has a category suggestion.
+                    # This ensures things like "Squeaky Kleen" (Old but No Link) stay in "For Review".
                     tx.is_qbo_matched = False
                 
                 # IMPORTANT: If we found a category, we ALWAYS want it as the suggestion
@@ -305,6 +373,29 @@ class TransactionService:
                     tx.reasoning = (tx.reasoning or "") + " [Auto-Tagged from History]"
 
             self.db.add(tx)
+        
+        # ============================================================================
+        # PRUNING: Delete transactions that no longer exist in QBO
+        # (or were moved to a type we don't sync, safely removing them)
+        # ============================================================================
+        if synced_qbo_ids and not sync_failed:
+            # Only prune if we successfully fetched at least 1 item to avoid accidental wipe on error
+            print(f"🧹 [sync_transactions] Pruning stale records. valid_ids_count={len(synced_qbo_ids)}")
+            
+            # Find ghosts
+            stale_txs = self.db.query(Transaction).filter(
+                Transaction.realm_id == self.connection.realm_id,
+                Transaction.id.notin_(synced_qbo_ids)
+            ).all()
+            
+            if stale_txs:
+                print(f"Found {len(stale_txs)} stale transactions to delete.")
+                for stale in stale_txs:
+                    print(f"❌ Deleting Stale Transaction: {stale.description} (ID: {stale.id})")
+                    self.db.delete(stale)
+            else:
+                print("✨ No stale transactions found.")
+
         self.db.commit()
         self._log("sync", "transaction", len(valid_purchases), "success")
 
@@ -346,90 +437,44 @@ class TransactionService:
 
     def _update_qbo_transaction(self, tx):
         """
-        Helper: Fetches fresh QBO Data, checks SyncToken, and Updates.
-        Returns the updated QBO JSON.
+        Helper: Writes the approved categorization back to QBO.
+        Sets the category and marks as manually categorized (TxnType=54).
         """
-        print(f"🔄 [Write-Back] Updating QBO Tx ID {tx.id}...")
+        print(f"🔄 [Write-Back] Updating QBO Purchase ID {tx.id}...")
         
-        # 1. Fetch Fresh Data (for SyncToken)
-        fresh_qbo_data = self.client.get_transaction(tx.id)
-        if not fresh_qbo_data:
-            raise ValueError(f"Transaction {tx.id} not found in QBO during write-back.")
+        # Validate we have the required data
+        if not tx.suggested_category_id or not tx.suggested_category_name:
+            raise ValueError(f"Transaction {tx.id} missing category information")
         
-        purchase_data = fresh_qbo_data.get("Purchase") or fresh_qbo_data.get("JournalEntry") # Handle different types if needed
-        # We only support Purchase/Expense for now based on 'sync_transactions'
-        if not purchase_data:
-             raise ValueError(f"Could not parse QBO Data for {tx.id} - Expected Purchase object.")
-
-        sync_token = purchase_data.get("SyncToken")
-        print(f"🔒 [Write-Back] Acquired SyncToken: {sync_token}")
+        if not tx.sync_token:
+            raise ValueError(f"Transaction {tx.id} missing SyncToken")
         
-        # 2. Construct Payload
-        # Start with the fresh data to ensure we have all required fields (Line IDs etc)
-        payload = purchase_data 
-        
-        # -- Update Category (AccountRef) --
-        # We need to find the specific Line Item that corresponds to the expense.
-        # Usually it's the Line with "AccountBasedExpenseLineDetail".
-        
+        # Handle split transactions
         if tx.is_split and tx.splits:
-            # Reconstruct Lines for Split
-            # WARNING: Replacing Lines might lose existing line IDs if we aren't careful.
-            # Best practice is to try to match up lines or wipe and replace.
-            # For "Uncategorized" -> "Categorized", typically we just replace the lines.
-            new_lines = []
-            for s in tx.splits:
-                line = {
-                    "Description": s.description,
-                    "Amount": float(s.amount),
-                    "DetailType": "AccountBasedExpenseLineDetail",
-                    "AccountBasedExpenseLineDetail": {
-                        "AccountRef": {
-                            "value": s.category_id,
-                            "name": s.category_name
-                        }
-                    }
-                }
-                new_lines.append(line)
-            payload["Line"] = new_lines
-        else:
-            # Single Category
-            # We iterate through lines to find the expense line
-            found_expense_line = False
-            if "Line" in payload:
-                for line in payload["Line"]:
-                    if "AccountBasedExpenseLineDetail" in line:
-                         line["AccountBasedExpenseLineDetail"]["AccountRef"] = {
-                             "value": tx.suggested_category_id,
-                             "name": tx.suggested_category_name
-                         }
-                         found_expense_line = True
+            # For split transactions, we need to use the complex update
+            # This is a future enhancement - for now, we'll raise an error
+            raise NotImplementedError("Split transaction write-back not yet implemented")
+        
+        # Use the new update_purchase method from QBOClient
+        try:
+            updated_purchase = self.client.update_purchase(
+                purchase_id=tx.id,  # Transaction.id is the QBO Purchase ID
+                category_id=tx.suggested_category_id,
+                category_name=tx.suggested_category_name,
+                sync_token=tx.sync_token
+            )
             
-            # If we didn't find an expense line (maybe it was empty?), we might need to add one.
-            # But usually a purchase has at least one line.
-        
-        # -- Append AI Reasoning to Memo --
-        # QBO field is "PrivateNote" (Memo on screen)
-        # We append, not overwrite, to preserve original user notes.
-        original_note = payload.get("PrivateNote", "")
-        ai_note = f" | AI Reasoning: {tx.vendor_reasoning}" if tx.vendor_reasoning else ""
-        
-        # Check length limit (QBO is 4000 chars, but let's be safe)
-        if len(original_note) + len(ai_note) < 4000:
-             if "AI Reasoning:" not in original_note: # Prevent duplicate appending
-                 payload["PrivateNote"] = original_note + ai_note
-
-        # 3. Execute Update
-        # Explicitly pass SyncToken just in case, though it's inside payload
-        payload["SyncToken"] = sync_token
-        
-        # The endpoint in QBOClient usually handles the entity type detection or we pass it
-        # self.client.request uses "purchase" entity default? Or we need to specify?
-        # looking at approve_transaction below, it used "purchase".
-        
-        res_data = self.client.request("POST", "purchase", params={'operation': 'update'}, json_payload=payload)
-        print(f"✅ [Write-Back] Success! QBO Updated.")
-        return res_data
+            # Update the SyncToken in our database for future updates
+            new_sync_token = updated_purchase.get("SyncToken")
+            if new_sync_token:
+                tx.sync_token = new_sync_token
+            
+            print(f"✅ [Write-Back] Success! QBO Purchase {tx.id} updated")
+            return updated_purchase
+            
+        except Exception as e:
+            print(f"❌ [Write-Back] Failed to update QBO Purchase {tx.id}: {e}")
+            raise
 
     def approve_transaction(self, tx_id: str):
         """Finalizes a transaction and writes it back to QBO"""
