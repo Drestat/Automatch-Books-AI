@@ -235,23 +235,21 @@ class TransactionService:
                             qbo_category_id = detail["ItemRef"].get("value")
                             break
                 
-                # Final check for match status
-                # 6 vs 34 LOGIC: 
-                # Transactions with 'Uncategorized' or 'Opening Balance' in description go to 'To Review'.
-                # Everything else that has a category or a structural link goes to 'Already Matched'.
+                # 6 vs 34 LOGIC REFINED:
+                # User report: "For Review" items in QBO often have categories!
+                # We typically only confirm "Already Matched" if there is a concrete LINK (LinkedTxn) 
+                # or if the user has explicitly approved it in our app (checked elsewhere).
                 
                 desc_upper = (tx.description or "").upper()
                 is_weak_desc = "UNCATEGORIZED" in desc_upper or "OPENING BALANCE" in desc_upper
                 
-                # If it's currently in forced_review, we DON'T want to automatically mark it as matched
-                # unless specifically resolved. But actually, if we re-sync, we should probably 
-                # keep it in forced_review if the user moved it there.
-                
-                if (qbo_category_name or has_linked_txn) and not is_weak_desc:
+                if has_linked_txn and not is_weak_desc:
                     tx.is_qbo_matched = True
-                    if not qbo_category_name and has_linked_txn:
+                    if not qbo_category_name:
                         qbo_category_name = "Matched to QBO Entry"
                 else:
+                    # Even if qbo_category_name exists, if there's no link, we treat it as a "Suggestion"
+                    # and force it to "To Review" so the user can Confirm or Change it.
                     tx.is_qbo_matched = False
                 
                 # IMPORTANT: If we found a category, we ALWAYS want it as the suggestion

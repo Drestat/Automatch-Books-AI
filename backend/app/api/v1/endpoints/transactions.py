@@ -92,6 +92,7 @@ def analyze_user_transactions(realm_id: str, tx_id: str = None, db: Session = De
     if not connection:
         raise HTTPException(status_code=404, detail="QBO Connection not found")
     
+    try:
         if tx_id:
             tx = db.query(Transaction).filter(Transaction.id == tx_id, Transaction.realm_id == realm_id).first()
             if tx and tx.is_qbo_matched:
