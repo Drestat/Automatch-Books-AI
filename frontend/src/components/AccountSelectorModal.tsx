@@ -150,164 +150,164 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         className="relative w-full max-w-md max-h-[90vh] bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
                     >
-                        <div className="p-6 space-y-6">
-                            <div className="flex items-center justify-between">
-                                <div className="space-y-1">
-                                    <h2 className="text-xl font-bold flex items-center gap-2 text-white">
-                                        <Building2 size={24} className="text-brand" />
-                                        Select Accounts
-                                    </h2>
-                                    <p className="text-sm text-white/60">
-                                        Choose which bank accounts to track. Your plan allows for <span className="text-brand font-bold">{limit}</span> connected account{limit > 1 ? 's' : ''}.
+                        <div className="p-6 flex-1 flex flex-col min-h-0">
+                            {/* Loading States */}
+                            {(loading || previewLoading) ? (
+                                <div className="flex-1 flex flex-col items-center justify-center gap-4 py-12">
+                                    <Loader2 className="animate-spin text-brand" size={40} />
+                                    <p className="text-sm text-white/40">
+                                        {loading ? "Loading your accounts..." : "Analyzing transactions..."}
                                     </p>
                                 </div>
-                                <button onClick={onClose} className="p-2 text-white/20 hover:text-white transition-colors">
-                                    <X size={20} />
-                                </button>
-                            </div>
-
-                            {loading ? (
-                                <div className="py-16 flex flex-col items-center justify-center gap-4">
-                                    <Loader2 className="animate-spin text-brand" size={40} />
-                                    <p className="text-sm text-white/40">Loading your accounts...</p>
-                                </div>
-                            ) : step === 'select' && (
-                                <div className="space-y-4 max-h-[50vh] overflow-y-auto">
-                                    <div className="flex items-center justify-between text-xs text-white/50 px-2 pb-2 border-b border-white/5">
-                                        <span>Available Accounts</span>
-                                        <span className={isLimitReached ? "text-amber-400 font-bold" : ""}>
-                                            {selectedIds.length} / {limit} Selected
-                                        </span>
+                            ) : step === 'select' ? (
+                                <div className="flex-1 flex flex-col min-h-0 space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="space-y-1">
+                                            <h2 className="text-xl font-bold flex items-center gap-2 text-white">
+                                                <Building2 size={24} className="text-brand" />
+                                                Select Accounts
+                                            </h2>
+                                            <p className="text-sm text-white/60">
+                                                Choose which bank accounts to track. Your plan allows for <span className="text-brand font-bold">{limit}</span> connected account{limit > 1 ? 's' : ''}.
+                                            </p>
+                                        </div>
+                                        <button onClick={onClose} className="p-2 text-white/20 hover:text-white transition-colors">
+                                            <X size={20} />
+                                        </button>
                                     </div>
 
-                                    {accounts.map(account => {
-                                        const isSelected = selectedIds.includes(account.id);
-                                        const isDisabled = !isSelected && isLimitReached;
+                                    <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
+                                        <div className="flex items-center justify-between text-xs text-white/50 px-2 pb-2 border-b border-white/5">
+                                            <span>Available Accounts</span>
+                                            <span className={isLimitReached ? "text-amber-400 font-bold" : ""}>
+                                                {selectedIds.length} / {limit} Selected
+                                            </span>
+                                        </div>
 
-                                        return (
-                                            <div key={account.id}
-                                                className={`flex items-center space-x-3 p-3 rounded-xl border transition-all duration-200 cursor-pointer
-                                                ${isSelected
-                                                        ? 'bg-brand/10 border-brand/40'
-                                                        : 'bg-white/5 border-white/5 hover:border-white/20'
-                                                    }
-                                                ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
-                                                `}
-                                                onClick={() => !isDisabled && handleToggle(account.id, !isSelected)}
-                                            >
-                                                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-brand border-brand text-black' : 'border-white/20 bg-transparent'}`}>
-                                                    {isSelected && <Check size={14} strokeWidth={3} />}
-                                                </div>
+                                        {accounts.map(account => {
+                                            const isSelected = selectedIds.includes(account.id);
+                                            const isDisabled = !isSelected && isLimitReached;
 
-                                                <div className="flex-1">
-                                                    <div className="font-bold text-sm text-white">{account.name}</div>
-                                                    <div className="text-xs text-white/50 font-mono">
-                                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: account.currency }).format(account.balance)}
+                                            return (
+                                                <div key={account.id}
+                                                    className={`flex items-center space-x-3 p-3 rounded-xl border transition-all duration-200 cursor-pointer
+                                                    ${isSelected
+                                                            ? 'bg-brand/10 border-brand/40'
+                                                            : 'bg-white/5 border-white/5 hover:border-white/20'
+                                                        }
+                                                    ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
+                                                    `}
+                                                    onClick={() => !isDisabled && handleToggle(account.id, !isSelected)}
+                                                >
+                                                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-brand border-brand text-black' : 'border-white/20 bg-transparent'}`}>
+                                                        {isSelected && <Check size={14} strokeWidth={3} />}
+                                                    </div>
+
+                                                    <div className="flex-1">
+                                                        <div className="font-bold text-sm text-white">{account.name}</div>
+                                                        <div className="text-xs text-white/50 font-mono">
+                                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: account.currency }).format(account.balance)}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })}
+                                            );
+                                        })}
 
-                                    {accounts.length === 0 && !loading && (
-                                        <div className="py-8 text-center space-y-2">
-                                            <Building2 size={40} className="mx-auto text-white/20" />
-                                            <p className="text-white/60 text-sm">No bank accounts found</p>
-                                            <p className="text-white/40 text-xs">Make sure your QuickBooks has bank or credit card accounts.</p>
-                                        </div>
-                                    )}
+                                        {accounts.length === 0 && (
+                                            <div className="py-8 text-center space-y-2">
+                                                <Building2 size={40} className="mx-auto text-white/20" />
+                                                <p className="text-white/60 text-sm">No bank accounts found</p>
+                                                <p className="text-white/40 text-xs">Make sure your QuickBooks has bank or credit card accounts.</p>
+                                            </div>
+                                        )}
 
-                                    {isLimitReached && (
-                                        <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-200 flex items-start gap-3">
-                                            <Crown className="h-5 w-5 shrink-0 mt-0.5" />
-                                            <div className="text-xs leading-relaxed">
-                                                You've reached your plan limit. <a href="https://billing.stripe.com/p/login/test_..." target="_blank" className="underline font-bold hover:text-white">Upgrade to Pro</a> to connect more accounts.
+                                        {isLimitReached && (
+                                            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-200 flex items-start gap-3">
+                                                <Crown className="h-5 w-5 shrink-0 mt-0.5" />
+                                                <div className="text-xs leading-relaxed">
+                                                    You've reached your plan limit. <a href="#" target="_blank" className="underline font-bold hover:text-white">Upgrade to Pro</a> to connect more accounts.
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
+                                        <button
+                                            onClick={onClose}
+                                            className="px-4 py-2 text-sm font-medium text-white/40 hover:text-white transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handlePreview}
+                                            disabled={selectedIds.length === 0}
+                                            className="px-6 py-2 rounded-lg bg-brand hover:bg-brand/90 text-black font-bold text-sm disabled:opacity-50 transition-colors"
+                                        >
+                                            Continue
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex-1 flex flex-col space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                            <Sparkles className="text-brand" size={20} />
+                                            Import Summary
+                                        </h3>
+                                        <button onClick={onClose} className="p-2 text-white/20 hover:text-white transition-colors">
+                                            <X size={20} />
+                                        </button>
+                                    </div>
+
+                                    <div className="space-y-4 flex-1 overflow-y-auto pr-1">
+                                        <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                                            <p className="text-sm text-white/50">Total Transactions Found</p>
+                                            <p className="text-3xl font-mono font-bold text-white">{previewStats?.total_transactions || 0}</p>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-1">
+                                                <p className="text-xs text-emerald-400 font-bold uppercase tracking-wider">Matched</p>
+                                                <p className="text-2xl font-mono font-bold text-white">{previewStats?.already_matched || 0}</p>
+                                                <p className="text-[10px] text-white/40">Already categorized</p>
+                                            </div>
+                                            <div className="p-4 rounded-xl bg-brand/10 border border-brand/20 space-y-1">
+                                                <p className="text-xs text-brand font-bold uppercase tracking-wider">To Analyze</p>
+                                                <p className="text-2xl font-mono font-bold text-white">{previewStats?.to_analyze || 0}</p>
+                                                <p className="text-[10px] text-white/40">Needs AI review</p>
                                             </div>
                                         </div>
-                                    )}
+
+                                        <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-start gap-3">
+                                            <Sparkles className="h-5 w-5 text-blue-400 shrink-0 mt-0.5" />
+                                            <div className="space-y-1">
+                                                <p className="text-sm font-bold text-blue-200">AI Analysis Available</p>
+                                                <p className="text-xs text-blue-200/70 leading-relaxed">
+                                                    Importing is free. You can later use the <strong>AI Sparkles</strong> on individual transactions to analyze them (1 token each).
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-end gap-3 pt-6 border-t border-white/5">
+                                        <button
+                                            onClick={() => setStep('select')}
+                                            className="px-4 py-2 text-sm font-medium text-white/50 hover:text-white transition-colors"
+                                        >
+                                            Back
+                                        </button>
+                                        <button
+                                            onClick={handleSave}
+                                            disabled={submitting}
+                                            className="px-6 py-2 rounded-lg bg-brand hover:bg-brand/90 text-black font-bold text-sm flex items-center gap-2 disabled:opacity-50 transition-colors"
+                                        >
+                                            {submitting ? <Loader2 className="animate-spin h-4 w-4" /> : null}
+                                            {submitting ? 'Importing...' : 'Confirm Import'}
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>
-
-                        {step === 'preview' && previewStats && (
-                            <div className="absolute inset-0 bg-[#0a0a0a] z-10 flex flex-col p-6 animate-in slide-in-from-right-4">
-                                <h3 className="text-xl font-bold text-white mb-6">Import Summary</h3>
-
-                                <div className="space-y-4 flex-1">
-                                    <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
-                                        <p className="text-sm text-white/50">Total Transactions Found</p>
-                                        <p className="text-3xl font-mono font-bold text-white">{previewStats.total_transactions}</p>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-1">
-                                            <p className="text-xs text-emerald-400 font-bold uppercase tracking-wider">Matched</p>
-                                            <p className="text-2xl font-mono font-bold text-white">{previewStats.already_matched}</p>
-                                            <p className="text-[10px] text-white/40">Already categorized</p>
-                                        </div>
-                                        <div className="p-4 rounded-xl bg-brand/10 border border-brand/20 space-y-1">
-                                            <p className="text-xs text-brand font-bold uppercase tracking-wider">To Analyze</p>
-                                            <p className="text-2xl font-mono font-bold text-white">{previewStats.to_analyze}</p>
-                                            <p className="text-[10px] text-white/40">Needs AI review</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-start gap-3">
-                                        <Sparkles className="h-5 w-5 text-blue-400 shrink-0 mt-0.5" />
-                                        <div>
-                                            <p className="text-sm font-bold text-blue-200 mb-1">AI Analysis Available</p>
-                                            <p className="text-xs text-blue-200 leading-relaxed">
-                                                Importing is free. You can later use the <strong>AI Sparkles</strong> on individual transactions to analyze them (1 token each).
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-end gap-3 mt-auto pt-6 border-t border-white/5">
-                                    <button
-                                        onClick={() => setStep('select')}
-                                        className="px-4 py-2 text-sm font-medium text-white/50 hover:text-white transition-colors"
-                                    >
-                                        Back
-                                    </button>
-                                    <button
-                                        onClick={handleSave}
-                                        disabled={submitting}
-                                        className="px-6 py-2 rounded-lg bg-brand hover:bg-brand/90 text-black font-bold text-sm flex items-center gap-2 disabled:opacity-50 transition-colors"
-                                    >
-                                        {submitting ? <Loader2 className="animate-spin h-4 w-4" /> : null}
-                                        {submitting ? 'Importing...' : 'Confirm Import'}
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                        {previewLoading && (
-                            <div className="absolute inset-0 bg-[#0a0a0a] z-20 flex flex-col items-center justify-center gap-4">
-                                <Loader2 className="animate-spin text-brand" size={40} />
-                                <p className="text-sm text-white/40">Analyzing transactions...</p>
-                            </div>
-                        )}
-
-                        {step === 'select' && (
-                            <div className="p-4 bg-white/5 flex justify-end gap-3 border-t border-white/5">
-                                <button
-                                    onClick={onClose}
-                                    disabled={previewLoading}
-                                    className="px-4 py-2 text-sm font-medium text-white/50 hover:text-white transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handlePreview}
-                                    disabled={loading || previewLoading || selectedIds.length === 0}
-                                    className="px-6 py-2 rounded-lg bg-brand hover:bg-brand/90 text-black font-bold text-sm flex items-center gap-2 disabled:opacity-50 transition-colors"
-                                >
-                                    {previewLoading ? <Loader2 className="animate-spin h-4 w-4" /> : null}
-                                    {previewLoading ? 'Analyzing...' : 'Review Import'}
-                                </button>
-                            </div>
-                        )}
                     </motion.div>
                 </div>
             )}
