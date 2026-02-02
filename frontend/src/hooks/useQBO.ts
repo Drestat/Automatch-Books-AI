@@ -56,6 +56,7 @@ export interface Transaction {
     is_exported?: boolean;
     is_qbo_matched?: boolean;
     is_excluded?: boolean;
+    is_bank_feed_import?: boolean;
     forced_review?: boolean;
     tags?: string[];
     suggested_tags?: string[];

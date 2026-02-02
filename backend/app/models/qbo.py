@@ -64,6 +64,7 @@ class Transaction(Base):
     account_name = Column(String)
     is_qbo_matched = Column(Boolean, default=False)
     is_excluded = Column(Boolean, default=False)
+    is_bank_feed_import = Column(Boolean, default=True)  # False if TxnType=54 (manual entry)
     forced_review = Column(Boolean, default=False)
     transaction_type = Column(String) # Expense, Check, CreditCard, etc.
     note = Column(String) # User editable note (initially from Memo)

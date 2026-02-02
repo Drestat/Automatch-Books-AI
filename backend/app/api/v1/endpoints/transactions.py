@@ -48,6 +48,7 @@ class TransactionSchema(BaseModel):
     confidence: Optional[float] = None
     is_qbo_matched: bool = False
     is_excluded: bool = False
+    is_bank_feed_import: bool = True
     forced_review: bool = False
     is_split: bool = False
     splits: List[SplitSchema] = []

@@ -324,6 +324,14 @@ class TransactionService:
                     # This ensures things like "Squeaky Kleen" (Old but No Link) stay in "For Review".
                     tx.is_qbo_matched = False
                 
+                # BANK FEED vs MANUAL ENTRY DISCRIMINATOR:
+                # TxnType=54 indicates a manual entry (not from bank feed)
+                # QBO Banking UI hides these from the Banking tab
+                if txn_type == "54":
+                    tx.is_bank_feed_import = False
+                else:
+                    tx.is_bank_feed_import = True
+                
                 # IMPORTANT: If we found a category, we ALWAYS want it as the suggestion
                 if qbo_category_name:
                     # Check if we should overwrite the categorization details
