@@ -230,17 +230,18 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
                                         <div className="p-4 rounded-xl bg-brand/10 border border-brand/20 space-y-1">
                                             <p className="text-xs text-brand font-bold uppercase tracking-wider">To Analyze</p>
                                             <p className="text-2xl font-mono font-bold text-white">{previewStats.to_analyze}</p>
-                                            <p className="text-[10px] text-white/40">New for AI</p>
+                                            <p className="text-[10px] text-white/40">Needs AI review</p>
                                         </div>
                                     </div>
 
-                                    <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 flex gap-3 items-start">
-                                        <div className="bg-blue-500/20 p-1.5 rounded text-blue-400 mt-0.5">
-                                            <Sparkles size={14} />
+                                    <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-start gap-3">
+                                        <Sparkles className="h-5 w-5 text-blue-400 shrink-0 mt-0.5" />
+                                        <div>
+                                            <p className="text-sm font-bold text-blue-200 mb-1">AI Analysis Available</p>
+                                            <p className="text-xs text-blue-200 leading-relaxed">
+                                                Importing is free. You can later use the <strong>AI Sparkles</strong> on individual transactions to analyze them (1 token each).
+                                            </p>
                                         </div>
-                                        <p className="text-xs text-blue-200 leading-relaxed">
-                                            Importing is free. You can later use the <strong>AI Sparkles</strong> on individual transactions to analyze them (1 token each).
-                                        </p>
                                     </div>
                                 </div>
 
@@ -260,6 +261,13 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
                                         {submitting ? 'Importing...' : 'Confirm Import'}
                                     </button>
                                 </div>
+                            </div>
+                        )}
+
+                        {previewLoading && (
+                            <div className="absolute inset-0 bg-[#0a0a0a] z-20 flex flex-col items-center justify-center gap-4">
+                                <Loader2 className="animate-spin text-brand" size={40} />
+                                <p className="text-sm text-white/40">Analyzing transactions...</p>
                             </div>
                         )}
 
