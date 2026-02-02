@@ -76,20 +76,20 @@ function DashboardContent() {
     }));
   };
 
-  // Logic to separate "For review" vs "Categorized"
-  // ELEGANT STRATEGY: Backend now computes NEEDS_REVIEW vs CATEGORIZED status
-  // based on QBO Account (Uncategorized vs Expense) and Recency.
+  // CORRECT STRATEGY: Use is_qbo_matched (which checks LinkedTxn in QBO)
+  // A transaction is "Categorized" ONLY if QBO has accepted/matched it (LinkedTxn exists)
+  // Everything else is "For Review", even if it has a suggested category
   const toReviewTxs = transactions.filter(tx => {
     // DEBUG LOGGING
-    if (tx.description.includes("Lara")) {
-      console.log(`[DEBUG UI] Lara Status: ${tx.status}, Excluded: ${tx.is_excluded}`);
+    if (tx.description.includes("Lara") || tx.description.includes("Squeaky")) {
+      console.log(`[DEBUG UI] ${tx.description}: is_qbo_matched=${tx.is_qbo_matched}, Excluded=${tx.is_excluded}`);
     }
-    return !tx.is_excluded && tx.status === 'NEEDS_REVIEW';
+    return !tx.is_excluded && !tx.is_qbo_matched;
   });
 
   const alreadyMatchedTxs = transactions.filter(tx =>
     !tx.is_excluded &&
-    tx.status === 'CATEGORIZED'
+    tx.is_qbo_matched
   );
 
   const excludedTxs = transactions.filter(tx => tx.is_excluded === true);
@@ -250,7 +250,7 @@ function DashboardContent() {
                 {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
               </span>
               <span className="px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] uppercase font-bold tracking-wider ml-2">
-                v3.17.1 | f3.17.1
+                v3.18.0 | f3.18.0
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight">
