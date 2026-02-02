@@ -127,6 +127,10 @@ class TransactionService:
         valid_purchases = []
         
         for p in all_txs:
+            # Skip voided or deleted transactions
+            if p.get("TxnStatus") in ["Voided", "Deleted"]:
+                continue
+            
             # Resolve Account ID (differs by type)
             acc_id = None
             acc_name = "Unknown Account"

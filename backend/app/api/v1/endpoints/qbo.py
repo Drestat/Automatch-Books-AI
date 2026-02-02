@@ -224,25 +224,11 @@ def preview_account_sync(payload: AccountSelectionSchema, db: Session = Depends(
         account_breakdown[acc_id] = account_breakdown.get(acc_id, 0) + 1
         
         # Determine Status
-        # Check if it has a valid category
-        has_category = False
-        if "Line" in p:
-            for line in p["Line"]:
-                # Purchase/CreditCardCredit
-                if "AccountBasedExpenseLineDetail" in line:
-                    detail = line["AccountBasedExpenseLineDetail"]
-                    if "AccountRef" in detail:
-                        cat_name = detail["AccountRef"].get("name", "")
-                        if "Uncategorized" not in cat_name:
-                            has_category = True
-                        break
-                # Journal/Deposit
-                elif "Description" in line and p.get("Id"): # Simplistic for preview
-                    # For JournalEntry and Deposit, categorize is complex
-                    # Let's assume for now they need review unless we have a better heuristic
-                    pass
+        # KEY: QBO considers a transaction "Categorized" ONLY if it has a LinkedTxn
+        # Category suggestions from QBO are NOT the same as user categorization
+        has_linked_txn = len(p.get("LinkedTxn", [])) > 0
         
-        if has_category:
+        if has_linked_txn:
             matched_count += 1
         else:
             unmatched_count += 1
