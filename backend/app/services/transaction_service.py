@@ -181,12 +181,26 @@ class TransactionService:
             
             if "Line" in p:
                 for line in p["Line"]:
+                    detail = None
                     if "AccountBasedExpenseLineDetail" in line:
                         detail = line["AccountBasedExpenseLineDetail"]
-                        if "AccountRef" in detail:
-                            qbo_category_name = detail["AccountRef"].get("name")
-                            qbo_category_id = detail["AccountRef"].get("value")
-                            break # Just grab the first one for now
+                    elif "JournalEntryLineDetail" in line:
+                        detail = line["JournalEntryLineDetail"]
+                    elif "DepositLineDetail" in line:
+                        detail = line["DepositLineDetail"]
+                    elif "SalesItemLineDetail" in line:
+                        detail = line["SalesItemLineDetail"]
+                    
+                    if detail and "AccountRef" in detail:
+                        # For Journal Entry, we want to find the account that is NOT the source account
+                        ref_name = detail["AccountRef"].get("name")
+                        ref_id = detail["AccountRef"].get("value")
+                        
+                        # Heuristic: If it's a valid category name (not the bank account itself)
+                        if ref_name and "Uncategorized" not in ref_name and ref_id != acc_id:
+                            qbo_category_name = ref_name
+                            qbo_category_id = ref_id
+                            break 
             
             # Logic: If QBO has a valid category (not Uncategorized), treat as Suggestion but keep unmatched for AI?
             # UPDATED LOGIC: Only apply "Imported existing" if we haven't already enriched it with AI.

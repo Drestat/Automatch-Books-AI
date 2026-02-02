@@ -41,6 +41,7 @@ interface Transaction {
     note_reasoning?: string;
     tax_deduction_note?: string;
     is_exported?: boolean;
+    is_qbo_matched?: boolean;
     suggested_category_name: string;
 }
 

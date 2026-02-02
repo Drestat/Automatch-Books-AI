@@ -46,6 +46,7 @@ class TransactionSchema(BaseModel):
     note_reasoning: Optional[str] = None
     tax_deduction_note: Optional[str] = None
     confidence: Optional[float] = None
+    is_qbo_matched: bool = False
     is_split: bool = False
     splits: List[SplitSchema] = []
 
