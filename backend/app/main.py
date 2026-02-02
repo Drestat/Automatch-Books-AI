@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.14.1 - STRICT MATCHING LOGIC
+# v3.14.3 - ACCOUNT VISIBILITY FIX
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.
@@ -30,6 +30,7 @@ async def lifespan(app: FastAPI):
             print("🏗️ [main.py] Running manual schema patches...")
             # BankAccount additions
             conn.execute(text("ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT FALSE;"))
+            conn.execute(text("ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS is_connected BOOLEAN DEFAULT FALSE;"))
             conn.execute(text("ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS nickname VARCHAR;"))
             
             # Transactions reasoning (added in previous migration attempts)
@@ -70,13 +71,13 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.14.1"}
+    return {"status": "ok", "version": "3.14.3"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.14.1",
+        "version": "3.14.3",
         "status": "ready"
     }
 
