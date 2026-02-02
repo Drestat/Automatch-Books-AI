@@ -80,14 +80,16 @@ function DashboardContent() {
   // Already matched = items imported from QBO with a valid category (is_qbo_matched flag)
   const toReviewTxs = transactions.filter(tx =>
     !tx.is_excluded &&
-    (tx.status === 'pending_approval' || (!tx.is_qbo_matched && tx.status !== 'approved') || tx.forced_review)
+    tx.status !== 'approved' &&
+    (tx.status === 'pending_approval' || !tx.is_qbo_matched || tx.forced_review)
   );
 
   const alreadyMatchedTxs = transactions.filter(tx =>
     !tx.is_excluded &&
-    tx.is_qbo_matched &&
-    !tx.forced_review &&
-    tx.status !== 'approved'
+    (
+      (tx.is_qbo_matched && !tx.forced_review) ||
+      tx.status === 'approved'
+    )
   );
 
   const excludedTxs = transactions.filter(tx => tx.is_excluded === true);
