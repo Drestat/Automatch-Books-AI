@@ -76,7 +76,7 @@ function DashboardContent() {
     }));
   };
 
-  // Logic to separate "To Review" vs "Already Matched"
+  // Logic to separate "For review" vs "Categorized"
   // Already matched = items imported from QBO with a valid category (is_qbo_matched flag)
   const toReviewTxs = transactions.filter(tx =>
     !tx.is_excluded &&
@@ -453,7 +453,7 @@ function DashboardContent() {
                     className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 ${activeTab === 'review' ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white hover:bg-white/5'
                       }`}
                   >
-                    To Review
+                    For review
                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${activeTab === 'review' ? 'bg-black/20 text-black' : 'bg-white/5 text-white/40'}`}>
                       {toReviewTxs.length}
                     </span>
@@ -463,7 +463,7 @@ function DashboardContent() {
                     className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 ${activeTab === 'matched' ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white hover:bg-white/5'
                       }`}
                   >
-                    Already Matched
+                    Categorized
                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${activeTab === 'matched' ? 'bg-black/20 text-black' : 'bg-white/5 text-white/40'}`}>
                       {alreadyMatchedTxs.length}
                     </span>
