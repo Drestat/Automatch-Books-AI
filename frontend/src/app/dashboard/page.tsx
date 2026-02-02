@@ -76,18 +76,17 @@ function DashboardContent() {
     }));
   };
 
-  // BANK FEED FILTERING: Only show bank feed imports (hide TxnType=54 manual entries)
-  // This matches QBO Banking UI behavior exactly
-  const bankFeedTransactions = transactions.filter(tx => tx.is_bank_feed_import !== false);
+  // SHOW ALL TRANSACTIONS: Bank feed imports + manual entries
+  // User wants complete view of all Mastercard activity
 
   // CORRECT STRATEGY: Use is_qbo_matched (which checks LinkedTxn in QBO)
   // A transaction is "Categorized" ONLY if QBO has accepted/matched it (LinkedTxn exists)
   // Everything else is "For Review", even if it has a suggested category
-  const toReviewTxs = bankFeedTransactions.filter(tx => {
+  const toReviewTxs = transactions.filter(tx => {
     return !tx.is_excluded && !tx.is_qbo_matched;
   });
 
-  const alreadyMatchedTxs = bankFeedTransactions.filter(tx =>
+  const alreadyMatchedTxs = transactions.filter(tx =>
     !tx.is_excluded &&
     tx.is_qbo_matched
   );
@@ -250,7 +249,7 @@ function DashboardContent() {
                 {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
               </span>
               <span className="px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] uppercase font-bold tracking-wider ml-2">
-                v3.19.0 | f3.19.0
+                v3.19.1 | f3.19.1
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight">
