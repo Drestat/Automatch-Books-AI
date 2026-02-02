@@ -128,13 +128,32 @@ class TransactionService:
             # Resolve Account ID (differs by type)
             acc_id = None
             acc_name = "Unknown Account"
+            
             if "AccountRef" in p:
-                acc_id = p["AccountRef"].get("value")
+                acc_id = str(p["AccountRef"].get("value"))
                 acc_name = p["AccountRef"].get("name", "Unknown Account")
             elif "DepositToAccountRef" in p:
-                acc_id = p["DepositToAccountRef"].get("value")
+                acc_id = str(p["DepositToAccountRef"].get("value"))
                 acc_name = p["DepositToAccountRef"].get("name", "Unknown Account")
+            elif "FromAccountRef" in p:
+                acc_id = str(p["FromAccountRef"].get("value"))
+                acc_name = p["FromAccountRef"].get("name", "Unknown Account")
             
+            # Special case for JournalEntry and Transfer where the account might be in the lines
+            if not acc_id and "Line" in p:
+                for line in p["Line"]:
+                    # Look for the primary bank account in the lines if not set in header
+                    # Usually for Transfers/JournalEntries, we care if ONE of the lines matches our active account
+                    for detail_key in ["JournalEntryLineDetail", "DepositLineDetail", "TransferLineDetail"]:
+                        if detail_key in line:
+                            detail = line[detail_key]
+                            temp_acc_id = str(detail.get("AccountRef", {}).get("value"))
+                            if temp_acc_id in self.active_account_ids:
+                                acc_id = temp_acc_id
+                                acc_name = detail.get("AccountRef", {}).get("name", "Unknown Account")
+                                break
+                    if acc_id: break
+
             if not acc_id or acc_id not in self.active_account_ids:
                 continue
 
@@ -178,9 +197,15 @@ class TransactionService:
             # Extract Expense Category from Lines (for History/Training)
             qbo_category_name = None
             qbo_category_id = None
-            
             if "Line" in p:
+                has_linked_txn = False
                 for line in p["Line"]:
+                    # 1. Check for Linked Transactions (Highest priority for 'matched' status)
+                    if "LinkedTxn" in line and len(line["LinkedTxn"]) > 0:
+                        has_linked_txn = True
+                        # If we find a linked txn, we can consider it matched
+                        # But we still continue to look for a specific category name
+                    
                     detail = None
                     if "AccountBasedExpenseLineDetail" in line:
                         detail = line["AccountBasedExpenseLineDetail"]
@@ -190,37 +215,48 @@ class TransactionService:
                         detail = line["DepositLineDetail"]
                     elif "SalesItemLineDetail" in line:
                         detail = line["SalesItemLineDetail"]
+                    elif "ItemBasedExpenseLineDetail" in line:
+                        detail = line["ItemBasedExpenseLineDetail"]
                     
-                    if detail and "AccountRef" in detail:
-                        # For Journal Entry, we want to find the account that is NOT the source account
-                        ref_name = detail["AccountRef"].get("name")
-                        ref_id = detail["AccountRef"].get("value")
-                        
-                        # Heuristic: If it's a valid category name (not the bank account itself)
-                        if ref_name and "Uncategorized" not in ref_name and ref_id != acc_id:
-                            qbo_category_name = ref_name
-                            qbo_category_id = ref_id
-                            break 
-            
-            # Logic: If QBO has a valid category (not Uncategorized), treat as Suggestion but keep unmatched for AI?
-            # UPDATED LOGIC: Only apply "Imported existing" if we haven't already enriched it with AI.
-            # If current status is 'pending_approval' or 'approved', DO NOT OVERWRITE category/reasoning.
-            if qbo_category_name and "Uncategorized" not in qbo_category_name:
-                # Check if we should overwrite
-                should_overwrite = True
-                if tx.status in ['pending_approval', 'approved']:
-                    should_overwrite = False
-                elif tx.vendor_reasoning: # Has AI data
-                    should_overwrite = False
+                    if detail:
+                        if "AccountRef" in detail:
+                            ref_name = detail["AccountRef"].get("name")
+                            ref_id = detail["AccountRef"].get("value")
+                            if ref_name and "Uncategorized" not in ref_name and str(ref_id) != str(acc_id):
+                                qbo_category_name = ref_name
+                                qbo_category_id = ref_id
+                                break 
+                        elif "ItemRef" in detail:
+                            qbo_category_name = detail["ItemRef"].get("name")
+                            qbo_category_id = detail["ItemRef"].get("value")
+                            break
                 
-                if should_overwrite:
-                    tx.status = 'unmatched' # Keep unmatched so AnalysisService picks it up (if we want AI to verify)
-                    tx.is_qbo_matched = True # Mark that it was already matched in QBO
+                # Final check for match status
+                if qbo_category_name or has_linked_txn:
+                    tx.is_qbo_matched = True
                     
-                    tx.suggested_category_name = qbo_category_name
-                    tx.suggested_category_id = qbo_category_id
-                    tx.confidence = 0.9 
-                    tx.reasoning = f"Imported existing category '{qbo_category_name}' from QuickBooks."
+                    if not qbo_category_name and has_linked_txn:
+                        # Construct a generic category name for linked transactions if none found
+                        qbo_category_name = "Matched to QBO Entry"
+            
+            # Logic: If QBO has a valid category or link, mark as matched
+            if tx.is_qbo_matched:
+                # MARK AS MATCHED REGARDLESS OF AI DATA
+                
+                # Check if we should overwrite the categorization details
+                should_overwrite_details = True
+                if tx.status in ['pending_approval', 'approved']:
+                    should_overwrite_details = False
+                elif tx.vendor_reasoning: # Has AI data, don't overwrite its reasoning
+                    should_overwrite_details = False
+                
+                if should_overwrite_details:
+                    tx.status = 'unmatched' # Keep unmatched so AnalysisService picks it up (if we want AI to verify)
+                    if qbo_category_name:
+                        tx.suggested_category_name = qbo_category_name
+                        tx.suggested_category_id = qbo_category_id
+                        tx.confidence = 0.9 
+                        tx.reasoning = f"Imported existing { 'link' if 'link' in qbo_category_name.lower() else 'category' } '{qbo_category_name}' from QuickBooks."
             
             # --- Smart Tagging Logic (Historical) ---
             # Try to find a recent approved transaction with same Vendor/Description to copy tags
