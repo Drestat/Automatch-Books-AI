@@ -331,11 +331,11 @@ class TransactionService:
                     else:
                         tx.is_qbo_matched = False
                 else:
-                    # Bank feed: only categorized if LinkedTxn or created today
-                    # (AccountRef alone is just a suggestion)
-                    is_categorized_in_qbo = has_linked_txn or is_created_today
+                    # Bank feed: ONLY categorized if LinkedTxn exists
+                    # (AccountRef alone is just a suggestion, even if old)
+                    # LinkedTxn is created when user clicks "Add" or "Match" in QBO Banking
                     
-                    if is_categorized_in_qbo:
+                    if has_linked_txn:
                         tx.is_qbo_matched = True
                         if not qbo_category_name:
                             qbo_category_name = "Matched to QBO Entry"
