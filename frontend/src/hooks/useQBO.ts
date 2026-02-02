@@ -54,6 +54,7 @@ export interface Transaction {
     splits?: TransactionSplit[];
     receipt_url?: string;
     is_exported?: boolean;
+    is_qbo_matched?: boolean;
     tags?: string[];
     suggested_tags?: string[];
     transaction_type?: string;
