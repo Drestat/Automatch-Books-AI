@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.16.0 - TXNTYPE CATEGORIZATION FIX
+# v3.17.0 - FIX CATEGORIZATION DETECTION
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.
@@ -71,13 +71,13 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.16.0"}
+    return {"status": "ok", "version": "3.17.0"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.16.0",
+        "version": "3.17.0",
         "status": "ready"
     }
 

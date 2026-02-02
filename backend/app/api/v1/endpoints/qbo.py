@@ -226,8 +226,8 @@ def preview_account_sync(payload: AccountSelectionSchema, db: Session = Depends(
         # Determine Status
         # QBO considers a transaction "Categorized" if:
         # 1. It has a LinkedTxn (linked to bill/invoice), OR
-        # 2. It was manually categorized (TxnType = "54"), OR
-        # 3. It has a Description in the Line item (indicates manual entry/categorization)
+        # 2. It was manually categorized (TxnType = "54")
+        # NOTE: Line Description alone does NOT mean categorized!
         
         has_linked_txn = len(p.get("LinkedTxn", [])) > 0
         
@@ -243,15 +243,7 @@ def preview_account_sync(payload: AccountSelectionSchema, db: Session = Depends(
                         is_manually_categorized = True
                         break
         
-        # Check if Line has Description (another indicator of manual categorization)
-        has_line_description = False
-        if "Line" in p:
-            for line in p["Line"]:
-                if "Description" in line and line["Description"]:
-                    has_line_description = True
-                    break
-        
-        if has_linked_txn or is_manually_categorized or has_line_description:
+        if has_linked_txn or is_manually_categorized:
             matched_count += 1
         else:
             unmatched_count += 1
