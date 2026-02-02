@@ -85,10 +85,20 @@ def fix_matched_status():
                                 qbo_category_name = detail["ItemRef"].get("name")
                                 break
                 
-                if (qbo_category_name or has_linked_txn) and not tx.is_qbo_matched:
-                    print(f"✅ Marking tx {tx.id} as matched (Category: {qbo_category_name or 'Linked Entry'})")
-                    tx.is_qbo_matched = True
-                    updated_count += 1
+                # Fix logic to match 6 vs 34 split
+                desc_upper = (tx.description or "").upper()
+                is_weak_desc = "UNCATEGORIZED" in desc_upper or "OPENING BALANCE" in desc_upper
+
+                if (qbo_category_name or has_linked_txn) and not is_weak_desc:
+                    if not tx.is_qbo_matched:
+                        print(f"✅ Marking tx {tx.id} as matched (Category: {qbo_category_name or 'Linked Entry'})")
+                        tx.is_qbo_matched = True
+                        updated_count += 1
+                else:
+                    if tx.is_qbo_matched:
+                        print(f"🔄 UN-marking tx {tx.id} (needs review due to desc: {tx.description})")
+                        tx.is_qbo_matched = False
+                        updated_count += 1
             
             db.commit()
             print(f"🎉 Updated {updated_count} transactions for realm {conn.realm_id}.")

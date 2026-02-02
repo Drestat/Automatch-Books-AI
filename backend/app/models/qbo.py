@@ -41,6 +41,7 @@ class BankAccount(Base):
     currency = Column(String, default="USD")
     balance = Column(Numeric(15, 2), default=0)
     is_active = Column(Boolean, default=False)
+    is_connected = Column(Boolean, default=True) # Whether it exists in the latest QBO Bank/CC account list
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 class Tag(Base):

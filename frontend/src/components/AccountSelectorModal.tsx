@@ -12,6 +12,7 @@ interface Account {
     balance: number;
     currency: string;
     is_active: boolean;
+    is_connected: boolean;
 }
 
 interface AccountSelectorModalProps {
@@ -178,13 +179,13 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
 
                                     <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
                                         <div className="flex items-center justify-between text-xs text-white/50 px-2 pb-2 border-b border-white/5">
-                                            <span>Available Accounts</span>
+                                            <span>Connected Bank Accounts</span>
                                             <span className={isLimitReached ? "text-amber-400 font-bold" : ""}>
                                                 {selectedIds.length} / {limit} Selected
                                             </span>
                                         </div>
 
-                                        {accounts.map(account => {
+                                        {accounts.filter(a => a.is_connected).map(account => {
                                             const isSelected = selectedIds.includes(account.id);
                                             const isDisabled = !isSelected && isLimitReached;
 

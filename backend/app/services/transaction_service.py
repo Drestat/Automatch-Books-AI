@@ -57,11 +57,12 @@ class TransactionService:
             accounts = data.get("QueryResponse", {}).get("Account", [])
             print(f"📊 [sync_bank_accounts] Found {len(accounts)} accounts from QBO")
             
-            # Sort for display stability
-            accounts.sort(key=lambda x: x["Name"])
+            # 1. Mark all existing accounts for this realm as disconnected first
+            self.db.query(BankAccount).filter(
+                BankAccount.realm_id == self.connection.realm_id
+            ).update({BankAccount.is_connected: False})
 
-            # Sync ALL accounts so user can see them to select
-            # All default to is_active=False - user must choose
+            # 2. Sync / Reactivate live accounts
             for a in accounts:
                 bank = self.db.query(BankAccount).filter(
                     BankAccount.id == a["Id"],
@@ -75,6 +76,7 @@ class TransactionService:
                 bank.name = a["Name"]
                 bank.currency = a.get("CurrencyRef", {}).get("value", "USD")
                 bank.balance = a.get("CurrentBalance", 0)
+                bank.is_connected = True # It's in the live list
                 
                 self.db.add(bank)
                 print(f"💾 [sync_bank_accounts] Saved account: {bank.name} (ID: {bank.id})")
@@ -232,27 +234,31 @@ class TransactionService:
                             break
                 
                 # Final check for match status
-                if qbo_category_name or has_linked_txn:
+                # 6 vs 34 LOGIC: 
+                # Transactions with 'Uncategorized' or 'Opening Balance' in description go to 'To Review'.
+                # Everything else that has a category or a structural link goes to 'Already Matched'.
+                
+                desc_upper = (tx.description or "").upper()
+                is_weak_desc = "UNCATEGORIZED" in desc_upper or "OPENING BALANCE" in desc_upper
+                
+                if (qbo_category_name or has_linked_txn) and not is_weak_desc:
                     tx.is_qbo_matched = True
-                    
                     if not qbo_category_name and has_linked_txn:
-                        # Construct a generic category name for linked transactions if none found
                         qbo_category_name = "Matched to QBO Entry"
-            
-            # Logic: If QBO has a valid category or link, mark as matched
-            if tx.is_qbo_matched:
-                # MARK AS MATCHED REGARDLESS OF AI DATA
+                else:
+                    tx.is_qbo_matched = False
                 
-                # Check if we should overwrite the categorization details
-                should_overwrite_details = True
-                if tx.status in ['pending_approval', 'approved']:
-                    should_overwrite_details = False
-                elif tx.vendor_reasoning: # Has AI data, don't overwrite its reasoning
-                    should_overwrite_details = False
-                
-                if should_overwrite_details:
-                    tx.status = 'unmatched' # Keep unmatched so AnalysisService picks it up (if we want AI to verify)
-                    if qbo_category_name:
+                # IMPORTANT: If we found a category, we ALWAYS want it as the suggestion
+                if qbo_category_name:
+                    # Check if we should overwrite the categorization details
+                    should_overwrite_details = True
+                    if tx.status in ['pending_approval', 'approved']:
+                        should_overwrite_details = False
+                    elif tx.vendor_reasoning: # Has AI data, don't overwrite its reasoning
+                        should_overwrite_details = False
+                    
+                    if should_overwrite_details:
+                        tx.status = 'unmatched' # Keep unmatched so AnalysisService picks it up
                         tx.suggested_category_name = qbo_category_name
                         tx.suggested_category_id = qbo_category_id
                         tx.confidence = 0.9 
