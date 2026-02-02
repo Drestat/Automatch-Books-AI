@@ -109,6 +109,7 @@ def get_accounts(realm_id: str, db: Session = Depends(get_db)):
                 "name": a.name, 
                 "balance": float(a.balance), 
                 "is_active": a.is_active, 
+                "is_connected": a.is_connected,
                 "currency": a.currency
             } 
             for a in accounts
