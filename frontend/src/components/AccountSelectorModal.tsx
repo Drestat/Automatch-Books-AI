@@ -76,17 +76,30 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
     const handlePreview = async () => {
         setPreviewLoading(true);
         try {
+            console.log('Fetching preview for accounts:', selectedIds);
             const res = await fetch(`${API_BASE_URL}/qbo/accounts/preview`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ realm_id: realmId, active_account_ids: selectedIds })
             });
+
+            if (!res.ok) {
+                throw new Error(`Preview failed: ${res.status} ${res.statusText}`);
+            }
+
             const data = await res.json();
-            setPreviewStats(data);
-            setStep('preview');
+            console.log('Preview data received:', data);
+
+            if (data && typeof data.total_transactions === 'number') {
+                setPreviewStats(data);
+                setStep('preview');
+            } else {
+                throw new Error('Invalid preview data structure');
+            }
         } catch (error) {
             console.error("Preview error:", error);
-            alert("Failed to generating preview.");
+            alert(`Failed to generate preview: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            setPreviewLoading(false);
         } finally {
             setPreviewLoading(false);
         }
