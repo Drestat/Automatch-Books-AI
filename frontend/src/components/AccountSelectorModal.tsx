@@ -36,6 +36,11 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
 
     useEffect(() => {
         if (isOpen && realmId) {
+            // Reset state when modal opens
+            setStep('select');
+            setPreviewStats(null);
+            setPreviewLoading(false);
+            // Fetch accounts
             fetchAccounts();
         }
     }, [isOpen, realmId]);
