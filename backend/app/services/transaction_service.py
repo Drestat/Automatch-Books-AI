@@ -308,20 +308,22 @@ class TransactionService:
                     if "uncategorized" not in cat_lower and "ask my accountant" not in cat_lower:
                         is_specific_category = True
                 
+                
                 # CATEGORIZED vs FOR REVIEW DISCRIMINATOR:
-                # To match QBO, an item is ONLY "Categorized" if it has been "processed":
-                # 1. It has an explicit link (LinkedTxn)
-                # 2. OR it was just "Added" (Created Today).
+                # A transaction is "Categorized" if:
+                # 1. It has a specific category (not "Uncategorized" or "Ask My Accountant")
+                #    - This includes manual entries created with a category
+                #    - This includes bank feed transactions matched to a category
+                # 2. OR it has an explicit link (LinkedTxn) from QBO matching
+                # 3. OR it was just "Added" (Created Today)
                 
-                is_categorized_in_qbo = has_linked_txn or is_created_today
-                
-                if is_specific_category and is_categorized_in_qbo:
-                     tx.is_qbo_matched = True
-                     if not qbo_category_name:
-                         qbo_category_name = "Matched to QBO Entry"
+                # If it has a specific category, it's categorized (respects existing QBO categories)
+                if is_specific_category:
+                    tx.is_qbo_matched = True
+                    if not qbo_category_name:
+                        qbo_category_name = "Matched to QBO Entry"
                 else:
-                    # Everything else is 'For Review', even if it has a category suggestion.
-                    # This ensures things like "Squeaky Kleen" (Old but No Link) stay in "For Review".
+                    # No specific category = For Review
                     tx.is_qbo_matched = False
                 
                 # BANK FEED vs MANUAL ENTRY DISCRIMINATOR:
