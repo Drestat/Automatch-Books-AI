@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.13.0 - ADVANCED CATEGORIZATION + LINKEDTXN SUPPORT
+# v3.14.0 - QBO EXPERIENCE ALIGNMENT
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.
@@ -38,6 +38,8 @@ async def lifespan(app: FastAPI):
             conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS note_reasoning VARCHAR;"))
             conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS tax_deduction_note VARCHAR;"))
             conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS is_qbo_matched BOOLEAN DEFAULT FALSE;"))
+            conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS is_excluded BOOLEAN DEFAULT FALSE;"))
+            conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS forced_review BOOLEAN DEFAULT FALSE;"))
             
             # QBO Connection updates
             conn.execute(text("ALTER TABLE qbo_connections ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT now();"))
@@ -68,13 +70,13 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.13.0"}
+    return {"status": "ok", "version": "3.14.0"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.13.0",
+        "version": "3.14.0",
         "status": "ready"
     }
 

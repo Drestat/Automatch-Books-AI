@@ -58,14 +58,16 @@ function DashboardContent() {
     tags,
     categories,
     reAnalyze,
-    disconnect
+    disconnect,
+    excludeTransaction,
+    includeTransaction
   } = useQBO();
 
   const [loading, setLoading] = useState(false); // Local loading for UI actions
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [sortConfig, setSortConfig] = useState<{ key: 'date' | 'confidence', direction: 'asc' | 'desc' }>({ key: 'date', direction: 'desc' });
-  const [activeTab, setActiveTab] = useState<'review' | 'matched'>('review');
+  const [activeTab, setActiveTab] = useState<'review' | 'matched' | 'excluded'>('review');
 
   const toggleSort = (key: 'date' | 'confidence') => {
     setSortConfig(prev => ({
@@ -77,14 +79,23 @@ function DashboardContent() {
   // Logic to separate "To Review" vs "Already Matched"
   // Already matched = items imported from QBO with a valid category (is_qbo_matched flag)
   const toReviewTxs = transactions.filter(tx =>
-    tx.status !== 'approved' && !tx.is_qbo_matched
+    !tx.is_excluded &&
+    (tx.status === 'pending_approval' || (!tx.is_qbo_matched && tx.status !== 'approved') || tx.forced_review)
   );
 
   const alreadyMatchedTxs = transactions.filter(tx =>
-    tx.status !== 'approved' && tx.is_qbo_matched
+    !tx.is_excluded &&
+    tx.is_qbo_matched &&
+    !tx.forced_review &&
+    tx.status !== 'approved'
   );
 
-  const currentTabTransactions = activeTab === 'review' ? toReviewTxs : alreadyMatchedTxs;
+  const excludedTxs = transactions.filter(tx => tx.is_excluded === true);
+
+  const currentTabTransactions =
+    activeTab === 'review' ? toReviewTxs :
+      activeTab === 'matched' ? alreadyMatchedTxs :
+        excludedTxs;
 
   const sortedTransactions = [...currentTabTransactions].sort((a, b) => {
     let comparison = 0;
@@ -232,10 +243,10 @@ function DashboardContent() {
                 {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
               </span>
               <span className="px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] uppercase font-bold tracking-wider ml-2">
-                v3.13.0 | f3.13.0
+                v3.14.0 | f3.14.0
               </span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight">
               Financial <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Intelligence</span>
             </h1>
             <p className="text-white/40 text-base md:text-lg max-w-md">
@@ -434,28 +445,36 @@ function DashboardContent() {
             {/* Transactions List */}
             <div className="md:col-span-3 mt-8">
               <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8">
-                <div className="flex p-1 bg-white/5 border border-white/10 rounded-xl">
+                <div className="flex bg-[#0a0a0a] p-1 rounded-xl border border-white/5 shadow-2xl">
                   <button
                     onClick={() => setActiveTab('review')}
-                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'review'
-                      ? 'bg-brand text-black shadow-lg shadow-brand/20'
-                      : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 ${activeTab === 'review' ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white hover:bg-white/5'
+                      }`}
                   >
                     To Review
-                    <div className={`px-1.5 py-0.5 rounded-md text-[10px] ${activeTab === 'review' ? 'bg-black/20' : 'bg-white/10'}`}>
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${activeTab === 'review' ? 'bg-black/20 text-black' : 'bg-white/5 text-white/40'}`}>
                       {toReviewTxs.length}
-                    </div>
+                    </span>
                   </button>
                   <button
                     onClick={() => setActiveTab('matched')}
-                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'matched'
-                      ? 'bg-brand text-black shadow-lg shadow-brand/20'
-                      : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 ${activeTab === 'matched' ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white hover:bg-white/5'
+                      }`}
                   >
                     Already Matched
-                    <div className={`px-1.5 py-0.5 rounded-md text-[10px] ${activeTab === 'matched' ? 'bg-black/20' : 'bg-white/10'}`}>
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${activeTab === 'matched' ? 'bg-black/20 text-black' : 'bg-white/5 text-white/40'}`}>
                       {alreadyMatchedTxs.length}
-                    </div>
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('excluded')}
+                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 ${activeTab === 'excluded' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'
+                      }`}
+                  >
+                    Excluded
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${activeTab === 'excluded' ? 'bg-black/20 text-white' : 'bg-white/5 text-white/40'}`}>
+                      {excludedTxs.length}
+                    </span>
                   </button>
                 </div>
 
@@ -508,9 +527,7 @@ function DashboardContent() {
                         onAnalyze={reAnalyze}
                         availableTags={tags}
                         availableCategories={categories}
-                        onCategoryChange={async (txId, catId, catName) => {
-                          await updateTransaction(txId, { suggested_category_id: catId, suggested_category_name: catName });
-                        }}
+                        onCategoryChange={(txId, catId, catName) => updateTransaction(txId, { suggested_category_id: catId, suggested_category_name: catName })}
                         onTagAdd={async (txId, tag) => {
                           const currentTags = tx.tags || [];
                           if (!currentTags.includes(tag)) {

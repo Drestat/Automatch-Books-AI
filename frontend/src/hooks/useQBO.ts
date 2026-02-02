@@ -55,6 +55,8 @@ export interface Transaction {
     receipt_url?: string;
     is_exported?: boolean;
     is_qbo_matched?: boolean;
+    is_excluded?: boolean;
+    forced_review?: boolean;
     tags?: string[];
     suggested_tags?: string[];
     transaction_type?: string;
@@ -614,6 +616,36 @@ export const useQBO = () => {
         }
     };
 
+    const excludeTransaction = async (txId: string) => {
+        if (!realmId) return;
+        try {
+            const response = await fetch(`${API_BASE_URL}/transactions/${txId}/exclude?realm_id=${realmId}`, { method: 'POST' });
+            if (response.ok) {
+                setTransactions(prev => prev.map(tx => tx.id === txId ? { ...tx, is_excluded: true } : tx));
+                showToast('Transaction excluded', 'info');
+                return true;
+            }
+        } catch (e) {
+            console.error("Exclude failed", e);
+        }
+        return false;
+    };
+
+    const includeTransaction = async (txId: string) => {
+        if (!realmId) return;
+        try {
+            const response = await fetch(`${API_BASE_URL}/transactions/${txId}/include?realm_id=${realmId}`, { method: 'POST' });
+            if (response.ok) {
+                setTransactions(prev => prev.map(tx => tx.id === txId ? { ...tx, is_excluded: false } : tx));
+                showToast('Transaction included', 'success');
+                return true;
+            }
+        } catch (e) {
+            console.error("Include failed", e);
+        }
+        return false;
+    };
+
     const disconnect = async () => {
         if (!realmId && !isDemo) {
             // Just clear demo mode
@@ -693,6 +725,8 @@ export const useQBO = () => {
         createTag,
         updateBankNickname,
         reAnalyze,
+        excludeTransaction,
+        includeTransaction,
         disconnect
     };
 };

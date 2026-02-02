@@ -164,6 +164,8 @@ class TransactionService:
             tx = self.db.query(Transaction).filter(Transaction.id == p["Id"]).first()
             if not tx:
                 tx = Transaction(id=p["Id"], realm_id=self.connection.realm_id)
+                # For new transactions, is_excluded defaults to False.
+                # For existing transactions, is_excluded is preserved by not being overwritten.
             
             tx.date = datetime.strptime(p["TxnDate"], "%Y-%m-%d")
             
@@ -240,6 +242,10 @@ class TransactionService:
                 
                 desc_upper = (tx.description or "").upper()
                 is_weak_desc = "UNCATEGORIZED" in desc_upper or "OPENING BALANCE" in desc_upper
+                
+                # If it's currently in forced_review, we DON'T want to automatically mark it as matched
+                # unless specifically resolved. But actually, if we re-sync, we should probably 
+                # keep it in forced_review if the user moved it there.
                 
                 if (qbo_category_name or has_linked_txn) and not is_weak_desc:
                     tx.is_qbo_matched = True
@@ -442,10 +448,7 @@ class TransactionService:
 
         # Update Mirror Status to 'synced' to indicate full round-trip
         tx.status = 'approved' 
-        # Actually 'approved' usually means "User approved, waiting for sync", 
-        # but here we did synchronous sync. 
-        # Let's keep 'approved' as the final state for now or 'synced'.
-        # task.md says: "Update local DB status to 'synced'" - let's stick to that if schema allows.
+        tx.forced_review = False # Reset forced review flag
         # Checking models... Status enum usually: unmatched, pending_approval, approved.
         # I'll stick to 'approved' to avoid Enum errors unless I verify 'synced' exists.
         

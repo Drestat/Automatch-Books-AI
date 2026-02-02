@@ -42,6 +42,8 @@ interface Transaction {
     tax_deduction_note?: string;
     is_exported?: boolean;
     is_qbo_matched?: boolean;
+    is_excluded?: boolean;
+    forced_review?: boolean;
     suggested_category_name: string;
 }
 
@@ -55,6 +57,8 @@ interface TransactionCardProps {
     onTagAdd?: (txId: string, tagName: string) => void;
     onTagRemove?: (txId: string, tagName: string) => void;
     onAnalyze?: (id: string) => void;
+    onExclude?: (id: string) => void;
+    onInclude?: (id: string) => void;
 }
 
 export default function TransactionCard({
@@ -66,7 +70,9 @@ export default function TransactionCard({
     onCategoryChange,
     onTagAdd,
     onTagRemove,
-    onAnalyze
+    onAnalyze,
+    onExclude,
+    onInclude
 }: TransactionCardProps) {
     const isExpense = tx.amount < 0;
     const [showReasoning, setShowReasoning] = React.useState(true);
@@ -397,6 +403,24 @@ export default function TransactionCard({
                     >
                         <Sparkles size={18} />
                     </motion.button>
+
+                    {tx.is_excluded ? (
+                        <motion.button
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => onInclude && onInclude(tx.id)}
+                            className="px-4 h-12 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-400 font-bold text-xs transition-all"
+                        >
+                            Include
+                        </motion.button>
+                    ) : (
+                        <motion.button
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => onExclude && onExclude(tx.id)}
+                            className="px-4 h-12 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl flex items-center justify-center text-rose-400 font-bold text-xs transition-all"
+                        >
+                            Exclude
+                        </motion.button>
+                    )}
                 </div>
 
                 {tx.is_exported && (

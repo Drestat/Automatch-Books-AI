@@ -47,6 +47,8 @@ class TransactionSchema(BaseModel):
     tax_deduction_note: Optional[str] = None
     confidence: Optional[float] = None
     is_qbo_matched: bool = False
+    is_excluded: bool = False
+    forced_review: bool = False
     is_split: bool = False
     splits: List[SplitSchema] = []
 
@@ -90,17 +92,50 @@ def analyze_user_transactions(realm_id: str, tx_id: str = None, db: Session = De
     if not connection:
         raise HTTPException(status_code=404, detail="QBO Connection not found")
     
-    try:
+        if tx_id:
+            tx = db.query(Transaction).filter(Transaction.id == tx_id, Transaction.realm_id == realm_id).first()
+            if tx and tx.is_qbo_matched:
+                tx.forced_review = True
+                db.add(tx)
+                db.commit()
+
         from modal_app import process_ai_categorization
         process_ai_categorization.spawn(realm_id, tx_id=tx_id)
         return {"message": f"AI categorization {'for ' + tx_id if tx_id else ''} triggered successfully"}
     except Exception as e:
+        if tx_id:
+            tx = db.query(Transaction).filter(Transaction.id == tx_id, Transaction.realm_id == realm_id).first()
+            if tx and tx.is_qbo_matched:
+                tx.forced_review = True
+                db.add(tx)
+                db.commit()
+        
         service = AnalysisService(db, realm_id)
         try:
             results = service.analyze_transactions(tx_id=tx_id)
             return {"message": "AI analysis completed (synchronous fallback)", "count": len(results) if isinstance(results, list) else 0}
         except Exception as inner_e:
              return {"message": "AI analysis failed", "error": str(inner_e)}
+
+@router.post("/{tx_id}/exclude")
+def exclude_transaction(realm_id: str, tx_id: str, db: Session = Depends(get_db)):
+    tx = db.query(Transaction).filter(Transaction.id == tx_id, Transaction.realm_id == realm_id).first()
+    if not tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    tx.is_excluded = True
+    db.commit()
+    return {"message": "Transaction excluded"}
+
+@router.post("/{tx_id}/include")
+def include_transaction(realm_id: str, tx_id: str, db: Session = Depends(get_db)):
+    tx = db.query(Transaction).filter(Transaction.id == tx_id, Transaction.realm_id == realm_id).first()
+    if not tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    tx.is_excluded = False
+    db.commit()
+    return {"message": "Transaction included"}
 
 @router.post("/{tx_id}/approve")
 def approve_transaction(realm_id: str, tx_id: str, db: Session = Depends(get_db)):
