@@ -102,17 +102,40 @@ class TransactionService:
 
         self.active_account_ids = [b.id for b in active_banks]
 
-        data = self.client.query("SELECT * FROM Purchase")
-        purchases = data.get("QueryResponse", {}).get("Purchase", [])
+        # Fetch from multiple sources: Purchase, Deposit, CreditCardCredit, JournalEntry, Transfer
+        queries = [
+            "SELECT * FROM Purchase",
+            "SELECT * FROM Deposit",
+            "SELECT * FROM CreditCardCredit",
+            "SELECT * FROM JournalEntry",
+            "SELECT * FROM Transfer"
+        ]
+
+        all_txs = []
+        for q in queries:
+            try:
+                res = self.client.query(q)
+                entity = q.split()[3]
+                txs = res.get("QueryResponse", {}).get(entity, [])
+                all_txs.extend(txs)
+            except Exception as e:
+                print(f"⚠️ Error querying {q}: {e}")
+                continue
         
         valid_purchases = []
         
-        for p in purchases:
-            # Filter by Account Limit
-            account_ref = p.get("AccountRef", {})
-            acc_id = account_ref.get("value")
+        for p in all_txs:
+            # Resolve Account ID (differs by type)
+            acc_id = None
+            acc_name = "Unknown Account"
+            if "AccountRef" in p:
+                acc_id = p["AccountRef"].get("value")
+                acc_name = p["AccountRef"].get("name", "Unknown Account")
+            elif "DepositToAccountRef" in p:
+                acc_id = p["DepositToAccountRef"].get("value")
+                acc_name = p["DepositToAccountRef"].get("name", "Unknown Account")
             
-            if acc_id not in self.active_account_ids:
+            if not acc_id or acc_id not in self.active_account_ids:
                 continue
 
             valid_purchases.append(p)
@@ -125,7 +148,7 @@ class TransactionService:
             
             # Map Account (Source)
             tx.account_id = acc_id
-            tx.account_name = account_ref.get("name", "Unknown Account")
+            tx.account_name = acc_name
 
             # Map Description (Vendor + Memo)
             entity_ref = p.get("EntityRef", {})

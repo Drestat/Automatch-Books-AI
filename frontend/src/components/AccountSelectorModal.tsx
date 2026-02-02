@@ -149,10 +149,11 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
                             </div>
 
                             {loading ? (
-                                <div className="py-12 flex justify-center">
-                                    <Loader2 className="animate-spin text-brand" size={32} />
+                                <div className="py-16 flex flex-col items-center justify-center gap-4">
+                                    <Loader2 className="animate-spin text-brand" size={40} />
+                                    <p className="text-sm text-white/40">Loading your accounts...</p>
                                 </div>
-                            ) : (
+                            ) : step === 'select' && (
                                 <div className="space-y-4 max-h-[50vh] overflow-y-auto">
                                     <div className="flex items-center justify-between text-xs text-white/50 px-2 pb-2 border-b border-white/5">
                                         <span>Available Accounts</span>

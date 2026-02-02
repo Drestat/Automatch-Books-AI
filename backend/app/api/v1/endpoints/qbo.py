@@ -171,38 +171,75 @@ def preview_account_sync(payload: AccountSelectionSchema, db: Session = Depends(
     qbo_client = QBOClient(db, connection) # Handles refresh automatically
 
     # Fetch Transactions (Mirroring sync logic)
-    # Limit to 1000 for preview speed
-    query = "SELECT * FROM Purchase MAXRESULTS 1000"
-    data = qbo_client.query(query)
-    purchases = data.get("QueryResponse", {}).get("Purchase", [])
-
+    # Fetch from multiple sources: Purchase, Deposit, CreditCardCredit
     total_count = 0
     matched_count = 0
     unmatched_count = 0
+    account_breakdown = {acc_id: 0 for acc_id in selected_ids}
 
-    for p in purchases:
-        # Filter by Selected Accounts
-        account_ref = p.get("AccountRef", {})
-        acc_id = account_ref.get("value")
-        
-        if acc_id not in selected_ids:
+    queries = [
+        "SELECT * FROM Purchase MAXRESULTS 1000",
+        "SELECT * FROM Deposit MAXRESULTS 500",
+        "SELECT * FROM CreditCardCredit MAXRESULTS 500",
+        "SELECT * FROM JournalEntry MAXRESULTS 500",
+        "SELECT * FROM Transfer MAXRESULTS 500"
+    ]
+
+    all_txs = []
+    for q in queries:
+        try:
+            res = qbo_client.query(q)
+            entity = q.split()[3]
+            txs = res.get("QueryResponse", {}).get(entity, [])
+            all_txs.extend(txs)
+        except:
             continue
 
+    for p in all_txs:
+        # Resolve Account ID (differs by type)
+        acc_id = None
+        if "AccountRef" in p:
+            acc_id = str(p["AccountRef"].get("value"))
+        elif "DepositToAccountRef" in p:
+            acc_id = str(p["DepositToAccountRef"].get("value"))
+        elif "FromAccountRef" in p:
+            acc_id = str(p["FromAccountRef"].get("value"))
+        
+        # Check if the primary account ID is selected
+        if acc_id and acc_id in selected_ids:
+            pass # We're good
+        else:
+            # Check secondary ID for Transfers (ToAccountRef)
+            to_acc_id = None
+            if "ToAccountRef" in p:
+                to_acc_id = str(p["ToAccountRef"].get("value"))
+            
+            if to_acc_id and to_acc_id in selected_ids:
+                acc_id = to_acc_id
+            else:
+                continue
+
         total_count += 1
+        account_breakdown[acc_id] = account_breakdown.get(acc_id, 0) + 1
         
         # Determine Status
-        # Check if it has a valid category (AccountRef in Line items)
+        # Check if it has a valid category
         has_category = False
         if "Line" in p:
             for line in p["Line"]:
+                # Purchase/CreditCardCredit
                 if "AccountBasedExpenseLineDetail" in line:
                     detail = line["AccountBasedExpenseLineDetail"]
                     if "AccountRef" in detail:
                         cat_name = detail["AccountRef"].get("name", "")
-                        # Check for "Uncategorized" keyword
                         if "Uncategorized" not in cat_name:
                             has_category = True
                         break
+                # Journal/Deposit
+                elif "Description" in line and p.get("Id"): # Simplistic for preview
+                    # For JournalEntry and Deposit, categorize is complex
+                    # Let's assume for now they need review unless we have a better heuristic
+                    pass
         
         if has_category:
             matched_count += 1
@@ -214,7 +251,8 @@ def preview_account_sync(payload: AccountSelectionSchema, db: Session = Depends(
         "selected_count": len(selected_ids),
         "total_transactions": total_count,
         "already_matched": matched_count,
-        "to_analyze": unmatched_count
+        "to_analyze": unmatched_count,
+        "account_breakdown": account_breakdown
     }
 
 @router.get("/analyze")
