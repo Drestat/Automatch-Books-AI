@@ -224,11 +224,34 @@ def preview_account_sync(payload: AccountSelectionSchema, db: Session = Depends(
         account_breakdown[acc_id] = account_breakdown.get(acc_id, 0) + 1
         
         # Determine Status
-        # KEY: QBO considers a transaction "Categorized" ONLY if it has a LinkedTxn
-        # Category suggestions from QBO are NOT the same as user categorization
+        # QBO considers a transaction "Categorized" if:
+        # 1. It has a LinkedTxn (linked to bill/invoice), OR
+        # 2. It was manually categorized (TxnType = "54"), OR
+        # 3. It has a Description in the Line item (indicates manual entry/categorization)
+        
         has_linked_txn = len(p.get("LinkedTxn", [])) > 0
         
-        if has_linked_txn:
+        # Check for manual categorization via TxnType
+        is_manually_categorized = False
+        purchase_ex = p.get("PurchaseEx", {})
+        if "any" in purchase_ex:
+            for item in purchase_ex["any"]:
+                if item.get("value", {}).get("Name") == "TxnType":
+                    txn_type = item.get("value", {}).get("Value")
+                    # TxnType 54 = Manually added/categorized expense
+                    if txn_type == "54":
+                        is_manually_categorized = True
+                        break
+        
+        # Check if Line has Description (another indicator of manual categorization)
+        has_line_description = False
+        if "Line" in p:
+            for line in p["Line"]:
+                if "Description" in line and line["Description"]:
+                    has_line_description = True
+                    break
+        
+        if has_linked_txn or is_manually_categorized or has_line_description:
             matched_count += 1
         else:
             unmatched_count += 1
