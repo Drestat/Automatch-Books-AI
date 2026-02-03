@@ -9,11 +9,56 @@ Accounting should feel like a byproduct of doing business. This project isn't ju
 ---
 
 ## 1. Architecture Overview
-- **Core API**: FastAPI (Python) running in `backend/`.
-- **Mirror Database**: PostgreSQL for multi-tenant data storage with RLS.
-- **Serverless Infrastructure**: Modal for long-running sync and AI jobs.
-- **AI Engine**: Google Gemini 1.5 Pro for transaction categorization and "Reasoning Narratives."
-- **Authentication**: Clerk (Next.js) for secure, multi-tenant SaaS auth.
+
+### Core Technology Stack (2026 Best Practices)
+
+#### Backend Infrastructure
+- **Core API**: FastAPI (Python 3.9+) with async/await patterns
+  - **Why FastAPI**: Industry-standard for serverless Python APIs with native async support, automatic OpenAPI docs, and type-driven validation
+  - **Alternative Considered**: Litestar (async-first, stricter architecture) - FastAPI chosen for ecosystem maturity
+- **Mirror Database**: PostgreSQL with Row-Level Security (RLS)
+  - **Connection Pooling**: **CRITICAL** - Use external PgBouncer in transaction pooling mode for serverless
+    - Disable SQLAlchemy's internal pooling (`poolclass=NullPool`)
+    - Prevents connection exhaustion from ephemeral serverless functions
+    - Cloud options: AWS RDS Proxy, Supabase Supavisor, or Neon's built-in pooler
+- **Serverless Infrastructure**: Modal for GPU-accelerated AI and background sync
+  - **Why Modal**: Native Python support, auto-scaling, GPU access for AI workloads
+  - **Alternatives Considered**: Runpod (GPU-focused), AWS Lambda + SageMaker (enterprise MLOps)
+- **AI Engine**: Google Gemini 1.5 Pro/Flash with intelligent batching
+  - **Batch API**: Use for non-urgent categorization (50% cost reduction, 24hr turnaround)
+  - **Real-time API**: Reserve for interactive user corrections only
+  - **Rate Limits**: Free tier = 15 RPM, 250K TPM; Tier 1 = 300 RPM
+  - **Optimization**: Implement context caching for recurring vendor patterns (90% discount on cached tokens)
+- **Authentication**: Clerk (Next.js 16) with server-side validation
+  - **Security**: Always use `auth()` helper in Server Actions, never rely on middleware alone
+  - **Session Management**: Short-lived JWTs (60s default) with automatic refresh
+
+#### Frontend Stack
+- **Framework**: Next.js 16 (App Router) with Turbopack bundler
+  - **Performance**: 10x faster Fast Refresh, 2-5x faster production builds vs Webpack
+  - **Routing**: Layout deduplication and incremental prefetching (massive bandwidth savings)
+- **UI Library**: React 19 with automatic compiler optimization
+  - **Compiler**: Auto-memoization reduces re-renders by 25-40% without manual `useMemo`/`useCallback`
+- **Animation**: Framer Motion with bundle optimization
+  - **Best Practice**: Use `LazyMotion` + `m` component instead of `motion` for smaller bundles
+  - **GPU Acceleration**: Animate `transform` and `opacity` properties only
+- **Payments**: Stripe with idempotent webhook handlers
+  - **Critical**: Verify webhook signatures, store event IDs to prevent duplicate processing
+  - **Pattern**: Return 200 OK immediately, offload processing to background queue
+
+#### Third-Party API Integration
+
+##### QuickBooks Online API
+- **Library**: `intuit-oauth` (OAuth 2.0) + `requests` (REST calls)
+  - **Why Direct REST**: More flexible than high-level wrappers for edge cases in transaction data
+- **Best Practices**:
+  - Use Change Data Capture (CDC) API instead of polling for updates
+  - Implement webhooks for real-time entity change notifications
+  - Include `request-id` query parameter for idempotency
+  - Update minor version monthly (QBO releases monthly updates)
+  - Use filters and max page size (1,000 records) to minimize API calls
+- **Rate Limiting**: Implement exponential backoff for 429 errors
+- **Security**: Encrypt access tokens before storage, use environment variables for credentials
 
 ### SaaS Route Structure
 - **Public (`/`)**: High-conversion Landing Page (Features, Pricing, Login).
@@ -120,7 +165,9 @@ graph TD
 - [x] **Hardcoded Prompts**: LLM prompts are buried in `sync_service.py`. Extract to `app/core/prompts.py`.
 - [x] **Type Safety**: Frontend has distinct `any` types that violate strict mode.
 - [x] **Performance**: `sync_service.py` does not use `requests.Session()` for connection pooling.
+- [x] **Database Pooling**: Implemented `NullPool` in `app/db/session.py` for serverless compatibility (v3.18.0)
 
 ### Maintenance
 - [ ] **Refactor**: `SyncService` is becoming a "God Class". Logic for Receipts, Sync, and AI should fundamentally be separated.
+- [ ] **PgBouncer Deployment**: External connection pooler configured in code, needs cloud deployment (see `architecture/pgbouncer_setup.md`)
 
