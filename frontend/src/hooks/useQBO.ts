@@ -625,13 +625,19 @@ export const useQBO = () => {
                 showToast('AI analysis triggered', 'success');
                 track('re_analyze_start', { txId, realmId: targetRealm }, user?.id);
 
+                // Get active account IDs to preserve filter when refreshing
+                const activeAccountIds = accounts
+                    .filter(acc => acc.is_active)
+                    .map(acc => acc.id);
+
                 // Fetch fresh data with backoff polling to ensure background job finishes
+                // Preserve active account filter
                 // 1st attempt: 4s
-                setTimeout(() => fetchTransactions(targetRealm), 4000);
+                setTimeout(() => fetchTransactions(targetRealm, activeAccountIds.length > 0 ? activeAccountIds : undefined), 4000);
                 // 2nd attempt: 8s
-                setTimeout(() => fetchTransactions(targetRealm), 8000);
+                setTimeout(() => fetchTransactions(targetRealm, activeAccountIds.length > 0 ? activeAccountIds : undefined), 8000);
                 // 3rd attempt: 12s
-                setTimeout(() => fetchTransactions(targetRealm), 12000);
+                setTimeout(() => fetchTransactions(targetRealm, activeAccountIds.length > 0 ? activeAccountIds : undefined), 12000);
             } else {
                 showToast('Failed to trigger re-analysis', 'error');
             }
