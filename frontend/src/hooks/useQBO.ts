@@ -70,6 +70,8 @@ export interface Account {
     nickname?: string;
     balance?: number;
     currency?: string;
+    is_active?: boolean;
+    is_connected?: boolean;
 }
 
 export interface Tag {
@@ -143,10 +145,13 @@ export const useQBO = () => {
             if (response.ok) {
                 const data = await response.json();
                 setAccounts(data.accounts); // Extract accounts array from response
+                return data.accounts; // Return for chaining
             }
         } catch (error) {
             console.error("Failed to fetch accounts", error);
+            return [];
         }
+        return [];
     }, []);
 
     // Helper: Fetch Transactions
@@ -242,12 +247,31 @@ export const useQBO = () => {
         if (storedRealm) {
             setRealmId(storedRealm);
             setIsConnected(true);
+            // Fetch accounts first, then transactions will be auto-filtered by active accounts
             fetchAccounts(storedRealm as string);
-            fetchTransactions(storedRealm as string);
+            // Don't fetch transactions here - will be triggered by accounts effect below
             fetchTags(storedRealm as string);
             fetchCategories(storedRealm as string);
         }
-    }, [fetchTransactions]);
+    }, [fetchAccounts, fetchTags, fetchCategories]);
+
+    // Effect 4: Auto-filter transactions by active accounts
+    useEffect(() => {
+        if (realmId && accounts.length > 0) {
+            const activeAccountIds = accounts
+                .filter(acc => acc.is_active)
+                .map(acc => acc.id);
+
+            if (activeAccountIds.length > 0) {
+                console.log('Auto-filtering transactions by active accounts:', activeAccountIds);
+                fetchTransactions(realmId, activeAccountIds);
+            } else {
+                // No active accounts - fetch all or show empty
+                console.log('No active accounts found, fetching all transactions');
+                fetchTransactions(realmId);
+            }
+        }
+    }, [accounts, realmId, fetchTransactions]);
 
     const connect = async () => {
         // DEBUG: Check user existence immediately

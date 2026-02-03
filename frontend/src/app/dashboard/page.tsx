@@ -122,15 +122,8 @@ function DashboardContent() {
     }
   }, [isConnected, isDemo, isLoaded]);
 
-  // Refetch when filters change
-  useEffect(() => {
-    // Check for Demo Mode flag on mount
-    console.log("VERSION CHECK: f3.17.1 Elegant Logic loaded");
-    const demoFlag = localStorage.getItem('is_demo_mode');
-    if (isConnected && !isDemo) {
-      fetchTransactions(localStorage.getItem('qbo_realm_id') || '', selectedAccounts);
-    }
-  }, [selectedAccounts]);
+  // Auto-filter is now handled by useQBO hook (Effect 4)
+  // selectedAccounts is only used for manual UI filtering in the dropdown
 
   const toggleAccount = (accId: string) => {
     setSelectedAccounts(prev =>
@@ -249,7 +242,7 @@ function DashboardContent() {
                 {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
               </span>
               <span className="px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] uppercase font-bold tracking-wider ml-2">
-                v3.23.0 | f3.23.0
+                v3.18.0 (BE) | v3.19.0 (FE)
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight">
