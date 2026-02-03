@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'add_payee_column'
-down_revision = 'bbe0bc5375a9'
+down_revision = 'c4f8e2a1b5d9'  # Points to add_is_bank_feed_import
 branch_labels = None
 depends_on = None
 
