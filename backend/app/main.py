@@ -41,6 +41,7 @@ async def lifespan(app: FastAPI):
             conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS is_qbo_matched BOOLEAN DEFAULT FALSE;"))
             conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS is_excluded BOOLEAN DEFAULT FALSE;"))
             conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS forced_review BOOLEAN DEFAULT FALSE;"))
+            conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS payee VARCHAR;"))  # v3.18.2
             
             # QBO Connection updates
             conn.execute(text("ALTER TABLE qbo_connections ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT now();"))
@@ -71,13 +72,13 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.18.0"}
+    return {"status": "ok", "version": "3.18.2"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.18.0",
+        "version": "3.18.2",
         "status": "ready"
     }
 
