@@ -46,14 +46,22 @@ class FeedLogic:
             if has_linked_txn:
                  return False, "Manual Entry with LinkedTxn (Match Suggestion)"
             
+            # Check if transaction has a specific category (not Uncategorized)
+            has_specific_category = FeedLogic._has_specific_category(transaction_data)
+            
+            # If user set a specific category, it's finalized -> Categorized
+            # This handles cases like "Books By Bessie" with "Sales of Product Income"
+            if has_specific_category:
+                return True, "Manual Entry with Specific Category (User Finalized)"
+            
             # The "Law of Freshness": SyncToken 0 means freshly created by user -> Categorized
             if sync_token == 0:
                 # We assume if the user just created it, they consider it done.
                 return True, "Fresh Manual Entry (SyncToken 0) - Assumed Finalized"
             
-            # The "Law of Modification": SyncToken > 0 means touched by QBO -> For Review
+            # The "Law of Modification": SyncToken > 0 with no category means touched by QBO -> For Review
             # Often implies a 'Match Suggestion' was attached or it's waiting for approval
-            return False, "Modified Manual Entry (SyncToken > 0) - Assumed Pending Match"
+            return False, "Modified Manual Entry (SyncToken > 0, No Category) - Assumed Pending Match"
             
         # CASE C: BANK FEED IMPORTS (TxnType 1, 11, etc)
         # The standard flow. Needs explicit confirmation to be categorized.
@@ -90,3 +98,38 @@ class FeedLogic:
     def _is_bill_payment(data: Dict[str, Any]) -> bool:
         """Identifying BillPayment structure."""
         return "VendorRef" in data and ("CheckPayment" in data or "CreditCardPayment" in data)
+
+    @staticmethod
+    def _has_specific_category(data: Dict[str, Any]) -> bool:
+        """
+        Checks if transaction has a specific category (not Uncategorized or Ask My Accountant).
+        This indicates the user has finalized the categorization.
+        """
+        # Check all Line items for category information
+        for line in data.get("Line", []):
+            # Check various detail types for AccountRef
+            detail = None
+            if "AccountBasedExpenseLineDetail" in line:
+                detail = line["AccountBasedExpenseLineDetail"]
+            elif "JournalEntryLineDetail" in line:
+                detail = line["JournalEntryLineDetail"]
+            elif "DepositLineDetail" in line:
+                detail = line["DepositLineDetail"]
+            elif "SalesItemLineDetail" in line:
+                detail = line["SalesItemLineDetail"]
+            elif "ItemBasedExpenseLineDetail" in line:
+                detail = line["ItemBasedExpenseLineDetail"]
+            
+            if detail and "AccountRef" in detail:
+                category_name = detail["AccountRef"].get("name", "").lower()
+                # Check if it's a specific category (not generic)
+                if category_name and "uncategorized" not in category_name and "ask my accountant" not in category_name:
+                    return True
+            
+            # Also check ItemRef for item-based categorization
+            if detail and "ItemRef" in detail:
+                item_name = detail["ItemRef"].get("name", "").lower()
+                if item_name and "uncategorized" not in item_name:
+                    return True
+        
+        return False
