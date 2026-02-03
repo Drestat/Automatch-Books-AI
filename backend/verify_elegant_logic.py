@@ -1,74 +1,69 @@
+import modal
 import os
+from dotenv import dotenv_values
 import sys
-from datetime import datetime, timezone, timedelta
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from app.models.qbo import Transaction, QBOConnection
-from dotenv import load_dotenv
 
-# Load env vars
-load_dotenv(".env")
-DATABASE_URL = os.getenv("DATABASE_URL")
+base_dir = os.path.dirname(os.path.abspath(__file__))
+image = (
+    modal.Image.debian_slim()
+    .pip_install("sqlalchemy", "psycopg2-binary", "python-dotenv", "pydantic-settings")
+    .add_local_dir(os.path.join(base_dir, "app"), remote_path="/root/app")
+)
+app = modal.App("verify-elegant-logic")
+secrets = modal.Secret.from_dict({"DATABASE_URL": dotenv_values(os.path.join(base_dir, ".env")).get("DATABASE_URL", "")})
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-db = SessionLocal()
-
+@app.function(image=image, secrets=[secrets])
 def verify_logic():
-    print(f"Verifying Elegant Logic...")
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from app.models.qbo import Transaction
+    import os
     
-    # 1. Fetch All Transactions (Simulating sync_all result)
-    # Note: We need to make sure the DB actually HAS the transactions. 
-    # If the user hasn't re-synced yet, the DB might be empty because we cleared it earlier.
-    # But wait, the previous "Forensic" steps cleared the DB.
-    # So right now the DB is EMPTY.
+    engine = create_engine(os.getenv("DATABASE_URL"))
+    Session = sessionmaker(bind=engine)
+    session = Session()
     
-    txs = db.query(Transaction).all()
-    print(f"Total Transactions in DB: {len(txs)}")
+    # Key Entities to Check
+    targets = [
+        {"name": "Lara's Lamination", "expected": True, "type": "Manual (Fresh)"},
+        {"name": "Tania's Nursery", "expected": False, "type": "Manual (Modified)"},
+        {"name": "Norton Lumber", "expected": True, "type": "Bill Payment (Linked)"},
+        {"name": "Bob's Burger", "expected": False, "type": "Bank Feed (Unlinked)"},
+        {"name": "Squeaky Kleen", "expected": False, "type": "Bank Feed (Unlinked)"},
+    ]
     
-    if len(txs) == 0:
-        print("⚠️ Database is empty! Cannot verify logic until Sync runs.")
-        print("Next Step: Ask User to Trigger Sync via App.")
-        return
-
-    # 2. Apply Logic from get_transactions
-    now_utc = datetime.now(timezone.utc)
-    cutoff_date = now_utc - timedelta(days=90)
-    print(f"Cutoff Date (90 days ago): {cutoff_date}")
+    print(f"\nExample Verification Results:")
+    print(f"{'='*100}")
+    print(f"{'Entity':<25} | {'Type':<20} | {'Status':<15} | {'Expected':<15} | {'Result'}")
+    print(f"{'-'*100}")
     
-    print("\n---------------------------------------------------")
-    print(f"{'Description':<30} | {'Account':<25} | {'Date':<12} | {'Computed Status'}")
-    print("---------------------------------------------------")
+    passed_count = 0
     
-    for tx in txs:
-        acc_name = (tx.account_name or "").lower()
+    for target in targets:
+        # Simple LIKE query
+        tx = session.query(Transaction).filter(Transaction.description.ilike(f"%{target['name']}%")).first()
         
-        is_uncategorized_account = (
-            "uncategorized" in acc_name 
-            or "ask my accountant" in acc_name
-            or not acc_name 
-        )
-        
-        tx_date = tx.date
-        if tx_date and tx_date.tzinfo is None:
-            tx_date = tx_date.replace(tzinfo=timezone.utc)
+        if tx:
+            status = "CATEGORIZED" if tx.is_qbo_matched else "FOR REVIEW"
+            expected_str = "CATEGORIZED" if target['expected'] else "FOR REVIEW"
+            match = tx.is_qbo_matched == target['expected']
+            badge = "✅ PASS" if match else "❌ FAIL"
+            if match: passed_count += 1
             
-        is_recent = tx_date >= cutoff_date
-        
-        status = "UNKNOWN"
-        if is_uncategorized_account:
-            status = "NEEDS_REVIEW"
-        elif is_recent:
-            status = "CATEGORIZED"
+            print(f"{target['name']:<25} | {target['type']:<20} | {status:<15} | {expected_str:<15} | {badge}")
         else:
-            status = "ARCHIVED"
-            
-        desc = (tx.description or "No Desc")[:28]
-        date_str = tx.date.strftime("%Y-%m-%d") if tx.date else "N/A"
-        
-        print(f"{desc:<30} | {tx.account_name or 'None':<25} | {date_str:<12} | {status}")
+            print(f"{target['name']:<25} | {target['type']:<20} | {'NOT FOUND':<15} | {'--':<15} | ⚠️ MISSING")
 
-    print("\n---------------------------------------------------")
+    print(f"{'-'*100}")
     
+    # Overall Counters
+    total = session.query(Transaction).count()
+    for_review = session.query(Transaction).filter(Transaction.is_qbo_matched == False).count()
+    categorized = session.query(Transaction).filter(Transaction.is_qbo_matched == True).count()
+    
+    print(f"\nTotal Transactions: {total}")
+    print(f"For Review: {for_review}")
+    print(f"Categorized: {categorized}")
+
 if __name__ == "__main__":
-    verify_logic()
+    pass

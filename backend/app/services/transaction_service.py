@@ -104,10 +104,9 @@ class TransactionService:
 
         self.active_account_ids = [b.id for b in active_banks]
 
-        # Fetch from multiple sources: Purchase, Deposit, CreditCardCredit, JournalEntry, Transfer
-        # Fetch from multiple sources: Purchase, Deposit, CreditCardCredit, JournalEntry, Transfer
+        # Fetch from multiple sources: Purchase, Deposit, CreditCardCredit, JournalEntry, Transfer, BillPayment
         # We must sync EVERYTHING to safely prune deleted items.
-        entity_types = ["Purchase", "Deposit", "CreditCardCredit", "JournalEntry", "Transfer"]
+        entity_types = ["Purchase", "Deposit", "CreditCardCredit", "JournalEntry", "Transfer", "BillPayment"]
         
         all_txs = []
         paginated_batch_size = 1000
@@ -138,11 +137,16 @@ class TransactionService:
                     
                 except Exception as e:
                      print(f"⚠️ Error querying {entity} at start_position {start_position}: {e}")
-                     sync_failed = True
-                     break
+                     # Ensure the DB session is rolled back if a previous DB operation in this session failed
+                     try:
+                         self.db.rollback()
+                     except:
+                         pass
+                     # Don't fail the entire sync if one entity fails (e.g. CreditCardCredit 400 error)
+                     break # Break inner batch loop to move to next entity
             
-            if sync_failed:
-                break
+            # Continue to next entity
+            continue
         
         print(f"📊 [sync_transactions] Fetched total of {len(all_txs)} transactions from QBO.")
         
@@ -172,6 +176,13 @@ class TransactionService:
             elif "FromAccountRef" in p:
                 acc_id = str(p["FromAccountRef"].get("value"))
                 acc_name = p["FromAccountRef"].get("name", "Unknown Account")
+            # BillPayment Handling
+            elif "CheckPayment" in p and "BankAccountRef" in p["CheckPayment"]:
+                 acc_id = str(p["CheckPayment"]["BankAccountRef"].get("value"))
+                 acc_name = p["CheckPayment"]["BankAccountRef"].get("name", "Unknown Account")
+            elif "CreditCardPayment" in p and "CCAccountRef" in p["CreditCardPayment"]:
+                 acc_id = str(p["CreditCardPayment"]["CCAccountRef"].get("value"))
+                 acc_name = p["CreditCardPayment"]["CCAccountRef"].get("name", "Unknown Account")
             
             # Special case for JournalEntry and Transfer where the account might be in the lines
             if not acc_id and "Line" in p:
@@ -213,6 +224,10 @@ class TransactionService:
             # Map Description (Vendor + Memo)
             entity_ref = p.get("EntityRef", {})
             vendor_name = entity_ref.get("name")
+            if not vendor_name:
+                # BillPayment uses VendorRef
+                vendor_name = p.get("VendorRef", {}).get("name")
+                
             memo = p.get("PrivateNote") # QBO 'Memo' is often in PrivateNote or Line items
             
             # Construct a rich description for AI
@@ -312,36 +327,19 @@ class TransactionService:
                 # CATEGORIZED vs FOR REVIEW DISCRIMINATOR:
                 # The logic differs based on transaction source:
                 #
-                # BANK FEED TRANSACTIONS (TxnType=1 or 11):
-                #   - AccountRef is just a SUGGESTION from QBO's auto-matching
-                #   - Only categorized if LinkedTxn exists (user clicked "Add" or "Match")
-                #   - OR if created today (just added to books)
-                #
-                # MANUAL ENTRIES (TxnType=54):
-                #   - AccountRef is the ACTUAL category (user entered it)
-                #   - Categorized if has specific category
+                # EXTRACTED LOGIC: FeedLogic
+                # We delegate all categorization rules to the dedicated engine.
+                from app.core.feed_logic import FeedLogic
                 
-                is_bank_feed = txn_type in ["1", "11", None]  # None for older transactions
-                is_manual_entry = txn_type == "54"
+                is_qbo_matched, decision_reason = FeedLogic.analyze(p)
                 
-                if is_manual_entry:
-                    # Manual entries: category is real, not a suggestion
-                    if is_specific_category:
-                        tx.is_qbo_matched = True
-                    else:
-                        tx.is_qbo_matched = False
-                else:
-                    # Bank feed: ONLY categorized if LinkedTxn exists
-                    # (AccountRef alone is just a suggestion, even if old)
-                    # LinkedTxn is created when user clicks "Add" or "Match" in QBO Banking
-                    
-                    if has_linked_txn:
-                        tx.is_qbo_matched = True
-                        if not qbo_category_name:
-                            qbo_category_name = "Matched to QBO Entry"
-                    else:
-                        # Bank feed with no LinkedTxn = For Review (even if has AccountRef suggestion)
-                        tx.is_qbo_matched = False
+                tx.is_qbo_matched = is_qbo_matched
+                # tx.decision_reason = decision_reason # TODO: Add column to DB for debugging
+                
+                if is_qbo_matched:
+                    if not qbo_category_name and FeedLogic._has_linked_txn(p): 
+                         qbo_category_name = "Matched to QBO Entry"
+
                 
                 # BANK FEED vs MANUAL ENTRY DISCRIMINATOR:
                 # TxnType=54 indicates a manual entry (not from bank feed)
@@ -357,8 +355,9 @@ class TransactionService:
                     should_overwrite_details = True
                     if tx.status in ['pending_approval', 'approved']:
                         should_overwrite_details = False
-                    elif tx.vendor_reasoning: # Has AI data, don't overwrite its reasoning
-                        should_overwrite_details = False
+                    # Removed: elif tx.vendor_reasoning:
+                    # We WANT to overwrite AI reasoning if QBO provides a better category (e.g. Automobile vs Uncategorized)
+                    # as long as the user hasn't approved the transaction yet.
                     
                     if should_overwrite_details:
                         tx.status = 'unmatched' # Keep unmatched so AnalysisService picks it up

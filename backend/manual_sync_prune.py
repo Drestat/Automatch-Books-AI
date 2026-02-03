@@ -52,7 +52,12 @@ def manual_sync():
     
     # Run sync
     service = TransactionService(session, conn)
-    service.sync_transactions()
+    try:
+        service.sync_transactions()
+    except Exception as e:
+        print(f"❌ Sync failed with unexpected error: {e}")
+        session.rollback()
+        # Continue to pruning anyway with whatever was fetched/updated
     
     print(f"\n{'='*140}")
     print(f"AFTER SYNC: Database State")
