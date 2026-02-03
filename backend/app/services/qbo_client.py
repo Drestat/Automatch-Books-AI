@@ -112,6 +112,30 @@ class QBOClient:
         print(f"✅ [QBOClient] Purchase {purchase_id} updated successfully")
         return result.get("Purchase", {})
 
+    def create_vendor(self, vendor_name: str):
+        """
+        Create a new vendor in QuickBooks.
+        
+        Args:
+            vendor_name: The display name for the new vendor
+            
+        Returns:
+            dict: The created Vendor object from QBO
+            
+        Raises:
+            Exception: If the creation fails
+        """
+        payload = {
+            "DisplayName": vendor_name
+        }
+        
+        print(f"📝 [QBOClient] Creating vendor: {vendor_name}")
+        
+        result = self.request("POST", "vendor", json_payload=payload)
+        
+        print(f"✅ [QBOClient] Vendor '{vendor_name}' created successfully")
+        return result.get("Vendor", {})
+
     def revoke(self):
         """
         Revoke the refresh token on the Intuit side to terminate the connection.

@@ -221,29 +221,21 @@ class TransactionService:
             tx.account_id = acc_id
             tx.account_name = acc_name
 
-            # Map Description (Vendor + Memo)
+            # Map Description (Vendor only, NOT memo)
+            # The memo should go to the note field, not be part of description
             entity_ref = p.get("EntityRef", {})
             vendor_name = entity_ref.get("name")
             if not vendor_name:
                 # BillPayment uses VendorRef
                 vendor_name = p.get("VendorRef", {}).get("name")
-                
-            memo = p.get("PrivateNote") # QBO 'Memo' is often in PrivateNote or Line items
             
-            # Construct a rich description for AI
-            desc_parts = []
-            if vendor_name:
-                desc_parts.append(vendor_name)
-            if memo:
-                 desc_parts.append(memo)
-            
-            # Fallback to Line description if main description is empty
-            if not desc_parts and "Line" in p and len(p["Line"]) > 0:
+            # Fallback to Line description if vendor is empty
+            if not vendor_name and "Line" in p and len(p["Line"]) > 0:
                 line_desc = p["Line"][0].get("Description")
                 if line_desc:
-                    desc_parts.append(line_desc)
+                    vendor_name = line_desc
 
-            tx.description = " - ".join(desc_parts) if desc_parts else "Uncategorized Expense"
+            tx.description = vendor_name if vendor_name else "Uncategorized Expense"
 
             tx.amount = p.get("TotalAmt", 0)
             tx.currency = p.get("CurrencyRef", {}).get("value", "USD")
@@ -251,7 +243,16 @@ class TransactionService:
             
             # Store SyncToken for future updates
             tx.sync_token = p.get("SyncToken") # Default to Expense if missing
-            tx.note = p.get("PrivateNote")
+            tx.note = p.get("PrivateNote")  # Memo goes here, not in description
+            
+            # Extract payee (vendor or customer)
+            payee_name = None
+            if "EntityRef" in p:
+                payee_name = p["EntityRef"].get("name")
+            elif "VendorRef" in p:
+                payee_name = p["VendorRef"].get("name")
+            tx.payee = payee_name
+            
             tx.raw_json = p
             # Extract Expense Category from Lines (for History/Training)
             qbo_category_name = None

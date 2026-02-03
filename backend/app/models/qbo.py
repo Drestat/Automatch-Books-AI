@@ -68,6 +68,7 @@ class Transaction(Base):
     forced_review = Column(Boolean, default=False)
     transaction_type = Column(String) # Expense, Check, CreditCard, etc.
     note = Column(String) # User editable note (initially from Memo)
+    payee = Column(String, nullable=True) # Vendor or Customer name
     tags = Column(JSON, default=[]) # List of strings
     suggested_tags = Column(JSON, default=[]) # AI suggested tags
     status = Column(String, default="unmatched") # unmatched, pending_approval, approved
