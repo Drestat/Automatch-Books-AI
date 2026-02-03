@@ -42,8 +42,9 @@ class FeedLogic:
         # CASE B: MANUAL ENTRIES (TxnType 54)
         # Distinguish between user creation (Categorized) and QBO Match Suggestions (For Review)
         if is_manual_entry:
+            # LinkedTxn means QBO has suggested a match -> For Review
             if has_linked_txn:
-                 return True, "Manual Entry with LinkedTxn (Matched)"
+                 return False, "Manual Entry with LinkedTxn (Match Suggestion)"
             
             # The "Law of Freshness": SyncToken 0 means freshly created by user -> Categorized
             if sync_token == 0:
@@ -56,9 +57,11 @@ class FeedLogic:
             
         # CASE C: BANK FEED IMPORTS (TxnType 1, 11, etc)
         # The standard flow. Needs explicit confirmation to be categorized.
+        # LinkedTxn means QBO has suggested a match -> For Review
         if has_linked_txn:
-            return True, "Bank Feed with LinkedTxn (Matched)"
+            return False, "Bank Feed with LinkedTxn (Match Suggestion)"
         
+        # DocNumber means user has explicitly finalized -> Categorized
         if has_doc_number:
             return True, "Bank Feed with DocNumber (User Finalized)"
             
