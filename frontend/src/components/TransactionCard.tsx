@@ -252,13 +252,6 @@ export default function TransactionCard({
 
                     {/* Editable Note & Tags Section */}
                     <div className="mt-4 pt-4 border-t border-white/5">
-                        {/* Show QBO Memo if it exists */}
-                        {tx.note && (
-                            <div className="mb-3 p-2 rounded-lg bg-white/5 border border-white/10">
-                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">QBO Memo</span>
-                                <p className="text-xs text-white/70 mt-1">{tx.note}</p>
-                            </div>
-                        )}
 
                         <label className="block text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">Note for Team</label>
                         <div className="relative">
