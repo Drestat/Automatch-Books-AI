@@ -194,16 +194,18 @@ def upload_receipt(
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
-    # Process with AI
+    # Process with AI (Serverless)
     from app.services.token_service import TokenService
-    from app.models.user import User # Ensure User is imported if needed, although user_id is from connection
     
     token_service = TokenService(db)
     receipt_cost = 5
     
     if not token_service.has_sufficient_tokens(connection.user_id, receipt_cost):
         # Clean up file
-        os.remove(file_path)
+        try:
+            os.remove(file_path)
+        except:
+            pass
         raise HTTPException(status_code=402, detail="Insufficient tokens for receipt scan (Cost: 5 tokens)")
     
     token_service.deduct_tokens(connection.user_id, receipt_cost, reason="Receipt Scan")
@@ -211,21 +213,54 @@ def upload_receipt(
     with open(file_path, "rb") as f:
         content = f.read()
     
-    service = ReceiptService(db, realm_id)
-    result = service.process_receipt(content, file.filename)
+    try:
+        from modal_app import process_receipt_modal
+        # Execute remotely on Modal infrastructure
+        result = process_receipt_modal.remote(realm_id, content, file.filename)
+        
+        if "error" in result:
+             raise Exception(result["error"])
+             
+    except ImportError:
+        # Fallback for local dev without Modal
+        print("⚠️ Modal not found, running locally")
+        service = ReceiptService(db, realm_id)
+        result_obj = service.process_receipt(content, file.filename)
+        # Manually serialize to match Modal output
+        match = result_obj.get('match')
+        result = {
+            "extracted": result_obj.get('extracted'),
+            "match_id": match.id if match else None
+        }
+    except Exception as e:
+        print(f"❌ Serverless Receipt Error: {e}")
+        # Fallback to local
+        service = ReceiptService(db, realm_id)
+        result_obj = service.process_receipt(content, file.filename)
+        match = result_obj.get('match')
+        result = {
+            "extracted": result_obj.get('extracted'),
+            "match_id": match.id if match else None
+        }
+
+    # If match found, update the transaction (Local DB update)
+    match_id = result.get('match_id')
+    extracted = result.get('extracted')
     
-    # If match found, update the transaction
-    match = result.get('match')
-    if match:
-        match.receipt_url = file_path 
-        match.receipt_data = result.get('extracted')
-        db.add(match)
-        db.commit()
+    match = None
+    if match_id:
+        match = db.query(Transaction).filter(Transaction.id == match_id).first()
+        if match:
+            match.receipt_url = file_path # Local path (or S3 in future)
+            match.receipt_data = extracted
+            db.add(match)
+            db.commit()
+            db.refresh(match)
     
     return {
         "message": "Receipt processed",
-        "extracted": result.get('extracted'),
-        "match_id": match.id if match else None
+        "extracted": extracted,
+        "match_id": match_id
     }
 
 @router.post("/bulk-approve")

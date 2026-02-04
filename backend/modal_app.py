@@ -137,6 +137,37 @@ def process_ai_categorization(realm_id: str, tx_id: str = None):
     finally:
         db.close()
 
+@app.function(image=image, secrets=[secrets], timeout=300)
+def process_receipt_modal(realm_id: str, file_content: bytes, filename: str):
+    """
+    Process receipt image using Gemini Vision (Serverless)
+    Returns extracted data and potential match ID.
+    """
+    print(f"🧾 [Modal] Processing receipt for {realm_id}: {filename}")
+    import sys
+    if "/root" not in sys.path:
+        sys.path.append("/root")
+
+    from app.db.session import SessionLocal
+    from app.services.receipt_service import ReceiptService
+    
+    db = SessionLocal()
+    try:
+        service = ReceiptService(db, realm_id)
+        result = service.process_receipt(file_content, filename)
+        
+        # Unwrap SQLModel/ORM object to return serializable data
+        match = result.get('match')
+        return {
+            "extracted": result.get('extracted'),
+            "match_id": match.id if match else None
+        }
+    except Exception as e:
+        print(f"❌ Receipt processing failed: {e}")
+        return {"error": str(e)}
+    finally:
+        db.close()
+
 @app.function(image=image, secrets=[secrets])
 def daily_maintenance():
     print("Running daily maintenance tasks...")

@@ -229,6 +229,20 @@ class TransactionService:
                 # BillPayment uses VendorRef
                 vendor_name = p.get("VendorRef", {}).get("name")
             
+            # Fallback: Check Line Details for Entity (e.g. Deposits)
+            if not vendor_name and "Line" in p:
+                for line in p["Line"]:
+                    if "DepositLineDetail" in line:
+                         entity = line["DepositLineDetail"].get("Entity", {})
+                         if entity.get("name"):
+                             vendor_name = entity.get("name")
+                             break 
+                    elif "JournalEntryLineDetail" in line:
+                         entity = line["JournalEntryLineDetail"].get("Entity", {})
+                         if entity.get("name"):
+                             vendor_name = entity.get("name")
+                             break
+            
             # Fallback to Line description if vendor is empty
             if not vendor_name and "Line" in p and len(p["Line"]) > 0:
                 line_desc = p["Line"][0].get("Description")

@@ -120,6 +120,10 @@ export default function TransactionCard({
                                     <span className="px-1.5 py-0.5 rounded-md bg-brand/20 border border-brand/30 text-[8px] font-black uppercase tracking-widest text-brand">Split</span>
                                 )}
                             </div>
+                            {/* NEW: Ensure Description/Memo is visible if different from Header */}
+                            {tx.note && tx.note !== tx.description && (
+                                <p className="text-[11px] text-white/50 mb-1 line-clamp-1">{tx.note}</p>
+                            )}
                             <p className="text-xs text-brand/80 font-mono">My Bank • {tx.id.slice(-4)}</p>
 
                         </div>

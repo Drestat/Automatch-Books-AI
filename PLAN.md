@@ -123,6 +123,7 @@ graph TD
 - [x] **Mobile Bridging**: Configure Capacitor for haptic-feedback support on iOS/Android.
 - [x] **Transaction Splitting**: Implement AI logic to split bulk transactions into multiple categories.
 - [x] **Receipt Mirroring**: Add support for matching scanned receipts to bank transactions.
+- [x] **Serverless Offloading**: Migrated receipt processing to Modal for scalable AI workloads.
 
 ---
 
@@ -135,6 +136,7 @@ graph TD
 
 ### Component Directives
 - **Transaction Cards**: "Reasoning Narratives" should be interactive accordions or hover-states to reduce clutter.
+- **Description Visibility**: Explicitly display `Memo` / `Note` field below the header if it differs from the Vendor Name.
 - **Typography**: Use `clamp()` for all headers to ensure perfect scaling on mobile devices.
 - **Haptics**: (Capacitor) Trigger 'medium' haptic feedback on successful reconciliation.
 
