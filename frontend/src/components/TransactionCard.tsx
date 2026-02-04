@@ -1,8 +1,9 @@
 "use client";
 
 import React from 'react';
-import { Check, Edit2, Info, ArrowUpRight, FilePlus, Tags, Split as SplitIcon, ExternalLink, CheckCircle2, Sparkles } from 'lucide-react';
+import { Check, Edit2, Info, ArrowUpRight, FilePlus, Tags, Split as SplitIcon, ExternalLink, CheckCircle2, Sparkles, Building2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import VendorSelector from './VendorSelector';
 
 interface Split {
     category_name: string;
@@ -153,43 +154,38 @@ export default function TransactionCard({
                     {/* Payee Section */}
                     <div className="mb-4 pb-4 border-b border-white/5">
                         <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-white/40 mb-2 block">Payee / Vendor</span>
-                        {isEditingPayee ? (
-                            <form
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    if (onPayeeChange) onPayeeChange(tx.id, payeeInput);
-                                    setIsEditingPayee(false);
-                                }}
-                                className="flex gap-2"
-                            >
-                                <input
-                                    autoFocus
-                                    list={`vendors-${tx.id}`}
-                                    className="bg-black border border-brand/50 rounded px-2 py-1 text-sm text-white focus:outline-none w-full"
-                                    value={payeeInput}
-                                    onChange={(e) => setPayeeInput(e.target.value)}
-                                    onBlur={() => {
-                                        if (onPayeeChange && payeeInput !== tx.payee) onPayeeChange(tx.id, payeeInput);
-                                        setIsEditingPayee(false);
-                                    }}
-                                />
-                                <datalist id={`vendors-${tx.id}`}>
-                                    {availableVendors.map(v => (
-                                        <option key={v.id} value={v.display_name} />
-                                    ))}
-                                </datalist>
-                            </form>
-                        ) : (
-                            <div className="flex items-center gap-2 group/edit cursor-pointer" onClick={() => {
-                                setPayeeInput(tx.payee || "");
-                                setIsEditingPayee(true);
-                            }}>
-                                <p className={`text-base font-medium ${tx.payee ? 'text-white' : 'text-rose-400 italic'} hover:text-brand transition-colors border-b border-dashed border-white/20 hover:border-brand/50`}>
-                                    {tx.payee || "Matches require a Payee. Click to Assign."}
-                                </p>
-                                <Edit2 size={12} className="text-white/20 group-hover/edit:text-brand opacity-0 group-hover/edit:opacity-100 transition-all" />
+
+                        <div
+                            className="flex items-center gap-3 group/edit cursor-pointer p-2 -ml-2 rounded-xl transition-all hover:bg-white/[0.03] border border-transparent hover:border-white/5"
+                            onClick={() => setIsEditingPayee(true)}
+                        >
+                            <div className={`p-2 rounded-lg ${tx.payee ? 'bg-brand/10 text-brand' : 'bg-rose-500/10 text-rose-400'} transition-colors group-hover/edit:bg-brand group-hover/edit:text-white`}>
+                                <Building2 size={18} />
                             </div>
-                        )}
+                            <div className="flex-1">
+                                <p className={`text-base font-bold ${tx.payee ? 'text-white' : 'text-rose-400 italic'} transition-colors`}>
+                                    {tx.payee || "Unassigned Vendor"}
+                                </p>
+                                <p className="text-[10px] text-white/30 uppercase font-black tracking-widest leading-none mt-1">
+                                    {tx.payee ? 'Verified Merchant' : 'Action Required'}
+                                </p>
+                            </div>
+                            <div className="p-1.5 rounded-md bg-white/5 text-white/20 opacity-0 group-hover/edit:opacity-100 transition-all">
+                                <Edit2 size={14} />
+                            </div>
+                        </div>
+
+                        <VendorSelector
+                            isOpen={isEditingPayee}
+                            onClose={() => setIsEditingPayee(false)}
+                            onSelect={(vendorName) => {
+                                if (onPayeeChange) onPayeeChange(tx.id, vendorName);
+                                setIsEditingPayee(false);
+                            }}
+                            availableVendors={availableVendors}
+                            currentPayee={tx.payee}
+                            transactionDescription={tx.description}
+                        />
                     </div>
 
                     <div className="flex items-center gap-2 mb-3">
