@@ -581,6 +581,10 @@ export const useQBO = () => {
 
     const updateTransaction = async (txId: string, updates: any) => {
         if (!realmId) return;
+
+        // Optimistic update
+        setTransactions(prev => prev.map(tx => tx.id === txId ? { ...tx, ...updates } : tx));
+
         try {
             const response = await fetch(`${API_BASE_URL}/transactions/${txId}?realm_id=${realmId}`, {
                 method: 'PATCH',
@@ -589,11 +593,17 @@ export const useQBO = () => {
             });
             if (response.ok) {
                 const updatedTx = await response.json();
+                // Merge final backend data just in case
                 setTransactions(prev => prev.map(tx => tx.id === txId ? updatedTx : tx));
                 return updatedTx;
+            } else {
+                // Revert if error
+                console.error("Update failed on backend, refreshing...");
+                fetchTransactions(realmId);
             }
         } catch (e) {
             console.error("Update Transaction Failed", e);
+            fetchTransactions(realmId);
         }
     };
 
