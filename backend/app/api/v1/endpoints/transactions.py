@@ -40,6 +40,7 @@ class TransactionSchema(BaseModel):
     tags: List[str] = []
     suggested_tags: List[str] = []
     status: str
+    suggested_category_id: Optional[str] = None
     suggested_category_name: Optional[str] = None
     reasoning: Optional[str] = None
     vendor_reasoning: Optional[str] = None
@@ -53,6 +54,10 @@ class TransactionSchema(BaseModel):
     forced_review: bool = False
     is_split: bool = False
     splits: List[SplitSchema] = []
+    payee: Optional[str] = None
+    account_id: Optional[str] = None
+    account_name: Optional[str] = None
+    sync_token: Optional[str] = None
 
     class Config:
         from_attributes = True
