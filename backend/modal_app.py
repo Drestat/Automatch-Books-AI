@@ -240,3 +240,4 @@ def add_sync_token_column():
         raise
     finally:
         engine.dispose()
+

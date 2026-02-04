@@ -55,7 +55,7 @@ interface Transaction {
 
 interface TransactionCardProps {
     tx: Transaction;
-    onAccept: (id: string) => void;
+    onAccept: (id: string) => Promise<void> | void;
     onReceiptUpload?: (id: string, file: File) => void;
     availableCategories?: Category[];
     availableTags?: Tag[];
@@ -99,7 +99,7 @@ export default function TransactionCard({
     const handleAccept = async () => {
         const { triggerHapticFeedback } = await import('@/lib/haptics');
         triggerHapticFeedback();
-        onAccept(tx.id);
+        await onAccept(tx.id);
     };
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

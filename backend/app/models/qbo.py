@@ -32,6 +32,13 @@ class Customer(Base):
     fully_qualified_name = Column(String)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
+class Vendor(Base):
+    __tablename__ = "vendors"
+    id = Column(String, primary_key=True)
+    realm_id = Column(String, ForeignKey("qbo_connections.realm_id", ondelete="CASCADE"), index=True)
+    display_name = Column(String)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
 class BankAccount(Base):
     __tablename__ = "bank_accounts"
     id = Column(String, primary_key=True) # QBO Account Id

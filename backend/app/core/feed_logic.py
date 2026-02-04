@@ -43,21 +43,18 @@ class FeedLogic:
             if has_linked_txn:
                  return False, "Manual Entry with LinkedTxn (Auto-Match Review)"
             
-            # Check ClrStatus FIRST
-            # Unreconciled Manual Entries should be For Review?
-            # User Feedback suggests Pam Seitz (Type 54) showing as Categorized is WRONG ("Broke").
-            # So we MUST enforce this check before returning True.
-            clr_status = FeedLogic._get_clr_status(transaction_data)
-            if clr_status != "R":
-                 # Exception: If it's a Check (Type 3) with a DocNum, maybe allow it? 
-                 # But generally, if it's not reconciled, let's play safe.
-                 return False, f"Unreconciled Manual Entry (Clr: {clr_status})"
-
             # Check if transaction has a specific category
             has_specific_category = FeedLogic._has_specific_category(transaction_data)
             
-            if has_specific_category:
-                return True, "Reconciled Manual Entry (Categorized)"
+            # Check ClrStatus
+            # Unreconciled Manual Entries should be For Review!
+            # User Feedback suggests Pam Seitz (Type 54) showing as Categorized is WRONG ("Broke").
+            clr_status = FeedLogic._get_clr_status(transaction_data)
+            if clr_status != "R":
+                 return False, f"Unreconciled Manual Entry (Clr: {clr_status})"
+
+            if has_specific_category and FeedLogic._has_payee(transaction_data):
+                return True, "Categorized Manual Entry (Category + Payee)"
             
             if sync_token == 0:
                 return True, "Fresh Manual Entry (SyncToken 0)"
@@ -88,9 +85,12 @@ class FeedLogic:
         if is_deposit and has_specific_category and has_payee:
              return True, "Categorized Deposit (Category + Entity)"
 
-        # Standard Type 1 Check (Hicks Hardware Trap)
-        if txn_type == "1" and clr_status not in ["C", "R"]:
-             return False, "QBO Category Suggestion (Needs Confirmation)"
+        # Standard Type 1 Check (CreditCardCharge/Expense)
+        # If it has a specific category AND a payee, we treat it as "Categorized".
+        # Even if it is uncleared ('Create'), the presence of a specific category 
+        # (not Uncategorized) and a Payee implies it has been processed or manually entered.
+        if has_specific_category and has_payee:
+             return True, "Categorized (Category + Payee)"
         
         if not has_specific_category:
             return False, "Missing Specific Category"
@@ -98,13 +98,6 @@ class FeedLogic:
         if not has_payee:
             return False, "Missing Payee"
 
-        # Both category and payee exist, no auto-match suggestion -> Categorized
-        if has_doc_number:
-            if clr_status != "R":
-                 return False, f"Unreconciled Manual Check (Clr: {clr_status})"
-                 
-            return True, "Categorized (Manual Entry - Category + Payee)"
-            
         return True, "Categorized (Category + Payee)"
 
     @staticmethod

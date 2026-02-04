@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
-from app.models.qbo import Transaction, QBOConnection, Category, Customer, SyncLog, TransactionSplit, BankAccount, Tag
+from app.models.qbo import Transaction, QBOConnection, Category, Customer, Vendor, SyncLog, TransactionSplit, BankAccount, Tag
 from app.models.user import User
 from app.services.qbo_client import QBOClient
 import uuid
@@ -49,6 +49,7 @@ class TransactionService:
         await self.sync_bank_accounts()
         await self.sync_categories()
         await self.sync_customers()
+        await self.sync_vendors()
         await self.sync_transactions()
         print(f"✅ [sync_all] Completed successfully.")
 
@@ -359,6 +360,18 @@ class TransactionService:
         self.db.commit()
         self._log("sync", "customer", len(customers), "success")
 
+    async def sync_vendors(self):
+        data = await self.client.query("SELECT * FROM Vendor")
+        vendors = data.get("QueryResponse", {}).get("Vendor", [])
+        for v in vendors:
+            vend = self.db.query(Vendor).filter(Vendor.id == v["Id"]).first()
+            if not vend:
+                vend = Vendor(id=v["Id"], realm_id=self.connection.realm_id)
+            vend.display_name = v["DisplayName"]
+            self.db.add(vend)
+        self.db.commit()
+        self._log("sync", "vendor", len(vendors), "success")
+
     async def approve_transaction(self, tx_id: str):
         """
         Finalizes a transaction and writes it back to QBO.
@@ -390,6 +403,7 @@ class TransactionService:
         # Local Update
         tx.status = 'approved' 
         tx.forced_review = False
+        tx.is_qbo_matched = True
         self.db.add(tx)
         self.db.commit()
         
@@ -398,7 +412,7 @@ class TransactionService:
 
     async def _update_qbo_transaction(self, tx):
         """
-        Async Helper: Writes the approved categorization back to QBO.
+        Async Helper: Writes the approved categorization and payee back to QBO.
         """
         print(f"🔄 [Write-Back] Updating QBO Purchase ID {tx.id}...")
         
@@ -408,18 +422,70 @@ class TransactionService:
         if not tx.sync_token:
             raise ValueError(f"Transaction {tx.id} missing SyncToken")
         
+        # 1. Resolve or Create Vendor if Payee changed/assigned
+        entity_ref = None
+        if tx.payee:
+            # Check if this payee name exists as a vendor
+            vendor = self.db.query(Vendor).filter(
+                Vendor.display_name == tx.payee,
+                Vendor.realm_id == self.connection.realm_id
+            ).first()
+            
+            if vendor:
+                entity_ref = {"value": vendor.id, "name": vendor.display_name}
+            else:
+                # 2. Check if Vendor exists in QBO but NOT in local DB
+                remote_v = await self.client.get_vendor_by_name(tx.payee)
+                if remote_v:
+                    print(f"🔗 Linking to existing QBO vendor: {tx.payee}")
+                    vendor_id = remote_v.get("Id")
+                    entity_ref = {"value": vendor_id, "name": tx.payee}
+                    # Save locally for future use
+                    vendor = Vendor(
+                        id=vendor_id,
+                        realm_id=self.connection.realm_id,
+                        display_name=tx.payee
+                    )
+                    self.db.add(vendor)
+                    self.db.commit()
+                else:
+                    # 3. Create NEW vendor in QBO
+                    print(f"✨ Creating new vendor: {tx.payee}")
+                    new_v_data = await self.client.create_vendor(tx.payee)
+                    vendor_id = new_v_data.get("Id")
+                    if vendor_id:
+                        # Save locally for future use
+                        vendor = Vendor(
+                            id=vendor_id,
+                            realm_id=self.connection.realm_id,
+                            display_name=tx.payee
+                        )
+                        self.db.add(vendor)
+                        self.db.commit()
+                        entity_ref = {"value": vendor_id, "name": tx.payee}
+        
+        # Extract PaymentType from original if available (QBO sometimes requires it for updates)
+        payment_type = tx.raw_json.get("PaymentType") if tx.raw_json else None
+
         try:
             updated_purchase = await self.client.update_purchase(
                 purchase_id=tx.id,
                 category_id=tx.suggested_category_id,
                 category_name=tx.suggested_category_name,
-                sync_token=tx.sync_token
+                sync_token=tx.sync_token,
+                entity_ref=entity_ref,
+                payment_type=payment_type
             )
             
             new_sync_token = updated_purchase.get("SyncToken")
             if new_sync_token:
                 tx.sync_token = new_sync_token
             
+            # Update local payee if QBO returned something different (case normalize)
+            res_payee = updated_purchase.get("EntityRef", {}).get("name")
+            if res_payee:
+                tx.payee = res_payee
+
             print(f"✅ [Write-Back] Success! QBO Purchase {tx.id} updated")
             return updated_purchase
             

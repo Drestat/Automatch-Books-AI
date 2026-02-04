@@ -82,7 +82,7 @@ class QBOClient:
     async def query(self, query_str):
         return await self.request("GET", "query", params={'query': query_str})
 
-    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str):
+    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_ref: dict = None, payment_type: str = None):
         """
         Update a Purchase entity (Expense/Check) via Sparse Update.
         """
@@ -103,7 +103,14 @@ class QBOClient:
                 }
             ]
         }
-        print(f"📝 [QBOClient] Updating Purchase {purchase_id} -> {category_name}")
+        
+        if entity_ref:
+            update_payload["EntityRef"] = entity_ref
+            
+        if payment_type:
+            update_payload["PaymentType"] = payment_type
+
+        print(f"📝 [QBOClient] Updating Purchase {purchase_id} -> Cat: {category_name}, Payee: {entity_ref.get('name') if entity_ref else 'N/A'}, PayType: {payment_type}")
         result = await self.request("POST", "purchase", json_payload=update_payload)
         return result.get("Purchase", {})
 
@@ -136,6 +143,16 @@ class QBOClient:
         print(f"📝 [QBOClient] Creating vendor: {vendor_name}")
         result = await self.request("POST", "vendor", json_payload=payload)
         return result.get("Vendor", {})
+
+    async def get_vendor_by_name(self, vendor_name: str):
+        """Searches for a vendor by display name in QBO."""
+        # Escape single quotes in vendor_name for SQL-like query
+        safe_name = vendor_name.replace("'", "\\'")
+        query = f"SELECT * FROM Vendor WHERE DisplayName = '{safe_name}'"
+        print(f"🔍 [QBOClient] Searching for vendor: {vendor_name}")
+        result = await self.query(query)
+        vendors = result.get("QueryResponse", {}).get("Vendor", [])
+        return vendors[0] if vendors else None
 
     def revoke(self):
         try:

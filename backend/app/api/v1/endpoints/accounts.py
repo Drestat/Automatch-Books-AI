@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.api.v1.endpoints.qbo import get_db
-from app.models.qbo import BankAccount, Category, Tag, Transaction, QBOConnection
+from app.models.qbo import BankAccount, Category, Tag, Transaction, QBOConnection, Vendor
 from typing import List, Optional
 from pydantic import BaseModel
 import uuid
@@ -39,6 +39,13 @@ class CategorySchema(BaseModel):
     id: str
     name: str
     type: str
+
+    class Config:
+        from_attributes = True
+
+class VendorSchema(BaseModel):
+    id: str
+    display_name: str
 
     class Config:
         from_attributes = True
@@ -111,3 +118,10 @@ def get_categories(realm_id: str, db: Session = Depends(get_db)):
         Category.realm_id == realm_id,
         Category.type.in_(['Expense', 'Cost of Goods Sold', 'Other Expense'])
     ).order_by(Category.name).all()
+
+@router.get("/vendors", response_model=List[VendorSchema])
+def get_vendors(realm_id: str, db: Session = Depends(get_db)):
+    """Returns list of Vendors for Autocomplete"""
+    return db.query(Vendor).filter(
+        Vendor.realm_id == realm_id
+    ).order_by(Vendor.display_name).all()
