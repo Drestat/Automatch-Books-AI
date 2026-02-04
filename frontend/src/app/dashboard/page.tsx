@@ -23,6 +23,7 @@ import {
   ArrowDown
 } from 'lucide-react';
 import { AccountSelectorModal } from '@/components/AccountSelectorModal';
+import { TokenDepletedModal } from '@/components/TokenDepletedModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserButton } from "@clerk/nextjs";
 import { track } from '@/lib/analytics';
@@ -60,7 +61,9 @@ function DashboardContent() {
     reAnalyze,
     disconnect,
     excludeTransaction,
-    includeTransaction
+    includeTransaction,
+    showTokenModal,
+    setShowTokenModal
   } = useQBO();
 
   const [loading, setLoading] = useState(false); // Local loading for UI actions
@@ -229,6 +232,11 @@ function DashboardContent() {
             }
           }}
           realmId={localStorage.getItem('qbo_realm_id') || ''}
+        />
+
+        <TokenDepletedModal
+          isOpen={showTokenModal}
+          onClose={() => setShowTokenModal(false)}
         />
 
         <header className="pt-12 pb-8 px-6 md:px-12 max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8">

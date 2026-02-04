@@ -112,8 +112,24 @@ def analyze_user_transactions(realm_id: str, tx_id: str = None, db: Session = De
                 db.add(tx)
                 db.commit()
 
+        # Check Tokens synchronously BEFORE dispatching to Modal
+        from app.services.token_service import TokenService
+        token_service = TokenService(db)
+        
+        # Estimate cost (1 token per tx)
+        cost = 1
+        if not token_service.has_sufficient_tokens(connection.user_id, cost):
+            raise HTTPException(status_code=402, detail="Insufficient tokens. Please upgrade your plan.")
+
         from modal_app import process_ai_categorization
         process_ai_categorization.spawn(realm_id, tx_id=tx_id)
+        
+        # Deduct synchronously to update UI immediately? 
+        # Ideally the async task does it to ensure uniqueness, but doing it here prevents "free" spamming 
+        # while waiting for async. 
+        # Let's deduct here for the immediate endpoint usage (re-analyze).
+        token_service.deduct_tokens(connection.user_id, cost, reason=f"AI Analysis Request: {tx_id}")
+
         return {"message": f"AI categorization {'for ' + tx_id if tx_id else ''} triggered successfully"}
     except Exception as e:
         if tx_id:

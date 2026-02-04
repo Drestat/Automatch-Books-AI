@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from '@/hooks/useUser'; // Use custom hook
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/context/ToastContext';
 
@@ -86,7 +86,7 @@ export interface Category {
 }
 
 export const useQBO = () => {
-    const { user, isLoaded } = useUser();
+    const { user, isLoaded, refreshProfile } = useUser();
     const router = useRouter();
     const searchParams = useSearchParams();
     const { showToast } = useToast();
@@ -611,6 +611,11 @@ export const useQBO = () => {
         }
     };
 
+    const [showTokenModal, setShowTokenModal] = useState(false);
+
+
+    // ... (rest of hook) ...
+
     const reAnalyze = async (txId: string) => {
         const targetRealm = realmId;
         if (!targetRealm) return;
@@ -620,10 +625,22 @@ export const useQBO = () => {
             setTransactions(prev => prev.map(t => t.id === txId ? { ...t, status: 'unmatched', confidence: 0 } : t));
             showToast('Starting AI re-analysis...', 'info');
 
-            const response = await fetch(`${API_BASE_URL}/qbo/analyze?realm_id=${targetRealm}&tx_id=${txId}`);
+            const response = await fetch(`${API_BASE_URL}/transactions/analyze?realm_id=${targetRealm}&tx_id=${txId}`, { method: 'POST' });
+
+            if (response.status === 402) {
+                setShowTokenModal(true);
+                showToast('Insufficient tokens', 'error');
+                // Revert optimistic update
+                await fetchTransactions(targetRealm);
+                return;
+            }
+
             if (response.ok) {
                 showToast('AI analysis triggered', 'success');
                 track('re_analyze_start', { txId, realmId: targetRealm }, user?.id);
+
+                // Refresh tokens immediately
+                refreshProfile();
 
                 // Get active account IDs to preserve filter when refreshing
                 const activeAccountIds = accounts
@@ -636,8 +653,6 @@ export const useQBO = () => {
                 setTimeout(() => fetchTransactions(targetRealm, activeAccountIds.length > 0 ? activeAccountIds : undefined), 4000);
                 // 2nd attempt: 8s
                 setTimeout(() => fetchTransactions(targetRealm, activeAccountIds.length > 0 ? activeAccountIds : undefined), 8000);
-                // 3rd attempt: 12s
-                setTimeout(() => fetchTransactions(targetRealm, activeAccountIds.length > 0 ? activeAccountIds : undefined), 12000);
             } else {
                 showToast('Failed to trigger re-analysis', 'error');
             }
@@ -758,6 +773,8 @@ export const useQBO = () => {
         reAnalyze,
         excludeTransaction,
         includeTransaction,
-        disconnect
+        disconnect,
+        showTokenModal,
+        setShowTokenModal
     };
 };
