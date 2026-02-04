@@ -78,7 +78,7 @@ def health_check():
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.23.0",
+        "version": "3.23.1",
         "status": "ready"
     }
 
