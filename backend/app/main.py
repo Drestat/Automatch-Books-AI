@@ -72,13 +72,13 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.19.0"}
+    return {"status": "ok", "version": "3.19.6"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.19.0",
+        "version": "3.19.6",
         "status": "ready"
     }
 

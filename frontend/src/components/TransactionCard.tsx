@@ -75,7 +75,7 @@ export default function TransactionCard({
     onInclude
 }: TransactionCardProps) {
     const isExpense = tx.amount < 0;
-    const [showReasoning, setShowReasoning] = React.useState(true);
+    const [showReasoning, setShowReasoning] = React.useState(false);
     const [isUploading, setIsUploading] = React.useState(false);
     const [isEditingCategory, setIsEditingCategory] = React.useState(false);
     const [isAddingTag, setIsAddingTag] = React.useState(false);
@@ -99,7 +99,7 @@ export default function TransactionCard({
     };
 
     return (
-        <div className="glass-card overflow-hidden group">
+        <motion.div layout className="glass-card overflow-hidden group">
             <div className="p-6">
                 <div className="flex justify-between items-start mb-6">
                     <div className="flex gap-4">
@@ -199,7 +199,7 @@ export default function TransactionCard({
                             className="p-1 hover:bg-white/5 rounded-lg transition-colors text-brand/80 hover:text-brand ml-4 flex items-center gap-1 group/info"
                             title="Toggle AI Reasoning"
                         >
-                            <span className="text-[10px] font-bold opacity-0 group-hover/info:opacity-100 transition-opacity whitespace-nowrap">AI Insight</span>
+                            <span className="text-[10px] font-bold opacity-0 group-hover/info:opacity-100 transition-opacity whitespace-nowrap">Why?</span>
                             <Info size={16} />
                         </button>
                     </div>
@@ -210,7 +210,7 @@ export default function TransactionCard({
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                 className="overflow-hidden"
                             >
                                 <div className="mt-3 pt-3 border-t border-white/5 flex flex-col gap-3">
@@ -411,19 +411,29 @@ export default function TransactionCard({
 
                     {tx.is_excluded ? (
                         <motion.button
+                            whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(16, 185, 129, 0.2)" }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => onInclude && onInclude(tx.id)}
-                            className="px-4 h-12 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-400 font-bold text-xs transition-all"
+                            className="px-4 h-12 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 rounded-xl flex items-center justify-center text-emerald-400 font-bold text-xs transition-all relative overflow-hidden group/btn"
                         >
-                            Include
+                            <span className="relative z-10 flex items-center gap-2">
+                                <CheckCircle2 size={14} />
+                                Include
+                            </span>
+                            <div className="absolute inset-0 bg-emerald-500/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300" />
                         </motion.button>
                     ) : (
                         <motion.button
+                            whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(244, 63, 94, 0.2)" }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => onExclude && onExclude(tx.id)}
-                            className="px-4 h-12 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl flex items-center justify-center text-rose-400 font-bold text-xs transition-all"
+                            className="px-4 h-12 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/40 rounded-xl flex items-center justify-center text-rose-400 font-bold text-xs transition-all relative overflow-hidden group/btn"
                         >
-                            Exclude
+                            <span className="relative z-10 flex items-center gap-2">
+                                <SplitIcon size={14} className="rotate-45" />
+                                Exclude
+                            </span>
+                            <div className="absolute inset-0 bg-rose-500/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300" />
                         </motion.button>
                     )}
                 </div>
@@ -439,6 +449,6 @@ export default function TransactionCard({
                 )}
             </div>
             <div className="h-1 w-full bg-gradient-to-r from-transparent via-brand/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        </div>
+        </motion.div>
     );
 }

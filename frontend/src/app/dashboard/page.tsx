@@ -242,7 +242,7 @@ function DashboardContent() {
                 {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
               </span>
               <span className="px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] uppercase font-bold tracking-wider ml-2">
-                v3.19.0 (BE) | v3.19.3 (FE)
+                v3.19.6 (BE) | v3.19.4 (FE)
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight">
@@ -339,11 +339,14 @@ function DashboardContent() {
             <button
               onClick={handleBulkApprove}
               disabled={loading || transactions.filter(tx => tx.confidence > 0.9 && tx.status !== 'approved').length === 0}
-              className="btn-glass px-6 py-4 flex items-center gap-3 group border-brand/30 hover:bg-brand/10 disabled:opacity-50"
+              className="btn-glass px-6 py-4 flex items-center gap-3 group border-brand/30 hover:bg-brand/10 disabled:opacity-50 relative overflow-hidden"
             >
-              <ShieldCheck size={20} className="text-brand" />
-              <div className="text-left">
-                <span className="block text-[10px] uppercase tracking-wider font-bold text-brand">Bulk Action</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              <div className="relative z-10 p-2 rounded-full bg-brand/10 text-brand group-hover:bg-brand group-hover:text-white transition-colors">
+                <ShieldCheck size={20} />
+              </div>
+              <div className="text-left relative z-10">
+                <span className="block text-[10px] uppercase tracking-wider font-bold text-brand group-hover:text-brand-secondary transition-colors">Bulk Action</span>
                 <span className="text-xs font-bold text-white">Approve High Confidence</span>
               </div>
             </button>
