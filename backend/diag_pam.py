@@ -30,6 +30,7 @@ def find_pam():
             print(f"Is QBO Matched: {tx.is_qbo_matched}")
             print(f"AI Category: {tx.suggested_category_name} (ID: {tx.suggested_category_id})")
             print(f"SyncToken: {tx.sync_token}")
+            print(f"Tags: {tx.tags}")
             print(f"Confidence: {tx.confidence}")
             print(f"Raw Details: {json.dumps(tx.raw_json if tx.raw_json else {}, indent=2)}")
             print("="*50)

@@ -474,7 +474,8 @@ class TransactionService:
                 category_name=tx.suggested_category_name,
                 sync_token=tx.sync_token,
                 entity_ref=entity_ref,
-                payment_type=payment_type
+                payment_type=payment_type,
+                tags=tx.tags
             )
             
             new_sync_token = updated_purchase.get("SyncToken")

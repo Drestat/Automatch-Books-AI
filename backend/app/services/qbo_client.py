@@ -82,7 +82,7 @@ class QBOClient:
     async def query(self, query_str):
         return await self.request("GET", "query", params={'query': query_str})
 
-    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_ref: dict = None, payment_type: str = None):
+    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_ref: dict = None, payment_type: str = None, tags: list[str] = None):
         """
         Update a Purchase entity (Expense/Check) via Sparse Update.
         """
@@ -110,7 +110,13 @@ class QBOClient:
         if payment_type:
             update_payload["PaymentType"] = payment_type
 
-        print(f"📝 [QBOClient] Updating Purchase {purchase_id} -> Cat: {category_name}, Payee: {entity_ref.get('name') if entity_ref else 'N/A'}, PayType: {payment_type}")
+        # NOTE: QBO API v3 does NOT support native Tags (TagRef).
+        # Workaround: Include tags in the PrivateNote (Memo) so they are visible in QBO.
+        if tags:
+            tag_str = ", ".join([f"#{t}" for t in tags if t])
+            update_payload["PrivateNote"] = f"Tags: {tag_str}"
+
+        print(f"📝 [QBOClient] Updating Purchase {purchase_id} -> Cat: {category_name}, Payee: {entity_ref.get('name') if entity_ref else 'N/A'}, Tags mapped to Memo: {tags}")
         result = await self.request("POST", "purchase", json_payload=update_payload)
         return result.get("Purchase", {})
 
