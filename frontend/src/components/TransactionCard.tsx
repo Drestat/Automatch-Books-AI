@@ -81,6 +81,7 @@ export default function TransactionCard({
     const [isAddingTag, setIsAddingTag] = React.useState(false);
     const [isSyncing, setIsSyncing] = React.useState(false);
     const [newTag, setNewTag] = React.useState("");
+    const [isAnalyzing, setIsAnalyzing] = React.useState(false);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const handleAccept = async () => {
@@ -400,13 +401,29 @@ export default function TransactionCard({
                         <Edit2 size={18} />
                     </motion.button>
 
+                    const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+
+                    // ... (inside render)
+
                     <motion.button
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => onAnalyze && onAnalyze(tx.id)}
-                        className="w-12 h-12 bg-brand/10 hover:bg-brand/20 border border-brand/20 rounded-xl flex items-center justify-center text-brand transition-all"
+                        onClick={async () => {
+                            if (onAnalyze) {
+                                setIsAnalyzing(true);
+                                await onAnalyze(tx.id);
+                                setIsAnalyzing(false);
+                                // Optional: Auto-open reasoning if we could, but we don't know if it finished.
+                            }
+                        }}
+                        disabled={isAnalyzing}
+                        className={`w-12 h-12 ${isAnalyzing ? 'bg-brand/20 border-brand/30' : 'bg-brand/10 hover:bg-brand/20 border-brand/20'} border rounded-xl flex items-center justify-center text-brand transition-all`}
                         title="Re-analyze with AI (Deducts 1 Token)"
                     >
-                        <Sparkles size={18} />
+                        {isAnalyzing ? (
+                            <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                            <Sparkles size={18} />
+                        )}
                     </motion.button>
 
                     {tx.is_excluded ? (

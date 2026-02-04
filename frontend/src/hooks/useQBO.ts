@@ -649,10 +649,13 @@ export const useQBO = () => {
 
                 // Fetch fresh data with backoff polling to ensure background job finishes
                 // Preserve active account filter
-                // 1st attempt: 4s
-                setTimeout(() => fetchTransactions(targetRealm, activeAccountIds.length > 0 ? activeAccountIds : undefined), 4000);
-                // 2nd attempt: 8s
-                setTimeout(() => fetchTransactions(targetRealm, activeAccountIds.length > 0 ? activeAccountIds : undefined), 8000);
+                const poll = (delay: number) => setTimeout(() => fetchTransactions(targetRealm, activeAccountIds.length > 0 ? activeAccountIds : undefined), delay);
+
+                poll(4000);
+                poll(8000);
+                poll(12000); // Extended for cold starts
+                poll(16000);
+                poll(25000); // Final safety check
             } else {
                 showToast('Failed to trigger re-analysis', 'error');
             }
