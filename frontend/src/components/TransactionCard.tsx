@@ -15,6 +15,11 @@ interface Category {
     name: string;
 }
 
+interface Vendor {
+    id: string;
+    display_name: string;
+}
+
 interface Tag {
     id: string;
     name: string;
@@ -54,6 +59,7 @@ interface TransactionCardProps {
     onReceiptUpload?: (id: string, file: File) => void;
     availableCategories?: Category[];
     availableTags?: Tag[];
+    availableVendors?: Vendor[];
     onCategoryChange?: (txId: string, categoryId: string, categoryName: string) => void;
     onTagAdd?: (txId: string, tagName: string) => void;
     onTagRemove?: (txId: string, tagName: string) => void;
@@ -69,6 +75,7 @@ export default function TransactionCard({
     onReceiptUpload,
     availableCategories = [],
     availableTags = [],
+    availableVendors = [],
     onCategoryChange,
     onTagAdd,
     onTagRemove,
@@ -157,6 +164,7 @@ export default function TransactionCard({
                             >
                                 <input
                                     autoFocus
+                                    list={`vendors-${tx.id}`}
                                     className="bg-black border border-brand/50 rounded px-2 py-1 text-sm text-white focus:outline-none w-full"
                                     value={payeeInput}
                                     onChange={(e) => setPayeeInput(e.target.value)}
@@ -165,6 +173,11 @@ export default function TransactionCard({
                                         setIsEditingPayee(false);
                                     }}
                                 />
+                                <datalist id={`vendors-${tx.id}`}>
+                                    {availableVendors.map(v => (
+                                        <option key={v.id} value={v.display_name} />
+                                    ))}
+                                </datalist>
                             </form>
                         ) : (
                             <div className="flex items-center gap-2 group/edit cursor-pointer" onClick={() => {

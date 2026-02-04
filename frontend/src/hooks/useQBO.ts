@@ -82,6 +82,11 @@ export interface Tag {
     name: string;
 }
 
+export interface Vendor {
+    id: string;
+    display_name: string;
+}
+
 export interface Category {
     id: string;
     name: string;
@@ -102,6 +107,7 @@ export const useQBO = () => {
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [tags, setTags] = useState<Tag[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [vendors, setVendors] = useState<Vendor[]>([]);
     const [subscriptionStatus, setSubscriptionStatus] = useState<'active' | 'inactive' | 'free' | 'expired' | 'trial' | 'no_plan' | null>(null);
     const [daysRemaining, setDaysRemaining] = useState<number>(0);
 
@@ -200,6 +206,17 @@ export const useQBO = () => {
         }
     }, []);
 
+    const fetchVendors = useCallback(async (realm: string) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/accounts/vendors?realm_id=${realm}`);
+            if (response.ok) {
+                setVendors(await response.json());
+            }
+        } catch (error) {
+            console.error("Failed to fetch vendors", error);
+        }
+    }, []);
+
     // Effect 1: Handle URL Params (QBO Connections) - INDEPENDENT of User Loading
     // This ensures that even if Clerk is slow, we act on the redirect immediately.
     useEffect(() => {
@@ -255,8 +272,9 @@ export const useQBO = () => {
             // Don't fetch transactions here - will be triggered by accounts effect below
             fetchTags(storedRealm as string);
             fetchCategories(storedRealm as string);
+            fetchVendors(storedRealm as string);
         }
-    }, [fetchAccounts, fetchTags, fetchCategories]);
+    }, [fetchAccounts, fetchTags, fetchCategories, fetchVendors]);
 
     // Effect 4: Auto-filter transactions by active accounts
     useEffect(() => {
@@ -772,6 +790,7 @@ export const useQBO = () => {
         accounts,
         tags,
         categories,
+        vendors,
         fetchTransactions,
         updateTransaction,
         createTag,

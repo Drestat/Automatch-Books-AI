@@ -62,6 +62,7 @@ function DashboardContent() {
     disconnect,
     excludeTransaction,
     includeTransaction,
+    vendors,
     showTokenModal,
     setShowTokenModal
   } = useQBO();
@@ -257,7 +258,7 @@ function DashboardContent() {
               <span className={`text-xs font-bold tracking-[0.2em] ${isDemo ? 'text-amber-400' : 'text-brand'} uppercase`}>
                 {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
               </span>
-              v3.19.7 (BE) | v3.19.7 (FE)
+              v3.20.0 (BE) | v3.20.0 (FE)
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight">
               Financial <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Intelligence</span>
@@ -544,6 +545,7 @@ function DashboardContent() {
                         onPayeeChange={(txId, payee) => updateTransaction(txId, { payee })}
                         availableTags={tags}
                         availableCategories={categories}
+                        availableVendors={vendors}
                         onCategoryChange={(txId, catId, catName) => updateTransaction(txId, { suggested_category_id: catId, suggested_category_name: catName })}
                         onTagAdd={async (txId, tag) => {
                           const currentTags = tx.tags || [];
