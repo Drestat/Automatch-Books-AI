@@ -85,16 +85,23 @@ function DashboardContent() {
   // CORRECT STRATEGY: Use is_qbo_matched (which checks LinkedTxn in QBO)
   // A transaction is "Categorized" ONLY if QBO has accepted/matched it (LinkedTxn exists)
   // Everything else is "For Review", even if it has a suggested category
-  const toReviewTxs = transactions.filter(tx => {
+  // FILTERING LOGIC
+  // 1. Filter by Selected Accounts (if active)
+  const filteredTransactions = selectedAccounts.length > 0
+    ? transactions.filter(tx => tx.account_id && selectedAccounts.includes(tx.account_id))
+    : transactions;
+
+  // 2. Filter by Status (Review vs Matched vs Excluded)
+  const toReviewTxs = filteredTransactions.filter(tx => {
     return !tx.is_excluded && !tx.is_qbo_matched;
   });
 
-  const alreadyMatchedTxs = transactions.filter(tx =>
+  const alreadyMatchedTxs = filteredTransactions.filter(tx =>
     !tx.is_excluded &&
     tx.is_qbo_matched
   );
 
-  const excludedTxs = transactions.filter(tx => tx.is_excluded === true);
+  const excludedTxs = filteredTransactions.filter(tx => tx.is_excluded === true);
 
   const currentTabTransactions =
     activeTab === 'review' ? toReviewTxs :
@@ -110,6 +117,7 @@ function DashboardContent() {
     }
     return sortConfig.direction === 'asc' ? comparison : -comparison;
   });
+
 
   // Auto-open modal if connected but no accounts active (and not demo)
   useEffect(() => {
@@ -250,7 +258,7 @@ function DashboardContent() {
                 {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
               </span>
               <span className="px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] uppercase font-bold tracking-wider ml-2">
-                v3.19.6 (BE) | v3.19.4 (FE)
+                v3.19.6 (BE) | v3.19.6 (FE)
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight">

@@ -62,6 +62,8 @@ export interface Transaction {
     suggested_tags?: string[];
     transaction_type?: string;
     note?: string;
+    account_id?: string;
+    account_name?: string;
 }
 
 export interface Account {
