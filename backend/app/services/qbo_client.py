@@ -82,7 +82,7 @@ class QBOClient:
     async def query(self, query_str):
         return await self.request("GET", "query", params={'query': query_str})
 
-    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_ref: dict = None, payment_type: str = None, tags: list[str] = None):
+    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_ref: dict = None, payment_type: str = None, tags: list[str] = None, amount: float = None):
         """
         Update a Purchase entity (Expense/Check) via Sparse Update.
         """
@@ -103,6 +103,10 @@ class QBOClient:
                 }
             ]
         }
+
+        if amount is not None:
+            update_payload["TotalAmt"] = amount
+            update_payload["Line"][0]["Amount"] = amount
         
         if entity_ref:
             update_payload["EntityRef"] = entity_ref

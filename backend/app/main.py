@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.23.0 - TAG SYNC WORKAROUND (MEMO)
+# v3.23.1 - FIX AMOUNT RESET BUG + TAG SYNC
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.
@@ -72,7 +72,7 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.23.0"}
+    return {"status": "ok", "version": "3.23.1"}
 
 @app.get("/")
 def read_root():
