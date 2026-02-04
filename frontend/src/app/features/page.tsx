@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Footer from '@/components/Footer';
+import Navbar from '@/components/Navbar';
 import { motion } from 'framer-motion';
 import {
     Sparkles,
@@ -29,7 +30,8 @@ import {
 
 export default function FeaturesPage() {
     return (
-        <div className="min-h-screen bg-black text-white selection:bg-brand selection:text-white">
+        <div className="min-h-screen bg-black text-white selection:bg-brand selection:text-white pt-20">
+            <Navbar />
             <main className="py-24 px-6 md:px-12 max-w-7xl mx-auto">
 
                 {/* Hero section */}

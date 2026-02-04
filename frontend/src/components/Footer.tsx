@@ -11,7 +11,7 @@ export default function Footer() {
                 <div className="col-span-1 md:col-span-2">
                     <Link href="/" className="flex items-center gap-2 mb-6 group">
                         <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <Sparkles className="text-white" size={16} />
+                            <Sparkles className="text-white" size={16} aria-hidden="true" />
                         </div>
                         <span className="font-bold tracking-tight text-lg">AutoMatch Books AI</span>
                     </Link>

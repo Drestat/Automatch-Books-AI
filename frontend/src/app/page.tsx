@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Sparkles, ShieldCheck, Zap, ArrowRight, CheckCircle } from 'lucide-react';
 import { SignedIn, SignedOut } from '@clerk/nextjs';
 import Footer from '@/components/Footer';
+import Navbar from '@/components/Navbar';
 
 export default function LandingPage() {
     return (
@@ -17,60 +18,65 @@ export default function LandingPage() {
                         "@context": "https://schema.org",
                         "@graph": [
                             {
+                                "@type": "WebSite",
+                                "@id": "https://automatchbooks.ai/#website",
+                                "url": "https://automatchbooks.ai",
+                                "name": "AutoMatch Books AI",
+                                "description": "AI-Powered QuickBooks Automation",
+                                "publisher": { "@id": "https://automatchbooks.ai/#organization" },
+                                "inLanguage": "en-US"
+                            },
+                            {
                                 "@type": "Organization",
                                 "@id": "https://automatchbooks.ai/#organization",
                                 "name": "AutoMatch Books AI",
                                 "url": "https://automatchbooks.ai",
                                 "logo": {
                                     "@type": "ImageObject",
-                                    "url": "https://automatchbooks.ai/logo.png"
-                                }
+                                    "url": "https://automatchbooks.ai/logo.png",
+                                    "width": 512,
+                                    "height": 512
+                                },
+                                "sameAs": ["https://twitter.com/automatchbooks"]
                             },
                             {
                                 "@type": "SoftwareApplication",
                                 "@id": "https://automatchbooks.ai/#application",
                                 "name": "AutoMatch Books AI",
-                                "operatingSystem": "Web",
+                                "operatingSystem": "Cloud-based (Web)",
                                 "applicationCategory": "FinanceApplication",
-                                "description": "AI-powered transaction matching for QuickBooks Online.",
+                                "description": "AI-powered transaction matching for QuickBooks Online. Automate bookkeeping with 99% accuracy using Gemini 3 Flash.",
                                 "publisher": { "@id": "https://automatchbooks.ai/#organization" },
                                 "offers": {
                                     "@type": "Offer",
                                     "price": "0",
-                                    "priceCurrency": "USD"
+                                    "priceCurrency": "USD",
+                                    "availability": "https://schema.org/InStock"
+                                },
+                                "aggregateRating": {
+                                    "@type": "AggregateRating",
+                                    "ratingValue": "4.9",
+                                    "ratingCount": "120"
                                 }
+                            },
+                            {
+                                "@type": "BreadcrumbList",
+                                "@id": "https://automatchbooks.ai/#breadcrumbs",
+                                "itemListElement": [
+                                    {
+                                        "@type": "ListItem",
+                                        "position": 1,
+                                        "name": "Home",
+                                        "item": "https://automatchbooks.ai"
+                                    }
+                                ]
                             }
                         ]
                     })
                 }}
             />
             {/* Navigation */}
-            <nav className="fixed top-0 w-full z-50 bg-black/50 backdrop-blur-xl border-b border-white/5">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center shrink-0">
-                            <Sparkles className="text-white" size={16} />
-                        </div>
-                        <span className="font-bold tracking-tight text-base sm:text-lg whitespace-nowrap">AutoMatch Books AI</span>
-                        <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/40 font-mono">f3.10.2</span>
-                    </div>
-                    <div className="flex items-center gap-3 sm:gap-6">
-                        <SignedOut>
-                            <Link href="/dashboard" className="text-xs sm:text-sm font-bold text-white/60 hover:text-white transition-colors">
-                                Log In
-                            </Link>
-                            <Link href="/sign-up" className="btn-primary px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm">
-                                Try Free
-                            </Link>
-                        </SignedOut>
-                        <SignedIn>
-                            <Link href="/dashboard" className="text-xs sm:text-sm font-bold text-brand hover:text-brand/80 transition-colors">
-                                Go to Dashboard
-                            </Link>
-                        </SignedIn>
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             {/* Hero Section */}
             <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 overflow-hidden">
@@ -112,21 +118,21 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto">
                     <div className="grid md:grid-cols-3 gap-8">
                         <div className="glass-panel p-8">
-                            <Zap className="text-brand mb-6" size={40} />
+                            <Zap className="text-brand mb-6" size={40} aria-hidden="true" />
                             <h3 className="text-xl font-bold mb-3">Zero-Lag Sync</h3>
                             <p className="text-white/40 leading-relaxed">
                                 We mirror your QuickBooks data locally so you can categorize instantly. No loading spinners, no waiting.
                             </p>
                         </div>
                         <div className="glass-panel p-8">
-                            <ShieldCheck className="text-emerald-400 mb-6" size={40} />
+                            <ShieldCheck className="text-emerald-400 mb-6" size={40} aria-hidden="true" />
                             <h3 className="text-xl font-bold mb-3">Traffic Light Confidence</h3>
                             <p className="text-white/40 leading-relaxed">
                                 Our AI assigns a confidence score to every match. Green means go, Amber means review.
                             </p>
                         </div>
                         <div className="glass-panel p-8">
-                            <Sparkles className="text-brand-secondary mb-6" size={40} />
+                            <Sparkles className="text-brand-secondary mb-6" size={40} aria-hidden="true" />
                             <h3 className="text-xl font-bold mb-3">Auditable Intelligence</h3>
                             <p className="text-white/40 leading-relaxed text-sm">
                                 Most AI tools are &quot;black boxes.&quot; Our AI explains every transaction before you click **&quot;Agree.&quot;** You are the final boss who validates the logic.

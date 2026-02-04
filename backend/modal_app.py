@@ -21,6 +21,7 @@ image = (
         "sqlalchemy",
         "intuit-oauth",
         "requests",
+        "httpx",
         "google-generativeai",
         "stripe",
         "rapidfuzz",
@@ -87,7 +88,7 @@ def fastapi_app():
         return err_app
 
 @app.function(image=image, secrets=[secrets], timeout=600)
-def sync_user_data(realm_id: str):
+async def sync_user_data(realm_id: str):
     print(f"🔄 [Modal] Starting background sync for {realm_id}")
     import sys
     if "/root" not in sys.path:
@@ -105,7 +106,7 @@ def sync_user_data(realm_id: str):
             return
             
         service = TransactionService(db, connection)
-        service.sync_all()
+        await service.sync_all()
         print("✅ Sync complete")
         
         # CHAIN TO AI

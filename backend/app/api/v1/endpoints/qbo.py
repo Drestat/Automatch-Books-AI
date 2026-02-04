@@ -73,7 +73,7 @@ class AccountSelectionSchema(BaseModel):
     active_account_ids: List[str]
 
 @router.get("/accounts")
-def get_accounts(realm_id: str, db: Session = Depends(get_db)):
+async def get_accounts(realm_id: str, db: Session = Depends(get_db)):
     print(f"🔍 [get_accounts] Starting for realm_id: {realm_id}")
     
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
@@ -87,7 +87,7 @@ def get_accounts(realm_id: str, db: Session = Depends(get_db)):
     service = TransactionService(db, connection)
     try:
         print(f"🔄 [get_accounts] Starting sync_bank_accounts...")
-        service.sync_bank_accounts() # This syncs all without limit
+        await service.sync_bank_accounts() # This syncs all without limit
         print(f"✅ [get_accounts] sync_bank_accounts completed")
     except Exception as e:
         print(f"⚠️ [get_accounts] Sync failed: {e}")
@@ -120,7 +120,7 @@ def get_accounts(realm_id: str, db: Session = Depends(get_db)):
     }
 
 @router.post("/accounts/select")
-def update_account_selection(payload: AccountSelectionSchema, db: Session = Depends(get_db)):
+async def update_account_selection(payload: AccountSelectionSchema, db: Session = Depends(get_db)):
     realm_id = payload.realm_id
     selected_ids = payload.active_account_ids
     
@@ -147,12 +147,12 @@ def update_account_selection(payload: AccountSelectionSchema, db: Session = Depe
     
     # Trigger sync if changes made
     if updated_count > 0:
-        service.sync_transactions() # Will only pick active ones
+        await service.sync_transactions() # Will only pick active ones
         
     return {"status": "success", "message": f"Updated {updated_count} accounts"}
 
 @router.post("/accounts/preview")
-def preview_account_sync(payload: AccountSelectionSchema, db: Session = Depends(get_db)):
+async def preview_account_sync(payload: AccountSelectionSchema, db: Session = Depends(get_db)):
     realm_id = payload.realm_id
     selected_ids = payload.active_account_ids
     
@@ -160,19 +160,11 @@ def preview_account_sync(payload: AccountSelectionSchema, db: Session = Depends(
     if not connection:
          raise HTTPException(status_code=404, detail="QBO Connection not found")
 
-    client = AuthClient(
-        client_id=settings.QBO_CLIENT_ID,
-        client_secret=settings.QBO_CLIENT_SECRET,
-        redirect_uri=settings.QBO_REDIRECT_URI,
-        environment=settings.QBO_ENVIRONMENT,
-    )
-    # Refresh token if needed (simplified, usually done in QBOClient)
-    # We'll use the QBOClient service for convenience if possible, or manual 
+    # Refresh token if needed is handled by QBOClient
     from app.services.qbo_client import QBOClient
-    qbo_client = QBOClient(db, connection) # Handles refresh automatically
+    qbo_client = QBOClient(db, connection) 
 
     # Fetch Transactions (Mirroring sync logic)
-    # Fetch from multiple sources: Purchase, Deposit, CreditCardCredit
     total_count = 0
     matched_count = 0
     unmatched_count = 0
@@ -189,7 +181,7 @@ def preview_account_sync(payload: AccountSelectionSchema, db: Session = Depends(
     all_txs = []
     for q in queries:
         try:
-            res = qbo_client.query(q)
+            res = await qbo_client.query(q) # ASYNC await
             entity = q.split()[3]
             txs = res.get("QueryResponse", {}).get(entity, [])
             all_txs.extend(txs)
@@ -224,11 +216,6 @@ def preview_account_sync(payload: AccountSelectionSchema, db: Session = Depends(
         account_breakdown[acc_id] = account_breakdown.get(acc_id, 0) + 1
         
         # Determine Status
-        # QBO considers a transaction "Categorized" if:
-        # 1. It has a LinkedTxn (linked to bill/invoice), OR
-        # 2. It was manually categorized (TxnType = "54")
-        # NOTE: Line Description alone does NOT mean categorized!
-        
         has_linked_txn = len(p.get("LinkedTxn", [])) > 0
         
         # Check for manual categorization via TxnType

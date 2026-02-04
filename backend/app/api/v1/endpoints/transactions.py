@@ -73,23 +73,33 @@ def get_transactions(
     return txs
 
 @router.post("/sync")
-def sync_user_transactions(realm_id: str, db: Session = Depends(get_db)):
+async def sync_user_transactions(realm_id: str, db: Session = Depends(get_db)):
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
     if not connection:
         raise HTTPException(status_code=404, detail="QBO Connection not found")
     
     try:
-        from modal_app import sync_user_data
-        sync_user_data.spawn(realm_id)
-        return {"message": "Background sync triggered successfully"}
+        # Prefer Modal for heavy lifting if configured
+        try:
+            from modal_app import sync_user_data
+            # Modal spawn is sync (fire and forget hook), but we can await it if the client library supports it, 
+            # usually .spawn() is non-blocking or fast.
+            # If we want to force local async sync:
+            # raise ImportError 
+            sync_user_data.spawn(realm_id)
+            return {"message": "Background sync triggered successfully"}
+        except (ImportError, Exception):
+            # Fallback to local async sync
+            service = TransactionService(db, connection)
+            await service.sync_all()
+            return {"message": "Sync completed (local async fallback)"}
     except Exception as e:
-        # Fallback to synchronous sync if Modal is not configured or fails
-        service = TransactionService(db, connection)
-        service.sync_all()
-        return {"message": "Sync completed (synchronous fallback)", "error": str(e)}
+        return {"message": "Sync failed", "error": str(e)}
 
 @router.post("/analyze")
 def analyze_user_transactions(realm_id: str, tx_id: str = None, db: Session = Depends(get_db)):
+    # Keep analysis sync/threaded for now unless we refactor AnalysisService too.
+    # AnalysisService relies on AI/DB, usually blocking.
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
     if not connection:
         raise HTTPException(status_code=404, detail="QBO Connection not found")
@@ -141,14 +151,14 @@ def include_transaction(realm_id: str, tx_id: str, db: Session = Depends(get_db)
     return {"message": "Transaction included"}
 
 @router.post("/{tx_id}/approve")
-def approve_transaction(realm_id: str, tx_id: str, db: Session = Depends(get_db)):
+async def approve_transaction(realm_id: str, tx_id: str, db: Session = Depends(get_db)):
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
     if not connection:
         raise HTTPException(status_code=404, detail="QBO Connection not found")
     
     service = TransactionService(db, connection)
     try:
-        result = service.approve_transaction(tx_id)
+        result = await service.approve_transaction(tx_id)
         return {"message": "Transaction approved and synced to QBO", "result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -159,8 +169,6 @@ def update_transaction(realm_id: str, tx_id: str, update: TransactionUpdate, db:
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction not found")
     
-    # We update fields if they are explicitly sent (even empty strings or lists)
-    # But checks for None to respect partial updates
     if update.note is not None:
         tx.note = update.note
     if update.tags is not None:
@@ -168,7 +176,6 @@ def update_transaction(realm_id: str, tx_id: str, update: TransactionUpdate, db:
     if update.suggested_category_id is not None:
         tx.suggested_category_id = update.suggested_category_id
         tx.suggested_category_name = update.suggested_category_name or tx.suggested_category_name
-        # Reset approval status if category changes
         if tx.status == 'approved':
              tx.status = 'pending_approval'
         
@@ -182,11 +189,11 @@ def upload_receipt(
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
+    # Receipt upload remains sync/threaded for file IO
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
     if not connection:
         raise HTTPException(status_code=404, detail="QBO Connection not found")
     
-    # Save file locally
     upload_dir = "uploads"
     os.makedirs(upload_dir, exist_ok=True)
     file_path = os.path.join(upload_dir, f"{realm_id}_{file.filename}")
@@ -194,14 +201,12 @@ def upload_receipt(
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
-    # Process with AI (Serverless)
     from app.services.token_service import TokenService
     
     token_service = TokenService(db)
     receipt_cost = 5
     
     if not token_service.has_sufficient_tokens(connection.user_id, receipt_cost):
-        # Clean up file
         try:
             os.remove(file_path)
         except:
@@ -215,18 +220,15 @@ def upload_receipt(
     
     try:
         from modal_app import process_receipt_modal
-        # Execute remotely on Modal infrastructure
         result = process_receipt_modal.remote(realm_id, content, file.filename)
         
         if "error" in result:
              raise Exception(result["error"])
              
     except ImportError:
-        # Fallback for local dev without Modal
         print("⚠️ Modal not found, running locally")
         service = ReceiptService(db, realm_id)
         result_obj = service.process_receipt(content, file.filename)
-        # Manually serialize to match Modal output
         match = result_obj.get('match')
         result = {
             "extracted": result_obj.get('extracted'),
@@ -234,7 +236,6 @@ def upload_receipt(
         }
     except Exception as e:
         print(f"❌ Serverless Receipt Error: {e}")
-        # Fallback to local
         service = ReceiptService(db, realm_id)
         result_obj = service.process_receipt(content, file.filename)
         match = result_obj.get('match')
@@ -243,7 +244,6 @@ def upload_receipt(
             "match_id": match.id if match else None
         }
 
-    # If match found, update the transaction (Local DB update)
     match_id = result.get('match_id')
     extracted = result.get('extracted')
     
@@ -251,7 +251,7 @@ def upload_receipt(
     if match_id:
         match = db.query(Transaction).filter(Transaction.id == match_id).first()
         if match:
-            match.receipt_url = file_path # Local path (or S3 in future)
+            match.receipt_url = file_path 
             match.receipt_data = extracted
             db.add(match)
             db.commit()
@@ -264,11 +264,11 @@ def upload_receipt(
     }
 
 @router.post("/bulk-approve")
-def bulk_approve_transactions(realm_id: str, tx_ids: List[str], db: Session = Depends(get_db)):
+async def bulk_approve_transactions(realm_id: str, tx_ids: List[str], db: Session = Depends(get_db)):
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
     if not connection:
         raise HTTPException(status_code=404, detail="QBO Connection not found")
     
     service = TransactionService(db, connection)
-    results = service.bulk_approve(tx_ids)
+    results = await service.bulk_approve(tx_ids) # Now async
     return {"results": results}

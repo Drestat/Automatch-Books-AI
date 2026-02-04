@@ -58,7 +58,17 @@ Accounting should feel like a byproduct of doing business. This project isn't ju
   - Update minor version monthly (QBO releases monthly updates)
   - Use filters and max page size (1,000 records) to minimize API calls
 - **Rate Limiting**: Implement exponential backoff for 429 errors
-- **Security**: Encrypt access tokens before storage, use environment variables for credentials
+- **Security**: Encrypt access tokens before storage, use environmental variables for credentials
+
+#### Deep Matching & Categorization Strategy ("The Elegant Fix")
+Since QBO's "Bank Feed" (For Review) is API-inaccessible, we operate on the **Register Level**:
+1.  **Categorization (Confirm Match)**: Use **Sparse Updates** on `Purchase`/`JournalEntry` entities.
+    -   *Action*: Patch `AccountRef` from "Uncategorized" -> "Target Category".
+    -   *Result*: Instant update in QBO Register; auto-resolves Bank Feed match.
+2.  **Bill Matching**: Create `BillPayment` entities (Check/CreditCard) linking `Bill` to `BankAccount`.
+    -   *Result*: QBO natively detects the payment and "Greens" the match in the UI.
+3.  **Async Core**: Migrate `requests` to **`httpx`** for non-blocking I/O in FastAPI.
+    -   *Benefit*: High-throughput batch processing without stalling the serverless container.
 
 ### SaaS Route Structure
 - **Public (`/`)**: High-conversion Landing Page (Features, Pricing, Login).
@@ -113,7 +123,7 @@ graph TD
 
 ### Phase 3: Insights & Visibility (The Clarity)
 - [x] Analytics: Implement Recharts for spend analysis with fluid, responsive typography.
-- [x] SEO: Achieve 100/100 Lighthouse score while maintaining premium glassmorphism.
+- [x] **The Amplifier (SEO)**: Execute "Dominating the Algorithm" strategy (Schema, JSON-LD, Metadata, Semantics) to ensure 100/100 Lighthouse score.
 
 ### Phase 4: Architectural Cleanup (Maintenance)
 - [x] **Legacy Deprecation**: Remove/Migrate `sync_engine.py` and `navigation.py` from root.
@@ -167,9 +177,23 @@ graph TD
 - [x] **Hardcoded Prompts**: LLM prompts are buried in `sync_service.py`. Extract to `app/core/prompts.py`.
 - [x] **Type Safety**: Frontend has distinct `any` types that violate strict mode.
 - [x] **Performance**: `sync_service.py` does not use `requests.Session()` for connection pooling.
+- [x] **Async Core**: Migrated `QBOClient` and `TransactionService` to `httpx` + `async/await` for serverless concurrency (Deep Matching Engine).
 - [x] **Database Pooling**: Implemented `NullPool` in `app/db/session.py` for serverless compatibility (v3.18.0)
 
 ### Maintenance
 - [ ] **Refactor**: `SyncService` is becoming a "God Class". Logic for Receipts, Sync, and AI should fundamentally be separated.
 - [ ] **PgBouncer Deployment**: External connection pooler configured in code, needs cloud deployment (see `architecture/pgbouncer_setup.md`)
+
+## 6. QC Audit Findings (2026-02-03)
+### Critical (Must Fix)
+- [ ] **UI/UX**: Navigation Header is missing on `/pricing` and `/features` pages. Only visible on Landing Page.
+- [ ] **Auth**: Dashboard (`/dashboard`) is inaccessible for testing without a bypass or test account (Clerk in keyless dev mode).
+- [ ] **Config**: Live Environment is using Clerk Development Keys (console warning observed).
+- [ ] **Polish**: Version string (`f3.10.2`) is visible next to the logo on the landing page (likely debug artifact).
+- [ ] **E2E Testing**: No automated mechanism to bypass Clerk Auth for full user flow auditing.
+
+### Observations
+- **Public Pages**: Landing page, Pricing, and Features load correctly (except missing header).
+- **Backend**: API docs at `http://localhost:8000/docs` are accessible and healthy.
+
 

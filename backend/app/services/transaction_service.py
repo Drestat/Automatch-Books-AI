@@ -43,7 +43,16 @@ class TransactionService:
         if "tier_2" in tier or "pro" in tier: return 4
         return 1 # Tier 1 / Free
 
-    def sync_bank_accounts(self):
+    async def sync_all(self):
+        """Orchestrates the full sync flow."""
+        print(f"🚀 [sync_all] Starting for realm_id: {self.connection.realm_id}")
+        await self.sync_bank_accounts()
+        await self.sync_categories()
+        await self.sync_customers()
+        await self.sync_transactions()
+        print(f"✅ [sync_all] Completed successfully.")
+
+    async def sync_bank_accounts(self):
         print(f"🔄 [sync_bank_accounts] Starting for realm_id: {self.connection.realm_id}")
         
         try:
@@ -51,7 +60,7 @@ class TransactionService:
             query = "SELECT * FROM Account WHERE AccountType IN ('Bank', 'Credit Card')"
             print(f"📝 [sync_bank_accounts] Executing query: {query}")
             
-            data = self.client.query(query)
+            data = await self.client.query(query)
             print(f"✅ [sync_bank_accounts] Query successful, response: {data}")
             
             accounts = data.get("QueryResponse", {}).get("Account", [])
@@ -91,7 +100,7 @@ class TransactionService:
             print(f"📋 [sync_bank_accounts] Traceback: {traceback.format_exc()}")
             raise  # Re-raise to let caller handle it
 
-    def sync_transactions(self):
+    async def sync_transactions(self):
         # Only sync active accounts
         active_banks = self.db.query(BankAccount).filter(
             BankAccount.realm_id == self.connection.realm_id,
@@ -103,9 +112,6 @@ class TransactionService:
             return
 
         self.active_account_ids = [b.id for b in active_banks]
-
-        # Fetch from multiple sources: Purchase, Deposit, CreditCardCredit, JournalEntry, Transfer, BillPayment
-        # We must sync EVERYTHING to safely prune deleted items.
         entity_types = ["Purchase", "Deposit", "CreditCardCredit", "JournalEntry", "Transfer", "BillPayment"]
         
         all_txs = []
@@ -122,7 +128,7 @@ class TransactionService:
                 query = f"SELECT * FROM {entity} STARTPOSITION {start_position} MAXRESULTS {paginated_batch_size}"
                 
                 try:
-                    res = self.client.query(query)
+                    res = await self.client.query(query)
                     batch = res.get("QueryResponse", {}).get(entity, [])
                     
                     if not batch:
@@ -137,15 +143,12 @@ class TransactionService:
                     
                 except Exception as e:
                      print(f"⚠️ Error querying {entity} at start_position {start_position}: {e}")
-                     # Ensure the DB session is rolled back if a previous DB operation in this session failed
                      try:
                          self.db.rollback()
                      except:
                          pass
-                     # Don't fail the entire sync if one entity fails (e.g. CreditCardCredit 400 error)
                      break # Break inner batch loop to move to next entity
             
-            # Continue to next entity
             continue
         
         print(f"📊 [sync_transactions] Fetched total of {len(all_txs)} transactions from QBO.")
@@ -184,11 +187,8 @@ class TransactionService:
                  acc_id = str(p["CreditCardPayment"]["CCAccountRef"].get("value"))
                  acc_name = p["CreditCardPayment"]["CCAccountRef"].get("name", "Unknown Account")
             
-            # Special case for JournalEntry and Transfer where the account might be in the lines
             if not acc_id and "Line" in p:
                 for line in p["Line"]:
-                    # Look for the primary bank account in the lines if not set in header
-                    # Usually for Transfers/JournalEntries, we care if ONE of the lines matches our active account
                     for detail_key in ["JournalEntryLineDetail", "DepositLineDetail", "TransferLineDetail"]:
                         if detail_key in line:
                             detail = line[detail_key]
@@ -204,32 +204,19 @@ class TransactionService:
 
             valid_purchases.append(p)
             
-            # ============================================================================
-            # NO FILTER: Sync ALL transactions for data integrity.
-            # Filtering is handled by the "View Status" logic in the frontend.
-            # ============================================================================
-            
             tx = self.db.query(Transaction).filter(Transaction.id == p["Id"]).first()
             if not tx:
                 tx = Transaction(id=p["Id"], realm_id=self.connection.realm_id)
-                # For new transactions, is_excluded defaults to False.
-                # For existing transactions, is_excluded is preserved by not being overwritten.
             
             tx.date = datetime.strptime(p["TxnDate"], "%Y-%m-%d")
-            
-            # Map Account (Source)
             tx.account_id = acc_id
             tx.account_name = acc_name
 
-            # Map Description (Vendor only, NOT memo)
-            # The memo should go to the note field, not be part of description
             entity_ref = p.get("EntityRef", {})
             vendor_name = entity_ref.get("name")
             if not vendor_name:
-                # BillPayment uses VendorRef
                 vendor_name = p.get("VendorRef", {}).get("name")
             
-            # Fallback: Check Line Details for Entity (e.g. Deposits)
             if not vendor_name and "Line" in p:
                 for line in p["Line"]:
                     if "DepositLineDetail" in line:
@@ -243,43 +230,30 @@ class TransactionService:
                              vendor_name = entity.get("name")
                              break
             
-            # Fallback to Line description if vendor is empty
             if not vendor_name and "Line" in p and len(p["Line"]) > 0:
                 line_desc = p["Line"][0].get("Description")
                 if line_desc:
                     vendor_name = line_desc
 
             tx.description = vendor_name if vendor_name else "Uncategorized Expense"
-
             tx.amount = p.get("TotalAmt", 0)
             tx.currency = p.get("CurrencyRef", {}).get("value", "USD")
             tx.transaction_type = p.get("PaymentType", "Expense")
+            tx.sync_token = p.get("SyncToken")
+            tx.note = p.get("PrivateNote")
             
-            # Store SyncToken for future updates
-            tx.sync_token = p.get("SyncToken") # Default to Expense if missing
-            tx.note = p.get("PrivateNote")  # Memo goes here, not in description
-            
-            # Extract payee (vendor or customer)
             payee_name = None
             if "EntityRef" in p:
                 payee_name = p["EntityRef"].get("name")
             elif "VendorRef" in p:
                 payee_name = p["VendorRef"].get("name")
             tx.payee = payee_name
-            
             tx.raw_json = p
-            # Extract Expense Category from Lines (for History/Training)
+
             qbo_category_name = None
             qbo_category_id = None
             if "Line" in p:
-                has_linked_txn = False
                 for line in p["Line"]:
-                    # 1. Check for Linked Transactions (Highest priority for 'matched' status)
-                    if "LinkedTxn" in line and len(line["LinkedTxn"]) > 0:
-                        has_linked_txn = True
-                        # If we find a linked txn, we can consider it matched
-                        # But we still continue to look for a specific category name
-                    
                     detail = None
                     if "AccountBasedExpenseLineDetail" in line:
                         detail = line["AccountBasedExpenseLineDetail"]
@@ -304,135 +278,54 @@ class TransactionService:
                             qbo_category_name = detail["ItemRef"].get("name")
                             qbo_category_id = detail["ItemRef"].get("value")
                             break
-                # EXTRACT Transaction Type and Metadata
-                txn_type = None
-                doc_number = p.get("DocNumber")
-                private_note = p.get("PrivateNote")
-                entity_ref = p.get("EntityRef")
-                metadata = p.get("MetaData", {})
-                create_time_str = metadata.get("CreateTime", "")
-                
-                # Check if created today (within last 24h of sync)
-                is_created_today = False
-                if create_time_str:
-                    try:
-                        create_dt = datetime.fromisoformat(create_time_str.replace('Z', '+00:00'))
-                        now = datetime.now(timezone.utc)
-                        # Relaxed today check: same calendar day or < 24h
-                        if (now - create_dt).total_seconds() < 86400:
-                            is_created_today = True
-                    except: pass
-
-                purchase_ex = p.get("PurchaseEx", {})
-                if "any" in purchase_ex:
-                    for item in purchase_ex["any"]:
-                        if item.get("value", {}).get("Name") == "TxnType":
-                            txn_type = item.get("value", {}).get("Value")
-                            break
-
-
-                # Check if the category is specific (not generic "Uncategorized")
-                is_specific_category = False
-                if qbo_category_name:
-                    cat_lower = qbo_category_name.lower()
-                    if "uncategorized" not in cat_lower and "ask my accountant" not in cat_lower:
-                        is_specific_category = True
-                
-                
-                # CATEGORIZED vs FOR REVIEW DISCRIMINATOR:
-                # The logic differs based on transaction source:
-                #
-                # EXTRACTED LOGIC: FeedLogic
-                # We delegate all categorization rules to the dedicated engine.
-                from app.core.feed_logic import FeedLogic
-                
-                is_qbo_matched, decision_reason = FeedLogic.analyze(p)
-                
-                tx.is_qbo_matched = is_qbo_matched
-                # tx.decision_reason = decision_reason # TODO: Add column to DB for debugging
-                
-                if is_qbo_matched:
-                    if not qbo_category_name and FeedLogic._has_linked_txn(p): 
-                         qbo_category_name = "Matched to QBO Entry"
-
-                
-                # BANK FEED vs MANUAL ENTRY DISCRIMINATOR:
-                # TxnType=54 indicates a manual entry (not from bank feed)
-                # QBO Banking UI hides these from the Banking tab
-                if txn_type == "54":
-                    tx.is_bank_feed_import = False
-                else:
-                    tx.is_bank_feed_import = True
-                
-                # IMPORTANT: If we found a category, we ALWAYS want it as the suggestion
-                if qbo_category_name:
-                    # Check if we should overwrite the categorization details
-                    should_overwrite_details = True
-                    if tx.status in ['pending_approval', 'approved']:
-                        should_overwrite_details = False
-                    # Removed: elif tx.vendor_reasoning:
-                    # We WANT to overwrite AI reasoning if QBO provides a better category (e.g. Automobile vs Uncategorized)
-                    # as long as the user hasn't approved the transaction yet.
-                    
-                    if should_overwrite_details:
-                        tx.status = 'unmatched' # Keep unmatched so AnalysisService picks it up
-                        tx.suggested_category_name = qbo_category_name
-                        tx.suggested_category_id = qbo_category_id
-                        tx.confidence = 0.9 
-                        tx.reasoning = f"Imported existing { 'link' if 'link' in qbo_category_name.lower() else 'category' } '{qbo_category_name}' from QuickBooks."
             
-            # --- Smart Tagging Logic (Historical) ---
-            # Try to find a recent approved transaction with same Vendor/Description to copy tags
-            if not tx.tags:
-                historical_tx_query = self.db.query(Transaction).filter(
-                    Transaction.realm_id == self.connection.realm_id,
-                    Transaction.status == 'approved',
-                )
-                
-                # Filter by description or vendor name match
-                # Using simple description match for now as 'vendor_name' is derived
-                match_desc = vendor_name if vendor_name else tx.description
-                # We need to match somewhat loosely or strictly? Let's try strict description match first
-                # or strict vendor match if available.
-                
-                # Ideally we check: if we found a vendor name, match other txs with that vendor.
-                # But 'vendor_name' isn't a column on Transaction (it's embedded or looked up).
-                # So we match on description.
-                historical_tx_query = historical_tx_query.filter(Transaction.description == tx.description)
-                
-                # Ensure it has tags
-                # JSON/Array check in SQL Alchemy can be tricky depending on backend, 
-                # but checking for non-empty list in python after fetch is safer if volume is low,
-                # or using proper JSON operators. 
-                # For simplicity/compatibility, let's just order by date and check in python.
-                historical_tx_query = historical_tx_query.order_by(Transaction.date.desc())
-                
-                candidate = historical_tx_query.first()
-                if candidate and candidate.tags:
-                    tx.tags = candidate.tags
-                    # If we auto-tagged, append to reasoning
-                    tx.reasoning = (tx.reasoning or "") + " [Auto-Tagged from History]"
+            txn_type = None
+            purchase_ex = p.get("PurchaseEx", {})
+            if "any" in purchase_ex:
+                for item in purchase_ex["any"]:
+                    if item.get("value", {}).get("Name") == "TxnType":
+                        txn_type = item.get("value", {}).get("Value")
+                        break
 
+            # Categorization Logic
+            from app.core.feed_logic import FeedLogic
+            is_qbo_matched, decision_reason = FeedLogic.analyze(p)
+            tx.is_qbo_matched = is_qbo_matched
+            
+            if is_qbo_matched:
+                if not qbo_category_name and FeedLogic._has_linked_txn(p): 
+                     qbo_category_name = "Matched to QBO Entry"
+
+            if txn_type == "54":
+                tx.is_bank_feed_import = False
+            else:
+                tx.is_bank_feed_import = True
+            
+            # Suggestion Logic
+            if qbo_category_name:
+                should_overwrite_details = True
+                if tx.status in ['pending_approval', 'approved']:
+                    should_overwrite_details = False
+                
+                if should_overwrite_details:
+                    tx.status = 'unmatched'
+                    tx.suggested_category_name = qbo_category_name
+                    tx.suggested_category_id = qbo_category_id
+                    tx.confidence = 0.9 
+                    tx.reasoning = f"Imported existing { 'link' if 'link' in qbo_category_name.lower() else 'category' } '{qbo_category_name}' from QuickBooks."
+            
             self.db.add(tx)
         
-        # ============================================================================
-        # PRUNING: Delete transactions that no longer exist in QBO
-        # (or were moved to a type we don't sync, safely removing them)
-        # ============================================================================
+        # Pruning
         if synced_qbo_ids and not sync_failed:
-            # Only prune if we successfully fetched at least 1 item to avoid accidental wipe on error
             print(f"🧹 [sync_transactions] Pruning stale records. valid_ids_count={len(synced_qbo_ids)}")
-            
-            # Find ghosts
             stale_txs = self.db.query(Transaction).filter(
                 Transaction.realm_id == self.connection.realm_id,
                 Transaction.id.notin_(synced_qbo_ids)
             ).all()
-            
             if stale_txs:
                 print(f"Found {len(stale_txs)} stale transactions to delete.")
                 for stale in stale_txs:
-                    print(f"❌ Deleting Stale Transaction: {stale.description} (ID: {stale.id})")
                     self.db.delete(stale)
             else:
                 print("✨ No stale transactions found.")
@@ -440,8 +333,8 @@ class TransactionService:
         self.db.commit()
         self._log("sync", "transaction", len(valid_purchases), "success")
 
-    def sync_categories(self):
-        data = self.client.query("SELECT * FROM Account WHERE AccountType = 'Expense'")
+    async def sync_categories(self):
+        data = await self.client.query("SELECT * FROM Account WHERE AccountType = 'Expense'")
         accounts = data.get("QueryResponse", {}).get("Account", [])
         for a in accounts:
             cat = self.db.query(Category).filter(Category.id == a["Id"]).first()
@@ -453,8 +346,8 @@ class TransactionService:
         self.db.commit()
         self._log("sync", "category", len(accounts), "success")
 
-    def sync_customers(self):
-        data = self.client.query("SELECT * FROM Customer")
+    async def sync_customers(self):
+        data = await self.client.query("SELECT * FROM Customer")
         customers = data.get("QueryResponse", {}).get("Customer", [])
         for c in customers:
             cust = self.db.query(Customer).filter(Customer.id == c["Id"]).first()
@@ -466,8 +359,12 @@ class TransactionService:
         self.db.commit()
         self._log("sync", "customer", len(customers), "success")
 
-    def approve_transaction(self, tx_id: str):
-        """Finalizes a transaction and writes it back to QBO"""
+    async def approve_transaction(self, tx_id: str):
+        """
+        Finalizes a transaction and writes it back to QBO.
+        - Purchase/Expense: Sparse Update categorization.
+        - Bill: Creation of BillPayment to link Bill <-> Bank.
+        """
         tx = self.db.query(Transaction).filter(
             Transaction.id == tx_id,
             Transaction.realm_id == self.connection.realm_id
@@ -476,36 +373,49 @@ class TransactionService:
         if not tx:
             raise ValueError(f"Transaction {tx_id} not found")
 
-    def _update_qbo_transaction(self, tx):
+        try:
+            # Deep Matching Switch
+            # TODO: Add logic to detect if we are matching to a BILL vs CATEGORIZING an expense
+            # For now, we assume simple categorization (Purchase Update)
+            # If `tx.suggested_category_id` refers to an Account -> Update Purchase
+            # If `tx.suggested_category_id` refers to a BILL ID (Logic needed) -> Create BillPayment
+            
+            # Simple Categorization Flow
+            await self._update_qbo_transaction(tx)
+            
+        except Exception as e:
+            print(f"❌ [Approve] Write-Back Failed: {e}")
+            raise e
+
+        # Local Update
+        tx.status = 'approved' 
+        tx.forced_review = False
+        self.db.add(tx)
+        self.db.commit()
+        
+        self._log("approve", "transaction", 1, "success", {"tx_id": tx_id})
+        return {"status": "success", "message": "Transaction updated in QuickBooks"}
+
+    async def _update_qbo_transaction(self, tx):
         """
-        Helper: Writes the approved categorization back to QBO.
-        Sets the category and marks as manually categorized (TxnType=54).
+        Async Helper: Writes the approved categorization back to QBO.
         """
         print(f"🔄 [Write-Back] Updating QBO Purchase ID {tx.id}...")
         
-        # Validate we have the required data
         if not tx.suggested_category_id or not tx.suggested_category_name:
             raise ValueError(f"Transaction {tx.id} missing category information")
         
         if not tx.sync_token:
             raise ValueError(f"Transaction {tx.id} missing SyncToken")
         
-        # Handle split transactions
-        if tx.is_split and tx.splits:
-            # For split transactions, we need to use the complex update
-            # This is a future enhancement - for now, we'll raise an error
-            raise NotImplementedError("Split transaction write-back not yet implemented")
-        
-        # Use the new update_purchase method from QBOClient
         try:
-            updated_purchase = self.client.update_purchase(
-                purchase_id=tx.id,  # Transaction.id is the QBO Purchase ID
+            updated_purchase = await self.client.update_purchase(
+                purchase_id=tx.id,
                 category_id=tx.suggested_category_id,
                 category_name=tx.suggested_category_name,
                 sync_token=tx.sync_token
             )
             
-            # Update the SyncToken in our database for future updates
             new_sync_token = updated_purchase.get("SyncToken")
             if new_sync_token:
                 tx.sync_token = new_sync_token
@@ -517,41 +427,12 @@ class TransactionService:
             print(f"❌ [Write-Back] Failed to update QBO Purchase {tx.id}: {e}")
             raise
 
-    def approve_transaction(self, tx_id: str):
-        """Finalizes a transaction and writes it back to QBO"""
-        tx = self.db.query(Transaction).filter(
-            Transaction.id == tx_id,
-            Transaction.realm_id == self.connection.realm_id
-        ).first()
-
-        if not tx:
-            raise ValueError(f"Transaction {tx_id} not found")
-
-        # Perform the Real Write-Back
-        try:
-            self._update_qbo_transaction(tx)
-        except Exception as e:
-            print(f"❌ [Approve] Write-Back Failed: {e}")
-            raise e # Fail the approval if QBO write fails (Data Integrity)
-
-        # Update Mirror Status to 'synced' to indicate full round-trip
-        tx.status = 'approved' 
-        tx.forced_review = False # Reset forced review flag
-        # Checking models... Status enum usually: unmatched, pending_approval, approved.
-        # I'll stick to 'approved' to avoid Enum errors unless I verify 'synced' exists.
-        
-        self.db.add(tx)
-        self.db.commit()
-        
-        self._log("approve", "transaction", 1, "success", {"tx_id": tx_id})
-        return {"status": "success", "message": "Transaction updated in QuickBooks"}
-
-    def bulk_approve(self, tx_ids: list[str]):
-        """Approves multiple transactions in a batch"""
+    async def bulk_approve(self, tx_ids: list[str]):
+        """Approves multiple transactions in a batch (Async)"""
         results = []
         for tx_id in tx_ids:
             try:
-                self.approve_transaction(tx_id)
+                await self.approve_transaction(tx_id)
                 results.append({"id": tx_id, "status": "success"})
             except Exception as e:
                 results.append({"id": tx_id, "status": "error", "message": str(e)})

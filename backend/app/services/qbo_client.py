@@ -1,5 +1,5 @@
-import requests
-import time
+import httpx
+import asyncio
 from sqlalchemy.orm import Session
 from app.models.qbo import QBOConnection
 from app.core.config import settings
@@ -9,6 +9,7 @@ class QBOClient:
     def __init__(self, db: Session, qbo_connection: QBOConnection):
         self.db = db
         self.connection = qbo_connection
+        # We keep AuthClient for token management, even if we use httpx for requests
         self.auth_client = AuthClient(
             client_id=settings.QBO_CLIENT_ID,
             client_secret=settings.QBO_CLIENT_SECRET,
@@ -19,6 +20,9 @@ class QBOClient:
         )
 
     def _refresh_access_token(self):
+        # AuthClient is synchronous. In a rigorous async app, we might wrap this 
+        # or use an async-compatible auth library. usage: blocking for now.
+        print("🔄 [QBOClient] Refreshing Access Token...")
         self.auth_client.refresh()
         self.connection.access_token = self.auth_client.access_token
         self.connection.refresh_token = self.auth_client.refresh_token
@@ -30,11 +34,12 @@ class QBOClient:
         base_url = "https://sandbox-quickbooks.api.intuit.com" if settings.QBO_ENVIRONMENT == "sandbox" else "https://quickbooks.api.intuit.com"
         return f"{base_url}/v3/company/{self.connection.realm_id}/{endpoint}"
 
-    def request(self, method: str, endpoint: str, params: dict = None, json_payload: dict = None):
+    async def request(self, method: str, endpoint: str, params: dict = None, json_payload: dict = None):
         """
-        Unified QBO request handler with:
+        Async Unified QBO request handler with:
         - Auto-refresh for 401 Unauthorized
         - Exponential backoff for 429 Rate Limits
+        - httpx.AsyncClient for non-blocking I/O
         """
         url = self._get_api_url(endpoint)
         headers = {
@@ -46,53 +51,48 @@ class QBOClient:
         max_retries = 3
         backoff_factor = 2
         
-        for attempt in range(max_retries):
-            # Using basic requests as pooling was reverted
-            res = requests.request(method, url, headers=headers, params=params, json=json_payload)
-            
-            if res.status_code == 401:
-                token = self._refresh_access_token()
-                headers['Authorization'] = f'Bearer {token}'
-                continue # Retry with new token
-            
-            if res.status_code == 429:
-                if attempt < max_retries - 1:
-                    wait_time = backoff_factor ** attempt
-                    print(f"⚠️ QBO Rate Limit (429). Retrying in {wait_time}s...")
-                    time.sleep(wait_time)
-                    continue
-            
-            res.raise_for_status()
-            return res.json()
+        async with httpx.AsyncClient() as client:
+            for attempt in range(max_retries):
+                try:
+                    res = await client.request(method, url, headers=headers, params=params, json=json_payload)
+                    
+                    if res.status_code == 401:
+                        # Refresh logic (blocking DB write, but acceptable for rare auth refresh)
+                        token = self._refresh_access_token() 
+                        headers['Authorization'] = f'Bearer {token}'
+                        continue 
+                    
+                    if res.status_code == 429:
+                        if attempt < max_retries - 1:
+                            wait_time = backoff_factor ** attempt
+                            print(f"⚠️ QBO Rate Limit (429). Retrying in {wait_time}s...")
+                            await asyncio.sleep(wait_time)
+                            continue
+                    
+                    res.raise_for_status()
+                    return res.json()
+                    
+                except httpx.RequestError as e:
+                    print(f"❌ [QBOClient] Network Error: {e}")
+                    raise
+                except httpx.HTTPStatusError as e:
+                    print(f"❌ [QBOClient] HTTP Error: {e.response.text}")
+                    raise
 
-    def query(self, query_str):
-        return self.request("GET", "query", params={'query': query_str})
+    async def query(self, query_str):
+        return await self.request("GET", "query", params={'query': query_str})
 
-    def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str):
+    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str):
         """
-        Update a Purchase entity in QBO to set the category and mark as manually categorized.
-        
-        Args:
-            purchase_id: The QBO Purchase ID
-            category_id: The QBO Account ID for the category
-            category_name: The name of the category (for reference)
-            sync_token: The current SyncToken for optimistic locking
-            
-        Returns:
-            dict: The updated Purchase object from QBO
-            
-        Raises:
-            Exception: If the update fails
+        Update a Purchase entity (Expense/Check) via Sparse Update.
         """
-        # Construct sparse update payload
-        # We only need to update the Line array and PurchaseEx
         update_payload = {
             "Id": purchase_id,
             "SyncToken": sync_token,
             "sparse": True,
             "Line": [
                 {
-                    "Id": "1",  # Bank transactions typically have a single line with Id=1
+                    "Id": "1", 
                     "DetailType": "AccountBasedExpenseLineDetail",
                     "AccountBasedExpenseLineDetail": {
                         "AccountRef": {
@@ -103,48 +103,44 @@ class QBOClient:
                 }
             ]
         }
-        
-        print(f"📝 [QBOClient] Updating Purchase {purchase_id} with category {category_name} (ID: {category_id})")
-        
-        # Make the update request
-        result = self.request("POST", "purchase", json_payload=update_payload)
-        
-        print(f"✅ [QBOClient] Purchase {purchase_id} updated successfully")
+        print(f"📝 [QBOClient] Updating Purchase {purchase_id} -> {category_name}")
+        result = await self.request("POST", "purchase", json_payload=update_payload)
         return result.get("Purchase", {})
 
-    def create_vendor(self, vendor_name: str):
+    async def create_bill_payment(self, bill_id: str, bank_account_id: str, amount: float, date: str):
         """
-        Create a new vendor in QuickBooks.
-        
-        Args:
-            vendor_name: The display name for the new vendor
-            
-        Returns:
-            dict: The created Vendor object from QBO
-            
-        Raises:
-            Exception: If the creation fails
+        Create a BillPayment (Check) to link a Bill to a bank withdrawal.
+        This confirms the match in QBO.
         """
         payload = {
-            "DisplayName": vendor_name
+            "TxnDate": date,
+            "PayType": "Check", 
+            "CheckPayment": {
+                "BankAccountRef": {"value": bank_account_id}
+            },
+            "Line": [
+                {
+                    "Amount": amount,
+                    "LinkedTxn": [
+                         {"TxnId": bill_id, "TxnType": "Bill"}
+                    ]
+                }
+            ]
         }
-        
+        print(f"📝 [QBOClient] Creating BillPayment for Bill {bill_id}")
+        result = await self.request("POST", "billpayment", json_payload=payload)
+        return result.get("BillPayment", {})
+
+    async def create_vendor(self, vendor_name: str):
+        payload = {"DisplayName": vendor_name}
         print(f"📝 [QBOClient] Creating vendor: {vendor_name}")
-        
-        result = self.request("POST", "vendor", json_payload=payload)
-        
-        print(f"✅ [QBOClient] Vendor '{vendor_name}' created successfully")
+        result = await self.request("POST", "vendor", json_payload=payload)
         return result.get("Vendor", {})
 
     def revoke(self):
-        """
-        Revoke the refresh token on the Intuit side to terminate the connection.
-        """
         try:
-            print(f"🔌 [QBOClient] Revoking token for realm_id: {self.connection.realm_id}")
+            print(f"🔌 [QBOClient] Revoking token...")
             self.auth_client.revoke(token=self.connection.refresh_token)
-            print(f"✅ [QBOClient] Token revoked successfully.")
             return True
-        except Exception as e:
-            print(f"⚠️ [QBOClient] Revocation failed or already revoked: {e}")
+        except Exception:
             return False

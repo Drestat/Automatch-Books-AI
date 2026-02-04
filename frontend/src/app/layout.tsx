@@ -12,10 +12,27 @@ const jost = Jost({
 });
 
 export const metadata: Metadata = {
-  title: "AutoMatch Books AI | AI-Powered QuickBooks Automation",
+  title: {
+    template: '%s | AutoMatch Books AI',
+    default: 'AutoMatch Books AI | AI-Powered QuickBooks Automation',
+  },
   description: "Seamlessly match and sync your bank transactions with QuickBooks Online using Gemini 3 Flash. Next-generation financial intelligence for modern businesses.",
-  keywords: ["QuickBooks", "Bank Transactions", "AI Matching", "AutoMatch Books AI", "Financial Automation", "Gemini 3 Flash"],
+  applicationName: 'AutoMatch Books AI',
+  generator: 'Next.js',
+  referrer: 'origin-when-cross-origin',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  keywords: ["QuickBooks", "Bank Transactions", "AI Matching", "AutoMatch Books AI", "Financial Automation", "Gemini 3 Flash", "Bookkeeping AI", "QuickBooks Online Sync"],
   authors: [{ name: "Andres" }],
+  creator: 'Andres',
+  publisher: 'AutoMatch Books AI',
+  metadataBase: new URL("https://automatchbooks.ai"),
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: "AutoMatch Books AI | AI-Powered QuickBooks Automation",
     description: "Seamlessly match and sync your bank transactions with QuickBooks Online using Gemini 3 Flash.",
@@ -37,10 +54,18 @@ export const metadata: Metadata = {
     title: "AutoMatch Books AI | AI-Powered QuickBooks Automation",
     description: "AI-powered transaction matching for QuickBooks Online.",
     images: ["/og-image.png"],
+    creator: '@automatchbooks',
   },
-  metadataBase: new URL("https://automatchbooks.ai"),
-  alternates: {
-    canonical: '/',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
   icons: {
     icon: '/icon.png',
