@@ -1,0 +1,226 @@
+ID    | Date       | Description                    | Amount     | Type  | Clr   | Matched | Review
+----------------------------------------------------------------------------------------------------
+--- Raw JSON for Pam Seitz (ID: 127) ---
+{
+  "AccountRef": {
+    "value": "35",
+    "name": "Checking"
+  },
+  "PaymentType": "Cash",
+  "EntityRef": {
+    "value": "47",
+    "name": "Pam Seitz",
+    "type": "Vendor"
+  },
+  "TotalAmt": 75.0,
+  "PurchaseEx": {
+    "any": [
+      {
+        "name": "{http://schema.intuit.com/finance/v3}NameValue",
+        "declaredType": "com.intuit.schema.finance.v3.NameValue",
+        "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+        "value": {
+          "Name": "TxnType",
+          "Value": "54"
+        },
+        "nil": false,
+        "globalScope": true,
+        "typeSubstituted": false
+      }
+    ]
+  },
+  "domain": "QBO",
+  "sparse": false,
+  "Id": "127",
+  "SyncToken": "0",
+  "MetaData": {
+    "CreateTime": "2026-01-01T13:11:56-08:00",
+    "LastUpdatedTime": "2026-01-01T13:11:56-08:00"
+  },
+  "DocNumber": "76",
+  "TxnDate": "2026-01-01",
+  "CurrencyRef": {
+    "value": "USD",
+    "name": "United States Dollar"
+  },
+  "Line": [
+    {
+      "Id": "1",
+      "Description": "Counsel",
+      "Amount": 75.0,
+      "DetailType": "AccountBasedExpenseLineDetail",
+      "AccountBasedExpenseLineDetail": {
+        "AccountRef": {
+          "value": "12",
+          "name": "Legal & Professional Fees"
+        },
+        "BillableStatus": "NotBillable",
+        "TaxCodeRef": {
+          "value": "NON"
+        }
+      },
+      "CustomExtensions": []
+    }
+  ]
+}
+--------------------------------------------------
+--- Raw JSON for Books by Bessie (ID: 146) ---
+{
+  "DepositToAccountRef": {
+    "value": "35",
+    "name": "Checking"
+  },
+  "TotalAmt": 55.0,
+  "domain": "QBO",
+  "sparse": false,
+  "Id": "146",
+  "SyncToken": "0",
+  "MetaData": {
+    "CreateTime": "2026-02-02T03:19:30-08:00",
+    "LastUpdatedTime": "2026-02-02T03:19:30-08:00"
+  },
+  "TxnDate": "2026-02-26",
+  "CurrencyRef": {
+    "value": "USD",
+    "name": "United States Dollar"
+  },
+  "PrivateNote": "Sold to betty.",
+  "Line": [
+    {
+      "Id": "1",
+      "LineNum": 1,
+      "Description": "Sold to betty.",
+      "Amount": 55.0,
+      "DetailType": "DepositLineDetail",
+      "DepositLineDetail": {
+        "Entity": {
+          "value": "30",
+          "name": "Books by Bessie",
+          "type": "VENDOR"
+        },
+        "AccountRef": {
+          "value": "79",
+          "name": "Sales of Product Income"
+        }
+      },
+      "CustomExtensions": []
+    }
+  ],
+  "TxnTaxDetail": {}
+}
+--------------------------------------------------
+--- Raw JSON for Books by Bessie (ID: 37) ---
+{
+  "VendorRef": {
+    "value": "30",
+    "name": "Books by Bessie"
+  },
+  "PayType": "Check",
+  "CheckPayment": {
+    "BankAccountRef": {
+      "value": "35",
+      "name": "Checking"
+    },
+    "PrintStatus": "NotSet"
+  },
+  "TotalAmt": 75.0,
+  "domain": "QBO",
+  "sparse": false,
+  "Id": "37",
+  "SyncToken": "0",
+  "MetaData": {
+    "CreateTime": "2025-12-30T11:13:46-08:00",
+    "LastUpdatedTime": "2025-12-30T11:13:46-08:00"
+  },
+  "DocNumber": "3",
+  "TxnDate": "2025-12-30",
+  "CurrencyRef": {
+    "value": "USD",
+    "name": "United States Dollar"
+  },
+  "Line": [
+    {
+      "Amount": 75.0,
+      "LinkedTxn": [
+        {
+          "TxnId": "18",
+          "TxnType": "Bill"
+        }
+      ]
+    }
+  ]
+}
+--------------------------------------------------
+--- Raw JSON for Books by Bessie (ID: 109) ---
+{
+  "AccountRef": {
+    "value": "35",
+    "name": "Checking"
+  },
+  "PaymentType": "Check",
+  "EntityRef": {
+    "value": "30",
+    "name": "Books by Bessie",
+    "type": "Vendor"
+  },
+  "RemitToAddr": {
+    "Id": "31",
+    "Line1": "15 Main St.",
+    "City": "Palo Alto",
+    "CountrySubDivisionCode": "CA",
+    "PostalCode": "94303",
+    "Lat": "37.445013",
+    "Long": "-122.1391443"
+  },
+  "TotalAmt": 55.0,
+  "PrintStatus": "NotSet",
+  "PurchaseEx": {
+    "any": [
+      {
+        "name": "{http://schema.intuit.com/finance/v3}NameValue",
+        "declaredType": "com.intuit.schema.finance.v3.NameValue",
+        "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+        "value": {
+          "Name": "TxnType",
+          "Value": "3"
+        },
+        "nil": false,
+        "globalScope": true,
+        "typeSubstituted": false
+      }
+    ]
+  },
+  "domain": "QBO",
+  "sparse": false,
+  "Id": "109",
+  "SyncToken": "0",
+  "MetaData": {
+    "CreateTime": "2026-01-01T12:39:12-08:00",
+    "LastUpdatedTime": "2026-01-01T12:39:12-08:00"
+  },
+  "DocNumber": "12",
+  "TxnDate": "2025-11-21",
+  "CurrencyRef": {
+    "value": "USD",
+    "name": "United States Dollar"
+  },
+  "Line": [
+    {
+      "Id": "1",
+      "Amount": 55.0,
+      "DetailType": "AccountBasedExpenseLineDetail",
+      "AccountBasedExpenseLineDetail": {
+        "AccountRef": {
+          "value": "70",
+          "name": "Legal & Professional Fees:Bookkeeper"
+        },
+        "BillableStatus": "NotBillable",
+        "TaxCodeRef": {
+          "value": "NON"
+        }
+      },
+      "CustomExtensions": []
+    }
+  ]
+}
+--------------------------------------------------

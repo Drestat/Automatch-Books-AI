@@ -72,7 +72,7 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.20.0"}
+    return {"status": "ok", "version": "3.20.1"}
 
 @app.get("/")
 def read_root():

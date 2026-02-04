@@ -38,24 +38,26 @@ class FeedLogic:
             return False, "BillPayment (User Verified Review Required)"
                 
         # CASE B: MANUAL ENTRIES (TxnType 54, 3, etc)
-        if is_manual_entry:
+        if is_manual_entry or txn_type == "3": # Include Checks (Type 3) as Manual
             # LinkedTxn means QBO has matched it -> Categorized (Matched)
             if has_linked_txn:
                  return False, "Manual Entry with LinkedTxn (Auto-Match Review)"
             
+            # Check ClrStatus FIRST
+            # Unreconciled Manual Entries should be For Review?
+            # User Feedback suggests Pam Seitz (Type 54) showing as Categorized is WRONG ("Broke").
+            # So we MUST enforce this check before returning True.
+            clr_status = FeedLogic._get_clr_status(transaction_data)
+            if clr_status != "R":
+                 # Exception: If it's a Check (Type 3) with a DocNum, maybe allow it? 
+                 # But generally, if it's not reconciled, let's play safe.
+                 return False, f"Unreconciled Manual Entry (Clr: {clr_status})"
+
             # Check if transaction has a specific category
-            # MOVED UP: Valid category means user has "Added" it, even if not Reconciled yet.
             has_specific_category = FeedLogic._has_specific_category(transaction_data)
             
             if has_specific_category:
                 return True, "Reconciled Manual Entry (Categorized)"
-
-            # Check ClrStatus (Clearance Status)
-            # If it's in the Feed (Suggestion), it is likely NOT Reconciled ('R').
-            # We treat Uncleared manual entries as "For Review" to be safe.
-            clr_status = FeedLogic._get_clr_status(transaction_data)
-            if clr_status != "R":
-                 return False, f"Unreconciled Manual Entry (Clr: {clr_status})"
             
             if sync_token == 0:
                 return True, "Fresh Manual Entry (SyncToken 0)"
@@ -63,22 +65,32 @@ class FeedLogic:
             return False, "Modified Manual Entry (No Category)"
             
         # CASE C: BANK FEED IMPORTS (TxnType 1, 11, etc)
-        # CONSERVATIVE APPROACH: Items with LinkedTxn are auto-matches that need user verification
-        # Even if they have category + payee, we want user to review QBO's suggestion
         
         if has_linked_txn:
             return False, "Auto-Match Suggestion (Needs User Verification)"
 
-        # NEW: Check for QBO-side Suggestions (Type 1 with Category but NOT Cleared/Reconciled)
-        # If QBO suggests a category/payee in the feed, it populates the fields but keeps it as Type 1 / Uncleared
-        # We must treat these as "For Review" so the user can Confirm Match.
+        # Check for QBO-side Suggestions (Type 1 with Category but NOT Cleared/Reconciled)
         clr_status = FeedLogic._get_clr_status(transaction_data)
-        if txn_type == "1" and clr_status not in ["C", "R"]:
-             return False, "QBO Category Suggestion (Needs Confirmation)"
         
-        # For non-matched items, require both category and payee
+        # EXCEPTION: Deposits (Books by Bessie)
+        # If it's a Deposit (positive amount or DepositLineDetail) with a valid category, treat as Categorized?
+        # Detecting Deposit via Structure (DepositLineDetail)
+        is_deposit = False
+        for line in transaction_data.get("Line", []):
+            if "DepositLineDetail" in line:
+                is_deposit = True
+                break
+        
+        # If it's a Deposit with a Category/Payee, let it pass as Categorized even if Uncleared
         has_specific_category = FeedLogic._has_specific_category(transaction_data)
         has_payee = FeedLogic._has_payee(transaction_data)
+
+        if is_deposit and has_specific_category and has_payee:
+             return True, "Categorized Deposit (Category + Entity)"
+
+        # Standard Type 1 Check (Hicks Hardware Trap)
+        if txn_type == "1" and clr_status not in ["C", "R"]:
+             return False, "QBO Category Suggestion (Needs Confirmation)"
         
         if not has_specific_category:
             return False, "Missing Specific Category"
@@ -88,8 +100,6 @@ class FeedLogic:
 
         # Both category and payee exist, no auto-match suggestion -> Categorized
         if has_doc_number:
-            # BUG FIX: Even if it has a DocNumber (Manual Check), if it's Uncleared ('Create'), 
-            # it means it's likely a suggestion in the feed waiting for a match.
             if clr_status != "R":
                  return False, f"Unreconciled Manual Check (Clr: {clr_status})"
                  
