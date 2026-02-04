@@ -45,6 +45,7 @@ interface Transaction {
     is_excluded?: boolean;
     forced_review?: boolean;
     suggested_category_name: string;
+    payee?: string;
 }
 
 interface TransactionCardProps {
@@ -59,6 +60,7 @@ interface TransactionCardProps {
     onAnalyze?: (id: string) => void;
     onExclude?: (id: string) => void;
     onInclude?: (id: string) => void;
+    onPayeeChange?: (txId: string, payee: string) => void;
 }
 
 export default function TransactionCard({
@@ -72,15 +74,18 @@ export default function TransactionCard({
     onTagRemove,
     onAnalyze,
     onExclude,
-    onInclude
+    onInclude,
+    onPayeeChange
 }: TransactionCardProps) {
     const isExpense = tx.amount < 0;
     const [showReasoning, setShowReasoning] = React.useState(false);
     const [isUploading, setIsUploading] = React.useState(false);
     const [isEditingCategory, setIsEditingCategory] = React.useState(false);
+    const [isEditingPayee, setIsEditingPayee] = React.useState(false);
     const [isAddingTag, setIsAddingTag] = React.useState(false);
     const [isSyncing, setIsSyncing] = React.useState(false);
     const [newTag, setNewTag] = React.useState("");
+    const [payeeInput, setPayeeInput] = React.useState(tx.payee || "");
     const [isAnalyzing, setIsAnalyzing] = React.useState(false);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -137,6 +142,43 @@ export default function TransactionCard({
                 </div>
 
                 <div className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-4 mb-6 relative overflow-hidden">
+
+                    {/* Payee Section */}
+                    <div className="mb-4 pb-4 border-b border-white/5">
+                        <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-white/40 mb-2 block">Payee / Vendor</span>
+                        {isEditingPayee ? (
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    if (onPayeeChange) onPayeeChange(tx.id, payeeInput);
+                                    setIsEditingPayee(false);
+                                }}
+                                className="flex gap-2"
+                            >
+                                <input
+                                    autoFocus
+                                    className="bg-black border border-brand/50 rounded px-2 py-1 text-sm text-white focus:outline-none w-full"
+                                    value={payeeInput}
+                                    onChange={(e) => setPayeeInput(e.target.value)}
+                                    onBlur={() => {
+                                        if (onPayeeChange && payeeInput !== tx.payee) onPayeeChange(tx.id, payeeInput);
+                                        setIsEditingPayee(false);
+                                    }}
+                                />
+                            </form>
+                        ) : (
+                            <div className="flex items-center gap-2 group/edit cursor-pointer" onClick={() => {
+                                setPayeeInput(tx.payee || "");
+                                setIsEditingPayee(true);
+                            }}>
+                                <p className={`text-base font-medium ${tx.payee ? 'text-white' : 'text-rose-400 italic'} hover:text-brand transition-colors border-b border-dashed border-white/20 hover:border-brand/50`}>
+                                    {tx.payee || "Matches require a Payee. Click to Assign."}
+                                </p>
+                                <Edit2 size={12} className="text-white/20 group-hover/edit:text-brand opacity-0 group-hover/edit:opacity-100 transition-all" />
+                            </div>
+                        )}
+                    </div>
+
                     <div className="flex items-center gap-2 mb-3">
                         <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-brand">{tx.is_split ? 'Suggested Splits' : 'Suggested Category'}</span>
                         <div className="h-[1px] flex-1 bg-white/5" />
@@ -401,9 +443,7 @@ export default function TransactionCard({
                         <Edit2 size={18} />
                     </motion.button>
 
-                    const [isAnalyzing, setIsAnalyzing] = React.useState(false);
 
-                    // ... (inside render)
 
                     <motion.button
                         whileTap={{ scale: 0.95 }}

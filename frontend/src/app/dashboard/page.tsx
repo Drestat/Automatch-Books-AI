@@ -257,9 +257,7 @@ function DashboardContent() {
               <span className={`text-xs font-bold tracking-[0.2em] ${isDemo ? 'text-amber-400' : 'text-brand'} uppercase`}>
                 {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] uppercase font-bold tracking-wider ml-2">
-                v3.19.6 (BE) | v3.19.6 (FE)
-              </span>
+              v3.19.7 (BE) | v3.19.7 (FE)
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight">
               Financial <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Intelligence</span>
@@ -543,6 +541,7 @@ function DashboardContent() {
                         onAccept={handleAccept}
                         onReceiptUpload={handleReceiptUpload}
                         onAnalyze={reAnalyze}
+                        onPayeeChange={(txId, payee) => updateTransaction(txId, { payee })}
                         availableTags={tags}
                         availableCategories={categories}
                         onCategoryChange={(txId, catId, catName) => updateTransaction(txId, { suggested_category_id: catId, suggested_category_name: catName })}

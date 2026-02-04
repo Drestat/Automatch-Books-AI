@@ -64,6 +64,7 @@ export interface Transaction {
     note?: string;
     account_id?: string;
     account_name?: string;
+    payee?: string;
 }
 
 export interface Account {
