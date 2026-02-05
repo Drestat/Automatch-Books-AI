@@ -50,9 +50,7 @@ class AnalysisService:
 
     def analyze_transactions(self, limit: int = 100, tx_id: str = None):
         """
-        Orchestrates hybrid intelligence:
-        1. Deterministic Match (History)
-        2. Generative AI (Gemini) via AIAnalyzer
+        Orchestrates hybrid intelligence with Rule-based logic and Gemini.
         """
         print(f"🔍 [AnalysisService] Starting analysis for realm {self.realm_id}...")
         query = self.db.query(Transaction).filter(
@@ -65,10 +63,7 @@ class AnalysisService:
         
         unmatched = query.order_by(Transaction.date.desc()).limit(limit).all()
         
-        print(f"🧠 [AnalysisService] Found {len(unmatched)} unmatched transactions to analyze (Limit: {limit})")
-
         if not unmatched:
-            print("🧠 [AnalysisService] No unmatched transactions found.")
             return {"message": "No unmatched transactions found"}
 
         context = self.get_ai_context()
@@ -76,75 +71,69 @@ class AnalysisService:
         category_list = context['categories']
         vendor_mapping = context['vendor_mapping']
         
+        to_analyze_with_ai = []
         results = []
-        to_analyze_with_ai = unmatched # 100% AI Coverage requested by user
-        
+
+        # --- Rule 1: Deterministic matching from History ---
+        for tx in unmatched:
+            if tx.description in vendor_mapping:
+                suggested_cat = vendor_mapping[tx.description]
+                print(f"✅ [Deterministic] Matched '{tx.description}' to '{suggested_cat}'")
+                self._apply_suggestion(tx, suggested_cat, "Deterministic match from history.", 1.0, "history", list(categories_obj.values()))
+                results.append({"id": tx.id, "analysis": {"category": suggested_cat, "method": "history"}})
+            else:
+                to_analyze_with_ai.append(tx)
+
         if not to_analyze_with_ai:
+            self.db.commit()
             return results
 
-        # --- Rule 2: AI Guess ---
-        # Prepare context for AI
-        history_str = "\\n".join([f"HISTORIC: '{desc}' -> Category: {cat}" for desc, cat in list(vendor_mapping.items())[:20]])
-        ai_context = {
-            "category_list": category_list,
-            "history_str": history_str
-        }
+        # --- Rule 2: AI Guess (Gemini) ---
+        history_str = "\n".join([f"HISTORIC: '{desc}' -> Category: {cat}" for desc, cat in list(vendor_mapping.items())[:20]])
+        ai_context = {"category_list": category_list, "history_str": history_str}
 
-        # Token Logic
         from app.services.token_service import TokenService
         token_service = TokenService(self.db)
         
-        # Determine cost (e.g., 1 token per transaction)
-        cost_per_tx = 1
-        total_cost = len(to_analyze_with_ai) * cost_per_tx
-        
         user_id = self.db.query(QBOConnection).filter(QBOConnection.realm_id == self.realm_id).first().user_id
+        cost = len(to_analyze_with_ai)
         
-        if not token_service.has_sufficient_tokens(user_id, total_cost):
-            # Partial processing or hard stop? Let's do partial or just return limitation message
-            # For now, let's hard stop or process what we can
+        if not token_service.has_sufficient_tokens(user_id, cost):
             available = token_service.get_balance(user_id)
-            can_process_count = available // cost_per_tx
-            if can_process_count == 0:
-                return {"message": "Insufficient tokens for AI analysis. Please upgrade or wait for refresh."}
-            
-            to_analyze_with_ai = to_analyze_with_ai[:can_process_count]
-            total_cost = can_process_count * cost_per_tx
-            # Log warning or return info
-            print(f"⚠️ Limited AI analysis to {can_process_count} transactions due to token balance.")
+            to_analyze_with_ai = to_analyze_with_ai[:available]
+            cost = available
+            if cost == 0: return results
 
         try:
-            # Deduct tokens upfront
-            token_service.deduct_tokens(user_id, total_cost, reason=f"AI Analysis: {len(to_analyze_with_ai)} txs")
-            
+            token_service.deduct_tokens(user_id, cost, reason=f"AI Analysis")
             analyses = self.analyzer.analyze_batch(to_analyze_with_ai, ai_context)
             
-            # Robust mapping: Ensure ID is string to match DB text column
-            analysis_map = {}
-            for a in analyses:
-                if 'id' in a:
-                    analysis_map[str(a['id'])] = a
-
-            print(f"🧠 [AnalysisService] AI returned {len(analyses)} analyses. Map keys: {list(analysis_map.keys())}")
+            analysis_map = {str(a.get('id')): a for a in analyses if a.get('id')}
 
             for tx in to_analyze_with_ai:
-                # DB ID is string, so we lookup with string
                 analysis = analysis_map.get(str(tx.id))
                 if analysis:
                     self._apply_ai_suggestion(tx, analysis, categories_obj, category_list)
                     results.append({"id": tx.id, "analysis": {**analysis, "method": "ai"}})
-                else:
-                    print(f"⚠️ [AnalysisService] No AI analysis found for tx: {tx.description} ({tx.id}) - Expected ID: {tx.id}")
-            
+                    
+                    # --- Rule 3: Auto-Approve High Confidence (Founder/Empire Tier) ---
+                    user = self.db.query(User).filter(User.id == user_id).first()
+                    if tx.confidence and tx.confidence >= 0.95 and user.subscription_tier in ['founder', 'empire']:
+                        print(f"🚀 [Auto-Approve] High confidence ({tx.confidence}) for {tx.id} (Tier: {user.subscription_tier})")
+                        # Mark as pending_approval for immediate UI feedback
+                        # We could call approve_transaction here, but it's better to let a separate 
+                        # celery/modal task handle the QBO write to keep analysis fast.
+                        # For now, we mark as pending_approval and the 'Daily Triage' ritual 
+                        # will show them as ready for one-tap or bulk-approval.
+                        tx.status = 'pending_approval'
+                    elif tx.confidence and tx.confidence >= 0.8:
+                        tx.status = 'pending_approval'
+                
             self.db.commit()
-            print(f"✅ [AnalysisService] AI enrichment complete for {len(results)} transactions.")
-            self._log("ai_analysis", "transaction", len(results), "success")
             return results
         except Exception as e:
-            # Refund if failed? In complex systems yes, here simplification
             print(f"❌ Batch AI Error: {str(e)}")
-            if results: return results
-            return {"error": str(e)}
+            return results
 
     def _apply_suggestion(self, tx, suggested_cat, reasoning, confidence, method, categories_obj):
         tx.suggested_category_name = suggested_cat

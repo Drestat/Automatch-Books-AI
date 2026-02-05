@@ -1,11 +1,16 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Menu, X } from 'lucide-react';
 import { SignedIn, SignedOut } from '@clerk/nextjs';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const toggleMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+
     return (
         <nav className="fixed top-0 w-full z-50 bg-black/50 backdrop-blur-xl border-b border-white/5">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
@@ -19,6 +24,7 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex items-center gap-8">
+                    {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center gap-6">
                         <Link href="/features" className="text-sm font-medium text-white/60 hover:text-white transition-colors">
                             Features
@@ -28,7 +34,7 @@ export default function Navbar() {
                         </Link>
                     </div>
 
-                    <div className="flex items-center gap-3 sm:gap-6">
+                    <div className="hidden md:flex items-center gap-3 sm:gap-6">
                         <SignedOut>
                             <Link href="/dashboard" className="text-xs sm:text-sm font-bold text-white/60 hover:text-white transition-colors">
                                 Log In
@@ -43,8 +49,72 @@ export default function Navbar() {
                             </Link>
                         </SignedIn>
                     </div>
+
+                    {/* Mobile Menu Toggle */}
+                    <button
+                        onClick={toggleMenu}
+                        className="md:hidden p-2 text-white/60 hover:text-white transition-colors"
+                        aria-label="Toggle menu"
+                    >
+                        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
                 </div>
             </div>
+
+            {/* Mobile Menu Overlay */}
+            <AnimatePresence>
+                {isMobileMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="md:hidden bg-black/90 backdrop-blur-xl border-b border-white/5 overflow-hidden"
+                    >
+                        <div className="flex flex-col p-6 gap-6">
+                            <Link
+                                href="/features"
+                                className="text-lg font-medium text-white/80 hover:text-white"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Features
+                            </Link>
+                            <Link
+                                href="/pricing"
+                                className="text-lg font-medium text-white/80 hover:text-white"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                Pricing
+                            </Link>
+                            <div className="h-px bg-white/10 my-2" />
+                            <SignedOut>
+                                <Link
+                                    href="/dashboard"
+                                    className="text-lg font-bold text-white/60 hover:text-white"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    Log In
+                                </Link>
+                                <Link
+                                    href="/sign-up"
+                                    className="btn-primary py-3 text-center justify-center flex"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    Try Free
+                                </Link>
+                            </SignedOut>
+                            <SignedIn>
+                                <Link
+                                    href="/dashboard"
+                                    className="text-lg font-bold text-brand hover:text-brand/80"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    Go to Dashboard
+                                </Link>
+                            </SignedIn>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </nav>
     );
 }

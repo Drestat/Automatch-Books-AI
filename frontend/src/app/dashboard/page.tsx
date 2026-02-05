@@ -258,7 +258,6 @@ function DashboardContent() {
               <span className={`text-xs font-bold tracking-[0.2em] ${isDemo ? 'text-amber-400' : 'text-brand'} uppercase`}>
                 {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
               </span>
-              v3.23.0 (BE) | v3.23.0 (FE)
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight">
               Financial <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Intelligence</span>

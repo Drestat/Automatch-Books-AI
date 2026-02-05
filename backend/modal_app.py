@@ -94,7 +94,7 @@ async def sync_user_data(realm_id: str):
     if "/root" not in sys.path:
         sys.path.append("/root")
 
-    from app.services.transaction_service import TransactionService
+    from app.services.sync_service import SyncService
     from app.models.qbo import QBOConnection
     from app.db.session import SessionLocal
     
@@ -105,7 +105,7 @@ async def sync_user_data(realm_id: str):
             print("❌ Connection not found")
             return
             
-        service = TransactionService(db, connection)
+        service = SyncService(db, connection)
         await service.sync_all()
         print("✅ Sync complete")
         

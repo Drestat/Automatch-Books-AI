@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from app.db.session import get_db
+from app.api.deps import verify_subscription
 from app.models.qbo import QBOConnection
 from app.models.user import User
 from app.core.config import settings
@@ -73,7 +74,7 @@ class AccountSelectionSchema(BaseModel):
     active_account_ids: List[str]
 
 @router.get("/accounts")
-async def get_accounts(realm_id: str, db: Session = Depends(get_db)):
+async def get_accounts(realm_id: str, db: Session = Depends(get_db), user=Depends(verify_subscription)):
     print(f"🔍 [get_accounts] Starting for realm_id: {realm_id}")
     
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
@@ -120,7 +121,7 @@ async def get_accounts(realm_id: str, db: Session = Depends(get_db)):
     }
 
 @router.post("/accounts/select")
-async def update_account_selection(payload: AccountSelectionSchema, db: Session = Depends(get_db)):
+async def update_account_selection(payload: AccountSelectionSchema, db: Session = Depends(get_db), user=Depends(verify_subscription)):
     realm_id = payload.realm_id
     selected_ids = payload.active_account_ids
     
@@ -152,7 +153,7 @@ async def update_account_selection(payload: AccountSelectionSchema, db: Session 
     return {"status": "success", "message": f"Updated {updated_count} accounts"}
 
 @router.post("/accounts/preview")
-async def preview_account_sync(payload: AccountSelectionSchema, db: Session = Depends(get_db)):
+async def preview_account_sync(payload: AccountSelectionSchema, db: Session = Depends(get_db), user=Depends(verify_subscription)):
     realm_id = payload.realm_id
     selected_ids = payload.active_account_ids
     

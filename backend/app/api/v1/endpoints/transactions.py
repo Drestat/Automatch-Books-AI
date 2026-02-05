@@ -6,7 +6,8 @@ import shutil
 from datetime import datetime
 
 from app.api.v1.endpoints.qbo import get_db
-from app.models.qbo import QBOConnection, Transaction
+from app.api.deps import verify_subscription
+from app.models.qbo import QBOConnection, Transaction, TransactionSplit, Category
 from app.services.transaction_service import TransactionService
 from app.services.analysis_service import AnalysisService
 from app.services.receipt_service import ReceiptService
@@ -79,31 +80,58 @@ def get_transactions(
     return txs
 
 @router.post("/sync")
-async def sync_user_transactions(realm_id: str, db: Session = Depends(get_db)):
+async def sync_user_transactions(realm_id: str, db: Session = Depends(get_db), user=Depends(verify_subscription)):
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
     if not connection:
         raise HTTPException(status_code=404, detail="QBO Connection not found")
     
     try:
-        # Prefer Modal for heavy lifting if configured
-        try:
-            from modal_app import sync_user_data
-            # Modal spawn is sync (fire and forget hook), but we can await it if the client library supports it, 
-            # usually .spawn() is non-blocking or fast.
-            # If we want to force local async sync:
-            # raise ImportError 
-            sync_user_data.spawn(realm_id)
-            return {"message": "Background sync triggered successfully"}
-        except (ImportError, Exception):
-            # Fallback to local async sync
-            service = TransactionService(db, connection)
-            await service.sync_all()
-            return {"message": "Sync completed (local async fallback)"}
-    except Exception as e:
-        return {"message": "Sync failed", "error": str(e)}
+        from modal_app import sync_user_data
+        sync_user_data.spawn(realm_id)
+        return {"message": "Background sync triggered successfully"}
+    except (ImportError, Exception):
+        # Fallback to local async sync
+        from app.services.sync_service import SyncService
+        service = SyncService(db, connection)
+        await service.sync_all()
+        return {"message": "Sync completed (local async fallback)"}
+
+@router.post("/{tx_id}/split")
+def split_transaction(realm_id: str, tx_id: str, splits: List[SplitSchema], db: Session = Depends(get_db), user=Depends(verify_subscription)):
+    tx = db.query(Transaction).filter(Transaction.id == tx_id, Transaction.realm_id == realm_id).first()
+    if not tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    # Calculate total and validate against tx.amount
+    total_split = sum(s.amount for s in splits)
+    if abs(total_split - tx.amount) > 0.01:
+        raise HTTPException(status_code=400, detail=f"Split total ({total_split}) must match transaction amount ({tx.amount})")
+    
+    # Clear existing splits
+    db.query(TransactionSplit).filter(TransactionSplit.transaction_id == tx_id).delete()
+    
+    # Create new splits
+    tx.is_split = True
+    for s in splits:
+        split = TransactionSplit(
+            transaction_id=tx.id,
+            category_name=s.category_name,
+            amount=s.amount,
+            description=s.description or tx.description
+        )
+        # Resolve category ID if possible
+        cat = db.query(Category).filter(Category.name == s.category_name, Category.realm_id == realm_id).first()
+        if cat:
+            split.category_id = cat.id
+            
+        db.add(split)
+    
+    tx.status = 'pending_approval'
+    db.commit()
+    return {"message": "Transaction split successfully", "splits_count": len(splits)}
 
 @router.post("/analyze")
-def analyze_user_transactions(realm_id: str, tx_id: str = None, db: Session = Depends(get_db)):
+def analyze_user_transactions(realm_id: str, tx_id: str = None, db: Session = Depends(get_db), user=Depends(verify_subscription)):
     # Keep analysis sync/threaded for now unless we refactor AnalysisService too.
     # AnalysisService relies on AI/DB, usually blocking.
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
@@ -173,7 +201,7 @@ def include_transaction(realm_id: str, tx_id: str, db: Session = Depends(get_db)
     return {"message": "Transaction included"}
 
 @router.post("/{tx_id}/approve")
-async def approve_transaction(realm_id: str, tx_id: str, db: Session = Depends(get_db)):
+async def approve_transaction(realm_id: str, tx_id: str, db: Session = Depends(get_db), user=Depends(verify_subscription)):
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
     if not connection:
         raise HTTPException(status_code=404, detail="QBO Connection not found")
@@ -213,7 +241,8 @@ def update_transaction(realm_id: str, tx_id: str, update: TransactionUpdate, db:
 def upload_receipt(
     realm_id: str,
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user=Depends(verify_subscription)
 ):
     # Receipt upload remains sync/threaded for file IO
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
@@ -290,7 +319,7 @@ def upload_receipt(
     }
 
 @router.post("/bulk-approve")
-async def bulk_approve_transactions(realm_id: str, tx_ids: List[str], db: Session = Depends(get_db)):
+async def bulk_approve_transactions(realm_id: str, tx_ids: List[str], db: Session = Depends(get_db), user=Depends(verify_subscription)):
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
     if not connection:
         raise HTTPException(status_code=404, detail="QBO Connection not found")

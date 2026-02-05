@@ -82,7 +82,11 @@ class QBOClient:
     async def query(self, query_str):
         return await self.request("GET", "query", params={'query': query_str})
 
-    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_ref: dict = None, payment_type: str = None, tags: list[str] = None, amount: float = None):
+    async def get_purchase(self, purchase_id: str):
+        """Fetches a single Purchase entity by ID."""
+        return await self.request("GET", f"purchase/{purchase_id}")
+
+    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_ref: dict = None, payment_type: str = None, tags: list[str] = None, amount: float = None, append_memo: str = None):
         """
         Update a Purchase entity (Expense/Check) via Sparse Update.
         """
@@ -98,15 +102,18 @@ class QBOClient:
                         "AccountRef": {
                             "value": category_id,
                             "name": category_name
-                        }
+                        },
+                        "ClrStatus": "Cleared"
                     }
                 }
             ]
         }
 
-        if amount is not None:
+        if amount is not None and amount > 0:
             update_payload["TotalAmt"] = amount
             update_payload["Line"][0]["Amount"] = amount
+        elif amount == 0:
+            print(f"⚠️ [QBOClient] Amount is 0. Skipping amount update to preserve QBO value.")
         
         if entity_ref:
             update_payload["EntityRef"] = entity_ref
@@ -115,12 +122,19 @@ class QBOClient:
             update_payload["PaymentType"] = payment_type
 
         # NOTE: QBO API v3 does NOT support native Tags (TagRef).
-        # Workaround: Include tags in the PrivateNote (Memo) so they are visible in QBO.
+        # Workaround: Include tags and persistent markers in the PrivateNote (Memo).
+        memo_parts = []
         if tags:
             tag_str = ", ".join([f"#{t}" for t in tags if t])
-            update_payload["PrivateNote"] = f"Tags: {tag_str}"
+            memo_parts.append(f"Tags: {tag_str}")
+        
+        if append_memo:
+            memo_parts.append(append_memo)
 
-        print(f"📝 [QBOClient] Updating Purchase {purchase_id} -> Cat: {category_name}, Payee: {entity_ref.get('name') if entity_ref else 'N/A'}, Tags mapped to Memo: {tags}")
+        if memo_parts:
+            update_payload["PrivateNote"] = " | ".join(memo_parts)
+
+        print(f"📝 [QBOClient] Updating Purchase {purchase_id} -> Cat: {category_name}, Payee: {entity_ref.get('name') if entity_ref else 'N/A'}, Memo: {update_payload.get('PrivateNote', 'N/A')}")
         result = await self.request("POST", "purchase", json_payload=update_payload)
         return result.get("Purchase", {})
 

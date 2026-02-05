@@ -18,6 +18,12 @@ class FeedLogic:
             - reason: A human-readable explanation of the decision logic
         """
         
+        # 0. Check for Persistent Marker (#Accepted)
+        # This allows our app to maintain parity for explicitly accepted transactions
+        note = transaction_data.get("PrivateNote", "")
+        if "#Accepted" in note:
+            return True, "Categorized (Found #Accepted marker)"
+
         # 1. Extract Signals
         txn_type = FeedLogic._get_txn_type(transaction_data)
         doc_number = transaction_data.get("DocNumber")

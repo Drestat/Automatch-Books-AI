@@ -61,13 +61,18 @@ Accounting should feel like a byproduct of doing business. This project isn't ju
 - **Security**: Encrypt access tokens before storage, use environmental variables for credentials
 
 #### Deep Matching & Categorization Strategy ("The Elegant Fix")
-Since QBO's "Bank Feed" (For Review) is API-inaccessible, we operate on the **Register Level**:
+Since QBO's "Bank Feed" (For Review) is API-accessible only as read-only register entries, we operate on the **Register Level** to trigger movement:
 1.  **Categorization (Confirm Match)**: Use **Sparse Updates** on `Purchase`/`JournalEntry` entities.
     -   *Action*: Patch `AccountRef` from "Uncategorized" -> "Target Category".
-    -   *Result*: Instant update in QBO Register; auto-resolves Bank Feed match.
+    -   *Action*: Set `ClrStatus` to **`Cleared`** (in `AccountBasedExpenseLineDetail`). This is the "hidden switch" that tells QBO to move the transaction from "For Review" to "Categorized" in the Banking tab.
+    -   *Marker*: Append **`#Accepted`** to `PrivateNote` (Memo). This ensures our app maintains a persistent "source of truth" even if QBO matching logic fluctuates.
 2.  **Bill Matching**: Create `BillPayment` entities (Check/CreditCard) linking `Bill` to `BankAccount`.
-    -   *Result*: QBO natively detects the payment and "Greens" the match in the UI.
-3.  **Async Core**: Migrate `requests` to **`httpx`** for non-blocking I/O in FastAPI.
+    -   *Mechanism*: Use `LinkedTxn` array inside the `BillPayment` line item.
+    -   *Result*: QBO natively detects the payment and "Greens" the match in the UI, moving it to Categorized automatically.
+3.  **Refined Feed Logic**:
+    -   `is_qbo_matched` (Categorized) = `(#Accepted in Note) OR (ClrStatus == 'Cleared') OR (Has LinkedTxn)`.
+    -   `is_for_review` = `(No #Accepted) AND (ClrStatus != 'Cleared') AND (No LinkedTxn)`.
+4.  **Async Core**: Migrate `requests` to **`httpx`** for non-blocking I/O in FastAPI.
     -   *Benefit*: High-throughput batch processing without stalling the serverless container.
 
 ### SaaS Route Structure
@@ -134,6 +139,7 @@ graph TD
 - [x] **Transaction Splitting**: Implement AI logic to split bulk transactions into multiple categories.
 - [x] **Receipt Mirroring**: Add support for matching scanned receipts to bank transactions.
 - [x] **Serverless Offloading**: Migrated receipt processing to Modal for scalable AI workloads.
+- [x] **SaaS Gating**: Enforced subscription limits on sync and analysis endpoints.
 
 ---
 
@@ -181,8 +187,8 @@ graph TD
 - [x] **Database Pooling**: Implemented `NullPool` in `app/db/session.py` for serverless compatibility (v3.18.0)
 
 ### Maintenance
-- [ ] **Refactor**: `SyncService` is becoming a "God Class". Logic for Receipts, Sync, and AI should fundamentally be separated.
-- [ ] **PgBouncer Deployment**: External connection pooler configured in code, needs cloud deployment (see `architecture/pgbouncer_setup.md`)
+- [x] **Refactor**: `SyncService` is becoming a "God Class". Logic for Receipts, Sync, and AI should fundamentally be separated.
+- [ ] **PgBouncer Deployment**: External connection pooler configured in code, needs cloud deployment (see `architecture/pgbouncer_setup.md`) - *Deferred to Infrastructure Sprint*
 
 ## 6. QC Audit Findings (2026-02-03)
 ### Critical (Must Fix)
