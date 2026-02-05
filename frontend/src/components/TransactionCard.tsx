@@ -128,7 +128,9 @@ export default function TransactionCard({
                             {isExpense ? <ArrowUpRight className="rotate-180" size={20} /> : <ArrowUpRight size={20} />}
                         </div>
                         <div>
-                            <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">{tx.date}</p>
+                            <p className="text-[13px] text-white font-black uppercase tracking-wider mb-0.5">
+                                {new Date(tx.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </p>
                             <span className="text-[10px] font-bold text-white/60 uppercase tracking-tighter border border-white/10 px-1.5 py-0.5 rounded leading-tight block w-fit mt-1">
                                 {tx.transaction_type || 'TX'}
                             </span>
