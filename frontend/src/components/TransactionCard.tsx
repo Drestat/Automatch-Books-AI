@@ -295,13 +295,24 @@ export default function TransactionCard({
                 <div className="flex flex-wrap items-center gap-3">
                     <div className="flex gap-2">
                         <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
-                        <IconButton
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             onClick={() => fileInputRef.current?.click()}
-                            icon={<FilePlus size={18} />}
-                            title="Receipt"
-                            active={!!tx.receipt_url}
-                            loading={isUploading}
-                        />
+                            disabled={isUploading}
+                            className={`h-12 px-6 ${isUploading ? 'bg-brand/20 border-brand/30' : 'bg-brand/10 hover:bg-brand/20 border-brand/20'} border rounded-xl flex items-center justify-center text-brand font-bold gap-2 transition-all`}
+                            title="Upload Receipt"
+                        >
+                            {isUploading ? (
+                                <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                                <>
+                                    <FilePlus size={18} />
+                                    <span>Upload</span>
+                                </>
+                            )}
+                        </motion.button>
+
                         <IconButton
                             icon={<SplitIcon size={18} />}
                             title="Split"
@@ -312,25 +323,18 @@ export default function TransactionCard({
                         />
 
                         {tx.is_excluded ? (
-                            <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.95 }}
+                            <IconButton
+                                icon={<CheckCircle2 size={18} />}
+                                title="Include"
                                 onClick={() => onInclude && onInclude(tx.id)}
-                                className="px-5 h-12 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 font-bold text-xs rounded-xl flex items-center gap-2 transition-all"
-                            >
-                                <CheckCircle2 size={14} />
-                                Include
-                            </motion.button>
+                                active={true}
+                            />
                         ) : (
-                            <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.95 }}
+                            <IconButton
+                                icon={<SplitIcon size={18} className="rotate-45" />}
+                                title="Exclude"
                                 onClick={() => onExclude && onExclude(tx.id)}
-                                className="px-5 h-12 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 font-bold text-xs rounded-xl flex items-center gap-2 transition-all"
-                            >
-                                <SplitIcon size={14} className="rotate-45" />
-                                Exclude
-                            </motion.button>
+                            />
                         )}
                     </div>
 
