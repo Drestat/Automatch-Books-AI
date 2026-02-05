@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.23.2 - FIX ZERO AMOUNT OVERWRITE BUG
+# v3.24.0 - REDESIGN: FULL-WIDTH TRANSACTION ROWS
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.
@@ -26,27 +26,28 @@ async def lifespan(app: FastAPI):
         Base.metadata.create_all(bind=engine)
         
         # Repair Schema (Alembic might have missed these if create_all was used first)
-        with engine.begin() as conn:
-            print("🏗️ [main.py] Running manual schema patches...")
-            # BankAccount additions
-            conn.execute(text("ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT FALSE;"))
-            conn.execute(text("ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS is_connected BOOLEAN DEFAULT FALSE;"))
-            conn.execute(text("ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS nickname VARCHAR;"))
-            
-            # Transactions reasoning (added in previous migration attempts)
-            conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS vendor_reasoning VARCHAR;"))
-            conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS category_reasoning VARCHAR;"))
-            conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS note_reasoning VARCHAR;"))
-            conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS tax_deduction_note VARCHAR;"))
-            conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS is_qbo_matched BOOLEAN DEFAULT FALSE;"))
-            conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS is_excluded BOOLEAN DEFAULT FALSE;"))
-            conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS forced_review BOOLEAN DEFAULT FALSE;"))
-            conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS payee VARCHAR;"))  # v3.18.2
-            
-            # QBO Connection updates
-            conn.execute(text("ALTER TABLE qbo_connections ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT now();"))
-            
-            print("✅ [main.py] Schema repair complete.")
+        # ⚠️ DISABLED to prevent Deadlock (psycopg2.errors.DeadlockDetected) during rapid re-deployment
+        # with engine.begin() as conn:
+        #     print("🏗️ [main.py] Running manual schema patches...")
+        #     # BankAccount additions
+        #     conn.execute(text("ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT FALSE;"))
+        #     conn.execute(text("ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS is_connected BOOLEAN DEFAULT FALSE;"))
+        #     conn.execute(text("ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS nickname VARCHAR;"))
+        #     
+        #     # Transactions reasoning (added in previous migration attempts)
+        #     conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS vendor_reasoning VARCHAR;"))
+        #     conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS category_reasoning VARCHAR;"))
+        #     conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS note_reasoning VARCHAR;"))
+        #     conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS tax_deduction_note VARCHAR;"))
+        #     conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS is_qbo_matched BOOLEAN DEFAULT FALSE;"))
+        #     conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS is_excluded BOOLEAN DEFAULT FALSE;"))
+        #     conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS forced_review BOOLEAN DEFAULT FALSE;"))
+        #     conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS payee VARCHAR;"))  # v3.18.2
+        #     
+        #     # QBO Connection updates
+        #     conn.execute(text("ALTER TABLE qbo_connections ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT now();"))
+        #     
+        #     print("✅ [main.py] Schema repair complete.")
             
         print("✅ [main.py] Database initialized.")
     except Exception as e:
@@ -72,13 +73,13 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.23.2"}
+    return {"status": "ok", "version": "3.24.0"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.23.2",
+        "version": "3.24.0",
         "status": "ready"
     }
 

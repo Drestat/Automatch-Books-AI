@@ -85,7 +85,11 @@ export default function TransactionCard({
     onInclude,
     onPayeeChange
 }: TransactionCardProps) {
-    const isExpense = tx.amount < 0;
+    const expenseTypes = ['Purchase', 'Expense', 'Check', 'CreditCard', 'BillPayment', 'Cash', 'CreditCardCharge'];
+    // QBO sends positive TotalAmt for expenses. Identify by type OR if manually negative.
+    const isExpenseType = expenseTypes.includes(tx.transaction_type || '') || (tx.transaction_type === 'JournalEntry' && tx.amount < 0);
+    const isExpense = tx.amount < 0 || isExpenseType;
+
     const [showReasoning, setShowReasoning] = React.useState(false);
     const [isUploading, setIsUploading] = React.useState(false);
     const [isEditingCategory, setIsEditingCategory] = React.useState(false);
@@ -113,68 +117,47 @@ export default function TransactionCard({
     };
 
     return (
-        <motion.div layout className="glass-card overflow-hidden group">
-            <div className="p-6">
-                <div className="flex justify-between items-start mb-6">
-                    <div className="flex gap-4">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isExpense ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'
+        <motion.div layout className="glass-card overflow-hidden group w-full mb-4">
+            <div className="p-4 md:p-6">
+                {/* Main Columnar Row */}
+                <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 mb-4 md:mb-6">
+                    {/* Column 1: Date & Type */}
+                    <div className="flex items-center gap-4 min-w-[140px]">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isExpense ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'
                             } border border-white/5`}>
-                            {isExpense ? <ArrowUpRight className="rotate-180" size={24} /> : <ArrowUpRight size={24} />}
+                            {isExpense ? <ArrowUpRight className="rotate-180" size={20} /> : <ArrowUpRight size={20} />}
                         </div>
                         <div>
-                            <div className="flex items-center gap-2 mb-1">
-                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider border border-white/10 px-1.5 py-0.5 rounded">{tx.transaction_type || 'TRANSACTION'}</span>
-                                <span className="text-[10px] text-white/40">{tx.date}</span>
-                            </div>
-                            <div className="flex items-center gap-2 mb-1">
-                                <h3 className="text-lg font-bold tracking-tight text-white group-hover:text-brand transition-colors">
-                                    {tx.description}
-                                </h3>
-                                {tx.is_split && (
-                                    <span className="px-1.5 py-0.5 rounded-md bg-brand/20 border border-brand/30 text-[8px] font-black uppercase tracking-widest text-brand">Split</span>
-                                )}
-                            </div>
-                            {/* NEW: Ensure Description/Memo is visible if different from Header */}
-                            {tx.note && tx.note !== tx.description && (
-                                <p className="text-[11px] text-white/50 mb-1 line-clamp-1">{tx.note}</p>
-                            )}
-                            <p className="text-xs text-brand/80 font-mono">My Bank • {tx.id.slice(-4)}</p>
-
+                            <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">{tx.date}</p>
+                            <span className="text-[10px] font-bold text-white/60 uppercase tracking-tighter border border-white/10 px-1.5 py-0.5 rounded leading-tight block w-fit mt-1">
+                                {tx.transaction_type || 'TX'}
+                            </span>
                         </div>
                     </div>
-                    <div className="text-right">
-                        <p className={`text-xl font-black ${isExpense ? 'text-white' : 'text-emerald-400'}`}>
-                            {isExpense ? '' : '+'}{tx.amount.toLocaleString('en-US', { style: 'currency', currency: tx.currency })}
-                        </p>
+
+                    {/* Column 2: Bank Description */}
+                    <div className="flex-1 min-w-[200px]">
+                        <span className="text-[9px] uppercase tracking-widest font-black text-white/20 mb-1 block">Description</span>
+                        <h3 className="text-sm font-bold tracking-tight text-white group-hover:text-brand transition-colors line-clamp-1">
+                            {tx.description}
+                        </h3>
+                        {tx.note && tx.note !== tx.description && (
+                            <p className="text-[10px] text-white/40 line-clamp-1 mt-0.5 italic">{tx.note}</p>
+                        )}
                     </div>
-                </div>
 
-                <div className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-4 mb-6 relative overflow-hidden">
-
-                    {/* Payee Section */}
-                    <div className="mb-4 pb-4 border-b border-white/5">
-                        <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-white/40 mb-2 block">Payee / Vendor</span>
-
+                    {/* Column 3: Payee/Vendor Selector */}
+                    <div className="flex-1 min-w-[200px]">
+                        <span className="text-[9px] uppercase tracking-widest font-black text-white/20 mb-1 block">Payee</span>
                         <div
-                            className="flex items-center gap-3 group/edit cursor-pointer p-2 -ml-2 rounded-xl transition-all hover:bg-white/[0.03] border border-transparent hover:border-white/5"
+                            className="flex items-center gap-2 group/edit cursor-pointer transition-all hover:text-brand"
                             onClick={() => setIsEditingPayee(true)}
                         >
-                            <div className={`p-2 rounded-lg ${tx.payee ? 'bg-brand/10 text-brand' : 'bg-rose-500/10 text-rose-400'} transition-colors group-hover/edit:bg-brand group-hover/edit:text-white`}>
-                                <Building2 size={18} />
-                            </div>
-                            <div className="flex-1">
-                                <p className={`text-base font-bold ${tx.payee ? 'text-white' : 'text-rose-400 italic'} transition-colors`}>
-                                    {tx.payee || "Unassigned Vendor"}
-                                </p>
-                                <p className="text-[10px] text-white/30 uppercase font-black tracking-widest leading-none mt-1">
-                                    {tx.payee ? 'Verified Merchant' : 'Action Required'}
-                                </p>
-                            </div>
-                            <div className="p-1.5 rounded-md bg-white/5 text-white/20 opacity-0 group-hover/edit:opacity-100 transition-all">
-                                <Edit2 size={14} />
-                            </div>
+                            <p className={`text-sm font-bold ${tx.payee ? 'text-white/90' : 'text-rose-400 italic'}`}>
+                                {tx.payee || "Unassigned"}
+                            </p>
+                            <Edit2 size={12} className="text-white/20 opacity-0 group-hover/edit:opacity-100 transition-all" />
                         </div>
-
                         <VendorSelector
                             isOpen={isEditingPayee}
                             onClose={() => setIsEditingPayee(false)}
@@ -188,213 +171,149 @@ export default function TransactionCard({
                         />
                     </div>
 
-                    <div className="flex items-center gap-2 mb-3">
-                        <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-brand">{tx.is_split ? 'Suggested Splits' : 'Suggested Category'}</span>
-                        <div className="h-[1px] flex-1 bg-white/5" />
-                        <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border ${tx.confidence > 0.9 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+                    {/* Column 4: Category Selector */}
+                    <div className="flex-1 min-w-[180px]">
+                        <span className="text-[9px] uppercase tracking-widest font-black text-white/20 mb-1 block">Category</span>
+                        {isEditingCategory ? (
+                            <div className="relative">
+                                <select
+                                    className="w-full bg-black border border-brand/50 rounded px-2 py-1 text-xs text-white focus:outline-none"
+                                    onChange={(e) => {
+                                        const cat = availableCategories.find(c => c.id === e.target.value);
+                                        if (cat && onCategoryChange) {
+                                            onCategoryChange(tx.id, cat.id, cat.name);
+                                            setIsEditingCategory(false);
+                                        }
+                                    }}
+                                    onBlur={() => setIsEditingCategory(false)}
+                                    autoFocus
+                                    defaultValue=""
+                                >
+                                    <option value="" disabled>Select...</option>
+                                    {availableCategories.map(c => (
+                                        <option key={c.id} value={c.id}>{c.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2 group/edit cursor-pointer" onClick={() => setIsEditingCategory(true)}>
+                                <p className="text-sm font-medium text-white/90 group-hover:text-brand transition-colors">
+                                    {tx.suggested_category_name}
+                                </p>
+                                <Edit2 size={12} className="text-white/20 opacity-0 group-hover/edit:opacity-100 transition-all" />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Column 5: Amount & Confidence */}
+                    <div className="flex flex-col items-end min-w-[120px]">
+                        <p className={`text-lg font-black ${isExpense ? 'text-white' : 'text-emerald-400'}`}>
+                            {tx.amount === 0 ? '' : (isExpense ? '-' : '+')}{Math.abs(tx.amount).toLocaleString('en-US', { style: 'currency', currency: tx.currency })}
+                        </p>
+                        <div className={`flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full border ${tx.confidence > 0.9 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
                             tx.confidence > 0.7 ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
                                 'bg-rose-500/10 border-rose-500/20 text-rose-400'
                             }`}>
-                            <div className={`w-1 h-1 rounded-full animate-pulse ${tx.confidence > 0.9 ? 'bg-emerald-500' :
+                            <div className={`w-1 h-1 rounded-full ${tx.confidence > 0.9 ? 'bg-emerald-500' :
                                 tx.confidence > 0.7 ? 'bg-amber-500' :
                                     'bg-rose-500'
                                 }`} />
-                            <span className="text-[10px] font-bold">{Math.round(tx.confidence * 100)}% Match</span>
-                        </div>
-                    </div>
-                    <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                            {tx.is_split && tx.splits && tx.splits.length > 0 ? (
-                                <div className="space-y-3">
-                                    {tx.splits.map((split, i) => (
-                                        <div key={i} className="flex justify-between items-center text-sm border-b border-white/5 pb-2 last:border-0 last:pb-0">
-                                            <div>
-                                                <p className="font-bold text-white/90">{split.category_name}</p>
-                                                <p className="text-[10px] text-white/40">{split.description}</p>
-                                            </div>
-                                            <p className="font-black text-white/80">${split.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                isEditingCategory ? (
-                                    <div className="relative">
-                                        <select
-                                            className="w-full bg-black border border-brand/50 rounded px-2 py-1 text-sm text-white focus:outline-none"
-                                            onChange={(e) => {
-                                                const cat = availableCategories.find(c => c.id === e.target.value);
-                                                if (cat && onCategoryChange) {
-                                                    onCategoryChange(tx.id, cat.id, cat.name);
-                                                    setIsEditingCategory(false);
-                                                }
-                                            }}
-                                            defaultValue=""
-                                        >
-                                            <option value="" disabled>Select Category...</option>
-                                            {availableCategories.map(c => (
-                                                <option key={c.id} value={c.id}>{c.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center gap-2 group/edit cursor-pointer" onClick={() => setIsEditingCategory(true)}>
-                                        <p className="text-lg font-medium text-white/90 hover:text-brand transition-colors border-b border-dashed border-white/20 hover:border-brand/50">
-                                            {tx.suggested_category_name}
-                                        </p>
-                                        <Edit2 size={12} className="text-white/20 group-hover/edit:text-brand opacity-0 group-hover/edit:opacity-100 transition-all" />
-                                    </div>
-                                )
-                            )}
-                        </div>
-                        <button
-                            onClick={() => setShowReasoning(!showReasoning)}
-                            className="p-1 hover:bg-white/5 rounded-lg transition-colors text-brand/80 hover:text-brand ml-4 flex items-center gap-1 group/info"
-                            title="Toggle AI Reasoning"
-                        >
-                            <span className="text-[10px] font-bold opacity-0 group-hover/info:opacity-100 transition-opacity whitespace-nowrap">Why?</span>
-                            <Info size={16} />
-                        </button>
-                    </div>
-
-                    <AnimatePresence>
-                        {showReasoning && (
-                            <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                                className="overflow-hidden"
-                            >
-                                <div className="mt-3 pt-3 border-t border-white/5 flex flex-col gap-3">
-                                    {tx.vendor_reasoning && (
-                                        <div className="flex gap-2">
-                                            <span className="text-[10px] font-bold text-brand uppercase tracking-wider min-w-[60px] mt-0.5">Vendor</span>
-                                            <p className="text-xs text-white/60 leading-relaxed">{tx.vendor_reasoning}</p>
-                                        </div>
-                                    )}
-                                    {tx.category_reasoning && (
-                                        <div className="flex gap-2">
-                                            <span className="text-[10px] font-bold text-brand uppercase tracking-wider min-w-[60px] mt-0.5">Match</span>
-                                            <p className="text-xs text-white/60 leading-relaxed">{tx.category_reasoning}</p>
-                                        </div>
-                                    )}
-                                    {tx.note_reasoning && (
-                                        <div className="flex gap-2">
-                                            <span className="text-[10px] font-bold text-brand uppercase tracking-wider min-w-[60px] mt-0.5">Note</span>
-                                            <p className="text-xs text-white/60 leading-relaxed italic">"{tx.note_reasoning}"</p>
-                                        </div>
-                                    )}
-                                    {tx.tax_deduction_note && (
-                                        <div className="mt-2 p-3 rounded-xl bg-brand/5 border border-brand/20 relative overflow-hidden group/tip">
-                                            <div className="absolute inset-0 bg-gradient-to-r from-brand/10 to-transparent opacity-0 group-hover/tip:opacity-100 transition-opacity" />
-                                            <div className="flex items-center gap-2 mb-1.5 relative z-10">
-                                                <div className="p-1 rounded-md bg-brand/20 text-brand">
-                                                    <Sparkles size={12} />
-                                                </div>
-                                                <span className="text-[10px] font-black text-brand uppercase tracking-[0.2em]">CPA Tax Strategy</span>
-                                            </div>
-                                            <p className="text-[11px] text-white/80 leading-relaxed font-medium relative z-10">{tx.tax_deduction_note}</p>
-                                        </div>
-                                    )}
-                                    {!tx.vendor_reasoning && !tx.category_reasoning && !tx.tax_deduction_note && tx.reasoning && (
-                                        <div className="p-2 rounded-lg bg-white/5 border border-white/10">
-                                            <p className="text-xs text-white/40 leading-relaxed italic">{tx.reasoning}</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    {/* Editable Note & Tags Section */}
-                    <div className="mt-4 pt-4 border-t border-white/5">
-
-                        <label className="block text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">Note for Team</label>
-                        <div className="relative">
-                            <input
-                                type="text"
-                                defaultValue={tx.note || ''}
-                                placeholder="Add a note..."
-                                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-brand/50 transition-colors"
-                            />
-                        </div>
-
-                        {/* Tags Display */}
-                        <div className="flex flex-wrap gap-2 mt-3 items-center">
-                            {tx.tags && tx.tags.map((tag, i) => (
-                                <span key={i} className="px-2 py-1 rounded bg-white/5 border border-white/10 text-[10px] text-white/60 flex items-center gap-1 group/tag">
-                                    <Tags size={10} /> {tag}
-                                    {onTagRemove && (
-                                        <button
-                                            onClick={() => onTagRemove(tx.id, tag)}
-                                            className="hover:text-rose-400 ml-1 opacity-0 group-hover/tag:opacity-100 transition-opacity"
-                                        >
-                                            ×
-                                        </button>
-                                    )}
-                                </span>
-                            ))}
-
-                            {/* AI Suggested Tags */}
-                            {tx.suggested_tags && tx.suggested_tags.length > 0 && tx.suggested_tags.map((tag, i) => {
-                                // Only show if not already in active tags
-                                if (tx.tags && tx.tags.includes(tag)) return null;
-                                return (
-                                    <button
-                                        key={`suggest-${i}`}
-                                        onClick={() => onTagAdd && onTagAdd(tx.id, tag)}
-                                        className="px-2 py-1 rounded border border-dashed border-brand/50 text-[10px] text-brand/80 hover:bg-brand/10 transition-colors flex items-center gap-1 group/suggest"
-                                        title="Click to add suggested tag"
-                                    >
-                                        <Sparkles size={8} /> {tag}
-                                    </button>
-                                );
-                            })}
-
-                            {isAddingTag ? (
-                                <form
-                                    onSubmit={(e) => {
-                                        e.preventDefault();
-                                        if (newTag && onTagAdd) {
-                                            onTagAdd(tx.id, newTag);
-                                            setNewTag("");
-                                            setIsAddingTag(false);
-                                        }
-                                    }}
-                                    className="flex items-center gap-1"
-                                >
-                                    <input
-                                        type="text"
-                                        autoFocus
-                                        value={newTag}
-                                        onChange={(e) => setNewTag(e.target.value)}
-                                        placeholder="Tag..."
-                                        className="w-20 bg-black/20 border border-brand/50 rounded px-1.5 py-0.5 text-[10px] text-white focus:outline-none"
-                                        onBlur={() => setTimeout(() => setIsAddingTag(false), 200)}
-                                    />
-                                </form>
-                            ) : (
-                                <button
-                                    onClick={() => setIsAddingTag(true)}
-                                    className="px-2 py-1 rounded border border-dashed border-brand/30 text-[10px] text-brand hover:bg-brand/10 transition-colors"
-                                >
-                                    + Add Tag
-                                </button>
-                            )}
+                            <span className="text-[9px] font-black uppercase">{Math.round(tx.confidence * 100)}%</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex gap-3">
+                {/* AI Basement Section */}
+                <div className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-4 mb-6">
+                    <div className="flex flex-col md:flex-row gap-6">
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-3">
+                                <span className="text-[10px] font-bold text-brand uppercase tracking-[0.2em]">AI Intelligence</span>
+                                <div className="h-[1px] flex-1 bg-white/5" />
+                            </div>
+
+                            <div className="space-y-3">
+                                {(tx.vendor_reasoning || tx.category_reasoning || tx.reasoning) && (
+                                    <div className="flex gap-3">
+                                        <div className="p-1.5 rounded-lg bg-brand/10 text-brand shrink-0 h-fit">
+                                            <Sparkles size={14} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            {tx.vendor_reasoning && (
+                                                <p className="text-[11px] text-white/60 leading-relaxed">
+                                                    <span className="text-white/40 font-bold mr-1">VENDOR:</span> {tx.vendor_reasoning}
+                                                </p>
+                                            )}
+                                            {tx.category_reasoning && (
+                                                <p className="text-[11px] text-white/60 leading-relaxed">
+                                                    <span className="text-white/40 font-bold mr-1">MATCH:</span> {tx.category_reasoning}
+                                                </p>
+                                            )}
+                                            {!tx.vendor_reasoning && !tx.category_reasoning && tx.reasoning && (
+                                                <p className="text-[11px] text-white/50 leading-relaxed italic">{tx.reasoning}</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {tx.tax_deduction_note && (
+                                    <div className="p-3 rounded-xl bg-brand/5 border border-brand/20 relative overflow-hidden group/tip">
+                                        <div className="absolute inset-0 bg-gradient-to-r from-brand/10 to-transparent opacity-0 group-hover/tip:opacity-100 transition-opacity" />
+                                        <div className="flex items-center gap-2 relative z-10">
+                                            <div className="p-1 rounded-md bg-brand/20 text-brand">
+                                                <Info size={12} />
+                                            </div>
+                                            <span className="text-[10px] font-black text-brand uppercase tracking-[0.2em]">Tax Strategy</span>
+                                            <p className="text-[11px] text-white/80 leading-relaxed font-medium">{tx.tax_deduction_note}</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="flex-1 md:border-l md:border-white/5 md:pl-6">
+                            <div className="flex items-center gap-2 mb-3">
+                                <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Collaboration</span>
+                                <div className="h-[1px] flex-1 bg-white/5" />
+                            </div>
+
+                            <div className="space-y-4">
+                                <input
+                                    type="text"
+                                    defaultValue={tx.note || ''}
+                                    placeholder="Add team note..."
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-brand/40 transition-all font-medium"
+                                />
+
+                                <div className="flex flex-wrap gap-2 items-center">
+                                    {tx.tags && tx.tags.map((tag, i) => (
+                                        <span key={i} className="px-2 py-1 rounded-md bg-white/5 border border-white/10 text-[10px] text-white/60 flex items-center gap-1.5 group/tag">
+                                            <Tags size={10} /> {tag}
+                                            {onTagRemove && (
+                                                <button onClick={() => onTagRemove(tx.id, tag)} className="hover:text-rose-400 opacity-0 group-hover/tag:opacity-100 transition-opacity">×</button>
+                                            )}
+                                        </span>
+                                    ))}
+                                    <button
+                                        onClick={() => setIsAddingTag(true)}
+                                        className="px-2 py-1 rounded-md border border-dashed border-brand/30 text-[10px] text-brand hover:bg-brand/10 transition-colors"
+                                    >
+                                        + Tag
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Actions Section */}
+                <div className="flex flex-wrap items-center gap-3">
                     <motion.button
-                        whileTap={{ scale: 0.95 }}
-                        onClick={async () => {
-                            setIsSyncing(true);
-                            await handleAccept();
-                            setIsSyncing(false);
-                        }}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleAccept}
                         disabled={isSyncing}
-                        className={`flex-1 ${isSyncing ? 'bg-brand/50 cursor-wait' : 'bg-brand hover:bg-brand/90'} text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-brand/20 transition-all border border-white/10`}
+                        className={`min-w-[180px] h-12 ${isSyncing ? 'bg-brand/50 cursor-wait' : 'bg-brand hover:bg-brand/90'} text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-brand/20 transition-all border border-white/10`}
                     >
                         {isSyncing ? (
                             <div className="w-4 h-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin" />
@@ -406,102 +325,69 @@ export default function TransactionCard({
                         )}
                     </motion.button>
 
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                        className="hidden"
-                        accept="image/*"
-                    />
-
                     <motion.button
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                        className={`w-12 h-12 ${tx.receipt_url ? 'bg-brand/20 text-brand border-brand/30' : 'bg-white/5 text-white/60 hover:text-white'} border border-white/10 rounded-xl flex items-center justify-center transition-all`}
-                        title="Mirror Receipt"
-                    >
-                        {isUploading ? (
-                            <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                            <FilePlus size={18} />
-                        )}
-                    </motion.button>
-
-                    <motion.button
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setIsAddingTag(true)}
-                        className={`w-12 h-12 ${isAddingTag ? 'bg-brand/20 text-brand border-brand/30' : 'bg-white/5 hover:bg-white/10'} border border-white/10 rounded-xl flex items-center justify-center text-white/60 hover:text-white transition-all`}
-                        title="Add Tags"
-                    >
-                        <Tags size={18} />
-                    </motion.button>
-
-                    <motion.button
-                        whileTap={{ scale: 0.95 }}
-                        className="w-12 h-12 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center justify-center text-white/60 hover:text-white transition-all"
-                        title="Split Transaction"
-                    >
-                        <SplitIcon size={18} />
-                    </motion.button>
-
-                    <motion.button
-                        whileTap={{ scale: 0.95 }}
-                        className="w-12 h-12 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center justify-center text-white/60 hover:text-white transition-all"
-                    >
-                        <Edit2 size={18} />
-                    </motion.button>
-
-
-
-                    <motion.button
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={async () => {
                             if (onAnalyze) {
                                 setIsAnalyzing(true);
                                 await onAnalyze(tx.id);
                                 setIsAnalyzing(false);
-                                // Optional: Auto-open reasoning if we could, but we don't know if it finished.
                             }
                         }}
                         disabled={isAnalyzing}
-                        className={`w-12 h-12 ${isAnalyzing ? 'bg-brand/20 border-brand/30' : 'bg-brand/10 hover:bg-brand/20 border-brand/20'} border rounded-xl flex items-center justify-center text-brand transition-all`}
-                        title="Re-analyze with AI (Deducts 1 Token)"
+                        className={`h-12 px-6 ${isAnalyzing ? 'bg-brand/20 border-brand/30' : 'bg-brand/10 hover:bg-brand/20 border-brand/20'} border rounded-xl flex items-center justify-center text-brand font-bold gap-2 transition-all relative overflow-hidden group/sparkle`}
                     >
                         {isAnalyzing ? (
                             <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" />
                         ) : (
-                            <Sparkles size={18} />
+                            <>
+                                <Sparkles size={18} className="group-hover/sparkle:rotate-12 transition-transform" />
+                                <span>Analyze with AI</span>
+                            </>
                         )}
                     </motion.button>
 
-                    {tx.is_excluded ? (
-                        <motion.button
-                            whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(16, 185, 129, 0.2)" }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => onInclude && onInclude(tx.id)}
-                            className="px-4 h-12 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 rounded-xl flex items-center justify-center text-emerald-400 font-bold text-xs transition-all relative overflow-hidden group/btn"
-                        >
-                            <span className="relative z-10 flex items-center gap-2">
+                    <div className="flex gap-2 ml-auto">
+                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
+                        <IconButton
+                            onClick={() => fileInputRef.current?.click()}
+                            icon={<FilePlus size={18} />}
+                            title="Receipt"
+                            active={!!tx.receipt_url}
+                            loading={isUploading}
+                        />
+                        <IconButton
+                            icon={<SplitIcon size={18} />}
+                            title="Split"
+                        />
+                        <IconButton
+                            icon={<Edit2 size={18} />}
+                            title="Edit"
+                        />
+
+                        {tx.is_excluded ? (
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => onInclude && onInclude(tx.id)}
+                                className="px-5 h-12 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 font-bold text-xs rounded-xl flex items-center gap-2 transition-all"
+                            >
                                 <CheckCircle2 size={14} />
                                 Include
-                            </span>
-                            <div className="absolute inset-0 bg-emerald-500/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300" />
-                        </motion.button>
-                    ) : (
-                        <motion.button
-                            whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(244, 63, 94, 0.2)" }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => onExclude && onExclude(tx.id)}
-                            className="px-4 h-12 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/40 rounded-xl flex items-center justify-center text-rose-400 font-bold text-xs transition-all relative overflow-hidden group/btn"
-                        >
-                            <span className="relative z-10 flex items-center gap-2">
+                            </motion.button>
+                        ) : (
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => onExclude && onExclude(tx.id)}
+                                className="px-5 h-12 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 font-bold text-xs rounded-xl flex items-center gap-2 transition-all"
+                            >
                                 <SplitIcon size={14} className="rotate-45" />
                                 Exclude
-                            </span>
-                            <div className="absolute inset-0 bg-rose-500/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300" />
-                        </motion.button>
-                    )}
+                            </motion.button>
+                        )}
+                    </div>
                 </div>
 
                 {tx.is_exported && (
@@ -516,5 +402,37 @@ export default function TransactionCard({
             </div>
             <div className="h-1 w-full bg-gradient-to-r from-transparent via-brand/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </motion.div>
+    );
+}
+
+function IconButton({
+    icon,
+    onClick,
+    title,
+    active = false,
+    loading = false
+}: {
+    icon: React.ReactNode,
+    onClick?: () => void,
+    title: string,
+    active?: boolean,
+    loading?: boolean
+}) {
+    return (
+        <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onClick}
+            disabled={loading}
+            className={`w-12 h-12 rounded-xl flex items-center justify-center border transition-all ${active
+                ? 'bg-brand/20 text-brand border-brand/30'
+                : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border-white/10'
+                }`}
+            title={title}
+        >
+            {loading ? (
+                <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+            ) : icon}
+        </motion.button>
     );
 }

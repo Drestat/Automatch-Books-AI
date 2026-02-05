@@ -1,9 +1,19 @@
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException, Depends, Header
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 from app.db.session import get_db
 from app.models.user import User
 from app.models.qbo import QBOConnection
+from typing import Optional
+
+def get_current_user(x_user_id: str = Header(..., alias="X-User-Id"), db: Session = Depends(get_db)) -> User:
+    """
+    Retrieves the current user based on the X-User-Id header.
+    """
+    user = db.query(User).filter(User.id == x_user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
 def get_subscription_status(user: User):
     """

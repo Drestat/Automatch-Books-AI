@@ -121,13 +121,30 @@ async def get_accounts(realm_id: str, db: Session = Depends(get_db), user=Depend
     }
 
 @router.post("/accounts/select")
-async def update_account_selection(payload: AccountSelectionSchema, db: Session = Depends(get_db), user=Depends(verify_subscription)):
+async def update_account_selection(payload: AccountSelectionSchema, db: Session = Depends(get_db)):
     realm_id = payload.realm_id
     selected_ids = payload.active_account_ids
     
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
     if not connection:
          raise HTTPException(status_code=404, detail="QBO Connection not found")
+    
+    # Verify Subscription (Manual)
+    from app.api.deps import get_current_user, get_subscription_status
+    user = db.query(User).filter(User.id == connection.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    status = get_subscription_status(user)
+    if status in ['expired', 'no_plan']:
+        raise HTTPException(
+            status_code=402, 
+            detail={
+                "error": "subscription_required",
+                "message": "Your trial has expired. Please upgrade to a paid plan to continue.",
+                "tier": user.subscription_tier
+            }
+        )
          
     service = TransactionService(db, connection)
     limit = service._get_account_limit()
@@ -153,13 +170,26 @@ async def update_account_selection(payload: AccountSelectionSchema, db: Session 
     return {"status": "success", "message": f"Updated {updated_count} accounts"}
 
 @router.post("/accounts/preview")
-async def preview_account_sync(payload: AccountSelectionSchema, db: Session = Depends(get_db), user=Depends(verify_subscription)):
+async def preview_account_sync(payload: AccountSelectionSchema, db: Session = Depends(get_db)):
     realm_id = payload.realm_id
     selected_ids = payload.active_account_ids
     
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
     if not connection:
          raise HTTPException(status_code=404, detail="QBO Connection not found")
+         
+    # Verify Subscription (Manual)
+    from app.api.deps import get_current_user, get_subscription_status
+    user = db.query(User).filter(User.id == connection.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    status = get_subscription_status(user)
+    if status in ['expired', 'no_plan']:
+        raise HTTPException(
+            status_code=402, 
+            detail="Subscription required"
+        )
 
     # Refresh token if needed is handled by QBOClient
     from app.services.qbo_client import QBOClient

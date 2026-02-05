@@ -86,40 +86,65 @@ class QBOClient:
         """Fetches a single Purchase entity by ID."""
         return await self.request("GET", f"purchase/{purchase_id}")
 
-    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_ref: dict = None, payment_type: str = None, tags: list[str] = None, amount: float = None, append_memo: str = None):
+    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_ref: dict = None, payment_type: str = None, txn_status: str = None, global_tax_calculation: str = None, existing_line_override: dict = None, tags: list[str] = None, amount: float = None, append_memo: str = None):
         """
         Update a Purchase entity (Expense/Check) via Sparse Update.
+        Preserves existing line details if 'existing_line_override' is provided.
         """
+        
+        # Prepare Line Item
+        line_item = {}
+        if existing_line_override:
+            line_item = existing_line_override
+            # Purge invalid fields if they exist
+            if "ClrStatus" in line_item:
+                del line_item["ClrStatus"]
+            # Ensure DetailType is correct (usually AccountBasedExpenseLineDetail)
+            # If it was ItemBased, we might be switching to AccountBased?
+            # Ideally we stick to AccountBased for categorization.
+            line_item["DetailType"] = "AccountBasedExpenseLineDetail"
+            if "AccountBasedExpenseLineDetail" not in line_item:
+                 line_item["AccountBasedExpenseLineDetail"] = {}
+        else:
+            line_item = {
+                "Id": "1", 
+                "DetailType": "AccountBasedExpenseLineDetail",
+                "AccountBasedExpenseLineDetail": {}
+            }
+
+        # Update Category (Account)
+        line_item["AccountBasedExpenseLineDetail"]["AccountRef"] = {
+            "value": category_id,
+            "name": category_name
+        }
+        
+        # Update Amount on Line if provided
+        if amount is not None and amount > 0:
+            line_item["Amount"] = amount
+        
         update_payload = {
             "Id": purchase_id,
             "SyncToken": sync_token,
             "sparse": True,
-            "Line": [
-                {
-                    "Id": "1", 
-                    "DetailType": "AccountBasedExpenseLineDetail",
-                    "AccountBasedExpenseLineDetail": {
-                        "AccountRef": {
-                            "value": category_id,
-                            "name": category_name
-                        },
-                        "ClrStatus": "Cleared"
-                    }
-                }
-            ]
+            "Line": [line_item]
         }
 
         if amount is not None and amount > 0:
             update_payload["TotalAmt"] = amount
-            update_payload["Line"][0]["Amount"] = amount
         elif amount == 0:
             print(f"⚠️ [QBOClient] Amount is 0. Skipping amount update to preserve QBO value.")
         
         if entity_ref:
             update_payload["EntityRef"] = entity_ref
-            
+
         if payment_type:
             update_payload["PaymentType"] = payment_type
+            
+        if txn_status:
+            update_payload["TxnStatus"] = txn_status
+            
+        if global_tax_calculation:
+            update_payload["GlobalTaxCalculation"] = global_tax_calculation
 
         # NOTE: QBO API v3 does NOT support native Tags (TagRef).
         # Workaround: Include tags and persistent markers in the PrivateNote (Memo).
@@ -135,6 +160,12 @@ class QBOClient:
             update_payload["PrivateNote"] = " | ".join(memo_parts)
 
         print(f"📝 [QBOClient] Updating Purchase {purchase_id} -> Cat: {category_name}, Payee: {entity_ref.get('name') if entity_ref else 'N/A'}, Memo: {update_payload.get('PrivateNote', 'N/A')}")
+        import json
+        try:
+            print(f"📦 [DEBUG] Payload: {json.dumps(update_payload, default=str)}")
+        except Exception as e:
+            print(f"📦 [DEBUG] Payload (raw): {update_payload} (Error dumping: {e})")
+
         result = await self.request("POST", "purchase", json_payload=update_payload)
         return result.get("Purchase", {})
 
@@ -177,6 +208,57 @@ class QBOClient:
         result = await self.query(query)
         vendors = result.get("QueryResponse", {}).get("Vendor", [])
         return vendors[0] if vendors else None
+
+    async def upload_attachment(self, file_bytes: bytes, filename: str, content_type: str, attachable_ref: dict = None):
+        """
+        Uploads a file to QBO 'Attachable' endpoint using multipart/form-data.
+        Docs: https://developer.intuit.com/app/developer/qbo/docs/api/accounting/all-entities/attachable#upload-attachments
+        """
+        endpoint = "upload"
+        url = self._get_api_url(endpoint)
+        headers = {
+            'Authorization': f'Bearer {self.connection.access_token}',
+            'Accept': 'application/json'
+            # Content-Type is set automatically by httpx for multipart
+        }
+        
+        # Metadata part (JSON)
+        metadata = {
+            "ContentType": content_type,
+            "FileName": filename
+        }
+        if attachable_ref:
+            # Setup linking (e.g. to a Purchase)
+            # Structure: "AttachableRef": [{"EntityRef": {"type": "Purchase", "value": "123"}}]
+            metadata["AttachableRef"] = [attachable_ref]
+
+        import json
+        
+        # httpx expects 'files' for multipart
+        # QBO requires specific part names: 'file_metadata_01' and 'file_content_01'
+        files = {
+            'file_metadata_01': (None, json.dumps(metadata), 'application/json'),
+            'file_content_01': (filename, file_bytes, content_type)
+        }
+        
+        print(f"Tb [QBOClient] Uploading attachment: {filename} ({len(file_bytes)} bytes)")
+        
+        async with httpx.AsyncClient() as client:
+            try:
+                res = await client.post(url, headers=headers, files=files)
+                if res.status_code == 401:
+                    # Simple refresh retry (blocking)
+                    token = self._refresh_access_token()
+                    headers['Authorization'] = f'Bearer {token}'
+                    res = await client.post(url, headers=headers, files=files)
+                
+                res.raise_for_status()
+                result = res.json()
+                return result.get("AttachableResponse", [{}])[0].get("Attachable", {})
+                
+            except httpx.HTTPStatusError as e:
+                print(f"❌ [QBOClient] Upload Failed: {e.response.text}")
+                raise e
 
     def revoke(self):
         try:

@@ -78,13 +78,14 @@ def fastapi_app():
         print("✅ [Modal] Ready to serve production traffic.")
         return main_app
     except Exception as e:
-        print(f"❌ [Modal] CRITICAL STARTUP ERROR: {e}")
+        error_msg = str(e)
+        print(f"❌ [Modal] CRITICAL STARTUP ERROR: {error_msg}")
         # Return a fallback app so the container stays healthy but reports the error
         from fastapi import FastAPI
         err_app = FastAPI()
         @err_app.get("/{path:path}")
         def err(path: str):
-            return {"error": "Startup Failed", "detail": str(e)}
+            return {"error": "Startup Failed", "detail": error_msg}
         return err_app
 
 @app.function(image=image, secrets=[secrets], timeout=600)
