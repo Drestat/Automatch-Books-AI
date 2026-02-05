@@ -308,47 +308,7 @@ export default function TransactionCard({
 
                 {/* Actions Section */}
                 <div className="flex flex-wrap items-center gap-3">
-                    <motion.button
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleAccept}
-                        disabled={isSyncing}
-                        className={`min-w-[180px] h-12 ${isSyncing ? 'bg-brand/50 cursor-wait' : 'bg-brand hover:bg-brand/90'} text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-brand/20 transition-all border border-white/10`}
-                    >
-                        {isSyncing ? (
-                            <div className="w-4 h-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                            <>
-                                <Check size={18} />
-                                Confirm Match
-                            </>
-                        )}
-                    </motion.button>
-
-                    <motion.button
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={async () => {
-                            if (onAnalyze) {
-                                setIsAnalyzing(true);
-                                await onAnalyze(tx.id);
-                                setIsAnalyzing(false);
-                            }
-                        }}
-                        disabled={isAnalyzing}
-                        className={`h-12 px-6 ${isAnalyzing ? 'bg-brand/20 border-brand/30' : 'bg-brand/10 hover:bg-brand/20 border-brand/20'} border rounded-xl flex items-center justify-center text-brand font-bold gap-2 transition-all relative overflow-hidden group/sparkle`}
-                    >
-                        {isAnalyzing ? (
-                            <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                            <>
-                                <Sparkles size={18} className="group-hover/sparkle:rotate-12 transition-transform" />
-                                <span>Analyze with AI</span>
-                            </>
-                        )}
-                    </motion.button>
-
-                    <div className="flex gap-2 ml-auto">
+                    <div className="flex gap-2">
                         <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
                         <IconButton
                             onClick={() => fileInputRef.current?.click()}
@@ -387,6 +347,48 @@ export default function TransactionCard({
                                 Exclude
                             </motion.button>
                         )}
+                    </div>
+
+                    <div className="flex items-center gap-3 ml-auto">
+                        <motion.button
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={async () => {
+                                if (onAnalyze) {
+                                    setIsAnalyzing(true);
+                                    await onAnalyze(tx.id);
+                                    setIsAnalyzing(false);
+                                }
+                            }}
+                            disabled={isAnalyzing}
+                            className={`h-12 px-6 ${isAnalyzing ? 'bg-brand/20 border-brand/30' : 'bg-brand/10 hover:bg-brand/20 border-brand/20'} border rounded-xl flex items-center justify-center text-brand font-bold gap-2 transition-all relative overflow-hidden group/sparkle`}
+                        >
+                            {isAnalyzing ? (
+                                <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                                <>
+                                    <Sparkles size={18} className="group-hover/sparkle:rotate-12 transition-transform" />
+                                    <span>Analyze with AI</span>
+                                </>
+                            )}
+                        </motion.button>
+
+                        <motion.button
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={handleAccept}
+                            disabled={isSyncing}
+                            className={`min-w-[180px] h-12 ${isSyncing ? 'bg-brand/50 cursor-wait' : 'bg-brand hover:bg-brand/90'} text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-brand/20 transition-all border border-white/10`}
+                        >
+                            {isSyncing ? (
+                                <div className="w-4 h-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                                <>
+                                    <Check size={18} />
+                                    Confirm Match
+                                </>
+                            )}
+                        </motion.button>
                     </div>
                 </div>
 
