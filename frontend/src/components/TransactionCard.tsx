@@ -124,10 +124,6 @@ export default function TransactionCard({
                 <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 mb-4 md:mb-6">
                     {/* Column 1: Date & Type */}
                     <div className="flex items-center gap-4 min-w-[140px]">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isExpense ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'
-                            } border border-white/5`}>
-                            {isExpense ? <ArrowUpRight className="rotate-180" size={20} /> : <ArrowUpRight size={20} />}
-                        </div>
                         <div>
                             <p className="text-[13px] text-white font-black uppercase tracking-wider mb-0.5">
                                 {new Date(tx.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -202,14 +198,11 @@ export default function TransactionCard({
                         <p className={`text-lg font-black ${isExpense ? 'text-white' : 'text-emerald-400'}`}>
                             {tx.amount === 0 ? '' : (isExpense ? '-' : '+')}{Math.abs(tx.amount).toLocaleString('en-US', { style: 'currency', currency: tx.currency })}
                         </p>
-                        <div className={`flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full border ${tx.confidence > 0.9 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+                        <div className={`flex items-center gap-1.5 mt-1 px-2 py-0.5 rounded-full border ${tx.confidence > 0.9 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
                             tx.confidence > 0.7 ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
                                 'bg-rose-500/10 border-rose-500/20 text-rose-400'
                             }`}>
-                            <div className={`w-1 h-1 rounded-full ${tx.confidence > 0.9 ? 'bg-emerald-500' :
-                                tx.confidence > 0.7 ? 'bg-amber-500' :
-                                    'bg-rose-500'
-                                }`} />
+                            {isExpense ? <ArrowUpRight className="rotate-180" size={12} /> : <ArrowUpRight size={12} />}
                             <span className="text-[9px] font-black uppercase">{Math.round(tx.confidence * 100)}%</span>
                         </div>
                     </div>
