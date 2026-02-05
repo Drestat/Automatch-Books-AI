@@ -4,6 +4,7 @@ import React from 'react';
 import { Check, Edit2, Info, ArrowUpRight, FilePlus, Tags, Split as SplitIcon, ExternalLink, CheckCircle2, Sparkles, Building2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import VendorSelector from './VendorSelector';
+import CategorySelector from './CategorySelector';
 
 interface Split {
     category_name: string;
@@ -176,35 +177,24 @@ export default function TransactionCard({
                     {/* Column 4: Category Selector */}
                     <div className="flex-1 min-w-[180px]">
                         <span className="text-[9px] uppercase tracking-widest font-black text-white/20 mb-1 block">Category</span>
-                        {isEditingCategory ? (
-                            <div className="relative">
-                                <select
-                                    className="w-full bg-black border border-brand/50 rounded px-2 py-1 text-xs text-white focus:outline-none"
-                                    onChange={(e) => {
-                                        const cat = availableCategories.find(c => c.id === e.target.value);
-                                        if (cat && onCategoryChange) {
-                                            onCategoryChange(tx.id, cat.id, cat.name);
-                                            setIsEditingCategory(false);
-                                        }
-                                    }}
-                                    onBlur={() => setIsEditingCategory(false)}
-                                    autoFocus
-                                    defaultValue=""
-                                >
-                                    <option value="" disabled>Select...</option>
-                                    {availableCategories.map(c => (
-                                        <option key={c.id} value={c.id}>{c.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        ) : (
-                            <div className="flex items-center gap-2 group/edit cursor-pointer" onClick={() => setIsEditingCategory(true)}>
-                                <p className="text-sm font-medium text-white/90 group-hover:text-brand transition-colors">
-                                    {tx.suggested_category_name}
-                                </p>
-                                <Edit2 size={12} className="text-white/20 opacity-0 group-hover/edit:opacity-100 transition-all" />
-                            </div>
-                        )}
+                        <div className="flex items-center gap-2 group/edit cursor-pointer" onClick={() => setIsEditingCategory(true)}>
+                            <p className="text-sm font-medium text-white/90 group-hover:text-brand transition-colors">
+                                {tx.suggested_category_name}
+                            </p>
+                            <Edit2 size={12} className="text-white/20 opacity-0 group-hover/edit:opacity-100 transition-all" />
+                        </div>
+                        <CategorySelector
+                            isOpen={isEditingCategory}
+                            onClose={() => setIsEditingCategory(false)}
+                            onSelect={(categoryName, categoryId) => {
+                                if (onCategoryChange) {
+                                    onCategoryChange(tx.id, categoryId, categoryName);
+                                    setIsEditingCategory(false);
+                                }
+                            }}
+                            availableCategories={availableCategories}
+                            currentCategory={tx.suggested_category_name}
+                        />
                     </div>
 
                     {/* Column 5: Amount & Confidence */}
