@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, Sparkles, Building2, X, Command, Check } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 interface Vendor {
     id: string;
@@ -28,8 +29,13 @@ export default function VendorSelector({
 }: VendorSelectorProps) {
     const [search, setSearch] = useState("");
     const [selectedIndex, setSelectedIndex] = useState(0);
+    const [mounted, setMounted] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Simple weighted search / scoring
     const filteredVendors = useMemo(() => {
@@ -101,7 +107,9 @@ export default function VendorSelector({
         }
     }, [selectedIndex]);
 
-    return (
+    if (!mounted) return null;
+
+    return createPortal(
         <AnimatePresence>
             {isOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -213,6 +221,7 @@ export default function VendorSelector({
                     </motion.div>
                 </div>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 }
