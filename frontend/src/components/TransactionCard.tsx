@@ -167,8 +167,8 @@ export default function TransactionCard({
                             className="flex items-center gap-2 group/edit cursor-pointer transition-all hover:text-brand"
                             onClick={() => setIsEditingPayee(true)}
                         >
-                            <p className={`text-sm font-bold ${tx.payee ? 'text-white/90' : 'text-rose-400 italic'}`}>
-                                {tx.payee || "Unassigned"}
+                            <p className={`text-sm font-bold ${tx.payee ? 'text-white/90' : (tx.suggested_payee ? 'text-white/40' : 'text-rose-400 italic')}`}>
+                                {tx.payee || tx.suggested_payee || "Unassigned"}
                             </p>
                             <Edit2 size={12} className="text-white/20 opacity-0 group-hover/edit:opacity-100 transition-all" />
                         </div>
@@ -316,12 +316,37 @@ export default function TransactionCard({
                                             <Sparkles size={10} /> {tag} +
                                         </motion.button>
                                     ))}
-                                    <button
-                                        onClick={() => setIsAddingTag(true)}
-                                        className="px-2 py-1 rounded-md border border-dashed border-brand/30 text-[10px] text-brand hover:bg-brand/10 transition-colors"
-                                    >
-                                        + Tag
-                                    </button>
+                                    {isAddingTag ? (
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                autoFocus
+                                                type="text"
+                                                value={newTag}
+                                                onChange={(e) => setNewTag(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' && newTag.trim()) {
+                                                        onTagAdd && onTagAdd(tx.id, newTag.trim());
+                                                        setNewTag("");
+                                                        setIsAddingTag(false);
+                                                    } else if (e.key === 'Escape') {
+                                                        setIsAddingTag(false);
+                                                    }
+                                                }}
+                                                onBlur={() => {
+                                                    if (!newTag.trim()) setIsAddingTag(false);
+                                                }}
+                                                placeholder="New tag..."
+                                                className="bg-black/40 border border-brand/30 rounded px-2 py-1 text-[10px] text-white focus:outline-none focus:border-brand w-24"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => setIsAddingTag(true)}
+                                            className="px-2 py-1 rounded-md border border-dashed border-brand/30 text-[10px] text-brand hover:bg-brand/10 transition-colors"
+                                        >
+                                            + Tag
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
