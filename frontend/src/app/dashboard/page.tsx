@@ -167,7 +167,7 @@ function DashboardContent() {
     }
   };
 
-  const approvedCount = transactions.filter(tx => tx.status === 'CATEGORIZED').length;
+  const approvedCount = transactions.filter(tx => tx.status === 'approved').length;
 
   if (!isConnected && !isDemo) {
     return (
@@ -561,6 +561,7 @@ function DashboardContent() {
                           const currentTags = tx.tags || [];
                           await updateTransaction(txId, { tags: currentTags.filter(t => t !== tag) });
                         }}
+                        onUpdate={updateTransaction}
                       />
                     </motion.div>
                   ))}
@@ -595,7 +596,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.28.7</span></p>
+          <p className="text-white/20 text-xs">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.28.17</span></p>
         </footer>
 
       </div>
