@@ -250,7 +250,7 @@ def update_transaction(realm_id: str, tx_id: str, update: TransactionUpdate, db:
 @router.post("/upload-receipt")
 def upload_receipt(
     realm_id: str,
-    tx_id: str = None,
+    tx_id: Optional[str] = Query(None),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     user=Depends(verify_subscription)

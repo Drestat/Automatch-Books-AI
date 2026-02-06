@@ -143,20 +143,19 @@ class QBOClient:
 
         # Date (TxnDate) and TotalAmt are EXCLUDED to prevent accidental overwrites.
         
-        if entity_ref and entity_type == "Purchase":
-            update_payload["EntityRef"] = entity_ref
-        elif entity_ref and entity_type == "BillPayment":
-            update_payload["VendorRef"] = entity_ref
+        if entity_ref:
+            if endpoint == "purchase":
+                update_payload["EntityRef"] = entity_ref
+            elif endpoint == "billpayment":
+                update_payload["VendorRef"] = entity_ref
 
-        if payment_type and entity_type == "Purchase":
+        if payment_type and endpoint == "purchase":
             update_payload["PaymentType"] = payment_type
             
-        if txn_status:
-            # Note: BillPayment uses a different status field usually, or none at all in sparse update
-            if entity_type == "Purchase":
-                update_payload["TxnStatus"] = txn_status
+        if txn_status and endpoint == "purchase":
+            update_payload["TxnStatus"] = txn_status
             
-        if global_tax_calculation and entity_type == "Purchase":
+        if global_tax_calculation and endpoint == "purchase":
             update_payload["GlobalTaxCalculation"] = global_tax_calculation
 
         # PrivateNote (Memo) workaround for tags
