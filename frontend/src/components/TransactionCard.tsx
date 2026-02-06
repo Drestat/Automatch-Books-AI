@@ -151,8 +151,8 @@ export default function TransactionCard({
                     <div className="flex-1 min-w-[200px]">
                         <span className="text-[9px] uppercase tracking-widest font-black text-white/20 mb-1 block">Description</span>
 
-                        {/* Suggestion Pill for Empty Description */}
-                        {(!tx.description || tx.description.trim() === '') && (tx.suggested_payee || tx.payee) && (
+                        {/* Suggestion Pill for Description */}
+                        {(tx.suggested_payee || tx.payee) && (
                             <motion.button
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
