@@ -32,5 +32,5 @@ async def diag_approve(realm_id, tx_id):
         db.close()
 
 if __name__ == "__main__":
-    # From previous check: ('151', 'A1 RENTAL BACKHOE DEPOSIT REFUND', 'pending_approval', 'Expense', '9341456245321396')
-    asyncio.run(diag_approve('9341456245321396', '151'))
+    # From previous check: ('77', 'PG&E', 'pending_approval', 'BillPayment', '9341456245321396')
+    asyncio.run(diag_approve('9341456245321396', '77'))

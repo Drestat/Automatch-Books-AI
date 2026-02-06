@@ -136,13 +136,7 @@ class TransactionService:
                      # Ideally we'd query QBO. But let's rely on standard logic:
                      pass 
                 
-                # Check raw_json AccountRef type?
-                # Use "Cash" (Expense) as safer default for Bank Accounts than "Check"
-                # If we force "Cash", it becomes an Expense.
-                if payment_type == "Check" and (not tx.raw_json.get("DocNumber")):
-                     print(f"🔄 [Approve] Converting 'Check' (no DocNum) to 'Cash' (Expense) for better matching.")
-                     payment_type = "Cash"
-                elif not payment_type:
+                if not payment_type:
                      payment_type = "Cash" # Default to Expense
                      
         # Use CreditCard if applicable (Logic implies we need to know Account details better. 

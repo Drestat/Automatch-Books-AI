@@ -158,8 +158,7 @@ class QBOClient:
         if entity_ref:
             if endpoint == "purchase":
                 update_payload["EntityRef"] = entity_ref
-            elif endpoint == "billpayment":
-                update_payload["VendorRef"] = entity_ref
+            # Skip VendorRef for BillPayment in sparse updates
 
         if deposit_to_account_ref:
             update_payload["DepositToAccountRef"] = deposit_to_account_ref
@@ -189,9 +188,8 @@ class QBOClient:
             memo_parts.append(append_memo)
 
         if memo_parts:
-            # BillPayment uses 'Memo', others use 'PrivateNote'
-            memo_field = "Memo" if entity_type == "BillPayment" else "PrivateNote"
-            update_payload[memo_field] = " | ".join(memo_parts)
+            # BillPayment seems to prefer PrivateNote in some contexts, let's standardize
+            update_payload["PrivateNote"] = " | ".join(memo_parts)
 
         print(f"📝 [QBOClient] Updating {entity_type} {purchase_id} -> Endpoint: {endpoint}")
         
