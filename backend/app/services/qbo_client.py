@@ -86,7 +86,7 @@ class QBOClient:
         """Fetches a single Purchase entity by ID."""
         return await self.request("GET", f"purchase/{purchase_id}")
 
-    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_type: str = "Purchase", entity_ref: dict = None, payment_type: str = None, txn_status: str = None, global_tax_calculation: str = None, existing_line_override: dict = None, tags: list[str] = None, note: str = None, append_memo: str = None):
+    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_type: str = "Purchase", entity_ref: dict = None, payment_type: str = None, txn_status: str = None, global_tax_calculation: str = None, existing_line_override: dict = None, tags: list[str] = None, note: str = None, append_memo: str = None, deposit_to_account_ref: dict = None, from_account_ref: dict = None):
         """
         Update a QBO entity (Purchase, BillPayment, etc.) via Sparse Update.
         Preserves existing line details if 'existing_line_override' is provided.
@@ -106,6 +106,15 @@ class QBOClient:
         }
         endpoint = type_mapping.get(entity_type, "purchase").lower()
         
+        # Determine DetailType based on Entity Type
+        detail_type = "AccountBasedExpenseLineDetail"
+        if entity_type == "Deposit":
+            detail_type = "DepositLineDetail"
+        elif entity_type == "JournalEntry":
+            detail_type = "JournalEntryLineDetail"
+        elif entity_type == "BillPayment":
+            detail_type = "BillPaymentLineDetail" # Note: update_purchase usually skips line details for BillPayment in specific ways
+
         # Prepare Line Item
         line_item = {}
         if existing_line_override:
@@ -114,21 +123,21 @@ class QBOClient:
             if "ClrStatus" in line_item:
                 del line_item["ClrStatus"]
             
-            # For non-BillPayment entities, we ensure DetailType is correct
+            # Ensure DetailType is correct for the specific entity
             if entity_type != "BillPayment":
-                line_item["DetailType"] = "AccountBasedExpenseLineDetail"
-                if "AccountBasedExpenseLineDetail" not in line_item:
-                    line_item["AccountBasedExpenseLineDetail"] = {}
+                line_item["DetailType"] = detail_type
+                if detail_type not in line_item:
+                    line_item[detail_type] = {}
         else:
             line_item = {
                 "Id": "1", 
-                "DetailType": "AccountBasedExpenseLineDetail",
-                "AccountBasedExpenseLineDetail": {}
+                "DetailType": detail_type,
+                detail_type: {}
             }
 
-        # Update Category (Account) - Only if it's NOT a BillPayment (which links to Bills, not Accounts directly)
+        # Update Category (Account) - Only if it's NOT a BillPayment
         if entity_type != "BillPayment":
-            line_item["AccountBasedExpenseLineDetail"]["AccountRef"] = {
+            line_item[detail_type]["AccountRef"] = {
                 "value": category_id,
                 "name": category_name
             }
@@ -138,9 +147,11 @@ class QBOClient:
         update_payload = {
             "Id": purchase_id,
             "SyncToken": sync_token,
-            "sparse": True,
-            "Line": [line_item]
+            "sparse": True
         }
+
+        if entity_type != "BillPayment":
+            update_payload["Line"] = [line_item]
 
         # Date (TxnDate) and TotalAmt are EXCLUDED to prevent accidental overwrites.
         
@@ -149,6 +160,12 @@ class QBOClient:
                 update_payload["EntityRef"] = entity_ref
             elif endpoint == "billpayment":
                 update_payload["VendorRef"] = entity_ref
+
+        if deposit_to_account_ref:
+            update_payload["DepositToAccountRef"] = deposit_to_account_ref
+        
+        if from_account_ref:
+            update_payload["FromAccountRef"] = from_account_ref
 
         if payment_type and endpoint == "purchase":
             update_payload["PaymentType"] = payment_type
