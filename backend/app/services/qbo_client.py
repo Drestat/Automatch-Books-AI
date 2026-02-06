@@ -86,7 +86,7 @@ class QBOClient:
         """Fetches a single Purchase entity by ID."""
         return await self.request("GET", f"purchase/{purchase_id}")
 
-    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_type: str = "Purchase", entity_ref: dict = None, payment_type: str = None, txn_status: str = None, global_tax_calculation: str = None, existing_line_override: dict = None, tags: list[str] = None, append_memo: str = None):
+    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_type: str = "Purchase", entity_ref: dict = None, payment_type: str = None, txn_status: str = None, global_tax_calculation: str = None, existing_line_override: dict = None, tags: list[str] = None, note: str = None, append_memo: str = None):
         """
         Update a QBO entity (Purchase, BillPayment, etc.) via Sparse Update.
         Preserves existing line details if 'existing_line_override' is provided.
@@ -159,8 +159,11 @@ class QBOClient:
         if global_tax_calculation and endpoint == "purchase":
             update_payload["GlobalTaxCalculation"] = global_tax_calculation
 
-        # PrivateNote (Memo) workaround for tags
+        # PrivateNote (Memo) logic: Combine Note + Tags + AppendMemo
         memo_parts = []
+        if note:
+            memo_parts.append(note)
+            
         if tags:
             tag_str = ", ".join([f"#{t}" for t in tags if t])
             memo_parts.append(f"Tags: {tag_str}")

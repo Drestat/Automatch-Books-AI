@@ -175,6 +175,7 @@ class TransactionService:
             global_tax_calculation=global_tax,
             existing_line_override=existing_line,
             tags=tx.tags,
+            note=tx.note,
             append_memo="#Accepted"
         )
         
