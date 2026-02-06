@@ -102,7 +102,7 @@ class QBOClient:
             "JournalEntry": "journalentry",
             "Transfer": "transfer",
             "CreditCardCredit": "purchase",
-            "Check": "check"
+            "Check": "purchase"
         }
         endpoint = type_mapping.get(entity_type, "purchase").lower()
         

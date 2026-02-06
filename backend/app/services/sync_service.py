@@ -77,7 +77,7 @@ class SyncService:
             return
 
         active_account_ids = [b.id for b in active_banks]
-        entity_types = ["Purchase", "Check", "Deposit", "CreditCardCredit", "JournalEntry", "Transfer", "BillPayment"]
+        entity_types = ["Purchase", "Deposit", "CreditCardCredit", "JournalEntry", "Transfer", "BillPayment"]
         
         all_txs = []
         batch_size = 1000
@@ -122,7 +122,13 @@ class SyncService:
             tx.description = self._resolve_vendor_name(p)
             tx.amount = p.get("TotalAmt", 0)
             tx.currency = p.get("CurrencyRef", {}).get("value", "USD")
+            
+            # Tag transaction type
             tx.transaction_type = p.get("_source_entity", "Purchase")
+            if p.get("_source_entity") == "Purchase" and p.get("PaymentType") == "Check":
+                tx.transaction_type = "Check"
+            elif p.get("_source_entity") == "Purchase" and p.get("PaymentType") == "CreditCard":
+                tx.transaction_type = "CreditCard"
             tx.sync_token = p.get("SyncToken")
             tx.note = p.get("PrivateNote")
             tx.payee = self._resolve_payee(p)
