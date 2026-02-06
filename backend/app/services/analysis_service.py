@@ -166,6 +166,10 @@ class AnalysisService:
         tx.confidence = analysis.get('confidence')
         tx.status = 'unmatched' # Keep as unmatched so it shows in the list
 
+        # DESCRIPTION LOGIC: If description is missing, suggest the Payee name
+        if not tx.description or not tx.description.strip():
+             tx.description = tx.suggested_payee
+
         # Resolve Suggested Category ID
         if suggested_name:
             cat_match = categories_obj.get(suggested_name)
