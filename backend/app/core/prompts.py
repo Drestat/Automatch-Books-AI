@@ -31,6 +31,7 @@ Output Format (STRICT JSON LIST):
     {{
         "id": "EXACT_ID_FROM_INPUT", 
         "category": "...", 
+        "payee": "The likely merchant name (e.g. 'Starbucks' or 'Apple')",
         "reasoning": "Professional summary for the user (~2 sentences)", 
         "vendor_reasoning": "...",
         "category_reasoning": "...",

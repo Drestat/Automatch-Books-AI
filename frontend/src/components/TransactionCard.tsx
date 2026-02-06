@@ -52,6 +52,10 @@ interface Transaction {
     is_excluded?: boolean;
     forced_review?: boolean;
     suggested_category_name: string;
+    suggested_category_id?: string;
+    suggested_payee?: string;
+    category_id?: string;
+    category_name?: string;
     payee?: string;
 }
 
@@ -148,6 +152,17 @@ export default function TransactionCard({
                     {/* Column 3: Payee/Vendor Selector */}
                     <div className="flex-1 min-w-[200px]">
                         <span className="text-[9px] uppercase tracking-widest font-black text-white/20 mb-1 block">Payee</span>
+                        {!tx.payee && tx.suggested_payee && (
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => onPayeeChange && onPayeeChange(tx.id, tx.suggested_payee!)}
+                                className="flex items-center gap-1.5 px-2 py-1 rounded bg-brand/10 border border-brand/20 text-brand text-[10px] font-bold mb-1 hover:bg-brand/20 transition-all"
+                            >
+                                <Sparkles size={8} />
+                                Suggested: {tx.suggested_payee}
+                            </motion.button>
+                        )}
                         <div
                             className="flex items-center gap-2 group/edit cursor-pointer transition-all hover:text-brand"
                             onClick={() => setIsEditingPayee(true)}
@@ -173,9 +188,20 @@ export default function TransactionCard({
                     {/* Column 4: Category Selector */}
                     <div className="flex-1 min-w-[180px]">
                         <span className="text-[9px] uppercase tracking-widest font-black text-white/20 mb-1 block">Category</span>
+                        {!tx.category_name && tx.suggested_category_name && (
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => onCategoryChange && onCategoryChange(tx.id, tx.suggested_category_id || '', tx.suggested_category_name)}
+                                className="flex items-center gap-1.5 px-2 py-1 rounded bg-brand/10 border border-brand/20 text-brand text-[10px] font-bold mb-1 hover:bg-brand/20 transition-all"
+                            >
+                                <Sparkles size={8} />
+                                Suggested: {tx.suggested_category_name}
+                            </motion.button>
+                        )}
                         <div className="flex items-center gap-2 group/edit cursor-pointer" onClick={() => setIsEditingCategory(true)}>
-                            <p className="text-sm font-medium text-white/90 group-hover:text-brand transition-colors">
-                                {tx.suggested_category_name}
+                            <p className={`text-sm font-medium ${tx.category_name ? 'text-white/90' : 'text-white/40'} group-hover:text-brand transition-colors`}>
+                                {tx.category_name || tx.suggested_category_name || "Select Category"}
                             </p>
                             <Edit2 size={12} className="text-white/20 opacity-0 group-hover/edit:opacity-100 transition-all" />
                         </div>
@@ -189,7 +215,7 @@ export default function TransactionCard({
                                 }
                             }}
                             availableCategories={availableCategories}
-                            currentCategory={tx.suggested_category_name}
+                            currentCategory={tx.category_name || tx.suggested_category_name}
                         />
                     </div>
 
@@ -272,12 +298,23 @@ export default function TransactionCard({
 
                                 <div className="flex flex-wrap gap-2 items-center">
                                     {tx.tags && tx.tags.map((tag, i) => (
-                                        <span key={i} className="px-2 py-1 rounded-md bg-white/5 border border-white/10 text-[10px] text-white/60 flex items-center gap-1.5 group/tag">
+                                        <span key={i} className="px-2 py-1 rounded-md bg-brand/20 border border-brand/30 text-[10px] text-brand flex items-center gap-1.5 group/tag">
                                             <Tags size={10} /> {tag}
                                             {onTagRemove && (
                                                 <button onClick={() => onTagRemove(tx.id, tag)} className="hover:text-rose-400 opacity-0 group-hover/tag:opacity-100 transition-opacity">×</button>
                                             )}
                                         </span>
+                                    ))}
+                                    {tx.suggested_tags && tx.suggested_tags.filter(t => !tx.tags?.includes(t)).map((tag, i) => (
+                                        <motion.button
+                                            key={`suggested-${i}`}
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => onTagAdd && onTagAdd(tx.id, tag)}
+                                            className="px-2 py-1 rounded-md bg-white/5 border border-dashed border-white/20 text-[10px] text-white/40 flex items-center gap-1.5 hover:border-brand/40 hover:text-brand/60 transition-colors"
+                                        >
+                                            <Sparkles size={10} /> {tag} +
+                                        </motion.button>
                                     ))}
                                     <button
                                         onClick={() => setIsAddingTag(true)}

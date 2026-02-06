@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.24.0 - REDESIGN: FULL-WIDTH TRANSACTION ROWS
+# v3.25.0 - INTERACTIVE AI SUGGESTIONS
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.

@@ -53,13 +53,13 @@ class AnalysisService:
         Orchestrates hybrid intelligence with Rule-based logic and Gemini.
         """
         print(f"🔍 [AnalysisService] Starting analysis for realm {self.realm_id}...")
-        query = self.db.query(Transaction).filter(
-            Transaction.realm_id == self.realm_id,
-            Transaction.status == 'unmatched'
-        )
-
         if tx_id:
-            query = query.filter(Transaction.id == tx_id)
+            query = self.db.query(Transaction).filter(Transaction.id == tx_id, Transaction.realm_id == self.realm_id)
+        else:
+            query = self.db.query(Transaction).filter(
+                Transaction.realm_id == self.realm_id,
+                Transaction.status == 'unmatched'
+            )
         
         unmatched = query.order_by(Transaction.date.desc()).limit(limit).all()
         
@@ -117,14 +117,10 @@ class AnalysisService:
                     results.append({"id": tx.id, "analysis": {**analysis, "method": "ai"}})
                     
                     # --- Rule 3: Auto-Approve High Confidence (Founder/Empire Tier) ---
+                    from app.models.user import User
                     user = self.db.query(User).filter(User.id == user_id).first()
-                    if tx.confidence and tx.confidence >= 0.95 and user.subscription_tier in ['founder', 'empire']:
+                    if tx.confidence and tx.confidence >= 0.95 and user and user.subscription_tier in ['founder', 'empire']:
                         print(f"🚀 [Auto-Approve] High confidence ({tx.confidence}) for {tx.id} (Tier: {user.subscription_tier})")
-                        # Mark as pending_approval for immediate UI feedback
-                        # We could call approve_transaction here, but it's better to let a separate 
-                        # celery/modal task handle the QBO write to keep analysis fast.
-                        # For now, we mark as pending_approval and the 'Daily Triage' ritual 
-                        # will show them as ready for one-tap or bulk-approval.
                         tx.status = 'pending_approval'
                     elif tx.confidence and tx.confidence >= 0.8:
                         tx.status = 'pending_approval'
@@ -133,6 +129,8 @@ class AnalysisService:
             return results
         except Exception as e:
             print(f"❌ Batch AI Error: {str(e)}")
+            # Even on error, we might want to commit what we have
+            self.db.commit()
             return results
 
     def _apply_suggestion(self, tx, suggested_cat, reasoning, confidence, method, categories_obj):
@@ -155,11 +153,11 @@ class AnalysisService:
 
     def _apply_ai_suggestion(self, tx, analysis, categories_obj, category_list):
         print(f"🐛 [DEBUG] Applying AI analysis for tx {tx.id}. Keys received: {list(analysis.keys())}")
-        print(f"🐛 [DEBUG] AI Reasoning payload: {analysis.get('reasoning')}")
-        print(f"🐛 [DEBUG] tax_deduction_note payload: {analysis.get('tax_deduction_note')}")
         
         suggested_name = analysis.get('category')
         tx.suggested_category_name = suggested_name
+        tx.suggested_payee = analysis.get('payee')
+        
         tx.reasoning = analysis.get('reasoning')
         tx.vendor_reasoning = analysis.get('vendor_reasoning')
         tx.category_reasoning = analysis.get('category_reasoning')
@@ -168,7 +166,7 @@ class AnalysisService:
         tx.confidence = analysis.get('confidence')
         tx.status = 'unmatched' # Keep as unmatched so it shows in the list
 
-        # Resolve ID (Exact or Fuzzy)
+        # Resolve Suggested Category ID
         if suggested_name:
             cat_match = categories_obj.get(suggested_name)
             if not cat_match:
@@ -179,9 +177,7 @@ class AnalysisService:
                 tx.suggested_category_id = cat_match.id
 
         # Capture AI Suggested Tags
-        suggested_tags = analysis.get('tags', [])
-        if suggested_tags:
-            tx.suggested_tags = suggested_tags
+        tx.suggested_tags = analysis.get('tags', [])
 
         # Handle Splits
         splits_data = analysis.get('splits', [])

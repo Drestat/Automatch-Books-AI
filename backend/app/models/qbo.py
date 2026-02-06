@@ -84,6 +84,12 @@ class Transaction(Base):
     # AI Suggestions (Main / Single)
     suggested_category_id = Column(String)
     suggested_category_name = Column(String)
+    suggested_payee = Column(String) # AI suggested vendor
+    
+    # User-confirmed Category (if different from QBO default)
+    category_id = Column(String)
+    category_name = Column(String)
+    
     reasoning = Column(String)
     vendor_reasoning = Column(String)
     category_reasoning = Column(String)

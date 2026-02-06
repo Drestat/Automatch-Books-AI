@@ -41,8 +41,21 @@ class AIAnalyzer:
                 generation_config={"response_mime_type": "application/json"}
             )
             raw_text = response.text.replace('```json', '').replace('```', '').strip()
-            print(f"🧠 [AIAnalyzer] Raw AI Response: {raw_text[:500]}...") # Log start of response
+            print(f"🧠 [AIAnalyzer] Raw AI Response Length: {len(raw_text)}")
+            if len(raw_text) > 0:
+                print(f"🧠 [AIAnalyzer] Raw AI Response (First 1000 chars): {raw_text[:1000]}")
+            
             analyses = json.loads(raw_text)
+            
+            # Basic validation of expected fields
+            if isinstance(analyses, list) and len(analyses) > 0:
+                first = analyses[0]
+                missing = [f for f in ["vendor_reasoning", "category_reasoning", "tax_deduction_note"] if f not in first]
+                if missing:
+                    print(f"⚠️ [AIAnalyzer] Missing reasoning fields in AI output: {missing}")
+                else:
+                    print(f"✅ [AIAnalyzer] All reasoning fields present in AI output.")
+            
             return analyses
         except Exception as e:
             print(f"❌ Batch AI Error: {str(e)}")

@@ -104,7 +104,10 @@ class TransactionService:
         """
         Helper: Writes standard categorization to QBO.
         """
-        if not tx.suggested_category_id:
+        cat_id = tx.category_id or tx.suggested_category_id
+        cat_name = tx.category_name or tx.suggested_category_name
+        
+        if not cat_id:
             raise ValueError(f"Transaction {tx.id} missing category")
         
         entity_ref = await self._resolve_entity_ref(tx.payee)
@@ -162,8 +165,8 @@ class TransactionService:
 
         updated = await self.client.update_purchase(
             purchase_id=tx.id,
-            category_id=tx.suggested_category_id,
-            category_name=tx.suggested_category_name,
+            category_id=cat_id,
+            category_name=cat_name,
             sync_token=tx.sync_token,
             entity_ref=entity_ref,
             payment_type=payment_type,

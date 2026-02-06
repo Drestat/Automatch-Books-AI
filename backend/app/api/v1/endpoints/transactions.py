@@ -28,6 +28,8 @@ class TransactionUpdate(BaseModel):
     tags: Optional[List[str]] = None
     suggested_category_id: Optional[str] = None
     suggested_category_name: Optional[str] = None
+    category_id: Optional[str] = None
+    category_name: Optional[str] = None
     payee: Optional[str] = None
 
 class TransactionSchema(BaseModel):
@@ -43,6 +45,9 @@ class TransactionSchema(BaseModel):
     status: str
     suggested_category_id: Optional[str] = None
     suggested_category_name: Optional[str] = None
+    suggested_payee: Optional[str] = None
+    category_id: Optional[str] = None
+    category_name: Optional[str] = None
     reasoning: Optional[str] = None
     vendor_reasoning: Optional[str] = None
     category_reasoning: Optional[str] = None
@@ -226,6 +231,11 @@ def update_transaction(realm_id: str, tx_id: str, update: TransactionUpdate, db:
     if update.suggested_category_id is not None:
         tx.suggested_category_id = update.suggested_category_id
         tx.suggested_category_name = update.suggested_category_name or tx.suggested_category_name
+        if tx.status == 'approved':
+             tx.status = 'pending_approval'
+    if update.category_id is not None:
+        tx.category_id = update.category_id
+        tx.category_name = update.category_name or tx.category_name
         if tx.status == 'approved':
              tx.status = 'pending_approval'
     if update.payee is not None:
