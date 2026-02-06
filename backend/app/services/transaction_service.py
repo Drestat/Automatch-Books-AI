@@ -110,7 +110,7 @@ class TransactionService:
         if not cat_id:
             raise ValueError(f"Transaction {tx.id} missing category")
         
-        entity_ref = await self._resolve_entity_ref(tx.payee)
+        entity_ref = await self._resolve_entity_ref(tx.payee, tx.transaction_type)
         payment_type = tx.raw_json.get("PaymentType") if tx.raw_json else None
 
         # [PaymentType Logic]
@@ -157,23 +157,78 @@ class TransactionService:
             
             global_tax = tx.raw_json.get("GlobalTaxCalculation")
 
-        updated = await self.client.update_purchase(
-            purchase_id=tx.id,
-            category_id=cat_id,
-            category_name=cat_name,
-            sync_token=tx.sync_token,
-            entity_type=tx.transaction_type or "Purchase",
-            entity_ref=entity_ref,
-            payment_type=payment_type,
-            txn_status="Closed",
-            global_tax_calculation=global_tax,
-            existing_line_override=existing_line,
-            tags=tx.tags,
-            note=tx.note,
-            append_memo="#Accepted",
-            deposit_to_account_ref=tx.raw_json.get("DepositToAccountRef") if tx.raw_json else None,
-            from_account_ref=tx.raw_json.get("FromAccountRef") if tx.raw_json else None
-        )
+        try:
+            updated = await self.client.update_purchase(
+                purchase_id=tx.id,
+                category_id=cat_id,
+                category_name=cat_name,
+                sync_token=tx.sync_token,
+                entity_type=tx.transaction_type or "Purchase",
+                entity_ref=entity_ref,
+                payment_type=payment_type,
+                txn_status="Closed",
+                global_tax_calculation=global_tax,
+                existing_line_override=existing_line,
+                tags=tx.tags,
+                note=tx.note,
+                append_memo="#Accepted",
+                deposit_to_account_ref=tx.raw_json.get("DepositToAccountRef") if tx.raw_json else None,
+                from_account_ref=tx.raw_json.get("FromAccountRef") if tx.raw_json else None
+            )
+        except Exception as e:
+            # Check for Stale Object Error (5010)
+            # Typically QBO returns validation fault 400 with code 5010 inside response body
+            is_stale = False
+            try:
+                if hasattr(e, "response") and e.response is not None:
+                    # Check the response text directly
+                    err_body = e.response.text
+                    if "5010" in err_body or "Stale Object" in err_body:
+                        is_stale = True
+            except:
+                pass
+            
+            if not is_stale and ("5010" in str(e) or "Stale Object" in str(e)):
+                is_stale = True
+
+            if is_stale:
+                print(f"⚠️ [TransactionService] Stale Object detected for {tx.id}. Retrying with fresh SyncToken...")
+                # Fetch fresh entity
+                if tx.transaction_type == "Payment":
+                    # Fallback to query as get_purchase might not support Payment specifically or verify logic
+                    # Just query blindly for now to be safe
+                    q_res = await self.client.query(f"SELECT * FROM Payment WHERE Id = '{tx.id}'")
+                    fresh = q_res.get("QueryResponse", {}).get("Payment", [])
+                else:
+                    fresh_res = await self.client.get_purchase(tx.id)
+                    fresh = [fresh_res.get("Purchase")] if "Purchase" in fresh_res else []
+                    if not fresh and "Payment" in fresh_res: fresh = [fresh_res["Payment"]] # Just in case
+
+                if fresh and isinstance(fresh, list) and len(fresh) > 0:
+                    fresh_obj = fresh[0]
+                    new_token = fresh_obj.get("SyncToken")
+                    print(f"🔄 [TransactionService] Retry with SyncToken: {new_token}")
+                    updated = await self.client.update_purchase(
+                        purchase_id=tx.id,
+                        category_id=cat_id,
+                        category_name=cat_name,
+                        sync_token=new_token,
+                        entity_type=tx.transaction_type or "Purchase",
+                        entity_ref=entity_ref,
+                        payment_type=payment_type,
+                        txn_status="Closed",
+                        global_tax_calculation=global_tax,
+                        existing_line_override=existing_line,
+                        tags=tx.tags,
+                        note=tx.note,
+                        append_memo="#Accepted",
+                        deposit_to_account_ref=tx.raw_json.get("DepositToAccountRef") if tx.raw_json else None,
+                        from_account_ref=tx.raw_json.get("FromAccountRef") if tx.raw_json else None
+                    )
+                else:
+                    raise e
+            else:
+                raise e
         
         if updated.get("SyncToken"):
             tx.sync_token = updated.get("SyncToken")
@@ -220,7 +275,7 @@ class TransactionService:
         """
         Helper: Writes a split transaction (multiple lines) to QBO.
         """
-        entity_ref = await self._resolve_entity_ref(tx.payee)
+        entity_ref = await self._resolve_entity_ref(tx.payee, tx.transaction_type)
         payment_type = tx.raw_json.get("PaymentType") if tx.raw_json else None
 
         # Build Line items for QBO
@@ -265,10 +320,36 @@ class TransactionService:
             tx.sync_token = updated.get("SyncToken")
         return updated
 
-    async def _resolve_entity_ref(self, payee_name):
+    async def _resolve_entity_ref(self, payee_name, transaction_type="Purchase"):
         if not payee_name:
             return None
             
+        # strategy: if Payment, look for Customer first. Else Vendor.
+        is_payment = transaction_type == "Payment"
+        
+        if is_payment:
+            # Check DB Customer
+            customer = self.db.query(Customer).filter(
+                Customer.display_name == payee_name,
+                Customer.realm_id == self.connection.realm_id
+            ).first()
+            if customer: return {"value": customer.id, "name": customer.display_name}
+            
+            # Check QBO Customer
+            remote_c = await self.client.get_customer_by_name(payee_name)
+            if remote_c:
+                # Cache it
+                cust = Customer(id=remote_c["Id"], realm_id=self.connection.realm_id, display_name=payee_name)
+                self.db.add(cust)
+                self.db.commit()
+                return {"value": remote_c["Id"], "name": payee_name}
+                
+            # Create Customer logic could go here if we wanted to auto-create customers, 
+            # but usually for Payments the customer MUST exist. 
+            # Failure fallback: maybe it IS a vendor? (Unlikely for Payment endpoint)
+            return None 
+
+        # Default Vendor Logic
         vendor = self.db.query(Vendor).filter(
             Vendor.display_name == payee_name,
             Vendor.realm_id == self.connection.realm_id
@@ -277,20 +358,31 @@ class TransactionService:
         if vendor:
             return {"value": vendor.id, "name": vendor.display_name}
             
-        # Try QBO directly
+        # Try QBO Vendor
         remote_v = await self.client.get_vendor_by_name(payee_name)
         if remote_v:
             vendor = Vendor(id=remote_v["Id"], realm_id=self.connection.realm_id, display_name=payee_name)
             self.db.add(vendor)
             self.db.commit()
             return {"value": remote_v["Id"], "name": payee_name}
+
+        # Check QBO Customer as fallback (sometimes people pay Vendors via Check)
+        remote_c = await self.client.get_customer_by_name(payee_name)
+        if remote_c:
+             # It's actually a customer
+            return {"value": remote_c["Id"], "name": payee_name}
             
-        # Create new
-        new_v = await self.client.create_vendor(payee_name)
-        vendor = Vendor(id=new_v["Id"], realm_id=self.connection.realm_id, display_name=payee_name)
-        self.db.add(vendor)
-        self.db.commit()
-        return {"value": new_v["Id"], "name": payee_name}
+        # Create new Vendor
+        try:
+            new_v = await self.client.create_vendor(payee_name)
+            vendor = Vendor(id=new_v["Id"], realm_id=self.connection.realm_id, display_name=payee_name)
+            self.db.add(vendor)
+            self.db.commit()
+            return {"value": new_v["Id"], "name": payee_name}
+        except Exception as e:
+            print(f"⚠️ Failed to create vendor {payee_name}: {e}")
+            # Could be it exists as something else?
+            return None
 
     async def bulk_approve(self, tx_ids: list[str]):
         results = []
