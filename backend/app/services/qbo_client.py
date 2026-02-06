@@ -186,8 +186,14 @@ class QBOClient:
         if global_tax_calculation and endpoint == "purchase":
             update_payload["GlobalTaxCalculation"] = global_tax_calculation
 
-        # PrivateNote (Memo) logic: Combine Note + Tags + AppendMemo
+        # PrivateNote (Memo) logic: Combine Description + Note + Tags + AppendMemo
         memo_parts = []
+        
+        # for Payments/BillPayments, the Description must live in the Memo/PrivateNote
+        # because we often skip Line updates or they don't have a header Description.
+        if description and entity_type in ["Payment", "BillPayment"]:
+            memo_parts.append(description)
+
         if note:
             memo_parts.append(note)
             
