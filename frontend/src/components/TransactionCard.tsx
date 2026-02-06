@@ -152,7 +152,7 @@ export default function TransactionCard({
                         <span className="text-[9px] uppercase tracking-widest font-black text-white/20 mb-1 block">Description</span>
 
                         {/* Suggestion Pill for Empty Description */}
-                        {!tx.description && (tx.suggested_payee || tx.payee) && (
+                        {(!tx.description || tx.description.trim() === '') && (tx.suggested_payee || tx.payee) && (
                             <motion.button
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
@@ -171,8 +171,8 @@ export default function TransactionCard({
                                 I should probably make it editable or just show placeholder if empty.
                                 Given user said "let him write", it implies editability.
                             */}
-                            <h3 className={`text-sm font-bold tracking-tight transition-colors line-clamp-1 ${!tx.description ? 'text-white/20 italic' : 'text-white group-hover:text-brand'}`}>
-                                {tx.description || "No Description"}
+                            <h3 className={`text-sm font-bold tracking-tight transition-colors line-clamp-1 ${(!tx.description || tx.description.trim() === '') ? 'text-white/20 italic' : 'text-white group-hover:text-brand'}`}>
+                                {(!tx.description || tx.description.trim() === '') ? "No Description" : tx.description}
                             </h3>
                             {/* Note: Actual editing might require a specialized Input component here, 
                                  but for now I'm enabling the 'Suggestion' button above. 
