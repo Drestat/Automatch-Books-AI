@@ -86,12 +86,15 @@ class QBOClient:
         """Fetches a single Purchase entity by ID."""
         return await self.request("GET", f"purchase/{purchase_id}")
 
-    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_ref: dict = None, payment_type: str = None, txn_status: str = None, global_tax_calculation: str = None, existing_line_override: dict = None, tags: list[str] = None, append_memo: str = None):
+    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_type: str = "Purchase", entity_ref: dict = None, payment_type: str = None, txn_status: str = None, global_tax_calculation: str = None, existing_line_override: dict = None, tags: list[str] = None, append_memo: str = None):
         """
-        Update a Purchase entity (Expense/Check) via Sparse Update.
+        Update a QBO entity (Purchase, BillPayment, etc.) via Sparse Update.
         Preserves existing line details if 'existing_line_override' is provided.
         IMPORTANT: Never overwrites Date or Amount.
         """
+        
+        # Determine endpoint (lowercase version of entity type)
+        endpoint = entity_type.lower()
         
         # Prepare Line Item
         line_item = {}
@@ -100,9 +103,12 @@ class QBOClient:
             # Purge invalid fields if they exist
             if "ClrStatus" in line_item:
                 del line_item["ClrStatus"]
-            line_item["DetailType"] = "AccountBasedExpenseLineDetail"
-            if "AccountBasedExpenseLineDetail" not in line_item:
-                 line_item["AccountBasedExpenseLineDetail"] = {}
+            
+            # For non-BillPayment entities, we ensure DetailType is correct
+            if entity_type != "BillPayment":
+                line_item["DetailType"] = "AccountBasedExpenseLineDetail"
+                if "AccountBasedExpenseLineDetail" not in line_item:
+                    line_item["AccountBasedExpenseLineDetail"] = {}
         else:
             line_item = {
                 "Id": "1", 
@@ -110,11 +116,12 @@ class QBOClient:
                 "AccountBasedExpenseLineDetail": {}
             }
 
-        # Update Category (Account)
-        line_item["AccountBasedExpenseLineDetail"]["AccountRef"] = {
-            "value": category_id,
-            "name": category_name
-        }
+        # Update Category (Account) - Only if it's NOT a BillPayment (which links to Bills, not Accounts directly)
+        if entity_type != "BillPayment":
+            line_item["AccountBasedExpenseLineDetail"]["AccountRef"] = {
+                "value": category_id,
+                "name": category_name
+            }
         
         # NEVER set line_item["Amount"] here. We want to preserve the bank amount.
         
@@ -127,16 +134,20 @@ class QBOClient:
 
         # Date (TxnDate) and TotalAmt are EXCLUDED to prevent accidental overwrites.
         
-        if entity_ref:
+        if entity_ref and entity_type == "Purchase":
             update_payload["EntityRef"] = entity_ref
+        elif entity_ref and entity_type == "BillPayment":
+            update_payload["VendorRef"] = entity_ref
 
-        if payment_type:
+        if payment_type and entity_type == "Purchase":
             update_payload["PaymentType"] = payment_type
             
         if txn_status:
-            update_payload["TxnStatus"] = txn_status
+            # Note: BillPayment uses a different status field usually, or none at all in sparse update
+            if entity_type == "Purchase":
+                update_payload["TxnStatus"] = txn_status
             
-        if global_tax_calculation:
+        if global_tax_calculation and entity_type == "Purchase":
             update_payload["GlobalTaxCalculation"] = global_tax_calculation
 
         # PrivateNote (Memo) workaround for tags
@@ -151,15 +162,10 @@ class QBOClient:
         if memo_parts:
             update_payload["PrivateNote"] = " | ".join(memo_parts)
 
-        print(f"📝 [QBOClient] Updating Purchase {purchase_id} -> Cat: {category_name}, Payee: {entity_ref.get('name') if entity_ref else 'N/A'}, Memo: {update_payload.get('PrivateNote', 'N/A')}")
-        import json
-        try:
-            print(f"📦 [DEBUG] Payload: {json.dumps(update_payload, default=str)}")
-        except Exception as e:
-            print(f"📦 [DEBUG] Payload (raw): {update_payload} (Error dumping: {e})")
-
-        result = await self.request("POST", "purchase", json_payload=update_payload)
-        return result.get("Purchase", {})
+        print(f"📝 [QBOClient] Updating {entity_type} {purchase_id} -> Endpoint: {endpoint}")
+        
+        result = await self.request("POST", endpoint, json_payload=update_payload)
+        return result.get(entity_type, {})
 
     async def create_bill_payment(self, bill_id: str, bank_account_id: str, amount: float, date: str):
         """

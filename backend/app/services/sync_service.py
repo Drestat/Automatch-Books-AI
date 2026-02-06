@@ -90,6 +90,11 @@ class SyncService:
                     res = await self.client.query(query)
                     batch = res.get("QueryResponse", {}).get(entity, [])
                     if not batch: break
+                    
+                    # Tag each item with its source entity type
+                    for item in batch:
+                        item["_source_entity"] = entity
+                    
                     all_txs.extend(batch)
                     if len(batch) < batch_size: break
                     start += len(batch)
@@ -117,7 +122,7 @@ class SyncService:
             tx.description = self._resolve_vendor_name(p)
             tx.amount = p.get("TotalAmt", 0)
             tx.currency = p.get("CurrencyRef", {}).get("value", "USD")
-            tx.transaction_type = p.get("PaymentType", "Expense")
+            tx.transaction_type = p.get("_source_entity", "Purchase")
             tx.sync_token = p.get("SyncToken")
             tx.note = p.get("PrivateNote")
             tx.payee = self._resolve_payee(p)

@@ -168,6 +168,7 @@ class TransactionService:
             category_id=cat_id,
             category_name=cat_name,
             sync_token=tx.sync_token,
+            entity_type=tx.transaction_type or "Purchase",
             entity_ref=entity_ref,
             payment_type=payment_type,
             txn_status="Closed",

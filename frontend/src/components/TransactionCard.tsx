@@ -152,7 +152,7 @@ export default function TransactionCard({
                     {/* Column 3: Payee/Vendor Selector */}
                     <div className="flex-1 min-w-[200px]">
                         <span className="text-[9px] uppercase tracking-widest font-black text-white/20 mb-1 block">Payee</span>
-                        {!tx.payee && tx.suggested_payee && (
+                        {tx.suggested_payee && (
                             <motion.button
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
@@ -167,7 +167,7 @@ export default function TransactionCard({
                             className="flex items-center gap-2 group/edit cursor-pointer transition-all hover:text-brand"
                             onClick={() => setIsEditingPayee(true)}
                         >
-                            <p className={`text-sm font-bold ${tx.payee ? 'text-white/90' : (tx.suggested_payee ? 'text-white/40' : 'text-rose-400 italic')}`}>
+                            <p className={`text-sm font-bold ${tx.payee ? 'text-white/90' : (tx.suggested_payee ? 'text-white/60' : 'text-rose-400 italic')}`}>
                                 {tx.payee || tx.suggested_payee || "Unassigned"}
                             </p>
                             <Edit2 size={12} className="text-white/20 opacity-0 group-hover/edit:opacity-100 transition-all" />
