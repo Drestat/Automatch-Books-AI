@@ -91,7 +91,8 @@ export default function TransactionCard({
     onExclude,
     onInclude,
     onPayeeChange,
-    onNoteChange
+    onNoteChange,
+    onUpdate
 }: TransactionCardProps) {
     const expenseTypes = ['Purchase', 'Expense', 'Check', 'CreditCard', 'BillPayment', 'Cash', 'CreditCardCharge'];
     // QBO sends positive TotalAmt for expenses. Identify by type OR if manually negative.
