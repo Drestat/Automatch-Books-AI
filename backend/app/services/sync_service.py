@@ -77,7 +77,7 @@ class SyncService:
             return
 
         active_account_ids = [b.id for b in active_banks]
-        entity_types = ["Purchase", "Deposit", "CreditCardCredit", "JournalEntry", "Transfer", "BillPayment"]
+        entity_types = ["Purchase", "Check", "Deposit", "CreditCardCredit", "JournalEntry", "Transfer", "BillPayment"]
         
         all_txs = []
         batch_size = 1000
