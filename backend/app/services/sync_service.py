@@ -195,13 +195,9 @@ class SyncService:
             if desc and desc.strip():
                 return desc
         
-        # 2. PrivateNote (Memo)
-        note = p.get("PrivateNote")
-        if note and note.strip():
-            return note
-            
-        # 3. Fallback / Suggestion: Vendor/Payee Name
-        return self._resolve_vendor_name(p)
+        # 2. Strict: Do NOT fallback to PrivateNote or VendorName.
+        # User wants manual control or explicit suggestion click.
+        return None
 
     def _resolve_payee(self, p):
         return p.get("EntityRef", {}).get("name") or p.get("VendorRef", {}).get("name") or p.get("CustomerRef", {}).get("name")

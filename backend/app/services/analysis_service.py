@@ -166,9 +166,8 @@ class AnalysisService:
         tx.confidence = analysis.get('confidence')
         tx.status = 'unmatched' # Keep as unmatched so it shows in the list
 
-        # DESCRIPTION LOGIC: If description is missing, suggest the Payee name
-        if not tx.description or not tx.description.strip():
-             tx.description = tx.suggested_payee
+        # DESCRIPTION LOGIC: Removed auto-fill per user request (v3.28.17)
+        # Frontend will handle suggestions if description is empty.
 
         # Resolve Suggested Category ID
         if suggested_name:
