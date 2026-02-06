@@ -102,7 +102,8 @@ class QBOClient:
             "JournalEntry": "journalentry",
             "Transfer": "transfer",
             "CreditCardCredit": "purchase",
-            "Check": "purchase"
+            "Check": "purchase",
+            "Payment": "payment"
         }
         endpoint = type_mapping.get(entity_type, "purchase").lower()
         
@@ -135,8 +136,8 @@ class QBOClient:
                 detail_type: {}
             }
 
-        # Update Category (Account) - Only if it's NOT a BillPayment
-        if entity_type != "BillPayment":
+        # Update Category (Account) - Only if it's NOT a BillPayment or Payment
+        if entity_type not in ["BillPayment", "Payment"]:
             line_item[detail_type]["AccountRef"] = {
                 "value": category_id,
                 "name": category_name
@@ -150,7 +151,7 @@ class QBOClient:
             "sparse": True
         }
 
-        if entity_type != "BillPayment":
+        if entity_type not in ["BillPayment", "Payment"]:
             update_payload["Line"] = [line_item]
 
         # Date (TxnDate) and TotalAmt are EXCLUDED to prevent accidental overwrites.
@@ -158,6 +159,8 @@ class QBOClient:
         if entity_ref:
             if endpoint == "purchase":
                 update_payload["EntityRef"] = entity_ref
+            elif endpoint == "payment":
+                update_payload["CustomerRef"] = entity_ref
             # Skip VendorRef for BillPayment in sparse updates
 
         if deposit_to_account_ref:
