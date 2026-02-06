@@ -73,6 +73,7 @@ interface TransactionCardProps {
     onExclude?: (id: string) => void;
     onInclude?: (id: string) => void;
     onPayeeChange?: (txId: string, payee: string) => void;
+    onNoteChange?: (txId: string, note: string) => void;
 }
 
 export default function TransactionCard({
@@ -88,7 +89,8 @@ export default function TransactionCard({
     onAnalyze,
     onExclude,
     onInclude,
-    onPayeeChange
+    onPayeeChange,
+    onNoteChange
 }: TransactionCardProps) {
     const expenseTypes = ['Purchase', 'Expense', 'Check', 'CreditCard', 'BillPayment', 'Cash', 'CreditCardCharge'];
     // QBO sends positive TotalAmt for expenses. Identify by type OR if manually negative.
@@ -294,6 +296,11 @@ export default function TransactionCard({
                                     defaultValue={tx.note || ''}
                                     placeholder="Add team note..."
                                     className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-brand/40 transition-all font-medium"
+                                    onBlur={(e) => {
+                                        if (e.target.value !== (tx.note || '') && onNoteChange) {
+                                            onNoteChange(tx.id, e.target.value);
+                                        }
+                                    }}
                                 />
 
                                 <div className="flex flex-wrap gap-2 items-center">
