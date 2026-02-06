@@ -119,7 +119,11 @@ class SyncService:
             tx.date = datetime.strptime(p["TxnDate"], "%Y-%m-%d")
             tx.account_id = acc_id
             tx.account_name = self._resolve_account_name(p)
-            tx.description = self._resolve_vendor_name(p)
+            
+            # DESCRIPTION LOGIC: Prioritize existing description/memo
+            # If empty, fallback to Vendor/Payee name (Suggestion)
+            tx.description = self._resolve_description(p)
+            
             tx.amount = p.get("TotalAmt", 0)
             tx.currency = p.get("CurrencyRef", {}).get("value", "USD")
             
@@ -183,6 +187,21 @@ class SyncService:
         if not name and "Line" in p and len(p["Line"]) > 0:
             name = p["Line"][0].get("Description")
         return name or "Uncategorized Expense"
+
+    def _resolve_description(self, p):
+        # 1. Line Description (most accurate for line-item detail)
+        if "Line" in p and len(p["Line"]) > 0:
+            desc = p["Line"][0].get("Description")
+            if desc and desc.strip():
+                return desc
+        
+        # 2. PrivateNote (Memo)
+        note = p.get("PrivateNote")
+        if note and note.strip():
+            return note
+            
+        # 3. Fallback / Suggestion: Vendor/Payee Name
+        return self._resolve_vendor_name(p)
 
     def _resolve_payee(self, p):
         return p.get("EntityRef", {}).get("name") or p.get("VendorRef", {}).get("name") or p.get("CustomerRef", {}).get("name")
