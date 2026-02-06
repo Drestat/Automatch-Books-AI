@@ -77,7 +77,7 @@ class SyncService:
             return
 
         active_account_ids = [b.id for b in active_banks]
-        entity_types = ["Purchase", "Deposit", "CreditCardCredit", "JournalEntry", "Transfer", "BillPayment"]
+        entity_types = ["Purchase", "Deposit", "CreditCardCredit", "JournalEntry", "Transfer", "BillPayment", "Payment"]
         
         all_txs = []
         batch_size = 1000
@@ -179,13 +179,13 @@ class SyncService:
         return "Unknown Account"
 
     def _resolve_vendor_name(self, p):
-        name = p.get("EntityRef", {}).get("name") or p.get("VendorRef", {}).get("name")
+        name = p.get("EntityRef", {}).get("name") or p.get("VendorRef", {}).get("name") or p.get("CustomerRef", {}).get("name")
         if not name and "Line" in p and len(p["Line"]) > 0:
             name = p["Line"][0].get("Description")
         return name or "Uncategorized Expense"
 
     def _resolve_payee(self, p):
-        return p.get("EntityRef", {}).get("name") or p.get("VendorRef", {}).get("name")
+        return p.get("EntityRef", {}).get("name") or p.get("VendorRef", {}).get("name") or p.get("CustomerRef", {}).get("name")
 
     def _extract_category(self, p):
         if "Line" in p:
