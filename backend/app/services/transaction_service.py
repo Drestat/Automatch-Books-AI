@@ -171,6 +171,7 @@ class TransactionService:
                 existing_line_override=existing_line,
                 tags=tx.tags,
                 note=tx.note,
+                description=tx.description,
                 append_memo="#Accepted",
                 deposit_to_account_ref=tx.raw_json.get("DepositToAccountRef") if tx.raw_json else None,
                 from_account_ref=tx.raw_json.get("FromAccountRef") if tx.raw_json else None
@@ -220,7 +221,9 @@ class TransactionService:
                         global_tax_calculation=global_tax,
                         existing_line_override=existing_line,
                         tags=tx.tags,
+                        tags=tx.tags,
                         note=tx.note,
+                        description=tx.description,
                         append_memo="#Accepted",
                         deposit_to_account_ref=tx.raw_json.get("DepositToAccountRef") if tx.raw_json else None,
                         from_account_ref=tx.raw_json.get("FromAccountRef") if tx.raw_json else None
