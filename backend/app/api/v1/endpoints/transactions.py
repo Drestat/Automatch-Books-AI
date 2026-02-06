@@ -250,6 +250,7 @@ def update_transaction(realm_id: str, tx_id: str, update: TransactionUpdate, db:
 @router.post("/upload-receipt")
 def upload_receipt(
     realm_id: str,
+    tx_id: str = None,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     user=Depends(verify_subscription)
@@ -309,7 +310,7 @@ def upload_receipt(
             "match_id": match.id if match else None
         }
 
-    match_id = result.get('match_id')
+    match_id = tx_id or result.get('match_id')
     extracted = result.get('extracted')
     
     match = None

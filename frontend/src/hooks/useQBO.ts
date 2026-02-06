@@ -561,19 +561,24 @@ export const useQBO = () => {
 
         try {
             setLoading(true);
-            const response = await fetch(`${API_BASE_URL}/transactions/upload-receipt?realm_id=${realmId}`, {
+            const response = await fetch(`${API_BASE_URL}/transactions/upload-receipt?realm_id=${realmId}&tx_id=${txId}`, {
                 method: 'POST',
                 body: formData
             });
             const data = await response.json() as ReceiptResponse;
 
             if (response.ok) {
+                showToast('Receipt uploaded and linked', 'success');
                 // Refresh transactions to show the receipt link/badge
                 await fetchTransactions(realmId);
                 return data;
+            } else {
+                const errorData = await response.json();
+                showToast(errorData.detail || 'Upload failed', 'error');
             }
         } catch (error) {
             console.error('Upload Error:', error);
+            showToast('Network error during upload', 'error');
         } finally {
             setLoading(false);
         }

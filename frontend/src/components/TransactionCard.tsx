@@ -370,7 +370,7 @@ export default function TransactionCard({
                             ) : (
                                 <>
                                     <FilePlus size={18} />
-                                    <span>Upload</span>
+                                    <span>{tx.receipt_url ? 'Replace' : 'Upload'}</span>
                                 </>
                             )}
                         </motion.button>
@@ -443,13 +443,23 @@ export default function TransactionCard({
                     </div>
                 </div>
 
-                {tx.is_exported && (
-                    <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-emerald-400">
-                            <CheckCircle2 size={14} />
-                            <span className="text-[10px] font-bold uppercase tracking-wider">Exported to QBO</span>
+                {(tx.is_exported || tx.receipt_url) && (
+                    <div className="mt-4 pt-4 border-t border-white/5 flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            {tx.is_exported && (
+                                <div className="flex items-center gap-2 text-emerald-400">
+                                    <CheckCircle2 size={14} />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider">Exported to QBO</span>
+                                </div>
+                            )}
+                            {tx.receipt_url && (
+                                <div className="flex items-center gap-2 text-brand">
+                                    <FilePlus size={14} />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider">Receipt Attached</span>
+                                </div>
+                            )}
                         </div>
-                        <ExternalLink size={12} className="text-white/20" />
+                        {tx.is_exported && <ExternalLink size={12} className="text-white/20" />}
                     </div>
                 )}
             </div>
