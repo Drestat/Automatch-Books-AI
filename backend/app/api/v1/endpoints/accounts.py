@@ -25,7 +25,7 @@ class BankAccountUpdate(BaseModel):
     nickname: str
 
 class TagSchema(BaseModel):
-    id: str
+    id: uuid.UUID
     name: str
     qbo_tag_id: Optional[str] = None
 

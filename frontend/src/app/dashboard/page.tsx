@@ -94,12 +94,12 @@ function DashboardContent() {
 
   // 2. Filter by Status (Review vs Matched vs Excluded)
   const toReviewTxs = filteredTransactions.filter(tx => {
-    return !tx.is_excluded && !tx.is_qbo_matched;
+    return !tx.is_excluded && !tx.is_qbo_matched && tx.status !== 'approved';
   });
 
   const alreadyMatchedTxs = filteredTransactions.filter(tx =>
     !tx.is_excluded &&
-    tx.is_qbo_matched
+    (tx.is_qbo_matched || tx.status === 'approved')
   );
 
   const excludedTxs = filteredTransactions.filter(tx => tx.is_excluded === true);
@@ -594,7 +594,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.28.0</span></p>
+          <p className="text-white/20 text-xs">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.28.2</span></p>
         </footer>
 
       </div>

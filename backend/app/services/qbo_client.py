@@ -93,8 +93,17 @@ class QBOClient:
         IMPORTANT: Never overwrites Date or Amount.
         """
         
-        # Determine endpoint (lowercase version of entity type)
-        endpoint = entity_type.lower()
+        # Determine endpoint (handle legacy 'Expense' and other types)
+        type_mapping = {
+            "Purchase": "purchase",
+            "Expense": "purchase", # Legacy support
+            "BillPayment": "billpayment",
+            "Deposit": "deposit",
+            "JournalEntry": "journalentry",
+            "Transfer": "transfer",
+            "CreditCardCredit": "purchase"
+        }
+        endpoint = type_mapping.get(entity_type, "purchase").lower()
         
         # Prepare Line Item
         line_item = {}
@@ -160,7 +169,9 @@ class QBOClient:
             memo_parts.append(append_memo)
 
         if memo_parts:
-            update_payload["PrivateNote"] = " | ".join(memo_parts)
+            # BillPayment uses 'Memo', others use 'PrivateNote'
+            memo_field = "Memo" if entity_type == "BillPayment" else "PrivateNote"
+            update_payload[memo_field] = " | ".join(memo_parts)
 
         print(f"📝 [QBOClient] Updating {entity_type} {purchase_id} -> Endpoint: {endpoint}")
         
