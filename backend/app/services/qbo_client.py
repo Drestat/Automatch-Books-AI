@@ -86,10 +86,11 @@ class QBOClient:
         """Fetches a single Purchase entity by ID."""
         return await self.request("GET", f"purchase/{purchase_id}")
 
-    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_ref: dict = None, payment_type: str = None, txn_status: str = None, global_tax_calculation: str = None, existing_line_override: dict = None, tags: list[str] = None, amount: float = None, append_memo: str = None):
+    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_ref: dict = None, payment_type: str = None, txn_status: str = None, global_tax_calculation: str = None, existing_line_override: dict = None, tags: list[str] = None, append_memo: str = None):
         """
         Update a Purchase entity (Expense/Check) via Sparse Update.
         Preserves existing line details if 'existing_line_override' is provided.
+        IMPORTANT: Never overwrites Date or Amount.
         """
         
         # Prepare Line Item
@@ -99,9 +100,6 @@ class QBOClient:
             # Purge invalid fields if they exist
             if "ClrStatus" in line_item:
                 del line_item["ClrStatus"]
-            # Ensure DetailType is correct (usually AccountBasedExpenseLineDetail)
-            # If it was ItemBased, we might be switching to AccountBased?
-            # Ideally we stick to AccountBased for categorization.
             line_item["DetailType"] = "AccountBasedExpenseLineDetail"
             if "AccountBasedExpenseLineDetail" not in line_item:
                  line_item["AccountBasedExpenseLineDetail"] = {}
@@ -118,9 +116,7 @@ class QBOClient:
             "name": category_name
         }
         
-        # Update Amount on Line if provided
-        if amount is not None and amount > 0:
-            line_item["Amount"] = amount
+        # NEVER set line_item["Amount"] here. We want to preserve the bank amount.
         
         update_payload = {
             "Id": purchase_id,
@@ -129,10 +125,7 @@ class QBOClient:
             "Line": [line_item]
         }
 
-        if amount is not None and amount > 0:
-            update_payload["TotalAmt"] = amount
-        elif amount == 0:
-            print(f"⚠️ [QBOClient] Amount is 0. Skipping amount update to preserve QBO value.")
+        # Date (TxnDate) and TotalAmt are EXCLUDED to prevent accidental overwrites.
         
         if entity_ref:
             update_payload["EntityRef"] = entity_ref
@@ -146,8 +139,7 @@ class QBOClient:
         if global_tax_calculation:
             update_payload["GlobalTaxCalculation"] = global_tax_calculation
 
-        # NOTE: QBO API v3 does NOT support native Tags (TagRef).
-        # Workaround: Include tags and persistent markers in the PrivateNote (Memo).
+        # PrivateNote (Memo) workaround for tags
         memo_parts = []
         if tags:
             tag_str = ", ".join([f"#{t}" for t in tags if t])

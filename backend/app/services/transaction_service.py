@@ -174,7 +174,6 @@ class TransactionService:
             global_tax_calculation=global_tax,
             existing_line_override=existing_line,
             tags=tx.tags,
-            amount=float(tx.amount) if tx.amount else 0.0,
             append_memo="#Accepted"
         )
         
@@ -249,10 +248,11 @@ class TransactionService:
             "Id": tx.id,
             "SyncToken": tx.sync_token,
             "sparse": True,
-            "TotalAmt": float(tx.amount) if tx.amount else 0.0,
             "Line": lines,
             "PrivateNote": f"Split Transaction | #Accepted {'| Tags: ' + ', '.join(tx.tags) if tx.tags else ''}"
         }
+        
+        # TotalAmt and TxnDate EXCLUDED to protect original banking data.
         
         if entity_ref:
             payload["EntityRef"] = entity_ref
