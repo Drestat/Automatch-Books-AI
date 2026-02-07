@@ -39,7 +39,7 @@ body {
     radial-gradient(circle at 0% 100%, rgba(0, 95, 86, 0.05) 0%, transparent 50%);
   background-attachment: fixed;
   min-height: 100vh;
-  font-family: var(--font-geist-sans);
+  font-family: 'Satoshi', sans-serif;
   overflow-x: hidden;
 }
 

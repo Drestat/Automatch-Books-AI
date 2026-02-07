@@ -98,11 +98,11 @@ export default function LandingPage() {
                             Leverage <strong className="text-white/90">Gemini 3 Flash&apos;s brain</strong> to automatically categorize your transactions, then explain the reasoning. All you have to do is click approve.
                         </p>
                         <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-                            <Link href="/sign-up" className="btn-primary px-8 py-4 text-lg w-full md:w-auto flex items-center justify-center gap-3 group">
+                            <Link href="/sign-up" aria-label="Start Syncing with QuickBooks, Free Trial" className="btn-primary px-8 py-4 text-lg w-full md:w-auto flex items-center justify-center gap-3 group">
                                 Start Syncing Now
-                                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" aria-hidden="true" />
                             </Link>
-                            <Link href="#how-it-works" className="px-8 py-4 text-lg font-bold text-white/60 hover:text-white transition-colors flex items-center gap-2">
+                            <Link href="#how-it-works" aria-label="Learn How AutoMatch Books Works" className="px-8 py-4 text-lg font-bold text-white/60 hover:text-white transition-colors flex items-center gap-2">
                                 See How It Works
                             </Link>
                         </div>
@@ -160,11 +160,11 @@ export default function LandingPage() {
                         Join 500+ businesses automating their bookkeeping today.
                     </p>
                     <ul className="flex flex-wrap justify-center gap-6 mb-10 text-sm font-bold text-white/80">
-                        <li className="flex items-center gap-2"><CheckCircle size={16} className="text-brand" /> 14-Day Free Trial</li>
-                        <li className="flex items-center gap-2"><CheckCircle size={16} className="text-brand" /> No Credit Card Required</li>
-                        <li className="flex items-center gap-2"><CheckCircle size={16} className="text-brand" /> Cancel Anytime</li>
+                        <li className="flex items-center gap-2"><CheckCircle size={16} className="text-brand" aria-hidden="true" /> 14-Day Free Trial</li>
+                        <li className="flex items-center gap-2"><CheckCircle size={16} className="text-brand" aria-hidden="true" /> No Credit Card Required</li>
+                        <li className="flex items-center gap-2"><CheckCircle size={16} className="text-brand" aria-hidden="true" /> Cancel Anytime</li>
                     </ul>
-                    <Link href="/sign-up" className="btn-primary px-10 py-5 text-xl inline-flex items-center gap-3">
+                    <Link href="/sign-up" aria-label="Get Started with AutoMatch Books for Free" className="btn-primary px-10 py-5 text-xl inline-flex items-center gap-3">
                         Get Started Free
                     </Link>
                 </div>

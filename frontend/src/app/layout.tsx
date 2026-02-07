@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
-import { Jost } from "next/font/google";
+
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import Script from "next/script";
 import { ToastProvider } from "@/context/ToastContext";
 
-const jost = Jost({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-jost"
-});
+
 
 export const metadata: Metadata = {
   title: {
@@ -86,8 +82,11 @@ export default function RootLayout({
       }}
     >
       <html lang="en">
+        <head>
+          <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap" rel="stylesheet" />
+        </head>
         <body
-          className={`${jost.variable} font-sans antialiased text-white selection:bg-brand selection:text-white`}
+          className="font-sans antialiased text-white selection:bg-brand selection:text-white"
         >
           {/* Google Analytics */}
           <Script

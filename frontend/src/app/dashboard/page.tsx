@@ -195,15 +195,16 @@ function DashboardContent() {
               whileTap={{ scale: 0.98 }}
               onClick={connect}
               disabled={false} // DEBUG: Force enabled
+              aria-label="Connect to QuickBooks Online"
               className="w-full btn-primary py-4 text-lg font-bold flex items-center justify-center gap-3 group relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
               {qboLoading || !isLoaded ? (
-                <div className="w-6 h-6 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+                <div role="status" className="w-6 h-6 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
               ) : (
                 <>
                   Connect Securely
-                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" aria-hidden="true" />
                 </>
               )}
             </motion.button>
@@ -248,7 +249,7 @@ function DashboardContent() {
           onClose={() => setShowTokenModal(false)}
         />
 
-        <header className="pt-12 pb-8 px-6 md:px-12 max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <header className="pt-8 md:pt-12 pb-8 px-4 sm:px-6 md:px-12 max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -284,12 +285,13 @@ function DashboardContent() {
             )}
 
             {/* Manage Accounts Button */}
-            {isConnected && !isDemo && (
+            {(isConnected || isDemo) && (
               <button
                 onClick={() => setShowAccountModal(true)}
+                aria-label="Manage Bank Accounts"
                 className="btn-glass px-4 py-3 flex items-center gap-2 border-brand/30 hover:bg-brand/10 text-sm"
               >
-                <Building2 size={16} className="text-brand" />
+                <Building2 size={16} className="text-brand" aria-hidden="true" />
                 <span>Manage Accounts</span>
               </button>
             )}
@@ -297,8 +299,11 @@ function DashboardContent() {
             {/* Account Filter */}
             {isConnected && accounts.length > 0 && !isDemo && (
               <div className="relative group/filter">
-                <button className="btn-glass px-4 py-3 flex items-center gap-2 border-brand/20 hover:border-brand-accent/50 hover:bg-brand/10 text-sm transition-all duration-300">
-                  <Filter size={16} className={selectedAccounts.length > 0 ? 'text-brand-accent' : 'text-white/40'} />
+                <button
+                  aria-label="Filter Transactions by Account"
+                  className="btn-glass px-4 py-3 flex items-center gap-2 border-brand/20 hover:border-brand-accent/50 hover:bg-brand/10 text-sm transition-all duration-300"
+                >
+                  <Filter size={16} className={selectedAccounts.length > 0 ? 'text-brand-accent' : 'text-white/40'} aria-hidden="true" />
                   <span className={selectedAccounts.length > 0 ? 'text-brand-accent font-bold' : ''}>{selectedAccounts.length > 0 ? `${selectedAccounts.length} Filtered` : 'All Accounts'}</span>
                 </button>
                 {/* Dropdown */}
@@ -319,9 +324,10 @@ function DashboardContent() {
                               const newName = window.prompt("Rename this account (Nickname):", acc.nickname || acc.name);
                               if (newName) updateBankNickname(acc.id, newName);
                             }}
+                            aria-label={`Rename account ${acc.nickname || acc.name}`}
                             className="opacity-0 group-hover/acc:opacity-100 hover:text-white transition-opacity text-white/40"
                           >
-                            <Edit2 size={10} />
+                            <Edit2 size={10} aria-hidden="true" />
                           </button>
                           {selectedAccounts.includes(acc.id) && <div className="w-2 h-2 rounded-full bg-brand" />}
                         </div>
@@ -341,8 +347,11 @@ function DashboardContent() {
             )}
 
             <Link href="/analytics" onClick={() => track('nav_analytics', {}, user?.id)}>
-              <button className="btn-glass px-6 py-4 flex items-center gap-3 group border-brand/30 hover:bg-brand/10">
-                <BarChart3 size={20} className="text-brand" />
+              <button
+                aria-label="View Analytics Dashboard"
+                className="btn-glass px-6 py-4 flex items-center gap-3 group border-brand/30 hover:bg-brand/10"
+              >
+                <BarChart3 size={20} className="text-brand" aria-hidden="true" />
                 <div className="text-left">
                   <span className="block text-[10px] uppercase tracking-wider font-bold text-brand">Insights</span>
                   <span className="text-xs font-bold text-white">View Analytics</span>
@@ -353,11 +362,12 @@ function DashboardContent() {
             <button
               onClick={handleBulkApprove}
               disabled={loading || transactions.filter(tx => tx.confidence > 0.9 && tx.status !== 'approved').length === 0}
+              aria-label="Bulk Approve High Confidence Transactions"
               className="btn-glass px-6 py-4 flex items-center gap-3 group border-brand/30 hover:bg-brand/10 disabled:opacity-50 relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
               <div className="relative z-10 p-2 rounded-full bg-brand/10 text-brand group-hover:bg-brand group-hover:text-white transition-colors">
-                <ShieldCheck size={20} />
+                <ShieldCheck size={20} aria-hidden="true" />
               </div>
               <div className="text-left relative z-10">
                 <span className="block text-[10px] uppercase tracking-wider font-bold text-brand group-hover:text-brand-accent transition-colors">Bulk Action</span>
@@ -365,16 +375,14 @@ function DashboardContent() {
               </div>
             </button>
 
-            <div className="glass-panel px-6 py-4 flex flex-col items-center min-w-[120px]">
-              <span className="text-3xl font-black text-brand leading-none mb-1">{approvedCount}</span>
-              <span className="text-[10px] uppercase tracking-[0.1em] font-bold text-white/30 text-center">Approved Today</span>
-            </div>
+
             <button
               onClick={() => sync()}
               disabled={loading}
+              aria-label="Sync with QuickBooks Online"
               className="btn-primary h-full min-h-[64px] px-8 flex items-center gap-3 group disabled:opacity-50"
             >
-              <Zap size={20} className={`group-hover:animate-pulse ${loading ? 'animate-spin' : ''}`} />
+              <Zap size={20} className={`group-hover:animate-pulse ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
               <span className="font-bold tracking-wide">{loading ? 'Syncing...' : 'Sync Now'}</span>
             </button>
             <div className="ml-2 flex items-center gap-3">
@@ -382,8 +390,9 @@ function DashboardContent() {
                 onClick={disconnect}
                 className="px-4 py-2 text-red-400 hover:text-red-300 transition-colors rounded-lg hover:bg-red-500/10 border border-red-500/20 hover:border-red-500/40 flex items-center gap-2"
                 title="Disconnect from QuickBooks"
+                aria-label="Disconnect from QuickBooks"
               >
-                <Zap size={14} className="rotate-45" />
+                <Zap size={14} className="rotate-45" aria-hidden="true" />
                 <span className="text-sm font-medium">Disconnect</span>
               </button>
               <UserButton afterSignOutUrl="/" />
@@ -391,74 +400,9 @@ function DashboardContent() {
           </motion.div>
         </header>
 
-        <main>
+        <main className="px-4 sm:px-6 md:px-12">
           <BentoGrid>
             {/* Quick Stats & Action Cards */}
-            <BentoTile className="md:col-span-1 bg-gradient-to-br from-brand/[0.15] to-brand-secondary/[0.1] border-brand/20 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-brand-trend/10 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-brand-trend/20 transition-colors duration-500" />
-              <div className="flex flex-col h-full justify-between relative z-10">
-                <div>
-                  <ShieldCheck className="text-brand group-hover:text-brand-accent transition-colors duration-500" size={32} />
-                  <h3 className="text-xl font-bold mb-2 text-white group-hover:text-brand-accent transition-colors">Automated Accuracy</h3>
-                  <p className="text-sm text-white/50 leading-relaxed">
-                    Gemini 3 Flash is currently maintaining a <span className="text-brand font-bold">94.2%</span> accuracy rate across your vendor history.
-                  </p>
-                </div>
-                <div className="mt-8">
-                  <div className="flex justify-between items-end mb-2">
-                    <span className="text-xs font-bold text-white/30 uppercase tracking-wider">Historical Trend</span>
-                    <span className="text-xs font-bold text-emerald-400">+2.4%</span>
-                  </div>
-                  <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: "94.2%" }}
-                      transition={{ duration: 1.5, delay: 0.5 }}
-                      className="h-full bg-brand"
-                    />
-                  </div>
-                </div>
-              </div>
-            </BentoTile>
-
-            <BentoTile className="md:col-span-1 border-white/5 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-brand-trend/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-brand-trend/10 transition-colors duration-500" />
-              <div className="flex flex-col h-full justify-between relative z-10">
-                <div>
-                  <Clock className="text-brand-secondary mb-4 group-hover:text-brand-accent transition-colors" size={32} />
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-brand-accent transition-colors">Pending Review</h3>
-                  <p className="text-sm text-white/50 leading-relaxed">
-                    You have <span className="text-brand-accent font-bold">{transactions.filter(t => t.status !== 'approved').length}</span> transactions waiting for your confirmation.
-                  </p>
-
-                </div>
-                <button className="btn-glass w-full text-xs font-bold py-3 mt-6">
-                  View History
-                </button>
-              </div>
-            </BentoTile>
-
-            <BentoTile className="md:col-span-1 border-white/5 bg-white/[0.01]">
-              <div className="flex flex-col h-full justify-between">
-                <div>
-                  <Layers className="text-brand-accent mb-4" size={32} />
-                  <h3 className="text-xl font-bold mb-2">Multi-Factor Matching</h3>
-                  <p className="text-sm text-white/50 leading-relaxed">
-                    Syncing across 3 checking accounts and 2 credit cards.
-                  </p>
-                </div>
-                <div className="mt-6 flex -space-x-3">
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="w-10 h-10 rounded-full border-2 border-slate-900 bg-white/10 flex items-center justify-center overflow-hidden">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-brand to-brand-secondary opacity-50" />
-                    </div>
-                  ))}
-                  <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-white/5 flex items-center justify-center text-[10px] font-bold">
-                    +2
-                  </div>
-                </div>
-              </div>
-            </BentoTile>
 
             {/* Transactions List */}
             <div className="md:col-span-3 mt-8">
@@ -466,7 +410,7 @@ function DashboardContent() {
                 <div className="flex glass-panel p-1 rounded-xl border border-white/5 shadow-2xl">
                   <button
                     onClick={() => setActiveTab('review')}
-                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 border ${activeTab === 'review' ? 'bg-brand/20 border-brand-accent/50 text-brand-accent shadow-[0_0_20px_-5px_rgba(212,175,55,0.3)]' : 'border-transparent text-white/40 hover:text-white hover:bg-white/5'
+                    className={`flex-1 md:flex-none px-4 sm:px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 border ${activeTab === 'review' ? 'bg-brand/20 border-brand-accent/50 text-brand-accent shadow-[0_0_20px_-5px_rgba(212,175,55,0.3)]' : 'border-transparent text-white/40 hover:text-white hover:bg-white/5'
                       }`}
                   >
                     For review
@@ -476,7 +420,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => setActiveTab('matched')}
-                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 border ${activeTab === 'matched' ? 'bg-brand/20 border-brand/50 text-brand shadow-[0_0_20px_-5px_rgba(0,95,86,0.3)]' : 'border-transparent text-white/40 hover:text-white hover:bg-white/5'
+                    className={`flex-1 md:flex-none px-4 sm:px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 border ${activeTab === 'matched' ? 'bg-brand/20 border-brand/50 text-brand shadow-[0_0_20px_-5px_rgba(0,95,86,0.3)]' : 'border-transparent text-white/40 hover:text-white hover:bg-white/5'
                       }`}
                   >
                     Categorized
@@ -486,7 +430,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => setActiveTab('excluded')}
-                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 ${activeTab === 'excluded' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'
+                    className={`flex-1 md:flex-none px-4 sm:px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'excluded' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'
                       }`}
                   >
                     Excluded
@@ -536,7 +480,7 @@ function DashboardContent() {
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}
-                      transition={{ duration: 0.4, delay: index * 0.1 }}
+                      transition={{ duration: 0.4, delay: index * 0.05 }}
                     >
                       <TransactionCard
                         tx={tx}
@@ -598,7 +542,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.30.0</span></p>
+          <p className="text-white/20 text-xs">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.31.0</span></p>
         </footer>
 
       </div>
