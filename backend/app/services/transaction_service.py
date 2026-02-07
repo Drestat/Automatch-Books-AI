@@ -74,6 +74,9 @@ class TransactionService:
                 print(f"🏷️ [Approve] Processing standard transaction {tx.id}...")
                 await self._update_qbo_transaction(tx)
             
+            # Post-Process: Upload Receipt (if any)
+            await self._upload_receipt(tx)
+            
         except Exception as e:
             print(f"❌ [Approve] Write-Back Failed: {e}")
             raise e
@@ -115,7 +118,6 @@ class TransactionService:
 
         # [PaymentType Logic]
         # If PaymentType is not explicitly Check or CreditCard, we default based on Account Type.
-        # This is critical for matching QBO Bank Feeds (which are usually Expenses/Cash or CreditCard Charges).
         if not payment_type or payment_type == "Check": 
             # Note: Even if it says "Check" in raw_json, if it has no DocNum, it might be a mis-classification 
             # or default QBO behavior. We prefer "Cash" (Expense) for matching unless user explicitly intends a Check.
@@ -127,35 +129,28 @@ class TransactionService:
             ).first()
             
             if bank_account:
-                # If it's a Credit Card account -> CreditCard
-                if "Credit Card" in bank_account.name or "Credit" in bank_account.name: # Fallback name check if type isn't stored
-                     # Better: Check QBO Account Type if we stored it? We store 'name'. 
-                     # Actually we should store 'account_type' in BankAccount model but we don't seem to have column.
-                     # We only have 'name', 'currency'. 
-                     # Wait, I see 'account_type' isn't in BankAccount model above. 
-                     # Ideally we'd query QBO. But let's rely on standard logic:
+                if "Credit Card" in bank_account.name or "Credit" in bank_account.name: 
                      pass 
                 
                 if not payment_type:
                      payment_type = "Cash" # Default to Expense
-                     
-        # Use CreditCard if applicable (Logic implies we need to know Account details better. 
-        # For now, defaulting to 'Cash' works for Checking/Savings. 
-        # For CC, 'CreditCard' is required. 
-        # If raw_json came from CC feed, QBO usually sets it to CreditCard.
-        # But if it came as 'Purchase', we might need to be careful.
-        # Let's trust raw_json if it says CreditCard. Only override 'Check' without DocNum.)
 
-        # Preserve existing Line details (TaxCode, Class, BillableStatus)
+        # Preserve existing Line details
         existing_line = {}
         global_tax = None
         if tx.raw_json:
             if "Line" in tx.raw_json and len(tx.raw_json["Line"]) > 0:
-                # Deep copy to avoid mutating the DB object directly in memory just in case
                 import copy
                 existing_line = copy.deepcopy(tx.raw_json["Line"][0])
-            
             global_tax = tx.raw_json.get("GlobalTaxCalculation")
+
+        # HANDLE PAYMENT/BILLPAYMENT CATEGORY IGNORE
+        # QBOClient intentionally ignores AccountRef for these types to preserve Invoice/Bill links.
+        # We must document the user's intent in the Memo.
+        append_memo = "#Accepted"
+        if tx.transaction_type in ["Payment", "BillPayment"] and cat_name:
+            print(f"⚠️ [Approve] Transaction {tx.id} is {tx.transaction_type}. Category '{cat_name}' will be noted in Memo (not applied to GL).")
+            append_memo = f"#Accepted | [App Category: {cat_name}]"
 
         try:
             updated = await self.client.update_purchase(
@@ -172,7 +167,7 @@ class TransactionService:
                 tags=tx.tags,
                 note=tx.note,
                 description=tx.description,
-                append_memo="#Accepted",
+                append_memo=append_memo,
                 deposit_to_account_ref=tx.raw_json.get("DepositToAccountRef") if tx.raw_json else None,
                 from_account_ref=tx.raw_json.get("FromAccountRef") if tx.raw_json else None
             )
@@ -235,68 +230,6 @@ class TransactionService:
         if updated.get("SyncToken"):
             tx.sync_token = updated.get("SyncToken")
 
-        # [Receipt Upload Logic]
-        if tx.receipt_url:
-            print(f"📎 [Approve] Found Receipt URL for {tx.id}. Downloading & Attaching...")
-            try:
-                import httpx
-                import os
-                
-                file_bytes = None
-                ct = "image/jpeg"
-                filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}.jpg"
-
-                # Check if it's a local file first
-                if os.path.exists(tx.receipt_url):
-                    print(f"📂 [Approve] Reading local receipt file: {tx.receipt_url}")
-                    with open(tx.receipt_url, "rb") as f:
-                        file_bytes = f.read()
-                    
-                    # Guess ext from filename
-                    _, ext = os.path.splitext(tx.receipt_url)
-                    if ext: 
-                        filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}{ext}"
-                        if "pdf" in ext.lower(): ct = "application/pdf"
-                        elif "png" in ext.lower(): ct = "image/png"
-                
-                else:
-                    # Fallback to URL download
-                    print(f"🌐 [Approve] Downloading receipt from URL: {tx.receipt_url}")
-                    async with httpx.AsyncClient() as dl_client:
-                        # Download the image
-                        r = await dl_client.get(tx.receipt_url)
-                        r.raise_for_status()
-                        file_bytes = r.content
-                        
-                        # Determine filename/type
-                        # Simple heuristic: assume jpg/png/pdf based on extension or header
-                        dl_ct = r.headers.get("content-type", "image/jpeg")
-                        if dl_ct: ct = dl_ct
-                        
-                        ext = ".jpg"
-                        if "pdf" in ct: ext = ".pdf"
-                        elif "png" in ct: ext = ".png"
-                        
-                        filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}{ext}"
-                
-                if file_bytes:
-                    print(f"📎 [Approve] Attaching {filename} ({len(file_bytes)} bytes)...")
-                    
-                    # Upload to QBO & Link to Purchase
-                    attachable_ref = {"EntityRef": {"type": "Purchase", "value": tx.id}}
-                    
-                    await self.client.upload_attachment(
-                        file_bytes=file_bytes,
-                        filename=filename,
-                        content_type=ct,
-                        attachable_ref=attachable_ref
-                    )
-                    print(f"✅ [Approve] Receipt attached to {tx.id}")
-                    
-            except Exception as e:
-                print(f"❌ [Approve] Receipt Upload Failed: {e}")
-                # Non-blocking error - we still approved the transaction
-                
         return updated
 
     async def _update_qbo_split_transaction(self, tx):
@@ -421,3 +354,63 @@ class TransactionService:
             except Exception as e:
                 results.append({"id": tx_id, "status": "error", "message": str(e)})
         return results
+
+    async def _upload_receipt(self, tx):
+        if not tx.receipt_url:
+            return
+
+        print(f"📎 [Approve] Found Receipt URL for {tx.id}. Downloading & Attaching...")
+        try:
+            import httpx
+            import os
+            
+            file_bytes = None
+            ct = "image/jpeg"
+            filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}.jpg"
+
+            # Check if it's a local file first
+            if os.path.exists(tx.receipt_url):
+                print(f"📂 [Approve] Reading local receipt file: {tx.receipt_url}")
+                with open(tx.receipt_url, "rb") as f:
+                    file_bytes = f.read()
+                
+                # Guess ext from filename
+                _, ext = os.path.splitext(tx.receipt_url)
+                if ext: 
+                    filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}{ext}"
+                    if "pdf" in ext.lower(): ct = "application/pdf"
+                    elif "png" in ext.lower(): ct = "image/png"
+            
+            else:
+                # Fallback to URL download
+                print(f"🌐 [Approve] Downloading receipt from URL: {tx.receipt_url}")
+                async with httpx.AsyncClient() as dl_client:
+                    r = await dl_client.get(tx.receipt_url)
+                    r.raise_for_status()
+                    file_bytes = r.content
+                    
+                    dl_ct = r.headers.get("content-type", "image/jpeg")
+                    if dl_ct: ct = dl_ct
+                    
+                    ext = ".jpg"
+                    if "pdf" in ct: ext = ".pdf"
+                    elif "png" in ct: ext = ".png"
+                    
+                    filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}{ext}"
+            
+            if file_bytes:
+                print(f"📎 [Approve] Attaching {filename} ({len(file_bytes)} bytes)...")
+                
+                attachable_ref = {"EntityRef": {"type": "Purchase", "value": tx.id}}
+                
+                await self.client.upload_attachment(
+                    file_bytes=file_bytes,
+                    filename=filename,
+                    content_type=ct,
+                    attachable_ref=attachable_ref
+                )
+                print(f"✅ [Approve] Receipt attached to {tx.id}")
+                
+        except Exception as e:
+            print(f"❌ [Approve] Receipt Upload Failed: {e}")
+            # Non-blocking error

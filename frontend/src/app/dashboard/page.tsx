@@ -172,7 +172,7 @@ function DashboardContent() {
   if (!isConnected && !isDemo) {
     return (
       <SubscriptionGuard status={subscriptionStatus} daysRemaining={daysRemaining}>
-        <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        <div className="min-h-screen text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-full bg-grid-white/[0.02] -z-10" />
           <div className="w-full max-w-md space-y-8 relative z-10">
             <div className="text-center space-y-4">
@@ -227,7 +227,7 @@ function DashboardContent() {
 
   return (
     <SubscriptionGuard status={subscriptionStatus} daysRemaining={daysRemaining}>
-      <div className="min-h-screen bg-black text-white selection:bg-brand selection:text-white pb-20">
+      <div className="min-h-screen text-white selection:bg-brand selection:text-white pb-20">
 
         <AccountSelectorModal
           isOpen={showAccountModal}
@@ -254,16 +254,16 @@ function DashboardContent() {
             animate={{ opacity: 1, x: 0 }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <span className={`w-2 h-2 rounded-full ${isDemo ? 'bg-amber-400' : 'bg-brand'} animate-pulse`} />
-              <span className={`text-xs font-bold tracking-[0.2em] ${isDemo ? 'text-amber-400' : 'text-brand'} uppercase`}>
+              <span className={`w-2 h-2 rounded-full ${isDemo ? 'bg-brand-accent' : 'bg-brand'} animate-pulse`} />
+              <span className={`text-xs font-bold tracking-[0.2em] ${isDemo ? 'text-brand-accent' : 'text-brand'} uppercase`}>
                 {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
               </span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight">
-              Financial <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Intelligence</span>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Dashboard</span>
             </h1>
             <p className="text-white/40 text-base md:text-lg max-w-md">
-              Leverage <strong className="text-white/90">Gemini 3 Flash&apos;s brain</strong> to automatically categorize your transactions, then explain the reasoning. All you have to do is click approve.
+              Welcome back, <strong className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">{user?.firstName || 'User'}</strong>.
             </p>
           </motion.div>
 
@@ -274,8 +274,8 @@ function DashboardContent() {
             className="flex flex-wrap gap-4 items-center"
           >
             {profile && (
-              <div className="btn-glass px-4 py-3 flex items-center gap-2 border-brand/30 bg-brand/5">
-                <Coins size={18} className="text-yellow-400" />
+              <div className="btn-glass px-4 py-3 flex items-center gap-2 border-brand-accent/30 bg-brand/5">
+                <Coins size={18} className="text-brand-accent" />
                 <div>
                   <p className="text-[10px] uppercase text-white/40 font-bold tracking-wider">Balance</p>
                   <p className="font-mono font-bold text-white/90 leading-none">{profile.token_balance.toLocaleString()} <span className="text-xs text-white/40">/ {profile.monthly_token_allowance.toLocaleString()}</span></p>
@@ -297,12 +297,12 @@ function DashboardContent() {
             {/* Account Filter */}
             {isConnected && accounts.length > 0 && !isDemo && (
               <div className="relative group/filter">
-                <button className="btn-glass px-4 py-3 flex items-center gap-2 border-brand/30 hover:bg-brand/10 text-sm">
-                  <Filter size={16} className={selectedAccounts.length > 0 ? 'text-brand' : 'text-white/40'} />
-                  <span>{selectedAccounts.length > 0 ? `${selectedAccounts.length} Filtered` : 'All Accounts'}</span>
+                <button className="btn-glass px-4 py-3 flex items-center gap-2 border-brand/20 hover:border-brand-accent/50 hover:bg-brand/10 text-sm transition-all duration-300">
+                  <Filter size={16} className={selectedAccounts.length > 0 ? 'text-brand-accent' : 'text-white/40'} />
+                  <span className={selectedAccounts.length > 0 ? 'text-brand-accent font-bold' : ''}>{selectedAccounts.length > 0 ? `${selectedAccounts.length} Filtered` : 'All Accounts'}</span>
                 </button>
                 {/* Dropdown */}
-                <div className="absolute top-full right-0 mt-2 w-56 bg-[#0a0a0a] border border-white/10 rounded-xl shadow-xl overflow-hidden hidden group-hover/filter:block z-50">
+                <div className="absolute top-full right-0 mt-2 w-56 glass-panel border border-white/10 rounded-xl shadow-xl overflow-hidden hidden group-hover/filter:block z-50">
                   <div className="p-2 space-y-1">
                     {accounts.map(acc => (
                       <div
@@ -360,7 +360,7 @@ function DashboardContent() {
                 <ShieldCheck size={20} />
               </div>
               <div className="text-left relative z-10">
-                <span className="block text-[10px] uppercase tracking-wider font-bold text-brand group-hover:text-brand-secondary transition-colors">Bulk Action</span>
+                <span className="block text-[10px] uppercase tracking-wider font-bold text-brand group-hover:text-brand-accent transition-colors">Bulk Action</span>
                 <span className="text-xs font-bold text-white">Approve High Confidence</span>
               </div>
             </button>
@@ -375,7 +375,7 @@ function DashboardContent() {
               className="btn-primary h-full min-h-[64px] px-8 flex items-center gap-3 group disabled:opacity-50"
             >
               <Zap size={20} className={`group-hover:animate-pulse ${loading ? 'animate-spin' : ''}`} />
-              <span className="font-bold">{loading ? 'Syncing...' : 'Sync Now'}</span>
+              <span className="font-bold tracking-wide">{loading ? 'Syncing...' : 'Sync Now'}</span>
             </button>
             <div className="ml-2 flex items-center gap-3">
               <button
@@ -394,11 +394,12 @@ function DashboardContent() {
         <main>
           <BentoGrid>
             {/* Quick Stats & Action Cards */}
-            <BentoTile className="md:col-span-1 bg-gradient-to-br from-brand/10 to-transparent border-brand/20">
-              <div className="flex flex-col h-full justify-between">
+            <BentoTile className="md:col-span-1 bg-gradient-to-br from-brand/[0.15] to-brand-secondary/[0.1] border-brand/20 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-brand-trend/10 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-brand-trend/20 transition-colors duration-500" />
+              <div className="flex flex-col h-full justify-between relative z-10">
                 <div>
-                  <ShieldCheck className="text-brand mb-4" size={32} />
-                  <h3 className="text-xl font-bold mb-2">Automated Accuracy</h3>
+                  <ShieldCheck className="text-brand group-hover:text-brand-accent transition-colors duration-500" size={32} />
+                  <h3 className="text-xl font-bold mb-2 text-white group-hover:text-brand-accent transition-colors">Automated Accuracy</h3>
                   <p className="text-sm text-white/50 leading-relaxed">
                     Gemini 3 Flash is currently maintaining a <span className="text-brand font-bold">94.2%</span> accuracy rate across your vendor history.
                   </p>
@@ -420,13 +421,14 @@ function DashboardContent() {
               </div>
             </BentoTile>
 
-            <BentoTile className="md:col-span-1 border-white/5">
-              <div className="flex flex-col h-full justify-between">
+            <BentoTile className="md:col-span-1 border-white/5 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-brand-trend/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-brand-trend/10 transition-colors duration-500" />
+              <div className="flex flex-col h-full justify-between relative z-10">
                 <div>
-                  <Clock className="text-brand-secondary mb-4" size={32} />
-                  <h3 className="text-xl font-bold mb-2">Pending Review</h3>
+                  <Clock className="text-brand-secondary mb-4 group-hover:text-brand-accent transition-colors" size={32} />
+                  <h3 className="text-xl font-bold mb-2 group-hover:text-brand-accent transition-colors">Pending Review</h3>
                   <p className="text-sm text-white/50 leading-relaxed">
-                    You have <span className="text-white font-bold">{transactions.filter(t => t.status !== 'approved').length}</span> transactions waiting for your confirmation.
+                    You have <span className="text-brand-accent font-bold">{transactions.filter(t => t.status !== 'approved').length}</span> transactions waiting for your confirmation.
                   </p>
 
                 </div>
@@ -448,7 +450,7 @@ function DashboardContent() {
                 <div className="mt-6 flex -space-x-3">
                   {[1, 2, 3, 4].map(i => (
                     <div key={i} className="w-10 h-10 rounded-full border-2 border-slate-900 bg-white/10 flex items-center justify-center overflow-hidden">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-brand to-brand-accent opacity-50" />
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-brand to-brand-secondary opacity-50" />
                     </div>
                   ))}
                   <div className="w-10 h-10 rounded-full border-2 border-slate-900 bg-white/5 flex items-center justify-center text-[10px] font-bold">
@@ -461,24 +463,24 @@ function DashboardContent() {
             {/* Transactions List */}
             <div className="md:col-span-3 mt-8">
               <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8">
-                <div className="flex bg-[#0a0a0a] p-1 rounded-xl border border-white/5 shadow-2xl">
+                <div className="flex glass-panel p-1 rounded-xl border border-white/5 shadow-2xl">
                   <button
                     onClick={() => setActiveTab('review')}
-                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 ${activeTab === 'review' ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white hover:bg-white/5'
+                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 border ${activeTab === 'review' ? 'bg-brand/20 border-brand-accent/50 text-brand-accent shadow-[0_0_20px_-5px_rgba(212,175,55,0.3)]' : 'border-transparent text-white/40 hover:text-white hover:bg-white/5'
                       }`}
                   >
                     For review
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${activeTab === 'review' ? 'bg-black/20 text-black' : 'bg-white/5 text-white/40'}`}>
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${activeTab === 'review' ? 'bg-brand-accent/20 text-brand-accent' : 'bg-white/5 text-white/40'}`}>
                       {toReviewTxs.length}
                     </span>
                   </button>
                   <button
                     onClick={() => setActiveTab('matched')}
-                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 ${activeTab === 'matched' ? 'bg-brand text-black shadow-lg shadow-brand/20' : 'text-white/40 hover:text-white hover:bg-white/5'
+                    className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 border ${activeTab === 'matched' ? 'bg-brand/20 border-brand/50 text-brand shadow-[0_0_20px_-5px_rgba(0,95,86,0.3)]' : 'border-transparent text-white/40 hover:text-white hover:bg-white/5'
                       }`}
                   >
                     Categorized
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${activeTab === 'matched' ? 'bg-black/20 text-black' : 'bg-white/5 text-white/40'}`}>
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${activeTab === 'matched' ? 'bg-brand/20 text-brand' : 'bg-white/5 text-white/40'}`}>
                       {alreadyMatchedTxs.length}
                     </span>
                   </button>
@@ -596,7 +598,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.29.0</span></p>
+          <p className="text-white/20 text-xs">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.30.0</span></p>
         </footer>
 
       </div>
@@ -606,7 +608,7 @@ function DashboardContent() {
 
 export default function Dashboard() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-black" />}>
+    <Suspense fallback={<div className="min-h-screen" />}>
       <DashboardContent />
     </Suspense>
   );

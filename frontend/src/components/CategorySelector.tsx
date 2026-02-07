@@ -193,8 +193,8 @@ export default function CategorySelector({
                                         <div className="text-left">
                                             <p className="text-sm font-bold text-white">Create "{search}"</p>
                                             <div className="flex items-center gap-1.5">
-                                                <Sparkles size={10} className="text-brand animate-pulse" />
-                                                <p className="text-[10px] text-brand uppercase font-bold tracking-widest">New AI Category</p>
+                                                <Sparkles size={10} className="text-brand-accent animate-pulse" />
+                                                <p className="text-[10px] text-brand-accent uppercase font-bold tracking-widest">New AI Category</p>
                                             </div>
                                         </div>
                                     </div>

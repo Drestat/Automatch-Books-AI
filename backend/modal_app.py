@@ -38,6 +38,7 @@ image = (
 )
 
 app = modal.App("qbo-sync-engine")
+print("🔄 [Modal] forcing invalidation...")
 
 
 
@@ -114,8 +115,9 @@ async def sync_user_data(realm_id: str):
         print("✅ Sync complete")
         
         # CHAIN TO AI
-        print("🧠 Triggering AI Analysis...")
-        process_ai_categorization.spawn(realm_id)
+        print("🧠 Triggering Deterministic Analysis (Rules/History Only)...")
+        # Disable AI for auto-sync to save tokens until user explicitly requests it
+        process_ai_categorization.spawn(realm_id, allow_ai=False)
         
     except Exception as e:
         print(f"❌ Sync failed: {e}")
@@ -123,8 +125,8 @@ async def sync_user_data(realm_id: str):
         db.close()
 
 @app.function(image=image, secrets=[secrets], timeout=600)
-def process_ai_categorization(realm_id: str, tx_id: str = None):
-    print(f"🧠 [Modal] Starting AI Analysis for {realm_id}")
+def process_ai_categorization(realm_id: str, tx_id: str = None, allow_ai: bool = True):
+    print(f"🧠 [Modal] Starting Analysis for {realm_id} (AI: {allow_ai})")
     import sys
     if "/root" not in sys.path:
         sys.path.append("/root")
@@ -135,7 +137,7 @@ def process_ai_categorization(realm_id: str, tx_id: str = None):
     db = SessionLocal()
     try:
         service = AnalysisService(db, realm_id)
-        results = service.analyze_transactions(tx_id=tx_id)
+        results = service.analyze_transactions(tx_id=tx_id, allow_ai=allow_ai)
         print(f"✅ Analysis complete. Processed {len(results)} transactions.")
     except Exception as e:
         print(f"❌ Analysis failed: {e}")

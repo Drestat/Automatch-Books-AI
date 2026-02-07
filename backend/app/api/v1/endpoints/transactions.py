@@ -161,7 +161,7 @@ def analyze_user_transactions(realm_id: str, tx_id: str = None, db: Session = De
             raise HTTPException(status_code=402, detail="Insufficient tokens. Please upgrade your plan.")
 
         from modal_app import process_ai_categorization
-        process_ai_categorization.spawn(realm_id, tx_id=tx_id)
+        process_ai_categorization.spawn(realm_id, tx_id=tx_id, allow_ai=True)
         
         # Deduct synchronously to update UI immediately? 
         # Ideally the async task does it to ensure uniqueness, but doing it here prevents "free" spamming 
@@ -255,79 +255,103 @@ def upload_receipt(
     db: Session = Depends(get_db),
     user=Depends(verify_subscription)
 ):
-    # Receipt upload remains sync/threaded for file IO
-    connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
-    if not connection:
-        raise HTTPException(status_code=404, detail="QBO Connection not found")
-    
-    upload_dir = "uploads"
-    os.makedirs(upload_dir, exist_ok=True)
-    file_path = os.path.join(upload_dir, f"{realm_id}_{file.filename}")
-    
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    
-    from app.services.token_service import TokenService
-    
-    token_service = TokenService(db)
-    receipt_cost = 5
-    
-    if not token_service.has_sufficient_tokens(connection.user_id, receipt_cost):
-        try:
-            os.remove(file_path)
-        except:
-            pass
-        raise HTTPException(status_code=402, detail="Insufficient tokens for receipt scan (Cost: 5 tokens)")
-    
-    token_service.deduct_tokens(connection.user_id, receipt_cost, reason="Receipt Scan")
-
-    with open(file_path, "rb") as f:
-        content = f.read()
-    
     try:
-        from modal_app import process_receipt_modal
-        result = process_receipt_modal.remote(realm_id, content, file.filename)
+        # Receipt upload remains sync/threaded for file IO
+        connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
+        if not connection:
+            raise HTTPException(status_code=404, detail="QBO Connection not found")
         
-        if "error" in result:
-             raise Exception(result["error"])
-             
-    except ImportError:
-        print("⚠️ Modal not found, running locally")
-        service = ReceiptService(db, realm_id)
-        result_obj = service.process_receipt(content, file.filename)
-        match = result_obj.get('match')
-        result = {
-            "extracted": result_obj.get('extracted'),
-            "match_id": match.id if match else None
-        }
-    except Exception as e:
-        print(f"❌ Serverless Receipt Error: {e}")
-        service = ReceiptService(db, realm_id)
-        result_obj = service.process_receipt(content, file.filename)
-        match = result_obj.get('match')
-        result = {
-            "extracted": result_obj.get('extracted'),
-            "match_id": match.id if match else None
+        # Use /tmp for ephemeral storage (works in Modal/Lambda)
+        upload_dir = "/tmp/uploads"
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        # Sanitize filename
+        safe_filename = "".join(c for c in file.filename if c.isalnum() or c in "._-")
+        file_path = os.path.join(upload_dir, f"{realm_id}_{safe_filename}")
+        
+        print(f"📂 [Upload] Saving to {file_path}")
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        from app.services.token_service import TokenService
+        
+        token_service = TokenService(db)
+        receipt_cost = 5
+        
+        if not token_service.has_sufficient_tokens(connection.user_id, receipt_cost):
+            try:
+                os.remove(file_path)
+            except:
+                pass
+            raise HTTPException(status_code=402, detail="Insufficient tokens for receipt scan (Cost: 5 tokens)")
+        
+        token_service.deduct_tokens(connection.user_id, receipt_cost, reason="Receipt Scan")
+
+        with open(file_path, "rb") as f:
+            content = f.read()
+        
+        try:
+            print("🚀 [Upload] Triggering Modal analysis...")
+            from modal_app import process_receipt_modal
+            
+            # Use spawn() for async if possible, but we want the result NOW for the user?
+            # User wants "Scan Receipt" -> "See Result". So it MUST be blocking (remote).
+            # If it times out, we should perhaps return 202 Accepted and poll?
+            # For now, keep remote() but catch timeout.
+            
+            result = process_receipt_modal.remote(realm_id, content, file.filename)
+            
+            if "error" in result:
+                 raise Exception(result["error"])
+                 
+        except ImportError:
+            print("⚠️ Modal not found, running locally")
+            service = ReceiptService(db, realm_id)
+            result_obj = service.process_receipt(content, file.filename)
+            match = result_obj.get('match')
+            result = {
+                "extracted": result_obj.get('extracted'),
+                "match_id": match.id if match else None
+            }
+        except Exception as e:
+            print(f"❌ Serverless Receipt Error: {e}")
+            # Fallback to local
+            service = ReceiptService(db, realm_id)
+            result_obj = service.process_receipt(content, file.filename)
+            match = result_obj.get('match')
+            result = {
+                "extracted": result_obj.get('extracted'),
+                "match_id": match.id if match else None
+            }
+
+        match_id = tx_id or result.get('match_id')
+        extracted = result.get('extracted')
+        
+        match = None
+        if match_id:
+            match = db.query(Transaction).filter(Transaction.id == match_id).first()
+            if match:
+                match.receipt_url = file_path 
+                match.receipt_data = extracted
+                db.add(match)
+                db.commit()
+                db.refresh(match)
+        
+        return {
+            "message": "Receipt processed",
+            "extracted": extracted,
+            "match_id": match_id
         }
 
-    match_id = tx_id or result.get('match_id')
-    extracted = result.get('extracted')
-    
-    match = None
-    if match_id:
-        match = db.query(Transaction).filter(Transaction.id == match_id).first()
-        if match:
-            match.receipt_url = file_path 
-            match.receipt_data = extracted
-            db.add(match)
-            db.commit()
-            db.refresh(match)
-    
-    return {
-        "message": "Receipt processed",
-        "extracted": extracted,
-        "match_id": match_id
-    }
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        print(f"❌ Upload Endpoint Crash: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Upload Error: {str(e)}")
+
+
 
 @router.post("/bulk-approve")
 async def bulk_approve_transactions(realm_id: str, tx_ids: List[str], db: Session = Depends(get_db), user=Depends(verify_subscription)):

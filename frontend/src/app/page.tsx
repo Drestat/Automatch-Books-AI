@@ -10,7 +10,7 @@ import Navbar from '@/components/Navbar';
 
 export default function LandingPage() {
     return (
-        <div className="min-h-screen bg-black text-white selection:bg-brand selection:text-white">
+        <div className="min-h-screen text-white selection:bg-brand selection:text-white">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
@@ -95,7 +95,7 @@ export default function LandingPage() {
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Smart Autopilot.</span>
                         </h1>
                         <p className="text-lg md:text-xl text-white/40 max-w-2xl mx-auto mb-10 leading-relaxed">
-                            Stop categorizing transactions manually. AutoMatch is the **human-in-the-loop** financial layer that business owners desperately need. Auditable intelligence, not just automation.
+                            Leverage <strong className="text-white/90">Gemini 3 Flash&apos;s brain</strong> to automatically categorize your transactions, then explain the reasoning. All you have to do is click approve.
                         </p>
                         <div className="flex flex-col md:flex-row items-center justify-center gap-4">
                             <Link href="/sign-up" className="btn-primary px-8 py-4 text-lg w-full md:w-auto flex items-center justify-center gap-3 group">
@@ -116,6 +116,15 @@ export default function LandingPage() {
             {/* Feature Grid */}
             <section id="how-it-works" className="py-24 px-6 border-t border-white/5 bg-white/[0.02]">
                 <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16 relative">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-brand/20 blur-3xl -z-10 rounded-full" />
+                        <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">
+                            True <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Financial Intelligence</span>
+                        </h2>
+                        <p className="text-white/40 text-lg max-w-xl mx-auto">
+                            Don't just track your money. Understand it.
+                        </p>
+                    </div>
                     <div className="grid md:grid-cols-3 gap-8">
                         <div className="glass-panel p-8">
                             <Zap className="text-brand mb-6" size={40} aria-hidden="true" />

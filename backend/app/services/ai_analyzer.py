@@ -1,4 +1,8 @@
-import google.generativeai as genai
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
+
 import json
 from app.core.config import settings
 from app.core.prompts import TRANSACTION_ANALYSIS_PROMPT, RECEIPT_ANALYSIS_PROMPT, ANALYTICS_INSIGHTS_PROMPT
@@ -6,10 +10,11 @@ from rapidfuzz import process, fuzz
 
 class AIAnalyzer:
     def __init__(self):
-        if settings.GEMINI_API_KEY:
+        if genai and settings.GEMINI_API_KEY:
             genai.configure(api_key=settings.GEMINI_API_KEY)
             self.model = genai.GenerativeModel(settings.GEMINI_MODEL)
         else:
+            print("⚠️ [AIAnalyzer] Generative AI not available (Missing lib or Key)")
             self.model = None
 
     def analyze_batch(self, transactions, context):

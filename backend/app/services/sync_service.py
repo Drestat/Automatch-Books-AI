@@ -146,13 +146,6 @@ class SyncService:
                 tx.duplicate_confidence = dup_conf
                 tx.status = "potential_duplicate" # Prevent auto-categorization
 
-            # Check for duplicates using fuzzy logic (Hubdoc Standard)
-            dup_id, dup_conf = self._check_duplicates(tx)
-            if dup_id:
-                print(f"⚠️ [Duplicate] Potential duplicate found for {tx.id} -> {dup_id} ({dup_conf})")
-                tx.potential_duplicate_id = dup_id
-                tx.duplicate_confidence = dup_conf
-                tx.status = "potential_duplicate" # Prevent auto-categorization
 
             is_qbo_matched, _ = FeedLogic.analyze(p)
             tx.is_qbo_matched = is_qbo_matched

@@ -28,7 +28,15 @@ def sync_user(user_in: UserSync, db: Session = Depends(get_db)):
             user.stripe_customer_id = user_in.stripe_customer_id
     
     db.commit()
+    db.commit()
     return {"status": "synced"}
+
+@router.get("/me")
+def get_current_user(user_id: str, db: Session = Depends(get_db)):
+    """
+    Proxy to get_user for 'me' path, using query param.
+    """
+    return get_user(user_id, db)
 
 @router.get("/{user_id}")
 def get_user(user_id: str, db: Session = Depends(get_db)):

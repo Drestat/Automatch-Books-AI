@@ -87,7 +87,7 @@ export default function RootLayout({
     >
       <html lang="en">
         <body
-          className={`${jost.variable} font-sans antialiased text-white bg-[#050505] selection:bg-brand selection:text-white`}
+          className={`${jost.variable} font-sans antialiased text-white selection:bg-brand selection:text-white`}
         >
           {/* Google Analytics */}
           <Script

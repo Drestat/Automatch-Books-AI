@@ -48,11 +48,12 @@ class AnalysisService:
             "category_objs": {c.name: c for c in categories}
         }
 
-    def analyze_transactions(self, limit: int = 100, tx_id: str = None):
+    def analyze_transactions(self, limit: int = 100, tx_id: str = None, allow_ai: bool = True):
         """
         Orchestrates hybrid intelligence with Rule-based logic and Gemini.
+        allow_ai: If False, only runs deterministic rules and history matching (Free).
         """
-        print(f"🔍 [AnalysisService] Starting analysis for realm {self.realm_id}...")
+        print(f"🔍 [AnalysisService] Starting analysis for realm {self.realm_id} (AI Enabled: {allow_ai})...")
         if tx_id:
             query = self.db.query(Transaction).filter(Transaction.id == tx_id, Transaction.realm_id == self.realm_id)
         else:
@@ -91,7 +92,8 @@ class AnalysisService:
                 # For now, let it flow to History/AI with the better Payee.
             
             # 1. History Match
-            if tx.description in vendor_mapping:
+            # Skip history match if we are explicitly analyzing a specific transaction (User Request)
+            if not tx_id and tx.description in vendor_mapping:
                 suggested_cat = vendor_mapping[tx.description]
                 print(f"✅ [Deterministic] Matched '{tx.description}' to '{suggested_cat}'")
                 self._apply_suggestion(tx, suggested_cat, "Deterministic match from history.", 1.0, "history", list(categories_obj.values()))
@@ -104,6 +106,11 @@ class AnalysisService:
             return results
 
         # --- Rule 2: AI Guess (Gemini) ---
+        if not allow_ai:
+            print("🛑 [AnalysisService] AI Analysis disabled by configuration. Returning deterministic results only.")
+            self.db.commit()
+            return results
+
         history_str = "\n".join([f"HISTORIC: '{desc}' -> Category: {cat}" for desc, cat in list(vendor_mapping.items())[:20]])
         ai_context = {"category_list": category_list, "history_str": history_str}
 
@@ -120,7 +127,12 @@ class AnalysisService:
             if cost == 0: return results
 
         try:
-            token_service.deduct_tokens(user_id, cost, reason=f"AI Analysis")
+            # Only deduct if this is a bulk run. If tx_id is set, API endpoint paid for it.
+            if not tx_id:
+                token_service.deduct_tokens(user_id, cost, reason=f"AI Analysis")
+            else:
+                print(f"🎟️ [Token] Skipping deduction for interactive analysis (Paid by API)")
+            
             analyses = self.analyzer.analyze_batch(to_analyze_with_ai, ai_context)
             
             analysis_map = {str(a.get('id')): a for a in analyses if a.get('id')}

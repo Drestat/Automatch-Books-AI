@@ -106,7 +106,7 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({ status, da
     return (
         <div className="relative">
             {status === 'trial' && (
-                <div className="bg-gradient-to-r from-indigo-900/50 to-purple-900/50 border-b border-white/5 backdrop-blur-md sticky top-0 z-50">
+                <div className="bg-gradient-to-r from-brand/50 to-brand-secondary/50 border-b border-white/5 backdrop-blur-md sticky top-0 z-50">
                     <div className="max-w-[1400px] mx-auto px-6 h-10 flex items-center justify-center gap-2 text-xs font-medium text-white/80">
                         <Clock size={14} className="text-brand-accent" />
                         <span>

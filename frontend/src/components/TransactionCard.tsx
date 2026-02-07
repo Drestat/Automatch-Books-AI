@@ -126,14 +126,14 @@ export default function TransactionCard({
     };
 
     return (
-        <motion.div layout className="glass-card overflow-hidden group w-full mb-4">
-            <div className="p-4 md:p-6">
+        <motion.div layout className="glass-card overflow-hidden group w-full mb-4 ring-1 ring-white/5 hover:ring-brand-accent/30 transition-all duration-500">
+            <div className="p-4 md:p-6 relative z-10">
                 {/* Main Columnar Row */}
                 <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 mb-4 md:mb-6">
                     {/* Column 1: Date & Type */}
                     <div className="flex items-center gap-4 min-w-[140px]">
                         <div>
-                            <p className="text-[13px] text-white font-black uppercase tracking-wider mb-0.5">
+                            <p className="text-[13px] text-white/90 font-black uppercase tracking-wider mb-0.5">
                                 {new Intl.DateTimeFormat('en-US', {
                                     month: 'short',
                                     day: 'numeric',
@@ -141,7 +141,7 @@ export default function TransactionCard({
                                     timeZone: 'UTC'
                                 }).format(new Date(tx.date))}
                             </p>
-                            <span className="text-[10px] font-bold text-white/60 uppercase tracking-tighter border border-white/10 px-1.5 py-0.5 rounded leading-tight block w-fit mt-1">
+                            <span className="text-[10px] font-bold text-brand-accent/80 uppercase tracking-tighter border border-brand-accent/20 px-1.5 py-0.5 rounded leading-tight block w-fit mt-1">
                                 {tx.transaction_type || 'TX'}
                             </span>
                         </div>
@@ -157,9 +157,9 @@ export default function TransactionCard({
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => onUpdate && onUpdate(tx.id, { description: tx.suggested_payee || tx.payee })}
-                                className="flex items-center gap-1.5 px-2 py-1 rounded bg-brand/10 border border-brand/20 text-brand text-[10px] font-bold mb-1 hover:bg-brand/20 transition-all w-fit"
+                                className="flex items-center gap-1.5 px-2 py-1 rounded bg-brand/10 border border-brand-accent/40 text-brand-accent text-[10px] font-bold mb-1 hover:bg-brand-accent/10 transition-all w-fit"
                             >
-                                <Sparkles size={8} />
+                                <Sparkles size={8} className="text-brand-accent" />
                                 Suggested: {tx.suggested_payee || tx.payee}
                             </motion.button>
                         )}
@@ -198,9 +198,9 @@ export default function TransactionCard({
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => onPayeeChange && onPayeeChange(tx.id, tx.suggested_payee!)}
-                                className="flex items-center gap-1.5 px-2 py-1 rounded bg-brand/10 border border-brand/20 text-brand text-[10px] font-bold mb-1 hover:bg-brand/20 transition-all"
+                                className="flex items-center gap-1.5 px-2 py-1 rounded bg-brand/10 border border-brand-accent/40 text-brand-accent text-[10px] font-bold mb-1 hover:bg-brand-accent/10 transition-all"
                             >
-                                <Sparkles size={8} />
+                                <Sparkles size={8} className="text-brand-accent" />
                                 Suggested: {tx.suggested_payee}
                             </motion.button>
                         )}
@@ -234,9 +234,9 @@ export default function TransactionCard({
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => onCategoryChange && onCategoryChange(tx.id, tx.suggested_category_id || '', tx.suggested_category_name)}
-                                className="flex items-center gap-1.5 px-2 py-1 rounded bg-brand/10 border border-brand/20 text-brand text-[10px] font-bold mb-1 hover:bg-brand/20 transition-all"
+                                className="flex items-center gap-1.5 px-2 py-1 rounded bg-brand/10 border border-brand-accent/40 text-brand-accent text-[10px] font-bold mb-1 hover:bg-brand-accent/10 transition-all"
                             >
-                                <Sparkles size={8} />
+                                <Sparkles size={8} className="text-brand-accent" />
                                 Suggested: {tx.suggested_category_name}
                             </motion.button>
                         )}
@@ -262,7 +262,7 @@ export default function TransactionCard({
 
                     {/* Column 5: Amount & Confidence */}
                     <div className="flex flex-col items-end min-w-[120px]">
-                        <p className={`text-lg font-black ${isExpense ? 'text-white' : 'text-emerald-400'}`}>
+                        <p className={`text-lg font-black ${isExpense ? 'text-white/90' : 'text-emerald-400'} tracking-tight`}>
                             {tx.amount === 0 ? '' : (isExpense ? '-' : '+')}{Math.abs(tx.amount).toLocaleString('en-US', { style: 'currency', currency: tx.currency })}
                         </p>
                         <div className={`flex items-center gap-1.5 mt-1 px-2 py-0.5 rounded-full border ${tx.confidence > 0.9 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
@@ -276,11 +276,12 @@ export default function TransactionCard({
                 </div>
 
                 {/* AI Basement Section */}
-                <div className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-4 mb-6">
+                <div className="bg-gradient-to-br from-brand-trend/[0.05] to-brand/[0.05] border border-brand-trend/10 rounded-2xl p-4 mb-6 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand-trend/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
                     <div className="flex flex-col md:flex-row gap-6">
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-3">
-                                <span className="text-[10px] font-bold text-brand uppercase tracking-[0.2em]">AI Intelligence</span>
+                                <span className="text-[10px] font-bold text-brand-accent uppercase tracking-[0.2em]">AI Intelligence</span>
                                 <div className="h-[1px] flex-1 bg-white/5" />
                             </div>
 
@@ -292,13 +293,13 @@ export default function TransactionCard({
                                         </div>
                                         <div className="space-y-2">
                                             {tx.vendor_reasoning && (
-                                                <p className="text-[11px] text-white/60 leading-relaxed">
-                                                    <span className="text-white/40 font-bold mr-1">VENDOR:</span> {tx.vendor_reasoning}
+                                                <p className="text-[11px] text-white/70 leading-relaxed">
+                                                    <span className="text-brand-accent/60 font-bold mr-1">VENDOR:</span> {tx.vendor_reasoning}
                                                 </p>
                                             )}
                                             {tx.category_reasoning && (
-                                                <p className="text-[11px] text-white/60 leading-relaxed">
-                                                    <span className="text-white/40 font-bold mr-1">MATCH:</span> {tx.category_reasoning}
+                                                <p className="text-[11px] text-white/70 leading-relaxed">
+                                                    <span className="text-brand-accent/60 font-bold mr-1">MATCH:</span> {tx.category_reasoning}
                                                 </p>
                                             )}
                                             {!tx.vendor_reasoning && !tx.category_reasoning && tx.reasoning && (
@@ -325,7 +326,7 @@ export default function TransactionCard({
 
                         <div className="flex-1 md:border-l md:border-white/5 md:pl-6">
                             <div className="flex items-center gap-2 mb-3">
-                                <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Collaboration</span>
+                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Collaboration</span>
                                 <div className="h-[1px] flex-1 bg-white/5" />
                             </div>
 
@@ -458,13 +459,13 @@ export default function TransactionCard({
                                 }
                             }}
                             disabled={isAnalyzing}
-                            className={`h-12 px-6 ${isAnalyzing ? 'bg-brand/20 border-brand/30' : 'bg-brand/10 hover:bg-brand/20 border-brand/20'} border rounded-xl flex items-center justify-center text-brand font-bold gap-2 transition-all relative overflow-hidden group/sparkle`}
+                            className={`h-12 px-6 ${isAnalyzing ? 'bg-brand/20 border-brand/30' : 'bg-brand/10 hover:bg-brand-accent/10 border-brand-accent/30'} border rounded-xl flex items-center justify-center text-brand-accent font-bold gap-2 transition-all relative overflow-hidden group/sparkle`}
                         >
                             {isAnalyzing ? (
-                                <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+                                <div className="w-4 h-4 border-2 border-brand-accent border-t-transparent rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    <Sparkles size={18} className="group-hover/sparkle:rotate-12 transition-transform" />
+                                    <Sparkles size={18} className="group-hover/sparkle:rotate-12 transition-transform text-brand-accent" />
                                     <span>Analyze with AI</span>
                                 </>
                             )}
@@ -475,7 +476,7 @@ export default function TransactionCard({
                             whileTap={{ scale: 0.98 }}
                             onClick={handleAccept}
                             disabled={isSyncing}
-                            className={`min-w-[180px] h-12 ${isSyncing ? 'bg-brand/50 cursor-wait' : 'bg-brand hover:bg-brand/90'} text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-brand/20 transition-all border border-white/10`}
+                            className={`min-w-[180px] h-12 ${isSyncing ? 'bg-brand/50 cursor-wait' : 'bg-brand hover:bg-brand/90'} text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-brand/20 hover:shadow-brand-accent/20 transition-all border border-white/10 ring-1 ring-transparent hover:ring-brand-accent/50`}
                         >
                             {isSyncing ? (
                                 <div className="w-4 h-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin" />
@@ -509,7 +510,7 @@ export default function TransactionCard({
                     </div>
                 )}
             </div>
-            <div className="h-1 w-full bg-gradient-to-r from-transparent via-brand/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="h-1 w-full bg-gradient-to-r from-transparent via-brand-trend/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-0 left-0" />
         </motion.div>
     );
 }

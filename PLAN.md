@@ -222,7 +222,42 @@ Based on deep analysis of user complaints (G2, Capterra, Reddit) for Dext, SaasA
 
 ---
 
-## 5. UX Directives (Strict Execution)
+## 5. Competitor Feed & Match Deconstruction (The "Push" vs "Pull" Reality)
+You asked: *"How do they show the feed, and what do they write when the user clicks Match?"*
+
+### 1. The "Inbox" Model (Dext & Hubdoc)
+Competitors like Dext do **NOT** show the QBO "For Review" bank feed. They show a "Document Inbox".
+*   **The "Feed"**: It is a list of *Receipts/Invoices* extracted by OCR, not bank transactions.
+*   **The "Pending" State**:
+    *   **"In Processing"**: OCR is running.
+    *   **"To Review"**: Data extracted, but Category is missing or Confidence is low.
+    *   **"Ready"**: Category is assigned (via Rules/AI).
+*   **The "Match" Action** (The Magic Trick):
+    *   When a user clicks **"Publish"** (or "Match" in their UI), they are **NOT** matching against the QBO Bank Feed via API.
+    *   **The Payload**: They send a `POST /bill` or `POST /purchase` to creating a *new* transaction in QBO.
+    *   **QBO's Job**: QBO's *internal* engine sees this new Bill, matches it to the Bank Feed item (same Amount + Date), and displays the **Green "Match" Badge** inside the QBO Banking Tab.
+    *   **Critical Weakness**: If QBO fails to see the link, you get a **Duplicate** (Double Counting).
+
+### 2. The "Bulk Import" Model (SaasAnt)
+SaasAnt is a "Data Cannon".
+*   **The "Feed"**: A spreadsheet preview of your CSV/Excel upload.
+*   **The "Pending" State**: "Validation Mode". It checks if `Vendor Name` exists in QBO. If not, it flags it red.
+*   **The "Match" Action**:
+    *   User clicks "Upload".
+    *   **The Payload**: SaasAnt blasts `POST /purchase` for every row.
+    *   **Logic**: It relies 100% on the user ensuring they aren't uploading already-synced data. It is a "Dumb Pipe".
+
+### 3. The Antigravity Advantage (The "Pull" Model)
+We are doing what they cannot.
+*   **Our Feed**: We mirror the **Actual QBO Bank Feed** (via Shadow Registers).
+*   **Our "Match"**: We don't just "Push and Pray".
+    1.  We read the *existing check*.
+    2.  We `PATCH` the existing transaction to "Categorized".
+    3.  **Result**: 0% chance of duplicates. 100% data integrity.
+
+---
+
+## 6. UX Directives (Strict Execution)
 
 ### Architecture of Experience
 - **Kinetic Feedback**: No action without motion. Accepted transactions MUST slide out; counters MUST pulse.
@@ -237,7 +272,7 @@ Based on deep analysis of user complaints (G2, Capterra, Reddit) for Dext, SaasA
 
 ---
 
-## 6. Intelligence & Architecture Specs
+## 7. Intelligence & Architecture Specs
 
 ### Database (The Source of Truth)
 - **Schema**: Strictly follow `architecture/postgres_mirror_v3.sql`.
@@ -255,7 +290,7 @@ Based on deep analysis of user complaints (G2, Capterra, Reddit) for Dext, SaasA
 
 ---
 
-## 7. Technical Debt & optimization Log
+## 8. Technical Debt & optimization Log
 ### Critical (Must Fix)
 - [x] **Security**: `backend/app/main.py` has `allow_origins=["*"]`. This must be restricted to frontend domains.
 - [x] **Dead Code**: `backend/app/services/ai_service.py` is unused and redundant.
@@ -269,7 +304,7 @@ Based on deep analysis of user complaints (G2, Capterra, Reddit) for Dext, SaasA
 - [x] **Refactor**: `SyncService` is becoming a "God Class". Logic for Receipts, Sync, and AI should fundamentally be separated.
 - [ ] **PgBouncer Deployment**: External connection pooler configured in code, needs cloud deployment (see `architecture/pgbouncer_setup.md`) - *Deferred to Infrastructure Sprint*
 
-## 8. QC Audit Findings (2026-02-03)
+## 9. QC Audit Findings (2026-02-03)
 ### Critical (Must Fix)
 - [ ] **UI/UX**: Navigation Header is missing on `/pricing` and `/features` pages. Only visible on Landing Page.
 - [ ] **Auth**: Dashboard (`/dashboard`) is inaccessible for testing without a bypass or test account (Clerk in keyless dev mode).
