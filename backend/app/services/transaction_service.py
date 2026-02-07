@@ -221,7 +221,6 @@ class TransactionService:
                         global_tax_calculation=global_tax,
                         existing_line_override=existing_line,
                         tags=tx.tags,
-                        tags=tx.tags,
                         note=tx.note,
                         description=tx.description,
                         append_memo="#Accepted",
@@ -242,20 +241,46 @@ class TransactionService:
             try:
                 import httpx
                 import os
-                async with httpx.AsyncClient() as dl_client:
-                    # Download the image
-                    r = await dl_client.get(tx.receipt_url)
-                    r.raise_for_status()
-                    file_bytes = r.content
+                
+                file_bytes = None
+                ct = "image/jpeg"
+                filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}.jpg"
+
+                # Check if it's a local file first
+                if os.path.exists(tx.receipt_url):
+                    print(f"📂 [Approve] Reading local receipt file: {tx.receipt_url}")
+                    with open(tx.receipt_url, "rb") as f:
+                        file_bytes = f.read()
                     
-                    # Determine filename/type
-                    # Simple heuristic: assume jpg/png/pdf based on extension or header
-                    ct = r.headers.get("content-type", "image/jpeg")
-                    ext = ".jpg"
-                    if "pdf" in ct: ext = ".pdf"
-                    elif "png" in ct: ext = ".png"
-                    
-                    filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}{ext}"
+                    # Guess ext from filename
+                    _, ext = os.path.splitext(tx.receipt_url)
+                    if ext: 
+                        filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}{ext}"
+                        if "pdf" in ext.lower(): ct = "application/pdf"
+                        elif "png" in ext.lower(): ct = "image/png"
+                
+                else:
+                    # Fallback to URL download
+                    print(f"🌐 [Approve] Downloading receipt from URL: {tx.receipt_url}")
+                    async with httpx.AsyncClient() as dl_client:
+                        # Download the image
+                        r = await dl_client.get(tx.receipt_url)
+                        r.raise_for_status()
+                        file_bytes = r.content
+                        
+                        # Determine filename/type
+                        # Simple heuristic: assume jpg/png/pdf based on extension or header
+                        dl_ct = r.headers.get("content-type", "image/jpeg")
+                        if dl_ct: ct = dl_ct
+                        
+                        ext = ".jpg"
+                        if "pdf" in ct: ext = ".pdf"
+                        elif "png" in ct: ext = ".png"
+                        
+                        filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}{ext}"
+                
+                if file_bytes:
+                    print(f"📎 [Approve] Attaching {filename} ({len(file_bytes)} bytes)...")
                     
                     # Upload to QBO & Link to Purchase
                     attachable_ref = {"EntityRef": {"type": "Purchase", "value": tx.id}}

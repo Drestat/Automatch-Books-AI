@@ -138,6 +138,22 @@ class SyncService:
             tx.payee = self._resolve_payee(p)
             tx.raw_json = p
 
+            # Check for duplicates using fuzzy logic (Hubdoc Standard)
+            dup_id, dup_conf = self._check_duplicates(tx)
+            if dup_id:
+                print(f"⚠️ [Duplicate] Potential duplicate found for {tx.id} -> {dup_id} ({dup_conf})")
+                tx.potential_duplicate_id = dup_id
+                tx.duplicate_confidence = dup_conf
+                tx.status = "potential_duplicate" # Prevent auto-categorization
+
+            # Check for duplicates using fuzzy logic (Hubdoc Standard)
+            dup_id, dup_conf = self._check_duplicates(tx)
+            if dup_id:
+                print(f"⚠️ [Duplicate] Potential duplicate found for {tx.id} -> {dup_id} ({dup_conf})")
+                tx.potential_duplicate_id = dup_id
+                tx.duplicate_confidence = dup_conf
+                tx.status = "potential_duplicate" # Prevent auto-categorization
+
             is_qbo_matched, _ = FeedLogic.analyze(p)
             tx.is_qbo_matched = is_qbo_matched
             
@@ -235,6 +251,8 @@ class SyncService:
             self.db.add(cust)
         self.db.commit()
 
+        self.db.commit()
+
     async def sync_vendors(self):
         data = await self.client.query("SELECT * FROM Vendor")
         vendors = data.get("QueryResponse", {}).get("Vendor", [])
@@ -245,3 +263,48 @@ class SyncService:
             vend.display_name = v["DisplayName"]
             self.db.add(vend)
         self.db.commit()
+
+    def _check_duplicates(self, tx):
+        """
+        Hubdoc-style Fuzzy Duplicate Detection:
+        - Exact Amount (or inverted for credit/debit mix-ups)
+        - Date +/- 2 days
+        - Different ID
+        """
+        from datetime import timedelta
+        
+        # Define search window
+        date_start = tx.date - timedelta(days=2)
+        date_end = tx.date + timedelta(days=2)
+        
+        # Query potential matches
+        candidates = self.db.query(Transaction).filter(
+            Transaction.realm_id == self.connection.realm_id,
+            Transaction.date >= date_start,
+            Transaction.date <= date_end,
+            Transaction.id != tx.id,
+            # Optimisation: Check amount in Python or DB? DB is faster.
+            Transaction.amount == tx.amount 
+        ).all()
+        
+        if candidates:
+            # Found exact amount match in date range
+            best_match = candidates[0]
+            confidence = 0.95 if best_match.date == tx.date else 0.85
+            return best_match.id, confidence
+            
+        # Check inverted amount (e.g. 100.00 vs -100.00)
+        candidates_inv = self.db.query(Transaction).filter(
+            Transaction.realm_id == self.connection.realm_id,
+            Transaction.date >= date_start,
+            Transaction.date <= date_end,
+            Transaction.id != tx.id,
+            Transaction.amount == -tx.amount 
+        ).all()
+        
+        if candidates_inv:
+            best_match = candidates_inv[0]
+            confidence = 0.80
+            return best_match.id, confidence
+
+        return None, None

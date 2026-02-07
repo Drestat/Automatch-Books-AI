@@ -73,15 +73,22 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.28.17"}
+    return {"status": "ok", "version": "3.29.0"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.28.17",
+        "version": "3.29.0",
         "status": "ready"
     }
+
+from fastapi.staticfiles import StaticFiles
+import os
+
+# Mount uploads for receipt preview
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Include the main API router
 app.include_router(api_router, prefix=settings.API_V1_STR)

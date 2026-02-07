@@ -139,11 +139,90 @@ graph TD
 - [x] **Transaction Splitting**: Implement AI logic to split bulk transactions into multiple categories.
 - [x] **Receipt Mirroring**: Add support for matching scanned receipts to bank transactions.
 - [x] **Serverless Offloading**: Migrated receipt processing to Modal for scalable AI workloads.
+- [x] **Serverless Scale**: Migrated QBO Webhooks and Bulk Transaction matching to Modal background workers.
 - [x] **SaaS Gating**: Enforced subscription limits on sync and analysis endpoints.
 
 ---
 
-## 3. UX Directives (Strict Execution)
+## 3. Architecture of Integration (Research & Strategy)
+
+### Competitor Logic Deconstruction
+We analyzed the integration patterns of market leaders to reverse-engineer the "Perfect Sync".
+
+#### 1. Dext Prepare (formerly Receipt Bank)
+-   **Core Mechanic**: "Publish to QBO" is an explicit user action, not a continuous sync.
+-   **Data Flow**:
+    1.  **Extraction**: OCR extracts Date, Supplier, Amount, Tax.
+    2.  **Validation**: Checks for existing suppliers in QBO cache. If new, forces user to create or map.
+    3.  **The "Publish" Payload**: Creates a `Bill` or `Expense` object. Crucially, it attaches the document image as an `Attachable` linked to the transaction ID immediately after creation.
+-   **Takeaway**: We must create the transaction *first*, get the ID, then upload the attachment. Atomic operations are key.
+
+#### 2. SaasAnt Transactions
+-   **Core Mechanic**: Bulk Excel/CSV Import.
+-   **Secret Weapon**: **Pre-Validation Layer**. Before hitting the QBO API, it runs a local validation against cached QBO entities (Accounts, Classes, Locations).
+-   **Error Handling**: If a row fails (e.g., "Account not found"), it skips that row but continues the batch, generating a specific error report.
+-   **Takeaway**: Our AI must "Validate" suggestions against the `Chart of Accounts` mirror before presenting them to the user. Never suggest an invalid account.
+
+#### 3. Hubdoc (Xero/Intuit)
+-   **Core Mechanic**: Automated Fetching.
+-   **Differentiation**: Logins to bank portals to scrape statements.
+-   **Relevance**: While we are *not* building a scraper, their **"Duplicate Detection"** is superior. They check `Amount` + `Date` (+/- 3 days) + `Supplier` to flag potential duplicates before insertion.
+-   **Takeaway**: Implement "Fuzzy Date Matching" (±2 days) when scanning for existing transactions to prevent double-entry.
+
+### Recommended Technical Stack (Serverless Python)
+
+#### Authentication & Client
+-   **Library**: `intuit-oauth` (Official Intuit Python Client)
+    -   *Why*: Handles the complex OAuth2 token rotation, refreshing, and standard compliance automatically. It is the only "safe" choice for long-term maintenance.
+-   **API Interaction**: `httpx` (Async HTTP Client)
+    -   *Why*: The official `python-quickbooks` library is synchronous and ORM-heavy (slow). For our serverless environment (Modal), we need raw, lightweight, asynchronous HTTP requests to handle high-concurrency batching.
+    -   *Pattern*: Use `intuit-oauth` to get the robust token, then inject that token into `httpx` headers for blazing fast, parallel API calls.
+
+#### Infrastructure Capability
+-   **Runtime**: **Modal** (Serverless Python)
+    -   *Fit*: Perfect for "Burst" workloads (syncing 1,000 transactions in 30 seconds) without paying for idle server time.
+    -   *Architecture*:
+        1.  **Trigger**: Webhook from QBO or User Login.
+        2.  **Spin Up**: Modal container starts (Cold start < 2s).
+        3.  **Execute**: `httpx` fetches standardized batches.
+        4.  **Spin Down**: Zero cost when inactive.
+
+---
+
+## 4. Competitive Landscape & Strategic Gaps
+
+### The "Holes" in the Industry (Our Opportunity)
+Based on deep analysis of user complaints (G2, Capterra, Reddit) for Dext, SaasAnt, and Hubdoc, here are the **unmet needs** we will fill:
+
+1.  **"Why did it do that?" (Explainability)**
+    -   *The Gap*: Competitors are "Black Boxes". When Dext mis-categorizes a receipt, users don't know why.
+    -   *The Fix*: **"Reasoning Narratives"**. Every AI suggestion comes with a one-sentence logic explanation (e.g., *"Categorized as 'Meals' because the vendor is 'Starbucks' and amount is < $20"*).
+2.  **Mobile Command Center (Not Just Capture)**
+    -   *The Gap*: Competitors treat mobile as a "Scanner" only. You can't effectively review or recategorize bulk transactions on a phone.
+    -   *The Fix*: **Tinder for Taxes**. A fast, swipe-based interface for rapid reviewing on the go.
+3.  **"Undo" / Safe-Mode**
+    -   *The Gap*: Fear of clicking "Publish". Once it's in QBO, it's messy to fix.
+    -   *The Fix*: **"The 10-Second Undo"**. A toast notification that holds the API call for 10s, allowing an instant revert.
+4.  **Pricing Sanity**
+    -   *The Gap*: SaasAnt uses confusing "Credits". Dext has hidden tiers.
+    -   *The Fix*: **Flat, Usage-Based Transparency**.
+
+### Feature Hierarchy (The Roadmap)
+
+| Priority | Feature | Why it Matters | Competitor Status |
+| :--- | :--- | :--- | :--- |
+| **CRITICAL** | **Perfect Duplicate Detection** | If we duplicate a transaction, trust is lost instantly. | **Hubdoc**: Good<br>**SaasAnt**: Weak |
+| **CRITICAL** | **"Pre-Validation"** | "Check before you Send". Verify Vendor/Account exists in QBO *before* trying to sync. | **SaasAnt**: Excellent<br>**Dext**: Good |
+| **MUST HAVE** | **Split Transactions** | Ability to split a $100 Walmart bill into $50 "Groceries" and $50 "Supplies". | **All**: Basic Support |
+| **MUST HAVE** | **Receipt Image Attachment** | The image MUST be attached to the QBO transaction, not just a link. | **Dext**: Gold Standard |
+| **SHOULD HAVE** | **Vendor "Aliasing"** | Map "Amzn Mktp" and "Amazon.com" to a single "Amazon" vendor automatically. | **Dext**: Good<br>**Hubdoc**: Weak |
+| **WOULD BE NICE** | **Project/Class Tracking** | Assigning expenses to specific QBO Projects or Classes. | **Most**: Enterprise Plans only |
+| **UNIQUE** | **"Confidence Traffic Lights"** | Green/Yellow/Red visual indicators of AI certainty. | **None**: Users guess the quality. |
+| **UNIQUE** | **"Natural Language Rules"** | "Always mark Uber as Travel unless it's on a weekend". | **None**: Regex based only. |
+
+---
+
+## 5. UX Directives (Strict Execution)
 
 ### Architecture of Experience
 - **Kinetic Feedback**: No action without motion. Accepted transactions MUST slide out; counters MUST pulse.
@@ -158,7 +237,7 @@ graph TD
 
 ---
 
-## 4. Intelligence & Architecture Specs
+## 6. Intelligence & Architecture Specs
 
 ### Database (The Source of Truth)
 - **Schema**: Strictly follow `architecture/postgres_mirror_v3.sql`.
@@ -176,7 +255,7 @@ graph TD
 
 ---
 
-## 5. Technical Debt & optimization Log
+## 7. Technical Debt & optimization Log
 ### Critical (Must Fix)
 - [x] **Security**: `backend/app/main.py` has `allow_origins=["*"]`. This must be restricted to frontend domains.
 - [x] **Dead Code**: `backend/app/services/ai_service.py` is unused and redundant.
@@ -190,7 +269,7 @@ graph TD
 - [x] **Refactor**: `SyncService` is becoming a "God Class". Logic for Receipts, Sync, and AI should fundamentally be separated.
 - [ ] **PgBouncer Deployment**: External connection pooler configured in code, needs cloud deployment (see `architecture/pgbouncer_setup.md`) - *Deferred to Infrastructure Sprint*
 
-## 6. QC Audit Findings (2026-02-03)
+## 8. QC Audit Findings (2026-02-03)
 ### Critical (Must Fix)
 - [ ] **UI/UX**: Navigation Header is missing on `/pricing` and `/features` pages. Only visible on Landing Page.
 - [ ] **Auth**: Dashboard (`/dashboard`) is inaccessible for testing without a bypass or test account (Clerk in keyless dev mode).

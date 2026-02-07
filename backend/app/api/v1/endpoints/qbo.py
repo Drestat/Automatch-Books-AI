@@ -20,7 +20,7 @@ def authorize(user_id: str):
         print(f">>> [qbo.py] Using Redirect URI: {settings.QBO_REDIRECT_URI}")
         print(f">>> [qbo.py] Environment: {settings.QBO_ENVIRONMENT}")
         if not settings.QBO_CLIENT_ID:
-            return {"error": "Configuration Error: QBO_CLIENT_ID is missing on server."}
+            raise HTTPException(status_code=500, detail="Configuration Error: QBO_CLIENT_ID is missing on server.")
 
         auth_client = AuthClient(
             client_id=settings.QBO_CLIENT_ID,
@@ -35,7 +35,17 @@ def authorize(user_id: str):
     except Exception as e:
         import traceback
         print(f"Error in authorize: {str(e)}")
-        return {"error": f"Internal Server Error: {str(e)}", "trace": traceback.format_exc()}
+        # Raise generic 500 but include detail
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+@router.get("/debug-config")
+def debug_config(user=Depends(verify_subscription)):
+    return {
+        "client_id_set": bool(settings.QBO_CLIENT_ID),
+        "client_id_len": len(settings.QBO_CLIENT_ID) if settings.QBO_CLIENT_ID else 0,
+        "redirect_uri": settings.QBO_REDIRECT_URI,
+        "environment": settings.QBO_ENVIRONMENT
+    }
 
 @router.get("/callback")
 def callback(code: str, state: str, realmId: str, db: Session = Depends(get_db)):

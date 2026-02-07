@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from rapidfuzz import process, fuzz
-from app.models.qbo import Transaction, Category, Customer, TransactionSplit, SyncLog, QBOConnection
+from app.models.qbo import Transaction, Category, Customer, TransactionSplit, SyncLog, QBOConnection, VendorAlias, ClassificationRule
 from app.services.ai_analyzer import AIAnalyzer
 import json
 
@@ -76,6 +76,21 @@ class AnalysisService:
 
         # --- Rule 1: Deterministic matching from History ---
         for tx in unmatched:
+            # 0. Check Natural Language Rules (Highest Priority)
+            if self._apply_rules(tx):
+                 results.append({"id": tx.id, "analysis": {"category": tx.suggested_category_name, "method": "rule"}})
+                 continue
+
+            # 0.5. Check Vendor Aliases
+            alias_vendor = self._resolve_vendor_alias(tx.description)
+            if alias_vendor:
+                print(f"🏷️ [Alias] Mapped '{tx.description}' to '{alias_vendor}'")
+                # Update description or payee? Usually Payee.
+                tx.payee = alias_vendor
+                # We might want to re-check history with the new vendor name?
+                # For now, let it flow to History/AI with the better Payee.
+            
+            # 1. History Match
             if tx.description in vendor_mapping:
                 suggested_cat = vendor_mapping[tx.description]
                 print(f"✅ [Deterministic] Matched '{tx.description}' to '{suggested_cat}'")
@@ -169,15 +184,28 @@ class AnalysisService:
         # DESCRIPTION LOGIC: Removed auto-fill per user request (v3.28.17)
         # Frontend will handle suggestions if description is empty.
 
-        # Resolve Suggested Category ID
+        # Resolve Suggested Category ID (Pre-Validation - SaasAnt Standard)
         if suggested_name:
+            # 1. Strict Check
             cat_match = categories_obj.get(suggested_name)
+            
+            # 2. Fuzzy Fallback (if AI hallucinated a slightly different name)
             if not cat_match:
                 f_match = process.extractOne(suggested_name, category_list, scorer=fuzz.WRatio)
-                if f_match and f_match[1] > 80:
+                if f_match and f_match[1] > 85: # High threshold for safety
                     cat_match = categories_obj.get(f_match[0])
+                    print(f"⚠️ [Validation] Fuzzy corrected '{suggested_name}' -> '{cat_match.name}'")
+            
             if cat_match:
                 tx.suggested_category_id = cat_match.id
+                tx.suggested_category_name = cat_match.name # Force canonical name
+            else:
+                # 3. Validation Failure - Do NOT assign invalid category
+                print(f"❌ [Validation] AI suggested invalid category '{suggested_name}'. Reverting to Uncategorized.")
+                tx.suggested_category_id = None
+                tx.suggested_category_name = None
+                tx.category_reasoning = (tx.category_reasoning or "") + f" [Warning: AI suggested '{suggested_name}' which does not exist in QBO.]"
+                tx.confidence = 0.4 # Penalize confidence
 
         # Capture AI Suggested Tags
         tx.suggested_tags = analysis.get('tags', [])
@@ -206,3 +234,73 @@ class AnalysisService:
                 tx.splits.append(split)
         
         self.db.add(tx)
+
+    def _resolve_vendor_alias(self, description: str):
+        """
+        Dext-style Aliasing:
+        "Amazon Mktp 123" -> "Amazon"
+        """
+        if not description: return None
+        
+        # Simple exact substring match for now. 
+        # In a real app, this would be cached or more sophisticated.
+        aliases = self.db.query(VendorAlias).filter(VendorAlias.realm_id == self.realm_id).all()
+        for alias in aliases:
+            if alias.alias.lower() in description.lower():
+                # Fetch vendor name
+                from app.models.qbo import Vendor
+                vendor = self.db.query(Vendor).filter(Vendor.id == alias.vendor_id).first()
+                if vendor:
+                    return vendor.display_name
+        return None
+
+    def _apply_rules(self, tx):
+        """
+        Natural Language Rules Engine (Unique)
+        Priority-based execution.
+        """
+        rules = self.db.query(ClassificationRule).filter(
+            ClassificationRule.realm_id == self.realm_id
+        ).order_by(ClassificationRule.priority.desc()).all()
+
+        for rule in rules:
+            conditions = rule.conditions
+            match = True
+            
+            # 1. Description Contains
+            if "description_contains" in conditions:
+                if conditions["description_contains"].lower() not in (tx.description or "").lower():
+                    match = False
+            
+            # 2. Amount Range (min/max)
+            if "amount_min" in conditions:
+                if abs(float(tx.amount)) < float(conditions["amount_min"]): match = False
+            if "amount_max" in conditions:
+                if abs(float(tx.amount)) > float(conditions["amount_max"]): match = False
+
+            if match:
+                print(f"✨ [Rules] Applied rule '{rule.name}' to {tx.id}")
+                action = rule.action
+                
+                if "category" in action:
+                    tx.suggested_category_name = action["category"]
+                    # Resolve ID (quick lookup)
+                    cat = self.db.query(Category).filter(
+                        Category.realm_id == self.realm_id, 
+                        Category.name == action["category"]
+                    ).first()
+                    if cat: tx.suggested_category_id = cat.id
+                
+                if "tag" in action:
+                    current_tags = tx.tags or []
+                    if action["tag"] not in current_tags:
+                        current_tags.append(action["tag"])
+                        tx.tags = current_tags
+
+                tx.reasoning = f"Matched rule: {rule.name}"
+                tx.confidence = 1.0 # Rules are absolute
+                tx.status = 'pending_approval'
+                return True
+        
+        # If no rule matched, return False so AI can take over
+        return False

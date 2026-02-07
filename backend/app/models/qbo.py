@@ -70,6 +70,8 @@ class Transaction(Base):
     account_id = Column(String)
     account_name = Column(String)
     is_qbo_matched = Column(Boolean, default=False)
+    potential_duplicate_id = Column(String, ForeignKey("transactions.id"), nullable=True)
+    duplicate_confidence = Column(Numeric(3, 2), nullable=True)
     is_excluded = Column(Boolean, default=False)
     is_bank_feed_import = Column(Boolean, default=True)  # False if TxnType=54 (manual entry)
     forced_review = Column(Boolean, default=False)
@@ -130,3 +132,21 @@ class SyncLog(Base):
     count = Column(Numeric, default=0)
     status = Column(String) # success, partial_failure, error
     details = Column(JSON, nullable=True)
+
+class VendorAlias(Base):
+    __tablename__ = "vendor_aliases"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    realm_id = Column(String, ForeignKey("qbo_connections.realm_id", ondelete="CASCADE"), index=True)
+    alias = Column(String, nullable=False)
+    vendor_id = Column(String, ForeignKey("vendors.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class ClassificationRule(Base):
+    __tablename__ = "classification_rules"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    realm_id = Column(String, ForeignKey("qbo_connections.realm_id", ondelete="CASCADE"), index=True)
+    name = Column(String, nullable=False)
+    priority = Column(Numeric, default=0)
+    conditions = Column(JSON, nullable=False) # e.g. {"description_contains": "Uber"}
+    action = Column(JSON, nullable=False) # e.g. {"category": "Travel", "tag": "Weekend"}
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

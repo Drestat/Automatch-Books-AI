@@ -41,15 +41,23 @@ async def qbo_webhook(
         if connection:
             # Trigger sync
             # In production, this should be a background task (Modal/Celery)
+            print(f"🔄 [Webhook] Triggering background sync for realm {realm_id}")
             try:
-                sync_service = TransactionService(db, connection)
-                sync_service.sync_all() 
-                
-                # Hybrid Intelligence trigger
-                analysis_service = AnalysisService(db, realm_id)
-                analysis_service.analyze_transactions()
+                from modal_app import sync_user_data
+                sync_user_data.spawn(realm_id)
+            except ImportError:
+                print("⚠️ [Webhook] Modal not found, falling back to local sync")
+                try:
+                    sync_service = TransactionService(db, connection)
+                    await sync_service.sync_transactions() # Use async wrapper if available or sync
+                    
+                    # Hybrid Intelligence trigger
+                    analysis_service = AnalysisService(db, realm_id)
+                    analysis_service.analyze_transactions()
+                except Exception as e:
+                    print(f"❌ Webhook Local Sync Error for realm {realm_id}: {str(e)}")
             except Exception as e:
-                print(f"❌ Webhook Sync Error for realm {realm_id}: {str(e)}")
+                print(f"❌ Webhook Modal Spawn Error for realm {realm_id}: {str(e)}")
 
     return {"status": "accepted"}
 

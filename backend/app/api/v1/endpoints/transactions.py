@@ -335,6 +335,19 @@ async def bulk_approve_transactions(realm_id: str, tx_ids: List[str], db: Sessio
     if not connection:
         raise HTTPException(status_code=404, detail="QBO Connection not found")
     
-    service = TransactionService(db, connection)
-    results = await service.bulk_approve(tx_ids) # Now async
-    return {"results": results}
+    try:
+        from modal_app import bulk_approve_modal
+        # Spawn background task
+        bulk_approve_modal.spawn(realm_id, tx_ids)
+        return {"message": "Bulk approval started in background", "count": len(tx_ids)}
+    except ImportError:
+        print("⚠️ Modal not found, falling back to local bulk approve")
+        service = TransactionService(db, connection)
+        results = await service.bulk_approve(tx_ids)
+        return {"results": results, "mode": "local_fallback"}
+    except Exception as e:
+        print(f"❌ Modal Spawn Error: {e}")
+        # Fallback
+        service = TransactionService(db, connection)
+        results = await service.bulk_approve(tx_ids)
+        return {"results": results, "mode": "local_fallback_error"}

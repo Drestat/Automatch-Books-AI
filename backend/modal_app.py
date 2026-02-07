@@ -9,6 +9,9 @@ env_path = os.path.join(base_dir, ".env")
 if not os.path.exists(env_path):
     env_path = os.path.join(os.path.dirname(base_dir), ".env")
 env_vars = dotenv_values(env_path)
+print(f"🔍 [Modal Build] Env path: {env_path}")
+print(f"🔍 [Modal Build] Keys found: {list(env_vars.keys())}")
+print(f"🔍 [Modal Build] QBO_CLIENT_ID present: {bool(env_vars.get('QBO_CLIENT_ID'))}")
 
 image = (
     modal.Image.debian_slim()
@@ -136,6 +139,35 @@ def process_ai_categorization(realm_id: str, tx_id: str = None):
         print(f"✅ Analysis complete. Processed {len(results)} transactions.")
     except Exception as e:
         print(f"❌ Analysis failed: {e}")
+    finally:
+        db.close()
+
+@app.function(image=image, secrets=[secrets], timeout=600)
+async def bulk_approve_modal(realm_id: str, tx_ids: list[str]):
+    print(f"🔄 [Modal] Starting Bulk Approve for {len(tx_ids)} transactions in {realm_id}")
+    import sys
+    if "/root" not in sys.path:
+        sys.path.append("/root")
+
+    from app.services.transaction_service import TransactionService
+    from app.models.qbo import QBOConnection
+    from app.db.session import SessionLocal
+
+    db = SessionLocal()
+    try:
+        connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
+        if not connection:
+            print("❌ Connection not found")
+            return
+            
+        service = TransactionService(db, connection)
+        results = await service.bulk_approve(tx_ids)
+        
+        success_count = sum(1 for r in results if r.get("status") == "success")
+        print(f"✅ Bulk Approve Complete. Success: {success_count}/{len(tx_ids)}")
+        
+    except Exception as e:
+        print(f"❌ Bulk Approve Failed: {e}")
     finally:
         db.close()
 
