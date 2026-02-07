@@ -12,11 +12,34 @@ import { UserButton } from "@clerk/nextjs";
 import { useAnalytics } from '@/hooks/useAnalytics';
 import Footer from '@/components/Footer';
 
+import Skeleton from '@/components/Skeleton';
+
 
 export default function AnalyticsPage() {
     const { spendTrend, categoryData, kpi, loading } = useAnalytics();
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center text-white/40">Loading insights...</div>;
+    if (loading) return (
+        <div className="min-h-screen py-12 px-6 lg:px-12 max-w-7xl mx-auto">
+            <header className="mb-12 flex justify-between items-end">
+                <div className="space-y-4">
+                    <Skeleton width="200px" height="20px" />
+                    <Skeleton width="400px" height="60px" />
+                    <Skeleton width="300px" height="30px" />
+                </div>
+            </header>
+            <BentoGrid>
+                <BentoTile className="md:col-span-2 md:row-span-2 min-h-[400px]">
+                    <Skeleton height="100%" />
+                </BentoTile>
+                <BentoTile className="md:col-span-1 md:row-span-2 min-h-[400px]">
+                    <Skeleton height="100%" />
+                </BentoTile>
+                <BentoTile><Skeleton height="100px" /></BentoTile>
+                <BentoTile><Skeleton height="100px" /></BentoTile>
+                <BentoTile><Skeleton height="100px" /></BentoTile>
+            </BentoGrid>
+        </div>
+    );
 
     return (
         <div className="min-h-screen py-12 px-6 lg:px-12 max-w-7xl mx-auto">

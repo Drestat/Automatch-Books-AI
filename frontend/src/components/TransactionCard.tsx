@@ -5,6 +5,7 @@ import { Check, Edit2, Info, ArrowUpRight, FilePlus, Tags, Split as SplitIcon, E
 import { motion, AnimatePresence } from 'framer-motion';
 import VendorSelector from './VendorSelector';
 import CategorySelector from './CategorySelector';
+import StreamingText from './StreamingText';
 
 interface Split {
     category_name: string;
@@ -294,16 +295,18 @@ export default function TransactionCard({
                                         <div className="space-y-2">
                                             {tx.vendor_reasoning && (
                                                 <p className="text-[11px] text-white/70 leading-relaxed">
-                                                    <span className="text-brand-accent/60 font-bold mr-1">VENDOR:</span> {tx.vendor_reasoning}
+                                                    <span className="text-brand-accent/60 font-bold mr-1">VENDOR:</span> <StreamingText text={tx.vendor_reasoning} speed={15} />
                                                 </p>
                                             )}
                                             {tx.category_reasoning && (
                                                 <p className="text-[11px] text-white/70 leading-relaxed">
-                                                    <span className="text-brand-accent/60 font-bold mr-1">MATCH:</span> {tx.category_reasoning}
+                                                    <span className="text-brand-accent/60 font-bold mr-1">MATCH:</span> <StreamingText text={tx.category_reasoning} speed={15} />
                                                 </p>
                                             )}
                                             {!tx.vendor_reasoning && !tx.category_reasoning && tx.reasoning && (
-                                                <p className="text-[11px] text-white/50 leading-relaxed italic">{tx.reasoning}</p>
+                                                <p className="text-[11px] text-white/50 leading-relaxed italic">
+                                                    <StreamingText text={tx.reasoning} speed={10} />
+                                                </p>
                                             )}
                                         </div>
                                     </div>

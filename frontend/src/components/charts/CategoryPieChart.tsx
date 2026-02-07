@@ -3,7 +3,7 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { CustomTooltip } from './CustomTooltip';
 
-const COLORS = ['#0070f3', '#7928ca', '#f5a623', '#10b981', '#ef4444'];
+const COLORS = ['#00ff9d', '#008f7a', '#005f56', '#2dd4bf', '#10b981'];
 
 interface CategoryPieChartProps {
     data: {

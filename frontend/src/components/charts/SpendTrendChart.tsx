@@ -26,12 +26,12 @@ export const SpendTrendChart = ({ data }: SpendTrendChartProps) => {
                 >
                     <defs>
                         <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                            <stop offset="5%" stopColor="#00ff9d" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#00ff9d" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#0070f3" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#0070f3" stopOpacity={0} />
+                            <stop offset="5%" stopColor="#005f56" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#005f56" stopOpacity={0} />
                         </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
@@ -58,7 +58,7 @@ export const SpendTrendChart = ({ data }: SpendTrendChartProps) => {
                         name="Income"
                         type="monotone"
                         dataKey="income"
-                        stroke="#10b981"
+                        stroke="#00ff9d"
                         strokeWidth={3}
                         fillOpacity={1}
                         fill="url(#colorIncome)"
@@ -68,7 +68,7 @@ export const SpendTrendChart = ({ data }: SpendTrendChartProps) => {
                         name="Expense"
                         type="monotone"
                         dataKey="expense"
-                        stroke="#0070f3"
+                        stroke="#005f56"
                         strokeWidth={3}
                         fillOpacity={1}
                         fill="url(#colorExpense)"
