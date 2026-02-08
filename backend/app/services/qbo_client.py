@@ -357,8 +357,9 @@ class QBOClient:
         
         # httpx expects 'files' for multipart
         # QBO requires specific part names: 'file_metadata_01' and 'file_content_01'
+        # The JSON part (file_metadata_01) MUST have a filename for some QBO parsers to link properly.
         files = {
-            'file_metadata_01': (None, json.dumps(metadata), 'application/json'),
+            'file_metadata_01': ('attachable.json', json.dumps(metadata), 'application/json'),
             'file_content_01': (filename, file_bytes, content_type)
         }
         

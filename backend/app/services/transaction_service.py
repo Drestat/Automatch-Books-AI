@@ -245,14 +245,7 @@ class TransactionService:
         if updated.get("SyncToken"):
             tx.sync_token = updated.get("SyncToken")
 
-        # R6: Finally, push Attachment if we have a receipt
-        if tx.receipt_content or (tx.receipt_url and not tx.is_exported):
-            try:
-                await self._upload_receipt(tx)
-                print(f"✅ [Approve] Receipt attached to QBO for {tx.id}")
-            except Exception as attachment_err:
-                print(f"⚠️ [Approve] Failed to attach receipt to QBO: {attachment_err}")
-                # We don't fail the whole approval for an attachment error, just log it.
+        # R6: Note: Receipt upload moved to parent approve_transaction to avoid redundancy
 
         return updated
 
@@ -411,6 +404,8 @@ class TransactionService:
         return mapped_type
 
     async def _upload_receipt(self, tx):
+        # Guard: Only upload if we have content/url and it's NOT already matched/exported recently
+        # (Though for a fresh approval, is_qbo_matched is about to become True)
         if not tx.receipt_url and not tx.receipt_content:
             return
 
