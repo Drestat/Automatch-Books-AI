@@ -8,6 +8,30 @@ import { useToast } from '@/context/ToastContext';
 const API_BASE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run') + '/api/v1';
 import { track } from '@/lib/analytics';
 
+/**
+ * Maps technical backend error messages to user-friendly descriptions
+ */
+const formatApprovalError = (backendError: string): string => {
+    const errorMappings: Record<string, string> = {
+        'missing category': 'Please select a category before confirming',
+        'Stale Object': 'Transaction was updated elsewhere. Please refresh and try again',
+        'entity not found': 'Vendor or customer not found in QuickBooks',
+        'insufficient tokens': 'Your token balance is too low. Please upgrade your plan',
+        'Connection not found': 'QuickBooks connection lost. Please reconnect',
+        'already approved': 'This transaction has already been approved',
+        'not found': 'Transaction not found. It may have been deleted',
+    };
+
+    for (const [key, message] of Object.entries(errorMappings)) {
+        if (backendError.toLowerCase().includes(key.toLowerCase())) {
+            return message;
+        }
+    }
+
+    // Return formatted error message if no mapping found
+    return `Approval failed: ${backendError}`;
+};
+
 interface QBOCallbackResponse {
     message?: string;
     realmId?: string;
@@ -505,8 +529,16 @@ export const useQBO = () => {
                 track('match_approve', { txId, mode: 'live' }, user?.id);
                 return true;
             }
-            showToast('Failed to approve match', 'error');
+
+            // EXTRACT ACTUAL ERROR MESSAGE FROM BACKEND
+            const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+            const backendError = errorData.detail || errorData.message || 'Failed to approve match';
+            const userFriendlyMessage = formatApprovalError(backendError);
+
+            console.error('Approve Error Response:', errorData);
+            showToast(userFriendlyMessage, 'error');
             return false;
+
         } catch (error) {
             console.error('Approve Error:', error);
             showToast('Communication error with backend', 'error');
@@ -562,6 +594,14 @@ export const useQBO = () => {
 
         try {
             setLoading(true);
+
+            // OPTIMISTIC UPDATE: Update UI immediately to show receipt is being uploaded
+            setTransactions(prev => prev.map(tx =>
+                tx.id === txId
+                    ? { ...tx, receipt_url: 'uploading' }  // Temporary placeholder
+                    : tx
+            ));
+
             const response = await fetch(`${API_BASE_URL}/transactions/upload-receipt?realm_id=${realmId}&tx_id=${txId}`, {
                 method: 'POST',
                 body: formData
@@ -570,14 +610,34 @@ export const useQBO = () => {
 
             if (response.ok) {
                 showToast('Receipt uploaded and linked', 'success');
-                // Refresh transactions to show the receipt link/badge
-                await fetchTransactions(realmId);
+
+                // CONFIRMED UPDATE: Set actual receipt URL from backend response
+                setTransactions(prev => prev.map(tx =>
+                    tx.id === txId
+                        ? { ...tx, receipt_url: data.receipt_url || '/tmp/uploaded' }
+                        : tx
+                ));
+
                 return data;
             } else {
+                // ROLLBACK on failure - remove receipt_url
+                setTransactions(prev => prev.map(tx =>
+                    tx.id === txId
+                        ? { ...tx, receipt_url: undefined }
+                        : tx
+                ));
+
                 console.error('Upload Failed Response:', data);
                 showToast(data.detail || 'Upload failed', 'error');
             }
         } catch (error) {
+            // ROLLBACK on error - remove receipt_url
+            setTransactions(prev => prev.map(tx =>
+                tx.id === txId
+                    ? { ...tx, receipt_url: undefined }
+                    : tx
+            ));
+
             console.error('Upload Error:', error);
             showToast('Network error during upload', 'error');
         } finally {

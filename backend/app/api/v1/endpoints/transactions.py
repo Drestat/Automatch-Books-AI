@@ -337,11 +337,12 @@ def upload_receipt(
                 db.add(match)
                 db.commit()
                 db.refresh(match)
-        
+
         return {
             "message": "Receipt processed",
             "extracted": extracted,
-            "match_id": match_id
+            "match_id": match_id,
+            "receipt_url": file_path  # Return the file path for UI update
         }
 
     except HTTPException as he:
