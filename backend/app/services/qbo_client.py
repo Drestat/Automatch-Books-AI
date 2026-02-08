@@ -251,10 +251,6 @@ class QBOClient:
             # BillPayment seems to prefer PrivateNote in some contexts, let's standardize
             memo_text = " | ".join(memo_parts)
             update_payload["PrivateNote"] = memo_text
-            
-            # For Sales types, also set CustomerMemo to ensure it shows up in most UI views
-            if endpoint in ["salesreceipt", "refundreceipt", "creditmemo", "invoice"]:
-                update_payload["CustomerMemo"] = {"value": memo_text}
 
         print(f"📝 [QBOClient] Updating {entity_type} {purchase_id} -> Endpoint: {endpoint}")
         
