@@ -153,9 +153,12 @@ export default function TransactionCard({
                         <span className="text-[9px] uppercase tracking-widest font-black text-white/20 mb-1 block">Description</span>
 
                         <div className="relative">
-                            <h3 className={`text-sm font-bold tracking-tight line-clamp-1 ${(!tx.description || tx.description.trim() === '') ? 'text-white/20 italic' : 'text-white'}`}>
-                                {(!tx.description || tx.description.trim() === '') ? "No Description" : tx.description}
+                            <h3 className={`text-sm font-bold tracking-tight line-clamp-1 ${(tx.payee || tx.suggested_payee) ? 'text-white' : 'text-rose-400 italic'}`}>
+                                {tx.payee || tx.suggested_payee || "Unassigned"}
                             </h3>
+                            <p className="text-[10px] text-white/40 line-clamp-1 mt-0.5 italic">
+                                {(!tx.description || tx.description.trim() === '') ? "No Bank Description" : tx.description}
+                            </p>
                         </div>
                     </div>
 
