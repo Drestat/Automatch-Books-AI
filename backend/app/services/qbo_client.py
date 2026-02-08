@@ -106,6 +106,8 @@ class QBOClient:
     async def get_purchase(self, purchase_id: str):
         """Fetches a single Purchase entity by ID (Legacy wrapper)."""
         return await self.get_entity(purchase_id, "Purchase")
+
+    async def update_purchase(self, purchase_id: str, category_id: str, category_name: str, sync_token: str, entity_type: str = "Purchase", entity_ref: dict = None, payment_type: str = None, txn_status: str = None, global_tax_calculation: str = None, existing_line_override: dict = None, tags: list[str] = None, note: str = None, description: str = None, append_memo: str = None, deposit_to_account_ref: dict = None, from_account_ref: dict = None):
         """
         Update a QBO entity (Purchase, BillPayment, etc.) via Sparse Update.
         Preserves existing line details if 'existing_line_override' is provided.

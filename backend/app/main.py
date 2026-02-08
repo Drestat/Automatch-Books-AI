@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.41.0 - FIX: PERSISTENT 400 BY AGGRESSIVE SKIP_LINE
+# v3.42.0 - FIX: RESTORED MISSING update_purchase METHOD
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.
@@ -73,13 +73,13 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.41.0"}
+    return {"status": "ok", "version": "3.42.0"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.41.0",
+        "version": "3.42.0",
         "status": "ready"
     }
 
