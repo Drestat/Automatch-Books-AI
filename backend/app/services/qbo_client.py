@@ -236,12 +236,36 @@ class QBOClient:
 
         if memo_parts:
             # BillPayment seems to prefer PrivateNote in some contexts, let's standardize
-            update_payload["PrivateNote"] = " | ".join(memo_parts)
+            memo_text = " | ".join(memo_parts)
+            update_payload["PrivateNote"] = memo_text
+            
+            # For Sales types, also set CustomerMemo to ensure it shows up in most UI views
+            if endpoint in ["salesreceipt", "refundreceipt", "creditmemo"]:
+                update_payload["CustomerMemo"] = {"Value": memo_text}
 
         print(f"📝 [QBOClient] Updating {entity_type} {purchase_id} -> Endpoint: {endpoint}")
         
         result = await self.request("POST", endpoint, json_payload=update_payload)
-        return result.get(entity_type, {})
+        
+        # Robust result extraction:
+        # 1. Try explicit entity_type (e.g. SalesReceipt)
+        # 2. Try PascalCase (e.g. SalesReceipt)
+        # 3. Try "Purchase" fallback (for Expenses)
+        # 4. Filter by any key that has an 'Id'
+        obj = result.get(entity_type)
+        if not obj:
+            # Try lower case and capitalize for safety
+            obj = result.get(entity_type.capitalize())
+        if not obj and endpoint == "purchase":
+            obj = result.get("Purchase")
+        
+        if not obj:
+            for k, v in result.items():
+                if isinstance(v, dict) and "Id" in v:
+                    obj = v
+                    break
+        
+        return obj or {}
 
     async def create_bill_payment(self, bill_id: str, bank_account_id: str, amount: float, date: str):
         """

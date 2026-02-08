@@ -233,7 +233,7 @@ class TransactionService:
                         tags=tx.tags,
                         note=tx.note,
                         description=tx.description,
-                        append_memo="#Accepted",
+                        append_memo=append_memo,
                         deposit_to_account_ref=tx.raw_json.get("DepositToAccountRef") if tx.raw_json else None,
                         from_account_ref=tx.raw_json.get("FromAccountRef") if tx.raw_json else None
                     )
@@ -244,6 +244,15 @@ class TransactionService:
         
         if updated.get("SyncToken"):
             tx.sync_token = updated.get("SyncToken")
+
+        # R6: Finally, push Attachment if we have a receipt
+        if tx.receipt_content or (tx.receipt_url and not tx.is_exported):
+            try:
+                await self._upload_receipt(tx)
+                print(f"✅ [Approve] Receipt attached to QBO for {tx.id}")
+            except Exception as attachment_err:
+                print(f"⚠️ [Approve] Failed to attach receipt to QBO: {attachment_err}")
+                # We don't fail the whole approval for an attachment error, just log it.
 
         return updated
 
@@ -402,7 +411,7 @@ class TransactionService:
         return mapped_type
 
     async def _upload_receipt(self, tx):
-        if not tx.receipt_url:
+        if not tx.receipt_url and not tx.receipt_content:
             return
 
         print(f"📎 [Approve] Found Receipt URL for {tx.id}. Downloading & Attaching...")
