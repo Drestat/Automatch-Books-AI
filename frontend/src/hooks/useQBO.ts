@@ -566,7 +566,7 @@ export const useQBO = () => {
                 method: 'POST',
                 body: formData
             });
-            const data = await response.json() as ReceiptResponse;
+            const data = await response.json();
 
             if (response.ok) {
                 showToast('Receipt uploaded and linked', 'success');
@@ -574,8 +574,8 @@ export const useQBO = () => {
                 await fetchTransactions(realmId);
                 return data;
             } else {
-                const errorData = await response.json();
-                showToast(errorData.detail || 'Upload failed', 'error');
+                console.error('Upload Failed Response:', data);
+                showToast(data.detail || 'Upload failed', 'error');
             }
         } catch (error) {
             console.error('Upload Error:', error);
