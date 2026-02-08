@@ -33,18 +33,22 @@ class FeedLogic:
         
         # 2. Determine Entity Category
         is_bill_payment = FeedLogic._is_bill_payment(transaction_data)
-        is_manual_entry = txn_type == "54"
-        is_bank_feed = not is_manual_entry and not is_bill_payment
+        
+        # Ledger Items are recorded transactions in QBO that might be matched to bank feed
+        source = transaction_data.get("_source_entity", "")
+        is_ledger_item = (txn_type in ["54", "3"] or 
+                         source in ["RefundReceipt", "SalesReceipt", "CreditMemo", "Payment", "BillPayment"])
+        
+        is_bank_feed = not is_ledger_item and not is_bill_payment
         
         # 3. Apply Heuristics
         
-        # CASE A: BILL PAYMENTS
-        # USER REQUEST: Even recorded Bill Payments should be reviewed to verify the match.
-        if is_bill_payment:
+        # CASE A: BILL PAYMENTS (Always review)
+        if is_bill_payment or source == "BillPayment":
             return False, "BillPayment (User Verified Review Required)"
                 
-        # CASE B: MANUAL ENTRIES (TxnType 54, 3, etc)
-        if is_manual_entry or txn_type == "3": # Include Checks (Type 3) as Manual
+        # CASE B: RECORDED LEDGER ITEMS (Refunds, Sales Receipts, Payments, Manual Purchases)
+        if is_ledger_item:
             # LinkedTxn means QBO has matched it -> Categorized (Matched)
             if has_linked_txn:
                  return False, "Manual Entry with LinkedTxn (Auto-Match Review)"

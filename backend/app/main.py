@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.28.17 - FIX: DESCRIPTION FALLBACK & AI DISPLAY
+# v3.37.0 - FIX: REFUNDRECEIPTS & LAYOUT REFACTOR
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.
@@ -73,13 +73,13 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.36.0"}
+    return {"status": "ok", "version": "3.37.0"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.36.0",
+        "version": "3.37.0",
         "status": "ready"
     }
 

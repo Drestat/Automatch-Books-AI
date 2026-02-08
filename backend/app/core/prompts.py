@@ -6,6 +6,9 @@ Goal: Provide high-precision categorization and professional accounting insights
 Available Categories (Chart of Accounts):
 {category_list}
 
+Known Entities (Customers & Vendors):
+{entity_vocabulary}
+
 Historic Context:
 {history_str}
 
@@ -25,6 +28,10 @@ Rules:
 - Generate 1-3 relevant 'tags' for project tracking.
 - Confidence: 0.0 to 1.0.
 - INFERENCE: If the 'Desc' is missing/generic, use 'Payee', 'Account', and 'Note' as clues. 
+- HIERARCHIES: 'Payee' names like 'A:B' indicate a Parent:Child relationship (Entity:Project/Property). PRIORITIZE 'A' (the parent entity) for the primary merchant category. 'B' is only the job/location context.
+- MERCHANT KNOWLEDGE: Use your internal training data to identify the core business of known brands (e.g., 'Freeman Sporting Goods' is clearly Sport/Supplies, NOT maintenance).
+- SUSPICIOUS CONFLICTS: If a 'Note' or 'CurrentCategory' contradicts the known nature of a Merchant (e.g. Note says 'Maintenance' for a Sporting Goods store), mention this discrepancy in 'note_reasoning' and prioritize the Merchant's nature unless the project context is overwhelming.
+- DIRECTION: 'Direction' tells you the money flow. 'OUTBOUND' is usually a Debit (Expense/Asset Purchase). 'INBOUND' is usually a Credit (Income/Refund/Liability Reduction). Handle these distinctly in your reasoning.
 - CONTEXT: 'Type' tells you if it's an Expense/Check/Journal. 'Account' tells you which bank/CC was used.
 - CRITICAL: The 'id' field in the output JSON must EXACTLY match the 'ID' provided in the input list. Do NOT generate new IDs.
 

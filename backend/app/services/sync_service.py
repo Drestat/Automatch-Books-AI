@@ -77,7 +77,11 @@ class SyncService:
             return
 
         active_account_ids = [b.id for b in active_banks]
-        entity_types = ["Purchase", "Deposit", "CreditCardCredit", "JournalEntry", "Transfer", "BillPayment", "Payment"]
+        entity_types = [
+            "Purchase", "Deposit", "CreditCardCredit", "JournalEntry", 
+            "Transfer", "BillPayment", "Payment", "SalesReceipt", 
+            "RefundReceipt", "CreditMemo"
+        ]
         
         all_txs = []
         batch_size = 1000
@@ -209,20 +213,45 @@ class SyncService:
         return None
 
     def _resolve_payee(self, p):
-        return p.get("EntityRef", {}).get("name") or p.get("VendorRef", {}).get("name") or p.get("CustomerRef", {}).get("name")
+        """
+        Resolves the full hierarchical name if possible.
+        """
+        ref = p.get("EntityRef") or p.get("VendorRef") or p.get("CustomerRef")
+        if not ref: return None
+        
+        name = ref.get("name")
+        val = ref.get("value")
+        
+        if val:
+            # Try to look up fully_qualified_name from our DB
+            from app.models.qbo import Vendor, Customer
+            # Note: We don't necessarily know if it's a Vendor or Customer from the Ref alone sometimes
+            # but usually it's one of them.
+            entity = self.db.query(Vendor).filter(Vendor.id == val).first()
+            if not entity:
+                entity = self.db.query(Customer).filter(Customer.id == val).first()
+            
+            if entity and entity.fully_qualified_name:
+                return entity.fully_qualified_name
+        
+        return name
 
     def _extract_category(self, p):
         if "Line" in p:
             for line in p["Line"]:
-                for detail_key in ["AccountBasedExpenseLineDetail", "JournalEntryLineDetail", "DepositLineDetail"]:
+                for detail_key in ["AccountBasedExpenseLineDetail", "JournalEntryLineDetail", "DepositLineDetail", "SalesItemLineDetail"]:
                     if detail_key in line:
-                        ref = line[detail_key].get("AccountRef", {})
-                        if ref.get("name") and "Uncategorized" not in ref.get("name"):
+                        detail = line[detail_key]
+                        # AccountBasedExpense uses AccountRef
+                        # SalesItem uses ItemAccountRef
+                        ref = detail.get("AccountRef") or detail.get("ItemAccountRef")
+                        if ref and ref.get("name") and "Uncategorized" not in ref.get("name"):
                             return ref.get("value"), ref.get("name")
         return None, None
 
     async def sync_categories(self):
-        data = await self.client.query("SELECT * FROM Account WHERE AccountType = 'Expense'")
+        # Sync Expenses, Income, and Other types to give AI full context
+        data = await self.client.query("SELECT * FROM Account WHERE AccountType IN ('Expense', 'Other Expense', 'Income', 'Other Income')")
         accounts = data.get("QueryResponse", {}).get("Account", [])
         for a in accounts:
             cat = self.db.query(Category).filter(Category.id == a["Id"]).first()
@@ -241,6 +270,7 @@ class SyncService:
             if not cust:
                 cust = Customer(id=c["Id"], realm_id=self.connection.realm_id)
             cust.display_name = c["DisplayName"]
+            cust.fully_qualified_name = c.get("FullyQualifiedName")
             self.db.add(cust)
         self.db.commit()
 
@@ -252,6 +282,7 @@ class SyncService:
             if not vend:
                 vend = Vendor(id=v["Id"], realm_id=self.connection.realm_id)
             vend.display_name = v["DisplayName"]
+            vend.fully_qualified_name = v.get("FullyQualifiedName")
             
             # Enrich with extra_data (Hubdoc/Dext Style)
             vend.extra_data = {

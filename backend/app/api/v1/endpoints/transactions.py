@@ -327,16 +327,15 @@ def upload_receipt(
         match_id = tx_id or result.get('match_id')
         extracted = result.get('extracted')
         
-        match = None
-        if match_id:
-            match = db.query(Transaction).filter(Transaction.id == match_id).first()
+        # If manual tx_id was provided, ensure it's updated (service might not have found it if provided manually)
+        if tx_id:
+            match = db.query(Transaction).filter(Transaction.id == tx_id).first()
             if match:
-                match.receipt_url = file_path # Keep for legacy/local reference
-                match.receipt_content = content # Binary persistence for serverless
+                match.receipt_url = file_path
+                match.receipt_content = content
                 match.receipt_data = extracted
                 db.add(match)
                 db.commit()
-                db.refresh(match)
 
         return {
             "message": "Receipt processed",

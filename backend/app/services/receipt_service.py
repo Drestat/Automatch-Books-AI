@@ -58,6 +58,15 @@ class ReceiptService:
         matches.sort(key=lambda x: x[1], reverse=True)
         best_match = matches[0][0] if matches else None
         
+        # PERSISTENCE: If we found a match, store the content now.
+        # This is critical for Modal workers because /tmp is ephemeral.
+        if best_match:
+            best_match.receipt_content = file_content
+            best_match.receipt_data = extracted
+            # Note: receipt_url might still be /tmp/... but receipt_content saves us.
+            self.db.add(best_match)
+            self.db.commit()
+
         return {
             "extracted": extracted,
             "match": best_match

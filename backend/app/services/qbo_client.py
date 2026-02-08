@@ -103,7 +103,10 @@ class QBOClient:
             "Transfer": "transfer",
             "CreditCardCredit": "purchase",
             "Check": "purchase",
-            "Payment": "payment"
+            "Payment": "payment",
+            "SalesReceipt": "salesreceipt",
+            "RefundReceipt": "refundreceipt",
+            "CreditMemo": "creditmemo"
         }
         endpoint = type_mapping.get(entity_type, "purchase").lower()
         
@@ -114,11 +117,15 @@ class QBOClient:
         elif entity_type == "JournalEntry":
             detail_type = "JournalEntryLineDetail"
         elif entity_type == "BillPayment":
-            detail_type = "BillPaymentLineDetail" # Note: update_purchase usually skips line details for BillPayment in specific ways
+            detail_type = "BillPaymentLineDetail"
+        elif entity_type in ["SalesReceipt", "RefundReceipt", "CreditMemo"]:
+            detail_type = "SalesItemLineDetail"
 
         # Prepare Line Item
+        update_line = False
         line_item = {}
         if existing_line_override:
+            update_line = True
             line_item = existing_line_override
             # Purge invalid fields if they exist
             if "ClrStatus" in line_item:
@@ -129,7 +136,8 @@ class QBOClient:
                 line_item["DetailType"] = detail_type
                 if detail_type not in line_item:
                     line_item[detail_type] = {}
-        else:
+        elif category_id:
+            update_line = True
             line_item = {
                 "Id": "1", 
                 "DetailType": detail_type,
@@ -137,14 +145,15 @@ class QBOClient:
             }
 
         # Update Category (Account) - Only if it's NOT a BillPayment or Payment
-        if entity_type not in ["BillPayment", "Payment"]:
-            line_item[detail_type]["AccountRef"] = {
+        if update_line and category_id and entity_type not in ["BillPayment", "Payment"]:
+            acc_ref_key = "ItemAccountRef" if detail_type == "SalesItemLineDetail" else "AccountRef"
+            line_item[detail_type][acc_ref_key] = {
                 "value": category_id,
                 "name": category_name
             }
         
         # Description Override logic
-        if description:
+        if update_line and description:
             line_item["Description"] = description
         
         # NEVER set line_item["Amount"] here. We want to preserve the bank amount.
@@ -155,7 +164,7 @@ class QBOClient:
             "sparse": True
         }
 
-        if entity_type not in ["BillPayment", "Payment"]:
+        if update_line and entity_type not in ["BillPayment", "Payment"]:
             update_payload["Line"] = [line_item]
 
         # Date (TxnDate) and TotalAmt are EXCLUDED to prevent accidental overwrites.

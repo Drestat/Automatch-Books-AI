@@ -23,9 +23,18 @@ class AnalysisService:
         self.db.commit()
 
     def get_ai_context(self):
-        """Fetches categories and customers for AI context"""
+        """Fetches categories, entities (customers/vendors) for AI context"""
         categories = self.db.query(Category).filter(Category.realm_id == self.realm_id).all()
         customers = self.db.query(Customer).filter(Customer.realm_id == self.realm_id).all()
+        from app.models.qbo import Vendor
+        vendors = self.db.query(Vendor).filter(Vendor.realm_id == self.realm_id).all()
+        
+        # Entity Vocabulary (Prioritize FullyQualifiedName)
+        entity_vocabulary = []
+        for c in customers:
+            entity_vocabulary.append(c.fully_qualified_name or c.display_name)
+        for v in vendors:
+            entity_vocabulary.append(v.fully_qualified_name or v.display_name)
         
         # Vendor history context
         history = self.db.query(
@@ -38,12 +47,12 @@ class AnalysisService:
         
         vendor_mapping = {}
         for desc, cat in history:
-            if desc not in vendor_mapping:
+            if desc and desc not in vendor_mapping:
                 vendor_mapping[desc] = cat
 
         return {
             "categories": [c.name for c in categories],
-            "customers": [c.display_name for c in customers],
+            "entity_vocabulary": entity_vocabulary,
             "vendor_mapping": vendor_mapping,
             "category_objs": {c.name: c for c in categories}
         }
@@ -112,7 +121,11 @@ class AnalysisService:
             return results
 
         history_str = "\n".join([f"HISTORIC: '{desc}' -> Category: {cat}" for desc, cat in list(vendor_mapping.items())[:20]])
-        ai_context = {"category_list": category_list, "history_str": history_str}
+        ai_context = {
+            "category_list": category_list, 
+            "history_str": history_str,
+            "entity_vocabulary": context.get('entity_vocabulary', [])
+        }
 
         from app.services.token_service import TokenService
         token_service = TokenService(self.db)

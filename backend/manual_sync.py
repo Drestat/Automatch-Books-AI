@@ -7,7 +7,9 @@ from app.db.session import SessionLocal
 from app.models.qbo import QBOConnection
 from app.services.transaction_service import TransactionService
 
-def trigger_sync():
+import asyncio
+
+async def trigger_sync():
     db = SessionLocal()
     connection = db.query(QBOConnection).order_by(QBOConnection.updated_at.desc()).first()
     
@@ -15,12 +17,13 @@ def trigger_sync():
         print("No connection found.")
         return
     
-    print(f"Syncing transactions for realm: {connection.realm_id}")
+    print(f"🚀 Triggering full sync for realm: {connection.realm_id}")
     
-    service = TransactionService(db, connection)
-    service.sync_transactions()
+    from app.services.sync_service import SyncService
+    service = SyncService(db, connection)
+    await service.sync_all()
     
-    print("✅ Sync complete!")
+    print("✅ Full sync complete!")
 
 if __name__ == "__main__":
-    trigger_sync()
+    asyncio.run(trigger_sync())

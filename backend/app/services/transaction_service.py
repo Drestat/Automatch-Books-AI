@@ -153,17 +153,25 @@ class TransactionService:
             append_memo = f"#Accepted | [App Category: {cat_name}]"
 
         try:
+            # OPTIMIZATION: If it's already matched in QBO and the user hasn't overridden the category,
+            # we skip the Line update entirely. This preserves multi-line transactions and avoids
+            # 400 errors during simple "Confirm Match" actions.
+            skip_line_update = False
+            if tx.is_qbo_matched and not tx.category_id:
+                print(f"🛡️ [Approve] Skipping line update for matched transaction {tx.id} to preserve original ledger structure.")
+                skip_line_update = True
+
             updated = await self.client.update_purchase(
                 purchase_id=tx.id,
-                category_id=cat_id,
-                category_name=cat_name,
+                category_id=cat_id if not skip_line_update else None,
+                category_name=cat_name if not skip_line_update else None,
                 sync_token=tx.sync_token,
                 entity_type=tx.transaction_type or "Purchase",
                 entity_ref=entity_ref,
                 payment_type=payment_type,
                 txn_status="Closed",
                 global_tax_calculation=global_tax,
-                existing_line_override=existing_line,
+                existing_line_override=existing_line if not skip_line_update else None,
                 tags=tx.tags,
                 note=tx.note,
                 description=tx.description,
@@ -364,16 +372,18 @@ class TransactionService:
         """
         type_mapping = {
             "Purchase": "Purchase",
-            "Check": "Check",
-            "CreditCard": "Purchase",  # CreditCard purchases are Purchase entities in QBO
-            "Expense": "Expense",
+            "Check": "Purchase",      # QBO treats Check as a Purchase entity internally for attachments sometimes, but actually 'Purchase' is the safest base.
+            "CreditCard": "Purchase", 
+            "Expense": "Purchase",    # QBO API uses 'Purchase' for Expenses
             "Bill": "Bill",
             "BillPayment": "BillPayment",
             "Payment": "Payment",
             "Deposit": "Deposit",
             "JournalEntry": "JournalEntry",
             "Invoice": "Invoice",
-            "SalesReceipt": "SalesReceipt"
+            "SalesReceipt": "SalesReceipt",
+            "RefundReceipt": "RefundReceipt",
+            "CreditMemo": "CreditMemo"
         }
 
         # Return mapped type or fallback to Purchase (most common)

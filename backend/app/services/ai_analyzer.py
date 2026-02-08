@@ -22,19 +22,28 @@ class AIAnalyzer:
         Analyzes a batch of transactions using Gemini Pro.
         context: {
             "category_list": [...],
-            "history_str": "..."
+            "history_str": "...",
+            "entity_vocabulary": [...]
         }
         """
         if not self.model:
             return {"error": "Gemini API Key missing"}
 
+        def get_direction(t_type):
+            if t_type in ["Purchase", "Check", "CreditCard", "BillPayment"]:
+                return "OUTBOUND (Spending/Expense)"
+            if t_type in ["Deposit", "Payment", "CreditCardCredit"]:
+                return "INBOUND (Income/Refund/Credit)"
+            return "NEUTRAL/TRANSFERRED"
+
         tx_list_str = "\n".join([
-            f"ID:{tx.id}|Type:{tx.transaction_type}|Desc:{tx.description}|Payee:{tx.payee}|Account:{tx.account_name}|Amt:{tx.amount} {tx.currency}|Note:{tx.note}|CurrentCategory:{tx.suggested_category_name or 'None'}" 
+            f"ID:{tx.id}|Direction:{get_direction(tx.transaction_type)}|Type:{tx.transaction_type}|Desc:{tx.description}|Payee:{tx.payee}|Account:{tx.account_name}|Amt:{tx.amount} {tx.currency}|Note:{tx.note}|CurrentCategory:{tx.suggested_category_name or 'None'}" 
             for tx in transactions
         ])
 
         prompt = TRANSACTION_ANALYSIS_PROMPT.format(
             category_list=', '.join(context['category_list']),
+            entity_vocabulary=', '.join(context.get('entity_vocabulary', [])[:100]), # Limit vocabulary for prompt length
             history_str=context['history_str'],
             tx_list_str=tx_list_str
         )

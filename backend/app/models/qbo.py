@@ -37,6 +37,7 @@ class Vendor(Base):
     id = Column(String, primary_key=True)
     realm_id = Column(String, ForeignKey("qbo_connections.realm_id", ondelete="CASCADE"), index=True)
     display_name = Column(String)
+    fully_qualified_name = Column(String)
     extra_data = Column(JSON, nullable=True) # QBO details like Address, etc.
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
