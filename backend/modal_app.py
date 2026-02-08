@@ -58,7 +58,7 @@ secrets = modal.Secret.from_dict({
     "NEXT_PUBLIC_APP_URL": env_vars.get("NEXT_PUBLIC_APP_URL", ""),
 })
 
-@app.function(image=image, secrets=[secrets], min_containers=1)
+@app.function(image=image, secrets=[secrets], min_containers=1, timeout=300)
 @modal.asgi_app()
 def fastapi_app():
     print("🚀 [Modal] ASGI Entrypoint waking up...")
