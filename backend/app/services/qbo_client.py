@@ -172,13 +172,13 @@ class QBOClient:
         if entity_ref:
             if endpoint == "purchase":
                 update_payload["EntityRef"] = entity_ref
+            elif endpoint in ["salesreceipt", "refundreceipt", "creditmemo"]:
+                update_payload["CustomerRef"] = entity_ref
             # elif endpoint == "payment":
             #    update_payload["CustomerRef"] = entity_ref
             #    NOTE: Sending CustomerRef in a sparse update for Payment often triggers 
             #    "You can't link a payment from a sub customer..." errors if the invoice linkage isn't perfect.
             #    For standard "Approve" actions (updating memo/status), we should SKIP CustomerRef for Payments.
-            
-            # Skip VendorRef for BillPayment in sparse updates
 
         if deposit_to_account_ref:
             update_payload["DepositToAccountRef"] = deposit_to_account_ref

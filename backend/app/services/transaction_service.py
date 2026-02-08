@@ -153,11 +153,11 @@ class TransactionService:
             append_memo = f"#Accepted | [App Category: {cat_name}]"
 
         try:
-            # OPTIMIZATION: If it's already matched in QBO and the user hasn't overridden the category,
-            # we skip the Line update entirely. This preserves multi-line transactions and avoids
-            # 400 errors during simple "Confirm Match" actions.
+            # OPTIMIZATION: If it's already matched in QBO, we skip the Line update by default.
+            # This preserves multi-line transactions and avoids 400 errors during "Confirm Match".
+            # We ONLY update lines if the category was explicitly changed OR it's not a match.
             skip_line_update = False
-            if tx.is_qbo_matched and not tx.category_id:
+            if tx.is_qbo_matched:
                 print(f"🛡️ [Approve] Skipping line update for matched transaction {tx.id} to preserve original ledger structure.")
                 skip_line_update = True
 
@@ -293,10 +293,10 @@ class TransactionService:
         if not payee_name:
             return None
             
-        # strategy: if Payment, look for Customer first. Else Vendor.
-        is_payment = transaction_type == "Payment"
+        # strategy: if Customer-facing type, look for Customer first. Else Vendor.
+        is_customer_type = transaction_type in ["Payment", "SalesReceipt", "RefundReceipt", "CreditMemo"]
         
-        if is_payment:
+        if is_customer_type:
             # Check DB Customer
             customer = self.db.query(Customer).filter(
                 Customer.display_name == payee_name,
