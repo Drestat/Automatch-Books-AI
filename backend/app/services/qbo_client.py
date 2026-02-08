@@ -253,6 +253,16 @@ class QBOClient:
         vendors = result.get("QueryResponse", {}).get("Vendor", [])
         return vendors[0] if vendors else None
 
+    async def get_customer_by_name(self, customer_name: str):
+        """Searches for a customer by display name in QBO."""
+        # Escape single quotes in customer_name for SQL-like query
+        safe_name = customer_name.replace("'", "\\'")
+        query = f"SELECT * FROM Customer WHERE DisplayName = '{safe_name}'"
+        print(f"🔍 [QBOClient] Searching for customer: {customer_name}")
+        result = await self.query(query)
+        customers = result.get("QueryResponse", {}).get("Customer", [])
+        return customers[0] if customers else None
+
     async def upload_attachment(self, file_bytes: bytes, filename: str, content_type: str, attachable_ref: dict = None):
         """
         Uploads a file to QBO 'Attachable' endpoint using multipart/form-data.
