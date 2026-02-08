@@ -323,5 +323,8 @@ We are doing what they cannot.
   - **Root Cause**: Transaction types like "Payment" and "CreditCard" were passed directly to QBO Attachable API, which expects specific entity types.
   - **Fix Location**: `backend/app/services/transaction_service.py:358-389`
   - **Impact**: Receipts now properly attach to QBO transactions when approved.
+- [x] **Receipt Upload Fix (Content-Type)**: Fixed issue where receipts with binary content in DB defaulted to `image/jpeg`, causing QBO to reject PNG/PDF files. Refactored `_upload_receipt` to detect file extension and content-type from the receipt URL and/or download headers.
+  - **Fix Location**: `backend/app/services/transaction_service.py:407-456`
+  - **Impact**: High-integrity receipt attachments for all file types (JPG, PNG, PDF).
 
 

@@ -405,21 +405,38 @@ class TransactionService:
         return mapped_type
 
     async def _upload_receipt(self, tx):
-        # Guard: Only upload if we have content/url and it's NOT already matched/exported recently
-        # (Though for a fresh approval, is_qbo_matched is about to become True)
+        """
+        Uploads an associated receipt to QBO.
+        Prefers binary content from DB (serverless-safe), fallbacks to local file or URL download.
+        Correctly detects content-type and filename from URL extension.
+        """
         if not tx.receipt_url and not tx.receipt_content:
             return
 
-        print(f"📎 [Approve] Found Receipt URL for {tx.id}. Downloading & Attaching...")
+        print(f"📎 [Approve] Found Receipt for {tx.id}. Preparing attachment...")
         try:
             import httpx
             import os
+            from urllib.parse import urlparse
 
             file_bytes = None
             ct = "image/jpeg"
-            filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}.jpg"
+            ext = ".jpg"
 
-            # 1. Check Binary Persistence (Serverless-Safe)
+            # 0. Pre-detect extension and content-type from URL path
+            if tx.receipt_url:
+                parsed_url = urlparse(tx.receipt_url)
+                _, url_ext = os.path.splitext(parsed_url.path)
+                if url_ext:
+                    url_ext = url_ext.lower()
+                    ext = url_ext
+                    if url_ext == ".pdf": ct = "application/pdf"
+                    elif url_ext == ".png": ct = "image/png"
+                    elif url_ext in [".jpg", ".jpeg"]: ct = "image/jpeg"
+
+            filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}{ext}"
+
+            # 1. Prefer Binary Persistence (Serverless-Safe)
             if tx.receipt_content:
                 print(f"📦 [Approve] Using binary receipt content from DB for {tx.id}")
                 file_bytes = tx.receipt_content
@@ -430,13 +447,7 @@ class TransactionService:
                 with open(tx.receipt_url, "rb") as f:
                     file_bytes = f.read()
 
-                _, ext = os.path.splitext(tx.receipt_url)
-                if ext:
-                    filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}{ext}"
-                    if "pdf" in ext.lower(): ct = "application/pdf"
-                    elif "png" in ext.lower(): ct = "image/png"
-
-            # 3. Fallback to URL download
+            # 3. Fallback to URL download (External Storage)
             elif tx.receipt_url and tx.receipt_url.startswith("http"):
                 print(f"🌐 [Approve] Downloading receipt from URL: {tx.receipt_url}")
                 async with httpx.AsyncClient() as dl_client:
@@ -444,14 +455,14 @@ class TransactionService:
                     r.raise_for_status()
                     file_bytes = r.content
 
-                    dl_ct = r.headers.get("content-type", "image/jpeg")
-                    if dl_ct: ct = dl_ct
-
-                    ext = ".jpg"
-                    if "pdf" in ct: ext = ".pdf"
-                    elif "png" in ct: ext = ".png"
-
-                    filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}{ext}"
+                    dl_ct = r.headers.get("content-type")
+                    if dl_ct: 
+                        ct = dl_ct
+                        # Adjust filename if download provides better type info
+                        if "pdf" in ct: ext = ".pdf"
+                        elif "png" in ct: ext = ".png"
+                        elif "jpeg" in ct: ext = ".jpg"
+                        filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}{ext}"
 
             if file_bytes:
                 print(f"📎 [Approve] Attaching {filename} ({len(file_bytes)} bytes)...")

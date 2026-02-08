@@ -374,8 +374,15 @@ class QBOClient:
                 
                 res.raise_for_status()
                 result = res.json()
-                # Return the individual Attachable object from the response array
-                return result.get("AttachableResponse", [{}])[0].get("Attachable", {})
+                
+                attachable_response = result.get("AttachableResponse", [{}])[0]
+                if "Fault" in attachable_response:
+                    fault = attachable_response["Fault"]
+                    error_msg = fault.get("Error", [{}])[0].get("Detail", "Unknown error")
+                    print(f"❌ [QBOClient] Upload Fault: {error_msg}")
+                    raise Exception(f"QBO Upload Fault: {error_msg}")
+
+                return attachable_response.get("Attachable", {})
                 
             except httpx.HTTPStatusError as e:
                 print(f"❌ [QBOClient] Upload Failed: {e.response.text}")
