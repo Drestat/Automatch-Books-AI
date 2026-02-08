@@ -148,19 +148,40 @@ export default function TransactionCard({
                         </div>
                     </div>
 
-                    {/* Column 2: Identity (Payee & Bank Description) */}
-                    <div className="flex-[2] min-w-[250px]">
-                        <span className="text-[9px] uppercase tracking-widest font-black text-white/20 mb-1 block">Payee / Description</span>
+                    {/* Column 2: Description */}
+                    <div className="flex-1 min-w-[200px]">
+                        <span className="text-[9px] uppercase tracking-widest font-black text-white/20 mb-1 block">Description</span>
 
                         <div className="relative">
-                            <h3 className={`text-sm font-bold tracking-tight line-clamp-1 ${(tx.payee || tx.suggested_payee) ? 'text-white' : 'text-rose-400 italic'}`}>
-                                {tx.payee || tx.suggested_payee || "Unassigned"}
+                            <h3 className={`text-sm font-bold tracking-tight line-clamp-1 ${(!tx.description || tx.description.trim() === '') ? 'text-white/20 italic' : 'text-white'}`}>
+                                {(!tx.description || tx.description.trim() === '') ? "No Description" : tx.description}
                             </h3>
-                            <p className="text-[10px] text-white/40 line-clamp-1 mt-0.5 italic">
-                                {(!tx.description || tx.description.trim() === '') ? "No Bank Description" : tx.description}
-                            </p>
                         </div>
+                    </div>
 
+                    {/* Column 3: Payee/Vendor Selector */}
+                    <div className="flex-1 min-w-[200px]">
+                        <span className="text-[9px] uppercase tracking-widest font-black text-white/20 mb-1 block">Payee</span>
+                        {tx.suggested_payee && (
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => onPayeeChange && onPayeeChange(tx.id, tx.suggested_payee!)}
+                                className="flex items-center gap-1.5 px-2 py-1 rounded bg-brand/10 border border-brand-accent/40 text-brand-accent text-[10px] font-bold mb-1 hover:bg-brand-accent/10 transition-all w-fit"
+                            >
+                                <Sparkles size={8} className="text-brand-accent" />
+                                Suggested: {tx.suggested_payee}
+                            </motion.button>
+                        )}
+                        <div
+                            className="flex items-center gap-2 group/edit cursor-pointer transition-all hover:text-brand"
+                            onClick={() => setIsEditingPayee(true)}
+                        >
+                            <p className={`text-sm font-bold ${tx.payee ? 'text-white/90' : (tx.suggested_payee ? 'text-white/60' : 'text-rose-400 italic')}`}>
+                                {tx.payee || tx.suggested_payee || "Unassigned"}
+                            </p>
+                            <Edit2 size={12} className="text-white/20 opacity-0 group-hover/edit:opacity-100 transition-all" />
+                        </div>
                         <VendorSelector
                             isOpen={isEditingPayee}
                             onClose={() => setIsEditingPayee(false)}
