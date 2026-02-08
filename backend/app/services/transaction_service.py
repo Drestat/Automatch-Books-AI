@@ -355,6 +355,35 @@ class TransactionService:
                 results.append({"id": tx_id, "status": "error", "message": str(e)})
         return results
 
+    def _map_to_qbo_attachable_type(self, transaction_type: str) -> str:
+        """
+        Maps internal transaction types to valid QBO Attachable EntityRef types.
+        QBO API requires specific entity types for AttachableRef.
+
+        Ref: https://developer.intuit.com/app/developer/qbo/docs/api/accounting/all-entities/attachable
+        """
+        type_mapping = {
+            "Purchase": "Purchase",
+            "Check": "Check",
+            "CreditCard": "Purchase",  # CreditCard purchases are Purchase entities in QBO
+            "Expense": "Expense",
+            "Bill": "Bill",
+            "BillPayment": "BillPayment",
+            "Payment": "Payment",
+            "Deposit": "Deposit",
+            "JournalEntry": "JournalEntry",
+            "Invoice": "Invoice",
+            "SalesReceipt": "SalesReceipt"
+        }
+
+        # Return mapped type or fallback to Purchase (most common)
+        mapped_type = type_mapping.get(transaction_type, "Purchase")
+
+        if mapped_type != transaction_type:
+            print(f"🔄 [Attachable] Mapped transaction type '{transaction_type}' -> '{mapped_type}' for QBO API")
+
+        return mapped_type
+
     async def _upload_receipt(self, tx):
         if not tx.receipt_url:
             return
@@ -363,7 +392,7 @@ class TransactionService:
         try:
             import httpx
             import os
-            
+
             file_bytes = None
             ct = "image/jpeg"
             filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}.jpg"
@@ -372,19 +401,19 @@ class TransactionService:
             if tx.receipt_content:
                 print(f"📦 [Approve] Using binary receipt content from DB for {tx.id}")
                 file_bytes = tx.receipt_content
-            
+
             # 2. Check local file (Local Dev / Single instance)
             elif tx.receipt_url and os.path.exists(tx.receipt_url):
                 print(f"📂 [Approve] Reading local receipt file: {tx.receipt_url}")
                 with open(tx.receipt_url, "rb") as f:
                     file_bytes = f.read()
-                
+
                 _, ext = os.path.splitext(tx.receipt_url)
-                if ext: 
+                if ext:
                     filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}{ext}"
                     if "pdf" in ext.lower(): ct = "application/pdf"
                     elif "png" in ext.lower(): ct = "image/png"
-            
+
             # 3. Fallback to URL download
             elif tx.receipt_url and tx.receipt_url.startswith("http"):
                 print(f"🌐 [Approve] Downloading receipt from URL: {tx.receipt_url}")
@@ -392,29 +421,32 @@ class TransactionService:
                     r = await dl_client.get(tx.receipt_url)
                     r.raise_for_status()
                     file_bytes = r.content
-                    
+
                     dl_ct = r.headers.get("content-type", "image/jpeg")
                     if dl_ct: ct = dl_ct
-                    
+
                     ext = ".jpg"
                     if "pdf" in ct: ext = ".pdf"
                     elif "png" in ct: ext = ".png"
-                    
+
                     filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}{ext}"
-            
+
             if file_bytes:
                 print(f"📎 [Approve] Attaching {filename} ({len(file_bytes)} bytes)...")
-                
-                attachable_ref = {"EntityRef": {"type": tx.transaction_type or "Purchase", "value": tx.id}}
-                
+
+                # Map transaction type to valid QBO Attachable entity type
+                qbo_entity_type = self._map_to_qbo_attachable_type(tx.transaction_type or "Purchase")
+
+                attachable_ref = {"EntityRef": {"type": qbo_entity_type, "value": tx.id}}
+
                 await self.client.upload_attachment(
                     file_bytes=file_bytes,
                     filename=filename,
                     content_type=ct,
                     attachable_ref=attachable_ref
                 )
-                print(f"✅ [Approve] Receipt attached to {tx.id}")
-                
+                print(f"✅ [Approve] Receipt attached to {tx.id} as {qbo_entity_type}")
+
         except Exception as e:
             print(f"❌ [Approve] Receipt Upload Failed: {e}")
             # Non-blocking error

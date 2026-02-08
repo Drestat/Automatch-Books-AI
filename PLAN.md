@@ -316,4 +316,12 @@ We are doing what they cannot.
 - **Public Pages**: Landing page, Pricing, and Features load correctly (except missing header).
 - **Backend**: API docs at `http://localhost:8000/docs` are accessible and healthy.
 
+## 10. Bug Fixes & Enhancements (2026-02-08)
+### Fixed
+- [x] **Receipt Upload to QBO**: Fixed receipt attachment failing due to invalid entity type mapping. Added `_map_to_qbo_attachable_type()` function to properly map internal transaction types (Payment, CreditCard, etc.) to valid QBO Attachable EntityRef types (Purchase, BillPayment, etc.).
+  - **Issue**: Receipts uploaded via `/upload-receipt` were stored in DB but not synced to QuickBooks on transaction approval.
+  - **Root Cause**: Transaction types like "Payment" and "CreditCard" were passed directly to QBO Attachable API, which expects specific entity types.
+  - **Fix Location**: `backend/app/services/transaction_service.py:358-389`
+  - **Impact**: Receipts now properly attach to QBO transactions when approved.
+
 
