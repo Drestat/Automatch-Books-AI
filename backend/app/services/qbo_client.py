@@ -167,11 +167,24 @@ class QBOClient:
 
         # Update Category (Account) - Only if it's NOT a BillPayment or Payment
         if update_line and category_id and entity_type not in ["BillPayment", "Payment"]:
-            acc_ref_key = "ItemAccountRef" if detail_type == "SalesItemLineDetail" else "AccountRef"
-            line_item[detail_type][acc_ref_key] = {
-                "value": category_id,
-                "name": category_name
-            }
+            # Note: For RefundReceipt/SalesReceipt, QBO requires an ItemRef, not an AccountRef directly.
+            # ItemAccountRef is only for Invoice-related reimbursements.
+            if detail_type == "SalesItemLineDetail":
+                if entity_type == "Invoice":
+                    line_item[detail_type]["ItemAccountRef"] = {
+                        "value": category_id,
+                        "name": category_name
+                    }
+                else:
+                    # For SalesReceipt/RefundReceipt, we fallback to ItemRef as AccountRef isn't allowed.
+                    # This is better than sending an invalid field that causes a 400.
+                    # Future: Map Category to a QBO Service Item.
+                    pass 
+            else:
+                line_item[detail_type]["AccountRef"] = {
+                    "value": category_id,
+                    "name": category_name
+                }
         
         # Description Override logic
         if update_line and description:
@@ -240,8 +253,8 @@ class QBOClient:
             update_payload["PrivateNote"] = memo_text
             
             # For Sales types, also set CustomerMemo to ensure it shows up in most UI views
-            if endpoint in ["salesreceipt", "refundreceipt", "creditmemo"]:
-                update_payload["CustomerMemo"] = {"Value": memo_text}
+            if endpoint in ["salesreceipt", "refundreceipt", "creditmemo", "invoice"]:
+                update_payload["CustomerMemo"] = {"value": memo_text}
 
         print(f"📝 [QBOClient] Updating {entity_type} {purchase_id} -> Endpoint: {endpoint}")
         

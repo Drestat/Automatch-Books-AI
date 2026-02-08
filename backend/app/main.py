@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.45.0 - FIX: DYNAMIC MIME TYPES FOR RECEIPT UPLOADS
+# v3.46.0 - FIX: REFUNDRECEIPT 400 ERROR & CUSTOMER MEMO SYNC
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.
@@ -73,13 +73,13 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.45.0"}
+    return {"status": "ok", "version": "3.46.0"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.45.0",
+        "version": "3.46.0",
         "status": "ready"
     }
 
