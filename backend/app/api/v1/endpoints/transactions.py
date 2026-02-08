@@ -35,7 +35,7 @@ class TransactionUpdate(BaseModel):
 class TransactionSchema(BaseModel):
     id: str
     date: datetime
-    description: str
+    description: Optional[str] = None
     amount: float
     currency: str
     transaction_type: Optional[str] = None
@@ -331,7 +331,8 @@ def upload_receipt(
         if match_id:
             match = db.query(Transaction).filter(Transaction.id == match_id).first()
             if match:
-                match.receipt_url = file_path 
+                match.receipt_url = file_path # Keep for legacy/local reference
+                match.receipt_content = content # Binary persistence for serverless
                 match.receipt_data = extracted
                 db.add(match)
                 db.commit()

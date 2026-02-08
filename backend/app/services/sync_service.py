@@ -244,8 +244,6 @@ class SyncService:
             self.db.add(cust)
         self.db.commit()
 
-        self.db.commit()
-
     async def sync_vendors(self):
         data = await self.client.query("SELECT * FROM Vendor")
         vendors = data.get("QueryResponse", {}).get("Vendor", [])
@@ -254,8 +252,36 @@ class SyncService:
             if not vend:
                 vend = Vendor(id=v["Id"], realm_id=self.connection.realm_id)
             vend.display_name = v["DisplayName"]
+            
+            # Enrich with extra_data (Hubdoc/Dext Style)
+            vend.extra_data = {
+                "address": v.get("BillAddr"),
+                "email": v.get("PrimaryEmailAddr", {}).get("Address"),
+                "phone": v.get("PrimaryPhone", {}).get("FreeFormNumber"),
+                "account_ref": v.get("TermRef", {}).get("name") # Default terms/category clues
+            }
             self.db.add(vend)
         self.db.commit()
+
+    def _resolve_account_name(self, p):
+        # 1. Direct Ref
+        for ref_key in ["AccountRef", "DepositToAccountRef", "FromAccountRef"]:
+            if ref_key in p: return p[ref_key].get("name")
+        
+        # 2. Payment specifics
+        if "CheckPayment" in p and "BankAccountRef" in p["CheckPayment"]:
+            return p["CheckPayment"]["BankAccountRef"].get("name")
+        if "CreditCardPayment" in p and "CCAccountRef" in p["CreditCardPayment"]:
+            return p["CreditCardPayment"]["CCAccountRef"].get("name")
+        
+        # 3. Bank Account specifics
+        if "Line" in p:
+            for line in p["Line"]:
+                for detail in ["AccountBasedExpenseLineDetail", "DepositLineDetail"]:
+                    if detail in line and "AccountRef" in line[detail]:
+                        return line[detail]["AccountRef"].get("name")
+
+        return "Unknown Account"
 
     def _check_duplicates(self, tx):
         """

@@ -24,6 +24,8 @@ Rules:
 - Use a professional, authoritative, yet helpful tone. Educate the user on WHY a transaction is classified this way.
 - Generate 1-3 relevant 'tags' for project tracking.
 - Confidence: 0.0 to 1.0.
+- INFERENCE: If the 'Desc' is missing/generic, use 'Payee', 'Account', and 'Note' as clues. 
+- CONTEXT: 'Type' tells you if it's an Expense/Check/Journal. 'Account' tells you which bank/CC was used.
 - CRITICAL: The 'id' field in the output JSON must EXACTLY match the 'ID' provided in the input list. Do NOT generate new IDs.
 
 Output Format (STRICT JSON LIST):

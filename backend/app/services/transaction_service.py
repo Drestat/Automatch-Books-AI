@@ -368,21 +368,25 @@ class TransactionService:
             ct = "image/jpeg"
             filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}.jpg"
 
-            # Check if it's a local file first
-            if os.path.exists(tx.receipt_url):
+            # 1. Check Binary Persistence (Serverless-Safe)
+            if tx.receipt_content:
+                print(f"📦 [Approve] Using binary receipt content from DB for {tx.id}")
+                file_bytes = tx.receipt_content
+            
+            # 2. Check local file (Local Dev / Single instance)
+            elif tx.receipt_url and os.path.exists(tx.receipt_url):
                 print(f"📂 [Approve] Reading local receipt file: {tx.receipt_url}")
                 with open(tx.receipt_url, "rb") as f:
                     file_bytes = f.read()
                 
-                # Guess ext from filename
                 _, ext = os.path.splitext(tx.receipt_url)
                 if ext: 
                     filename = f"Receipt-{tx.date.strftime('%Y-%m-%d')}-{tx.id[:8]}{ext}"
                     if "pdf" in ext.lower(): ct = "application/pdf"
                     elif "png" in ext.lower(): ct = "image/png"
             
-            else:
-                # Fallback to URL download
+            # 3. Fallback to URL download
+            elif tx.receipt_url and tx.receipt_url.startswith("http"):
                 print(f"🌐 [Approve] Downloading receipt from URL: {tx.receipt_url}")
                 async with httpx.AsyncClient() as dl_client:
                     r = await dl_client.get(tx.receipt_url)
@@ -401,7 +405,7 @@ class TransactionService:
             if file_bytes:
                 print(f"📎 [Approve] Attaching {filename} ({len(file_bytes)} bytes)...")
                 
-                attachable_ref = {"EntityRef": {"type": "Purchase", "value": tx.id}}
+                attachable_ref = {"EntityRef": {"type": tx.transaction_type or "Purchase", "value": tx.id}}
                 
                 await self.client.upload_attachment(
                     file_bytes=file_bytes,

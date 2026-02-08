@@ -29,7 +29,7 @@ class AIAnalyzer:
             return {"error": "Gemini API Key missing"}
 
         tx_list_str = "\n".join([
-            f"ID:{tx.id}|Desc:{tx.description}|Amt:{tx.amount} {tx.currency}|CurrentCategory:{tx.suggested_category_name or 'None'}" 
+            f"ID:{tx.id}|Type:{tx.transaction_type}|Desc:{tx.description}|Payee:{tx.payee}|Account:{tx.account_name}|Amt:{tx.amount} {tx.currency}|Note:{tx.note}|CurrentCategory:{tx.suggested_category_name or 'None'}" 
             for tx in transactions
         ])
 
@@ -76,17 +76,26 @@ class AIAnalyzer:
 
         prompt = RECEIPT_ANALYSIS_PROMPT
         
-        vision_result = self.model.generate_content([
-            prompt,
-            {"mime_type": "image/jpeg", "data": file_content}
-        ])
+        vision_result = self.model.generate_content(
+            [prompt, {"mime_type": "image/jpeg", "data": file_content}],
+            generation_config={"response_mime_type": "application/json"}
+        )
         
         try:
-            raw_text = vision_result.text.replace('```json', '').replace('```', '').strip()
+            # Clean possible markdown artifacts even if response_mime_type is set (safety)
+            raw_text = vision_result.text.strip()
+            if raw_text.startswith("```"):
+                raw_text = raw_text.split("\n", 1)[1] if "\n" in raw_text else raw_text
+                raw_text = raw_text.rsplit("\n", 1)[0] if "\n" in raw_text else raw_text
+                raw_text = raw_text.replace("json", "", 1).strip()
+            
+            print(f"📊 [AIAnalyzer] Extracted Receipt: {raw_text[:500]}...")
             extracted = json.loads(raw_text)
             return extracted
         except Exception as e:
             print(f"❌ AI Receipt Error: {str(e)}")
+            if 'vision_result' in locals() and hasattr(vision_result, 'text'):
+                 print(f"❌ Raw text that failed: {vision_result.text}")
             raise ValueError("Could not parse receipt data from AI")
 
     def generate_insights(self, events):

@@ -66,20 +66,20 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.32.0"}
+    return {"status": "ok", "version": "3.36.0"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.32.0",
+        "version": "3.36.0",
         "status": "ready"
     }
 

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, ForeignKey, Numeric, JSON, UUID, Boolean
+from sqlalchemy import Column, String, DateTime, ForeignKey, Numeric, JSON, UUID, Boolean, LargeBinary
 from sqlalchemy.sql import func
 from app.db.session import Base
 import uuid
@@ -37,6 +37,7 @@ class Vendor(Base):
     id = Column(String, primary_key=True)
     realm_id = Column(String, ForeignKey("qbo_connections.realm_id", ondelete="CASCADE"), index=True)
     display_name = Column(String)
+    extra_data = Column(JSON, nullable=True) # QBO details like Address, etc.
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 class BankAccount(Base):
@@ -107,6 +108,7 @@ class Transaction(Base):
     
     # Receipt Mirroring
     receipt_url = Column(String, nullable=True)
+    receipt_content = Column(LargeBinary, nullable=True) # Binary data for serverless persistence
     receipt_data = Column(JSON, nullable=True) # AI extracted info
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Check, Edit2, Info, ArrowUpRight, FilePlus, Tags, Split as SplitIcon, ExternalLink, CheckCircle2, Sparkles, Building2 } from 'lucide-react';
+import { Check, Edit2, Info, ArrowUpRight, FilePlus, FileCheck, Tags, Split as SplitIcon, ExternalLink, CheckCircle2, Sparkles, Building2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import VendorSelector from './VendorSelector';
 import CategorySelector from './CategorySelector';
@@ -414,15 +414,20 @@ export default function TransactionCard({
                             whileTap={{ scale: 0.95 }}
                             onClick={() => fileInputRef.current?.click()}
                             disabled={isUploading}
-                            className={`h-12 px-6 ${isUploading ? 'bg-brand/20 border-brand/30' : 'bg-brand/10 hover:bg-brand/20 border-brand/20'} border rounded-xl flex items-center justify-center text-brand font-bold gap-2 transition-all`}
-                            title="Upload Receipt"
+                            className={`h-12 px-6 ${isUploading
+                                    ? 'bg-brand/20 border-brand/30'
+                                    : tx.receipt_url
+                                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                                        : 'bg-brand/10 hover:bg-brand/20 border-brand/20 text-brand'
+                                } border rounded-xl flex items-center justify-center font-bold gap-2 transition-all shadow-sm`}
+                            title={tx.receipt_url ? "Replace Receipt" : "Upload Receipt"}
                         >
                             {isUploading ? (
                                 <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    <FilePlus size={18} />
-                                    <span>{tx.receipt_url ? 'Replace' : 'Upload'}</span>
+                                    {tx.receipt_url ? <FileCheck size={18} /> : <FilePlus size={18} />}
+                                    <span>{tx.receipt_url ? 'Receipt Added' : 'Upload Receipt'}</span>
                                 </>
                             )}
                         </motion.button>
