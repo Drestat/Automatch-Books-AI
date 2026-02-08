@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.50.0 - FIX: STOP OVERWRITING CUSTOMERMEMO ON SALES TYPES
+# v3.51.0 - FIX: FINALIZED RECEIPT ATTACHMENT COMPATIBILITY
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.
@@ -73,13 +73,13 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.50.0"}
+    return {"status": "ok", "version": "3.51.0"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.50.0",
+        "version": "3.51.0",
         "status": "ready"
     }
 

@@ -353,11 +353,13 @@ class QBOClient:
         
         # httpx expects 'files' for multipart
         # QBO requires specific part names: 'file_metadata_01' and 'file_content_01'
-        # The JSON part (file_metadata_01) MUST have a filename for some QBO parsers to link properly.
-        files = {
-            'file_metadata_01': ('attachable.json', json.dumps(metadata), 'application/json'),
-            'file_content_01': (filename, file_bytes, content_type)
-        }
+        # httpx expects 'files' for multipart. 
+        # Using a list of tuples to GUARANTEE order: Metadata (file_metadata_01) FIRST, Content SECOND.
+        # QBO is known to be picky about part order.
+        files = [
+            ('file_metadata_01', (None, json.dumps(metadata), 'application/json')),
+            ('file_content_01', (filename, file_bytes, content_type))
+        ]
         
         print(f"Tb [QBOClient] Uploading attachment: {filename} ({len(file_bytes)} bytes)")
         
@@ -372,6 +374,7 @@ class QBOClient:
                 
                 res.raise_for_status()
                 result = res.json()
+                # Return the individual Attachable object from the response array
                 return result.get("AttachableResponse", [{}])[0].get("Attachable", {})
                 
             except httpx.HTTPStatusError as e:

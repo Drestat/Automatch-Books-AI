@@ -7,7 +7,15 @@ import json
 
 async def test_attachment():
     db = SessionLocal()
-    tx = db.query(Transaction).filter(Transaction.id == '66').first()
+    tx = db.query(Transaction).filter(Transaction.id == '133').first()
+    if not tx:
+        # Fallback to any recent transaction with receipt
+        tx = db.query(Transaction).filter(Transaction.receipt_content != None).order_by(Transaction.date.desc()).first()
+        if not tx:
+            print("❌ No transactions with receipts found in DB")
+            return
+            
+    print(f"Targeting: {tx.description} (ID: {tx.id})")
     conn = db.query(QBOConnection).filter(QBOConnection.realm_id == tx.realm_id).first()
     
     if not tx.receipt_content:

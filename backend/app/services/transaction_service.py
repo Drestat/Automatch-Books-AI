@@ -382,7 +382,7 @@ class TransactionService:
         """
         type_mapping = {
             "Purchase": "Purchase",
-            "Check": "Purchase",      # QBO treats Check as a Purchase entity internally for attachments sometimes, but actually 'Purchase' is the safest base.
+            "Check": "Purchase",      # QBO API uses 'Purchase' for Checks/Expenses
             "CreditCard": "Purchase", 
             "Expense": "Purchase",    # QBO API uses 'Purchase' for Expenses
             "Bill": "Bill",
@@ -459,7 +459,10 @@ class TransactionService:
                 # Map transaction type to valid QBO Attachable entity type
                 qbo_entity_type = self._map_to_qbo_attachable_type(tx.transaction_type or "Purchase")
 
-                attachable_ref = {"EntityRef": {"type": qbo_entity_type, "value": tx.id}}
+                attachable_ref = {
+                    "EntityRef": {"type": qbo_entity_type, "value": tx.id},
+                    "IncludeOnSend": True
+                }
 
                 await self.client.upload_attachment(
                     file_bytes=file_bytes,
