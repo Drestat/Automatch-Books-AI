@@ -174,12 +174,12 @@ async def bulk_approve_modal(realm_id: str, tx_ids: list[str]):
         db.close()
 
 @app.function(image=image, secrets=[secrets], timeout=300)
-def process_receipt_modal(realm_id: str, file_content: bytes, filename: str):
+def process_receipt_modal(realm_id: str, file_content: bytes, filename: str, mime_type: str = "image/jpeg"):
     """
     Process receipt image using Gemini Vision (Serverless)
     Returns extracted data and potential match ID.
     """
-    print(f"🧾 [Modal] Processing receipt for {realm_id}: {filename}")
+    print(f"🧾 [Modal] Processing receipt for {realm_id}: {filename} ({mime_type})")
     import sys
     if "/root" not in sys.path:
         sys.path.append("/root")
@@ -190,7 +190,7 @@ def process_receipt_modal(realm_id: str, file_content: bytes, filename: str):
     db = SessionLocal()
     try:
         service = ReceiptService(db, realm_id)
-        result = service.process_receipt(file_content, filename)
+        result = service.process_receipt(file_content, filename, mime_type=mime_type)
         
         # Unwrap SQLModel/ORM object to return serializable data
         match = result.get('match')

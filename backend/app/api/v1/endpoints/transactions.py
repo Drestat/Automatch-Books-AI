@@ -290,16 +290,14 @@ def upload_receipt(
         with open(file_path, "rb") as f:
             content = f.read()
         
+        mime_type = file.content_type or "image/jpeg"
+        print(f"📊 [Upload] Detected MIME: {mime_type}")
+        
         try:
             print("🚀 [Upload] Triggering Modal analysis...")
             from modal_app import process_receipt_modal
             
-            # Use spawn() for async if possible, but we want the result NOW for the user?
-            # User wants "Scan Receipt" -> "See Result". So it MUST be blocking (remote).
-            # If it times out, we should perhaps return 202 Accepted and poll?
-            # For now, keep remote() but catch timeout.
-            
-            result = process_receipt_modal.remote(realm_id, content, file.filename)
+            result = process_receipt_modal.remote(realm_id, content, file.filename, mime_type=mime_type)
             
             if "error" in result:
                  raise Exception(result["error"])
@@ -307,7 +305,7 @@ def upload_receipt(
         except ImportError:
             print("⚠️ Modal not found, running locally")
             service = ReceiptService(db, realm_id)
-            result_obj = service.process_receipt(content, file.filename)
+            result_obj = service.process_receipt(content, file.filename, mime_type=mime_type)
             match = result_obj.get('match')
             result = {
                 "extracted": result_obj.get('extracted'),
@@ -317,7 +315,7 @@ def upload_receipt(
             print(f"❌ Serverless Receipt Error: {e}")
             # Fallback to local
             service = ReceiptService(db, realm_id)
-            result_obj = service.process_receipt(content, file.filename)
+            result_obj = service.process_receipt(content, file.filename, mime_type=mime_type)
             match = result_obj.get('match')
             result = {
                 "extracted": result_obj.get('extracted'),

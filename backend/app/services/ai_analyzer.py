@@ -76,7 +76,7 @@ class AIAnalyzer:
             # Fallback: return empty list to avoid crashing app
             return []
 
-    def process_receipt(self, file_content: bytes):
+    def process_receipt(self, file_content: bytes, mime_type: str = "image/jpeg"):
         """
         Extracts data from receipt image using Gemini Vision.
         """
@@ -86,7 +86,7 @@ class AIAnalyzer:
         prompt = RECEIPT_ANALYSIS_PROMPT
         
         vision_result = self.model.generate_content(
-            [prompt, {"mime_type": "image/jpeg", "data": file_content}],
+            [prompt, {"mime_type": mime_type, "data": file_content}],
             generation_config={"response_mime_type": "application/json"}
         )
         

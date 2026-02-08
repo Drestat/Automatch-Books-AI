@@ -9,12 +9,12 @@ class ReceiptService:
         self.realm_id = realm_id
         self.analyzer = AIAnalyzer()
 
-    def process_receipt(self, file_content: bytes, filename: str):
+    def process_receipt(self, file_content: bytes, filename: str, mime_type: str = "image/jpeg"):
         """
         Processes receipt visual data via AIAnalyzer and finds best match.
         """
         try:
-            extracted = self.analyzer.process_receipt(file_content)
+            extracted = self.analyzer.process_receipt(file_content, mime_type=mime_type)
         except Exception as e:
             print(f"❌ AI Receipt Error: {str(e)}")
             raise e
