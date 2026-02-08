@@ -63,6 +63,12 @@ class TransactionService:
             raise ValueError(f"Transaction {tx_id} not found")
         
         if tx.status == 'approved':
+            # Allow receipt upload even if already approved, if a receipt is present
+            if tx.receipt_url or tx.receipt_content:
+                print(f"📎 [Approve] Transaction {tx_id} already approved, but has receipt. Syncing attachment...")
+                await self._upload_receipt(tx)
+                return {"status": "success", "message": "Receipt attached to approved transaction"}
+            
             print(f"⏩ [Approve] Transaction {tx_id} already approved, skipping.")
             return {"status": "success", "message": "Transaction already approved"}
 

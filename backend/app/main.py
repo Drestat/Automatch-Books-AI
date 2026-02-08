@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.47.0 - FIX: QBO ATTACHMENT LINKAGE & SYNC OPTIMIZATION
+# v3.48.0 - FIX: LATE RECEIPT UPLOAD FOR APPROVED TRANSACTIONS
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.
@@ -73,13 +73,13 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.47.0"}
+    return {"status": "ok", "version": "3.48.0"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.47.0",
+        "version": "3.48.0",
         "status": "ready"
     }
 
