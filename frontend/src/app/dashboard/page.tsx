@@ -30,6 +30,7 @@ import { track } from '@/lib/analytics';
 import { useUser } from '@/hooks/useUser';
 
 import { SubscriptionGuard } from '@/components/SubscriptionGuard';
+import Skeleton from '@/components/Skeleton';
 
 function DashboardContent() {
   const {
@@ -542,7 +543,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.32.0</span></p>
+          <p className="text-white/20 text-xs">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.33.0</span></p>
         </footer>
 
       </div>
@@ -552,7 +553,22 @@ function DashboardContent() {
 
 export default function Dashboard() {
   return (
-    <Suspense fallback={<div className="min-h-screen" />}>
+    <Suspense fallback={
+      <div className="min-h-screen p-12 space-y-8">
+        <div className="flex justify-between items-end">
+          <div className="space-y-4">
+            <Skeleton width="200px" height="20px" />
+            <Skeleton width="400px" height="60px" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Skeleton height="200px" className="md:col-span-1" />
+          <Skeleton height="200px" className="md:col-span-1" />
+          <Skeleton height="200px" className="md:col-span-1" />
+          <Skeleton height="600px" className="md:col-span-3" />
+        </div>
+      </div>
+    }>
       <DashboardContent />
     </Suspense>
   );

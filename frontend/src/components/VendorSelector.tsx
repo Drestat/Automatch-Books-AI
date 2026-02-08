@@ -16,7 +16,7 @@ interface VendorSelectorProps {
     onSelect: (vendorName: string) => void;
     availableVendors: Vendor[];
     currentPayee?: string;
-    transactionDescription?: string;
+    transactionDescription?: string | null;
 }
 
 export default function VendorSelector({

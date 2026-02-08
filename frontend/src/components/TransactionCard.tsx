@@ -31,7 +31,7 @@ interface Tag {
 interface Transaction {
     id: string;
     date: string;
-    description: string;
+    description: string | null;
     amount: number;
     currency: string;
     transaction_type?: string;
@@ -320,7 +320,9 @@ export default function TransactionCard({
                                                 <Info size={12} />
                                             </div>
                                             <span className="text-[10px] font-black text-brand uppercase tracking-[0.2em]">Tax Strategy</span>
-                                            <p className="text-[11px] text-white/80 leading-relaxed font-medium">{tx.tax_deduction_note}</p>
+                                            <p className="text-[11px] text-white/80 leading-relaxed font-medium">
+                                                <StreamingText text={tx.tax_deduction_note} speed={20} />
+                                            </p>
                                         </div>
                                     </div>
                                 )}

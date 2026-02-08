@@ -40,7 +40,7 @@ export interface TransactionSplit {
 export interface Transaction {
     id: string;
     date: string;
-    description: string;
+    description: string | null;
     amount: number;
     currency: string;
     status: string;
