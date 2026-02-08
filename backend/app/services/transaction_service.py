@@ -153,12 +153,15 @@ class TransactionService:
             append_memo = f"#Accepted | [App Category: {cat_name}]"
 
         try:
-            # OPTIMIZATION: If it's already matched in QBO, we skip the Line update by default.
-            # This preserves multi-line transactions and avoids 400 errors during "Confirm Match".
-            # We ONLY update lines if the category was explicitly changed OR it's not a match.
+            # NEW OPTIMIZATION: If the transaction already exists in QBO (has SyncToken)
+            # and the user hasn't explicitly overridden the category, we skip the Line update.
+            # This handles:
+            # - Transactions already matched (is_qbo_matched=True)
+            # - Transactions with match suggestions (confidence > 0.8)
+            # - Any existing ledger item where we are just adding a memo/stamp.
             skip_line_update = False
-            if tx.is_qbo_matched:
-                print(f"🛡️ [Approve] Skipping line update for matched transaction {tx.id} to preserve original ledger structure.")
+            if tx.sync_token and not tx.category_id:
+                print(f"🛡️ [Approve] Skipping line update for existing transaction {tx.id} to preserve original ledger structure.")
                 skip_line_update = True
 
             updated = await self.client.update_purchase(
@@ -197,19 +200,23 @@ class TransactionService:
 
             if is_stale:
                 print(f"⚠️ [TransactionService] Stale Object detected for {tx.id}. Retrying with fresh SyncToken...")
-                # Fetch fresh entity
-                if tx.transaction_type == "Payment":
-                    # Fallback to query as get_purchase might not support Payment specifically or verify logic
-                    # Just query blindly for now to be safe
-                    q_res = await self.client.query(f"SELECT * FROM Payment WHERE Id = '{tx.id}'")
-                    fresh = q_res.get("QueryResponse", {}).get("Payment", [])
-                else:
-                    fresh_res = await self.client.get_purchase(tx.id)
-                    fresh = [fresh_res.get("Purchase")] if "Purchase" in fresh_res else []
-                    if not fresh and "Payment" in fresh_res: fresh = [fresh_res["Payment"]] # Just in case
+                # Fetch fresh entity using the specific type
+                fresh_res = await self.client.get_entity(tx.id, tx.transaction_type or "Purchase")
+                
+                # Extract object from wrapper (QBO returns { "Purchase": { ... } })
+                # But sometimes it's flattened or has a different key.
+                entity_key = tx.transaction_type or "Purchase"
+                if tx.transaction_type == "Expense": entity_key = "Purchase" # QBO mapping
+                
+                fresh_obj = fresh_res.get(entity_key)
+                if not fresh_obj:
+                    # Try to find any key that might be the object
+                    for k, v in fresh_res.items():
+                        if isinstance(v, dict) and "SyncToken" in v:
+                            fresh_obj = v
+                            break
 
-                if fresh and isinstance(fresh, list) and len(fresh) > 0:
-                    fresh_obj = fresh[0]
+                if fresh_obj:
                     new_token = fresh_obj.get("SyncToken")
                     print(f"🔄 [TransactionService] Retry with SyncToken: {new_token}")
                     updated = await self.client.update_purchase(
