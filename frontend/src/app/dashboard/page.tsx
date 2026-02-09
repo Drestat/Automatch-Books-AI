@@ -235,38 +235,6 @@ function DashboardContent() {
     <SubscriptionGuard status={subscriptionStatus} daysRemaining={daysRemaining}>
       <div className="min-h-screen text-white selection:bg-brand selection:text-white pb-20">
 
-        {/* Unified Sticky Command Bar */}
-        {profile && (
-          <div className="fixed top-4 right-6 sm:top-8 sm:right-12 z-[100] pointer-events-none flex items-center gap-3">
-            <div className="flex items-center btn-glass border-white/5 bg-[#020405]/40 backdrop-blur-3xl shadow-2xl pointer-events-auto rounded-[20px] p-1.5 tactile-item">
-              {/* Navigation Links */}
-              <div className="flex items-center gap-1 sm:gap-2 mr-4 ml-2 border-r border-white/10 pr-4">
-                <Link href="/dashboard" title="Home" className="p-2.5 rounded-xl text-brand transition-all hover:bg-brand/10">
-                  <Home size={18} />
-                </Link>
-                <Link href="/analytics" title="Insights" className="p-2.5 rounded-xl text-white/40 hover:text-white transition-all hover:bg-white/5">
-                  <PieChart size={18} />
-                </Link>
-                <Link href="/profile" title="Profile" className="p-2.5 rounded-xl text-white/40 hover:text-white transition-all hover:bg-white/5">
-                  <User size={18} />
-                </Link>
-              </div>
-
-              {/* Token Status */}
-              <div className="flex items-center gap-4 px-3 py-1.5 bg-brand-accent/5 rounded-[14px]">
-                <div className="p-1.5 rounded-lg bg-brand-accent/10">
-                  <Coins size={14} className="text-brand-accent" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[7px] uppercase text-brand-accent/60 font-black tracking-widest leading-none mb-1">Refill</span>
-                  <span className="font-mono font-bold text-white/90 leading-none text-sm">
-                    {profile.token_balance.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         <AccountSelectorModal
           isOpen={showAccountModal}
@@ -311,8 +279,39 @@ function DashboardContent() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex items-center gap-3"
+            className="flex flex-col items-end gap-5"
           >
+            {/* Unified Command Bar (Desktop only, scrolling) */}
+            {profile && (
+              <div className="hidden lg:flex items-center btn-glass border-white/5 bg-white/[0.03] backdrop-blur-3xl shadow-2xl rounded-[20px] p-1.5 tactile-item mb-1">
+                {/* Navigation Links */}
+                <div className="flex items-center gap-1 sm:gap-2 mr-4 ml-2 border-r border-white/10 pr-4">
+                  <Link href="/dashboard" title="Home" className="p-2 rounded-xl text-brand transition-all hover:bg-brand/10">
+                    <Home size={18} />
+                  </Link>
+                  <Link href="/analytics" title="Insights" className="p-2 rounded-xl text-white/40 hover:text-white transition-all hover:bg-white/5">
+                    <PieChart size={18} />
+                  </Link>
+                  <Link href="/profile" title="Profile" className="p-2 rounded-xl text-white/40 hover:text-white transition-all hover:bg-white/5">
+                    <User size={18} />
+                  </Link>
+                </div>
+
+                {/* Token Status */}
+                <div className="flex items-center gap-4 px-3 py-1.5 bg-brand-accent/5 rounded-[14px]">
+                  <div className="p-1.5 rounded-lg bg-brand-accent/10">
+                    <Coins size={14} className="text-brand-accent" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[7px] uppercase text-brand-accent/60 font-black tracking-widest leading-none mb-1">Refill</span>
+                    <span className="font-mono font-bold text-white/90 leading-none text-sm">
+                      {profile.token_balance.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Tactical Control Area */}
             <div className="flex items-center bg-white/[0.02] border border-white/5 rounded-2xl p-1 shadow-2xl">
               {(isConnected || isDemo) && (
@@ -568,7 +567,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.53.6</span></p>
+          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.53.7</span></p>
         </footer>
 
         {/* Mobile/Tablet Bottom Nav */}
