@@ -235,18 +235,39 @@ function DashboardContent() {
     <SubscriptionGuard status={subscriptionStatus} daysRemaining={daysRemaining}>
       <div className="min-h-screen text-white selection:bg-brand selection:text-white pb-20">
 
-        {/* Sticky Token HUD */}
+        {/* Sticky Global Navigation & Token HUD */}
         {profile && (
-          <div className="fixed top-4 right-6 sm:top-8 sm:right-12 z-[100] pointer-events-none">
+          <div className="fixed top-4 right-6 sm:top-8 sm:right-12 z-[100] pointer-events-none flex items-center gap-4">
+            {/* Desktop Navigation Links */}
+            <div className="hidden lg:flex items-center gap-6 px-6 py-3 btn-glass border-white/5 bg-[#020405]/60 backdrop-blur-2xl shadow-2xl pointer-events-auto rounded-2xl">
+              <Link href="/dashboard" className="flex flex-col items-center gap-1 text-brand group transition-all">
+                <Home size={20} className="group-hover:scale-110 transition-transform" />
+                <span className="text-[8px] font-black uppercase tracking-tighter">Home</span>
+              </Link>
+
+              <Link href="/analytics" className="flex flex-col items-center gap-1 text-white/40 hover:text-white group transition-all">
+                <PieChart size={20} className="group-hover:scale-110 transition-transform" />
+                <span className="text-[8px] font-black uppercase tracking-tighter">Insights</span>
+              </Link>
+
+              <Link href="/profile" className="flex flex-col items-center gap-1 text-white/40 hover:text-white group transition-all">
+                <User size={20} className="group-hover:scale-110 transition-transform" />
+                <span className="text-[8px] font-black uppercase tracking-tighter">Profile</span>
+              </Link>
+            </div>
+
+            {/* Token Status Pill */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="btn-glass px-5 py-3 flex items-center gap-3 border-brand-accent/30 bg-[#020405]/80 backdrop-blur-2xl shadow-2xl pointer-events-auto rounded-2xl"
+              className="btn-glass px-5 py-3 flex items-center gap-4 border-brand-accent/30 bg-[#020405]/80 backdrop-blur-2xl shadow-2xl pointer-events-auto rounded-2xl"
             >
-              <Coins size={18} className="text-brand-accent" />
+              <div className="p-2 rounded-xl bg-brand-accent/10">
+                <Coins size={18} className="text-brand-accent" />
+              </div>
               <div>
-                <p className="text-[9px] uppercase text-brand-accent/60 font-bold tracking-widest mb-0.5">Refill Status</p>
-                <p className="font-mono font-bold text-white/90 leading-none text-sm">{profile.token_balance.toLocaleString()} <span className="text-[10px] text-white/30">/ {profile.monthly_token_allowance.toLocaleString()}</span></p>
+                <p className="text-[9px] uppercase text-brand-accent/60 font-black tracking-widest mb-0.5 leading-none">Refill Status</p>
+                <p className="font-mono font-bold text-white/90 leading-none text-base">{profile.token_balance.toLocaleString()} <span className="text-xs text-white/20 font-normal">/ {profile.monthly_token_allowance.toLocaleString()}</span></p>
               </div>
             </motion.div>
           </div>
@@ -327,23 +348,7 @@ function DashboardContent() {
               </div>
             </button>
 
-            {/* Desktop Unified Navigation */}
-            <div className="hidden lg:flex items-center gap-8 ml-4 mr-2">
-              <Link href="/dashboard" className="flex flex-col items-center gap-1 opacity-100 text-brand group transition-all">
-                <Home size={22} className="group-hover:scale-110 transition-transform" />
-                <span className="text-[9px] font-bold">Home</span>
-              </Link>
-
-              <Link href="/analytics" className="flex flex-col items-center gap-1 opacity-40 text-white hover:opacity-100 group transition-all">
-                <PieChart size={22} className="group-hover:scale-110 transition-transform" />
-                <span className="text-[9px] font-bold">Insights</span>
-              </Link>
-
-              <Link href="/profile" className="flex flex-col items-center gap-1 opacity-40 text-white hover:opacity-100 group transition-all">
-                <User size={22} className="group-hover:scale-110 transition-transform" />
-                <span className="text-[9px] font-bold">Profile</span>
-              </Link>
-            </div>
+            {/* Desktop Navigation moved to sticky HUD */}
           </motion.div>
         </header>
 
@@ -365,8 +370,8 @@ function DashboardContent() {
                           key={acc.id}
                           onClick={() => toggleAccount(acc.id)}
                           className={`flex-shrink-0 px-5 py-2.5 rounded-2xl border text-xs font-bold transition-all duration-300 flex items-center gap-3 group relative overflow-visible ${isSelected
-                              ? 'border-brand/40 bg-brand/10 text-brand shadow-[0_0_20px_rgba(0,223,216,0.15)] ring-1 ring-brand/20'
-                              : 'border-white/5 bg-white/[0.02] text-white/40 hover:border-white/10 hover:bg-white/[0.04] hover:text-white/70'
+                            ? 'border-brand/40 bg-brand/10 text-brand shadow-[0_0_20px_rgba(0,223,216,0.15)] ring-1 ring-brand/20'
+                            : 'border-white/5 bg-white/[0.02] text-white/40 hover:border-white/10 hover:bg-white/[0.04] hover:text-white/70'
                             }`}
                         >
                           <div className={`w-2 h-2 rounded-full transition-all duration-500 ${isSelected ? 'bg-brand shadow-[0_0_8px_var(--color-brand)] scale-110' : 'bg-white/10 group-hover:bg-white/30'}`} />
@@ -573,7 +578,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.53.4</span></p>
+          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.53.5</span></p>
         </footer>
 
         {/* Mobile/Tablet Bottom Nav */}
