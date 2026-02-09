@@ -12,3 +12,4 @@ modal
 stripe
 rapidfuzz
 httpx
+tenacity

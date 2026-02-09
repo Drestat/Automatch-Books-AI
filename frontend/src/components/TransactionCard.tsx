@@ -109,7 +109,13 @@ export default function TransactionCard({
     const [newTag, setNewTag] = React.useState("");
     const [payeeInput, setPayeeInput] = React.useState(tx.payee || "");
     const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+    const [typingStage, setTypingStage] = React.useState({ vendor: false, category: false });
     const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+    // Reset typing stage when transaction ID or reasoning changes
+    React.useEffect(() => {
+        setTypingStage({ vendor: false, category: false });
+    }, [tx.id, tx.reasoning]);
 
     const handleAccept = async () => {
         const { triggerHapticFeedback } = await import('@/lib/haptics');
@@ -137,8 +143,9 @@ export default function TransactionCard({
         >
             <div className="p-4 md:p-5 relative z-10">
                 {/* 1. High-Fidelity Header */}
-                <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-4">
-                    <div className="flex gap-3 sm:gap-4 items-start">
+                {/* 1. High-Fidelity Header */}
+                <div className="flex flex-row justify-between items-start gap-3 mb-4">
+                    <div className="flex gap-3 sm:gap-4 items-start min-w-0">
                         {/* Date & Time */}
                         <div className="text-white shrink-0 min-w-[3rem]">
                             <h4 className="text-sm sm:text-base font-black tracking-tight leading-none uppercase">
@@ -150,21 +157,21 @@ export default function TransactionCard({
                         </div>
 
                         {/* Payee Identity */}
-                        <div className="min-w-0">
-                            <h2 className="text-lg sm:text-xl font-black text-white tracking-tight leading-tight sm:leading-none break-words">
+                        <div className="min-w-0 pr-2">
+                            <h2 className="text-lg sm:text-xl font-black text-white tracking-tight leading-tight sm:leading-none break-words line-clamp-2">
                                 {tx.payee || tx.suggested_payee || "Unassigned"}
                             </h2>
-                            <p className="text-[10px] font-medium text-white/30 mt-1 line-clamp-1 sm:line-clamp-none">
+                            <p className="text-[10px] font-medium text-white/30 mt-1 line-clamp-1">
                                 {(!tx.description || tx.description.trim() === '') ? "No bank description" : tx.description}
                             </p>
                         </div>
                     </div>
 
                     {/* Right Side: Confidence & Amount */}
-                    <div className="flex items-center justify-between w-full sm:w-auto gap-3 sm:gap-4 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t border-white/5 sm:border-0">
+                    <div className="flex items-center justify-end shrink-0 gap-2 sm:gap-4 pt-1">
                         {/* Confidence Circle (esk) */}
                         <motion.div
-                            className="relative w-10 h-10 flex items-center justify-center"
+                            className="relative w-10 h-10 flex items-center justify-center shrink-0"
                             animate={tx.confidence > 0.9 ? {
                                 filter: ["drop-shadow(0 0 2px var(--color-brand-accent))", "drop-shadow(0 0 8px var(--color-brand-accent))", "drop-shadow(0 0 2px var(--color-brand-accent))"],
                             } : {}}
@@ -197,7 +204,7 @@ export default function TransactionCard({
                             <span className="text-[10px] font-black text-brand-accent relative z-10">{Math.round(tx.confidence * 100)}%</span>
                         </motion.div>
 
-                        <span className="text-xl font-black text-white/90 ml-1">
+                        <span className="text-xl font-black text-white/90 whitespace-nowrap">
                             {tx.amount === 0 ? '' : (isExpense ? '-' : '+')} {Math.abs(tx.amount).toLocaleString('en-US', { style: 'currency', currency: tx.currency })}
                         </span>
                     </div>
@@ -264,13 +271,21 @@ export default function TransactionCard({
                     animate={{
                         opacity: 1,
                         x: 0,
-                        backgroundColor: isAnalyzing ? ["rgba(0, 223, 216, 0.02)", "rgba(0, 223, 216, 0.08)", "rgba(0, 223, 216, 0.02)"] : "rgba(255, 255, 255, 0.02)"
+                        backgroundColor: isAnalyzing
+                            ? ["rgba(0, 223, 216, 0.02)", "rgba(0, 223, 216, 0.08)", "rgba(0, 223, 216, 0.02)"]
+                            : "rgba(255, 255, 255, 0.02)",
+                        borderColor: (tx.vendor_reasoning || tx.category_reasoning) && !isAnalyzing
+                            ? ["rgba(0, 223, 216, 0.2)", "rgba(0, 223, 216, 0.6)", "rgba(0, 223, 216, 0.2)"] // Deep Cyan Breathing (Done)
+                            : isAnalyzing
+                                ? "rgba(0, 223, 216, 0.3)" // Analyzing
+                                : ["rgba(255, 255, 255, 0.05)", "rgba(255, 255, 255, 0.15)", "rgba(255, 255, 255, 0.05)"] // Idle Breathing
                     }}
                     transition={{
                         opacity: { delay: 0.2 },
-                        backgroundColor: { duration: 2, repeat: Infinity, ease: "linear" }
+                        backgroundColor: { duration: 2, repeat: Infinity, ease: "linear" },
+                        borderColor: { duration: 3, repeat: Infinity, ease: "easeInOut" }
                     }}
-                    className={`border border-white/5 rounded-2xl p-4 mb-4 relative overflow-hidden group/ai-module ${isAnalyzing ? 'ring-1 ring-brand-accent/20' : ''}`}
+                    className={`border rounded-2xl p-4 mb-4 relative overflow-hidden group/ai-module`}
                 >
                     {isAnalyzing && (
                         <motion.div
@@ -281,32 +296,45 @@ export default function TransactionCard({
                         />
                     )}
                     <div className="flex items-center gap-2 mb-3">
-                        <span className="text-[9px] font-bold text-brand-accent uppercase tracking-widest opacity-80 group-hover/ai-module:opacity-100 transition-opacity">AI Analysis</span>
-                        <div className="h-[1px] flex-1 bg-white/5 group-hover/ai-module:bg-brand-accent/10 transition-colors" />
+                        <span className={`text-[9px] font-bold uppercase tracking-widest transition-opacity ${(tx.vendor_reasoning || tx.category_reasoning) ? "text-brand-accent" : "text-brand-accent opacity-80 group-hover/ai-module:opacity-100"
+                            }`}>AI Analysis</span>
+                        <div className={`h-[1px] flex-1 transition-colors ${(tx.vendor_reasoning || tx.category_reasoning) ? "bg-brand-accent/20" : "bg-white/5 group-hover/ai-module:bg-brand-accent/10"
+                            }`} />
                     </div>
 
                     <div className="space-y-3">
                         <div className="flex gap-4">
-                            <div className="w-8 h-8 rounded-lg bg-brand-accent/5 flex items-center justify-center shrink-0 border border-brand-accent/10 group-hover/ai-module:border-brand-accent/30 transition-all">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border transition-all ${(tx.vendor_reasoning || tx.category_reasoning)
+                                ? "bg-brand-accent/10 border-brand-accent/30 shadow-[0_0_10px_-2px_var(--glow-brand)]"
+                                : "bg-brand-accent/5 border-brand-accent/10 group-hover/ai-module:border-brand-accent/30"
+                                }`}>
                                 <Sparkles size={14} className="text-brand-accent" />
                             </div>
                             <div className="space-y-2 pt-0.5">
                                 {tx.vendor_reasoning && (
                                     <p className="text-[11px] text-white/70 leading-normal font-medium max-w-2xl">
                                         <span className="text-brand-accent/80 font-bold mr-2 text-[9px] uppercase tracking-wider">Vendor Match</span>
-                                        {tx.vendor_reasoning}
+                                        <StreamingText
+                                            text={tx.vendor_reasoning}
+                                            speed={15}
+                                            onComplete={() => setTypingStage(prev => ({ ...prev, vendor: true }))}
+                                        />
                                     </p>
                                 )}
-                                {tx.category_reasoning && (
+                                {typingStage.vendor && tx.category_reasoning && (
                                     <p className="text-[11px] text-white/70 leading-normal font-medium max-w-2xl">
                                         <span className="text-brand-accent/80 font-bold mr-2 text-[9px] uppercase tracking-wider">Category Logic</span>
-                                        {tx.category_reasoning}
+                                        <StreamingText
+                                            text={tx.category_reasoning}
+                                            speed={15}
+                                            onComplete={() => setTypingStage(prev => ({ ...prev, category: true }))}
+                                        />
                                     </p>
                                 )}
                             </div>
                         </div>
 
-                        {tx.tax_deduction_note && (
+                        {typingStage.category && tx.tax_deduction_note && (
                             <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex gap-3 hover:bg-white/[0.04] transition-colors">
                                 <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center shrink-0">
                                     <Info size={12} className="text-white/40" />
@@ -314,7 +342,7 @@ export default function TransactionCard({
                                 <div className="flex flex-col gap-0.5">
                                     <span className="text-[8px] font-bold text-brand-accent/60 uppercase tracking-widest">Tax Strategy</span>
                                     <p className="text-[10px] text-white/60 leading-relaxed font-medium">
-                                        {tx.tax_deduction_note}
+                                        <StreamingText text={tx.tax_deduction_note} speed={15} />
                                     </p>
                                 </div>
                             </div>

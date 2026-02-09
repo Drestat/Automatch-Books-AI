@@ -8,9 +8,10 @@ interface StreamingTextProps {
     speed?: number;
     className?: string;
     startDelay?: number;
+    onComplete?: () => void;
 }
 
-export default function StreamingText({ text, speed = 20, className = "", startDelay = 0 }: StreamingTextProps) {
+export default function StreamingText({ text, speed = 20, className = "", startDelay = 0, onComplete }: StreamingTextProps) {
     const [displayedText, setDisplayedText] = useState("");
     const [isComplete, setIsComplete] = useState(false);
 
@@ -33,13 +34,14 @@ export default function StreamingText({ text, speed = 20, className = "", startD
                 if (i >= text.length) {
                     clearInterval(interval);
                     setIsComplete(true);
+                    if (onComplete) onComplete();
                 }
             }, speed);
             return () => clearInterval(interval);
         }
 
         return () => clearTimeout(timeout);
-    }, [text, speed, startDelay]);
+    }, [text, speed, startDelay]); // Note: onComplete omitted from deps to avoid re-triggering if parent recreates it
 
     return (
         <span className={className}>
@@ -48,7 +50,7 @@ export default function StreamingText({ text, speed = 20, className = "", startD
                 <motion.span
                     animate={{ opacity: [1, 0] }}
                     transition={{ duration: 0.8, repeat: Infinity }}
-                    className="inline-block w-1 h-3 bg-brand-accent ml-0.5"
+                    className="inline-block w-1 h-3 bg-brand-accent ml-0.5 align-middle"
                 />
             )}
         </span>
