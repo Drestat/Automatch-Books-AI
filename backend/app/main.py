@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.52.7 - UI: REMOVED ACCOUNT FILTER BUTTON
+# v3.52.8 - UI: UNIFIED NAVIGATION ACROSS DEVICES
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.
@@ -73,13 +73,13 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.52.7"}
+    return {"status": "ok", "version": "3.52.8"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.52.7",
+        "version": "3.52.8",
         "status": "ready"
     }
 

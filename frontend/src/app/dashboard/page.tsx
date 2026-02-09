@@ -302,25 +302,10 @@ function DashboardContent() {
             )}
 
 
-            <Link href="/analytics" onClick={() => track('nav_analytics', {}, user?.id)}>
-              <button
-                aria-label="View Analytics Dashboard"
-                className="btn-glass px-6 py-3.5 flex items-center gap-3 group border-white/10 hover:border-brand/30 hover:bg-brand/5 transition-all"
-              >
-                <div className="p-1.5 rounded-lg bg-white/5 group-hover:bg-brand/10 transition-colors">
-                  <BarChart3 size={18} className="text-white/60 group-hover:text-brand transition-colors" aria-hidden="true" />
-                </div>
-                <div className="text-left">
-                  <span className="block text-[9px] uppercase tracking-widest font-bold text-white/40 group-hover:text-brand transition-colors">Intelligence</span>
-                  <span className="text-xs font-bold text-white/90">Analytics</span>
-                </div>
-              </button>
-            </Link>
-
             <button
               onClick={handleBulkApprove}
               disabled={loading || transactions.filter(tx => tx.confidence > 0.9 && tx.status !== 'approved').length === 0}
-              aria-label="Bulk Approve High Confidence Transactions"
+              aria-label="Batch Approve High Confidence Transactions"
               className="btn-glass px-6 py-3.5 flex items-center gap-3 group border-brand/20 hover:border-brand/40 hover:bg-brand/5 disabled:opacity-50 relative overflow-hidden transition-all"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
@@ -328,43 +313,28 @@ function DashboardContent() {
                 <ShieldCheck size={18} aria-hidden="true" />
               </div>
               <div className="text-left relative z-10">
-                <span className="block text-[9px] uppercase tracking-widest font-bold text-brand group-hover:text-brand-trend transition-colors">Auto-Pilot</span>
+                <span className="block text-[9px] uppercase tracking-widest font-bold text-brand group-hover:text-white transition-colors">Auto-Pilot</span>
                 <span className="text-xs font-bold text-white">Batch Approve</span>
               </div>
             </button>
 
+            {/* Desktop Unified Navigation */}
+            <div className="hidden lg:flex items-center gap-8 ml-4 mr-2">
+              <Link href="/dashboard" className="flex flex-col items-center gap-1 opacity-100 text-brand group transition-all">
+                <Home size={22} className="group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] font-bold">Home</span>
+              </Link>
 
-            {/* Premium Profile Action Hub - Desktop Only */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="hidden md:flex items-center"
-            >
-              <div className="btn-glass p-1.5 pl-5 flex items-center gap-4 border-white/10 bg-[#020405]/60 backdrop-blur-xl group hover:border-white/20 transition-all duration-300 rounded-full">
-                <div className="text-right hidden sm:block">
-                  <p className="text-[9px] uppercase text-white/30 font-bold tracking-widest leading-none mb-1">Authenticated</p>
-                  <p className="text-xs font-bold text-white/90 leading-none">{user?.firstName || 'User'}</p>
-                </div>
-                <div className="w-[1px] h-8 bg-white/5 hidden sm:block" />
-                <Link
-                  href="/profile"
-                  className="w-10 h-10 rounded-full border border-white/10 overflow-hidden hover:border-brand-accent/50 transition-colors relative"
-                >
-                  {user?.imageUrl ? (
-                    <img
-                      src={user.imageUrl}
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-white/5 flex items-center justify-center text-white/40">
-                      <User size={18} />
-                    </div>
-                  )}
-                </Link>
-              </div>
-            </motion.div>
+              <Link href="/analytics" className="flex flex-col items-center gap-1 opacity-40 text-white hover:opacity-100 group transition-all">
+                <PieChart size={22} className="group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] font-bold">Insights</span>
+              </Link>
+
+              <Link href="/profile" className="flex flex-col items-center gap-1 opacity-40 text-white hover:opacity-100 group transition-all">
+                <User size={22} className="group-hover:scale-110 transition-transform" />
+                <span className="text-[9px] font-bold">Profile</span>
+              </Link>
+            </div>
           </motion.div>
         </header>
 
@@ -563,11 +533,11 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.52.7</span></p>
+          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.52.8</span></p>
         </footer>
 
-        {/* Mobile Bottom Nav */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-6 pb-6 pt-2 bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none">
+        {/* Mobile/Tablet Bottom Nav */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-6 pb-6 pt-2 bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none">
           <div className="glass-panel py-3 px-6 flex items-center justify-around border-white/10 shadow-2xl pointer-events-auto backdrop-blur-xl">
             <Link href="/dashboard" className="flex flex-col items-center gap-1 opacity-100 text-brand">
               <Home size={20} />
