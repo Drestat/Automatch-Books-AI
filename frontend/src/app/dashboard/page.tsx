@@ -254,37 +254,37 @@ function DashboardContent() {
           onClose={() => setShowTokenModal(false)}
         />
 
-        <header className="pt-6 sm:pt-12 pb-6 sm:pb-8 px-4 sm:px-12 max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6 sm:gap-8">
+        <header className="pt-8 sm:pt-14 pb-8 sm:pb-10 px-6 sm:px-12 max-w-[1600px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6 sm:gap-8">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            <div className="flex items-center gap-2 mb-1.5 sm:mb-2 text-xs sm:text-sm">
-              <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${isDemo ? 'bg-brand-accent' : 'bg-brand'} animate-pulse`} />
-              <span className={`text-[10px] sm:text-xs font-black tracking-[0.2em] ${isDemo ? 'text-brand-accent' : 'text-brand'} uppercase`}>
-                {isDemo ? 'Demo Mode' : 'Live Sync'}
+            <div className="flex items-center gap-2.5 mb-2 text-xs sm:text-sm">
+              <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${isDemo ? 'bg-brand-accent' : 'bg-brand'} animate-pulse shadow-[0_0_10px_rgba(0,223,216,0.5)]`} />
+              <span className={`text-[10px] sm:text-xs font-bold tracking-[0.2em] ${isDemo ? 'text-brand-accent' : 'text-brand'} uppercase opacity-80`}>
+                {isDemo ? 'Demo Environment' : 'Live Sync Active'}
               </span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black tracking-tight mb-1 sm:mb-2">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Dashboard</span>
+            <h1 className="text-4xl sm:text-6xl font-bold tracking-tighter mb-2 text-white">
+              Dashboard
             </h1>
-            <p className="text-white/40 text-sm sm:text-lg max-w-md">
-              Welcome back, <strong className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">{user?.firstName || 'User'}</strong>.
+            <p className="text-white/40 text-sm sm:text-base max-w-md font-medium leading-relaxed">
+              Welcome back, <strong className="text-white/90">{user?.firstName || 'User'}</strong>.
             </p>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="flex md:flex-wrap gap-4 items-center overflow-x-auto pb-4 md:pb-0 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0"
           >
             {profile && (
-              <div className="btn-glass px-4 py-3 flex items-center gap-2 border-brand-accent/30 bg-brand/5">
+              <div className="btn-glass px-5 py-3.5 flex items-center gap-3 border-brand-accent/20 bg-[#020405]/60 backdrop-blur-xl">
                 <Coins size={18} className="text-brand-accent" />
                 <div>
-                  <p className="text-[10px] uppercase text-white/40 font-bold tracking-wider">Balance</p>
-                  <p className="font-mono font-bold text-white/90 leading-none">{profile.token_balance.toLocaleString()} <span className="text-xs text-white/40">/ {profile.monthly_token_allowance.toLocaleString()}</span></p>
+                  <p className="text-[9px] uppercase text-brand-accent/60 font-bold tracking-widest mb-0.5">Tokens</p>
+                  <p className="font-mono font-bold text-white/90 leading-none text-sm">{profile.token_balance.toLocaleString()} <span className="text-[10px] text-white/30">/ {profile.monthly_token_allowance.toLocaleString()}</span></p>
                 </div>
               </div>
             )}
@@ -294,10 +294,10 @@ function DashboardContent() {
               <button
                 onClick={() => setShowAccountModal(true)}
                 aria-label="Manage Bank Accounts"
-                className="btn-glass px-4 py-3 flex items-center gap-2 border-brand/30 hover:bg-brand/10 text-sm"
+                className="btn-glass px-5 py-3.5 flex items-center gap-2.5 border-white/10 hover:bg-white/5 text-sm font-semibold text-white/70 hover:text-white transition-all"
               >
-                <Building2 size={16} className="text-brand" aria-hidden="true" />
-                <span>Manage Accounts</span>
+                <Building2 size={18} aria-hidden="true" />
+                <span>Accounts</span>
               </button>
             )}
 
@@ -306,23 +306,24 @@ function DashboardContent() {
               <div className="relative group/filter">
                 <button
                   aria-label="Filter Transactions by Account"
-                  className="btn-glass px-4 py-3 flex items-center gap-2 border-brand/20 hover:border-brand-accent/50 hover:bg-brand/10 text-sm transition-all duration-300"
+                  className={`btn-glass px-5 py-3.5 flex items-center gap-2.5 border-white/10 hover:border-brand-accent/30 hover:bg-white/5 text-sm transition-all duration-300 ${selectedAccounts.length > 0 ? 'text-brand-accent border-brand-accent/20' : 'text-white/70'}`}
                 >
-                  <Filter size={16} className={selectedAccounts.length > 0 ? 'text-brand-accent' : 'text-white/40'} aria-hidden="true" />
-                  <span className={selectedAccounts.length > 0 ? 'text-brand-accent font-bold' : ''}>{selectedAccounts.length > 0 ? `${selectedAccounts.length} Filtered` : 'All Accounts'}</span>
+                  <Filter size={18} className={selectedAccounts.length > 0 ? 'text-brand-accent' : 'text-white/40'} aria-hidden="true" />
+                  <span className={selectedAccounts.length > 0 ? 'text-brand-accent font-bold' : 'font-semibold'}>{selectedAccounts.length > 0 ? `${selectedAccounts.length} Filtered` : 'Filter'}</span>
                 </button>
                 {/* Dropdown */}
-                <div className="absolute top-full right-0 mt-2 w-56 glass-panel border border-white/10 rounded-xl shadow-xl overflow-hidden hidden group-hover/filter:block z-50">
+                <div className="absolute top-full right-0 mt-2 w-64 glass-panel border border-white/10 rounded-2xl shadow-2xl overflow-hidden hidden group-hover/filter:block z-50 bg-[#020405]/95 backdrop-blur-2xl">
                   <div className="p-2 space-y-1">
                     {accounts.map(acc => (
                       <div
                         key={acc.id}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-xs flex items-center justify-between transition-colors group/acc ${selectedAccounts.includes(acc.id) ? 'bg-brand/20 text-brand' : 'hover:bg-white/5 text-white/60'}`}
+                        className={`w-full text-left px-4 py-3 rounded-xl text-xs flex items-center justify-between transition-colors group/acc cursor-pointer ${selectedAccounts.includes(acc.id) ? 'bg-brand/10 text-brand' : 'hover:bg-white/5 text-white/60'}`}
+                        onClick={() => toggleAccount(acc.id)}
                       >
-                        <button onClick={() => toggleAccount(acc.id)} className="flex-1 text-left truncate">
+                        <span className="flex-1 truncate font-medium">
                           {acc.nickname || acc.name}
-                        </button>
-                        <div className="flex items-center gap-2">
+                        </span>
+                        <div className="flex items-center gap-3">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -330,18 +331,18 @@ function DashboardContent() {
                               if (newName) updateBankNickname(acc.id, newName);
                             }}
                             aria-label={`Rename account ${acc.nickname || acc.name}`}
-                            className="opacity-0 group-hover/acc:opacity-100 hover:text-white transition-opacity text-white/40"
+                            className="opacity-0 group-hover/acc:opacity-100 hover:text-white transition-opacity text-white/30"
                           >
-                            <Edit2 size={10} aria-hidden="true" />
+                            <Edit2 size={12} aria-hidden="true" />
                           </button>
-                          {selectedAccounts.includes(acc.id) && <div className="w-2 h-2 rounded-full bg-brand" />}
+                          {selectedAccounts.includes(acc.id) && <div className="w-2 h-2 rounded-full bg-brand shadow-[0_0_8px_var(--color-brand)]" />}
                         </div>
                       </div>
                     ))}
                     {selectedAccounts.length > 0 && (
                       <button
                         onClick={() => setSelectedAccounts([])}
-                        className="w-full text-center py-2 text-xs text-brand hover:underline border-t border-white/5 mt-2"
+                        className="w-full text-center py-3 text-xs text-brand hover:text-brand-accent border-t border-white/5 mt-2 font-bold tracking-wide uppercase"
                       >
                         Clear Filters
                       </button>
@@ -354,12 +355,14 @@ function DashboardContent() {
             <Link href="/analytics" onClick={() => track('nav_analytics', {}, user?.id)}>
               <button
                 aria-label="View Analytics Dashboard"
-                className="btn-glass px-6 py-4 flex items-center gap-3 group border-brand/30 hover:bg-brand/10"
+                className="btn-glass px-6 py-3.5 flex items-center gap-3 group border-white/10 hover:border-brand/30 hover:bg-brand/5 transition-all"
               >
-                <BarChart3 size={20} className="text-brand" aria-hidden="true" />
+                <div className="p-1.5 rounded-lg bg-white/5 group-hover:bg-brand/10 transition-colors">
+                  <BarChart3 size={18} className="text-white/60 group-hover:text-brand transition-colors" aria-hidden="true" />
+                </div>
                 <div className="text-left">
-                  <span className="block text-[10px] uppercase tracking-wider font-bold text-brand">Insights</span>
-                  <span className="text-xs font-bold text-white">View Analytics</span>
+                  <span className="block text-[9px] uppercase tracking-widest font-bold text-white/40 group-hover:text-brand transition-colors">Intelligence</span>
+                  <span className="text-xs font-bold text-white/90">Analytics</span>
                 </div>
               </button>
             </Link>
@@ -368,15 +371,15 @@ function DashboardContent() {
               onClick={handleBulkApprove}
               disabled={loading || transactions.filter(tx => tx.confidence > 0.9 && tx.status !== 'approved').length === 0}
               aria-label="Bulk Approve High Confidence Transactions"
-              className="btn-glass px-6 py-4 flex items-center gap-3 group border-brand/30 hover:bg-brand/10 disabled:opacity-50 relative overflow-hidden"
+              className="btn-glass px-6 py-3.5 flex items-center gap-3 group border-brand/20 hover:border-brand/40 hover:bg-brand/5 disabled:opacity-50 relative overflow-hidden transition-all"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-              <div className="relative z-10 p-2 rounded-full bg-brand/10 text-brand group-hover:bg-brand group-hover:text-white transition-colors">
-                <ShieldCheck size={20} aria-hidden="true" />
+              <div className="relative z-10 p-1.5 rounded-lg bg-brand/10 text-brand group-hover:bg-brand group-hover:text-white transition-colors">
+                <ShieldCheck size={18} aria-hidden="true" />
               </div>
               <div className="text-left relative z-10">
-                <span className="block text-[10px] uppercase tracking-wider font-bold text-brand group-hover:text-brand-accent transition-colors">Bulk Action</span>
-                <span className="text-xs font-bold text-white">Approve High Confidence</span>
+                <span className="block text-[9px] uppercase tracking-widest font-bold text-brand group-hover:text-brand-trend transition-colors">Auto-Pilot</span>
+                <span className="text-xs font-bold text-white">Batch Approve</span>
               </div>
             </button>
 
@@ -388,15 +391,15 @@ function DashboardContent() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="hidden md:flex items-center"
             >
-              <div className="btn-glass p-2 pl-4 flex items-center gap-4 border-brand/20 bg-brand/5 backdrop-blur-xl group hover:border-brand-accent/50 transition-all duration-300">
+              <div className="btn-glass p-1.5 pl-5 flex items-center gap-4 border-white/10 bg-[#020405]/60 backdrop-blur-xl group hover:border-white/20 transition-all duration-300 rounded-full">
                 <div className="text-right hidden sm:block">
-                  <p className="text-[10px] uppercase text-brand-accent/70 font-black tracking-widest leading-none mb-1">Authenticated</p>
+                  <p className="text-[9px] uppercase text-white/30 font-bold tracking-widest leading-none mb-1">Authenticated</p>
                   <p className="text-xs font-bold text-white/90 leading-none">{user?.firstName || 'User'}</p>
                 </div>
-                <div className="w-[1px] h-8 bg-white/10 hidden sm:block" />
+                <div className="w-[1px] h-8 bg-white/5 hidden sm:block" />
                 <Link
                   href="/profile"
-                  className="w-10 h-10 rounded-full border border-white/10 overflow-hidden hover:border-brand-accent/50 transition-colors"
+                  className="w-10 h-10 rounded-full border border-white/10 overflow-hidden hover:border-brand-accent/50 transition-colors relative"
                 >
                   {user?.imageUrl ? (
                     <img
@@ -405,8 +408,8 @@ function DashboardContent() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-brand/10 flex items-center justify-center text-brand">
-                      <User size={20} />
+                    <div className="w-full h-full bg-white/5 flex items-center justify-center text-white/40">
+                      <User size={18} />
                     </div>
                   )}
                 </Link>
@@ -415,14 +418,14 @@ function DashboardContent() {
           </motion.div>
         </header>
 
-        <main className="px-4 sm:px-6 md:px-12 pb-24 md:pb-0">
+        <main className="px-4 sm:px-6 md:px-12 pb-24 md:pb-0 max-w-[1600px] mx-auto">
           <BentoGrid>
             {/* Quick Stats & Action Cards */}
 
             {/* Transactions List */}
             <div className="md:col-span-3 mt-8">
               <div className="sticky-tabs flex flex-col md:flex-row md:items-center gap-6 mb-8 -mx-4 px-4 md:mx-0">
-                <div className="flex glass-panel p-1.5 rounded-2xl border border-white/10 shadow-2xl w-full md:w-auto overflow-x-auto no-scrollbar relative">
+                <div className="flex glass-panel p-1.5 rounded-2xl border border-white/5 bg-[#020405]/60 backdrop-blur-xl shadow-2xl w-full md:w-auto overflow-x-auto no-scrollbar relative">
                   {[
                     { id: 'review', label: 'For review', count: toReviewTxs.length, accent: 'brand-accent' },
                     { id: 'matched', label: 'Categorized', count: alreadyMatchedTxs.length, accent: 'brand' },
@@ -431,19 +434,19 @@ function DashboardContent() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id as any)}
-                      className={`relative flex-1 md:flex-none px-6 py-2.5 rounded-xl text-sm font-black transition-all duration-500 flex items-center justify-center gap-2 group/tab select-none ${activeTab === tab.id ? 'text-white' : 'text-white/30 hover:text-white/60'
+                      className={`relative flex-1 md:flex-none px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-500 flex items-center justify-center gap-2.5 group/tab select-none ${activeTab === tab.id ? 'text-white' : 'text-white/40 hover:text-white/80'
                         }`}
                     >
                       {activeTab === tab.id && (
                         <motion.div
                           layoutId="activeTab"
-                          className={`absolute inset-0 rounded-xl bg-white/[0.08] border border-white/10 shadow-[0_4px_20px_-1px_rgba(0,0,0,0.5)]`}
+                          className={`absolute inset-0 rounded-xl bg-white/[0.08] border border-white/5 shadow-lg`}
                           transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                         />
                       )}
-                      <span className="relative z-10 flex items-center gap-2">
+                      <span className="relative z-10 flex items-center gap-2.5">
                         {tab.label}
-                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-black transition-colors ${activeTab === tab.id ? `bg-${tab.accent}/20 text-${tab.accent}` : 'bg-white/5 text-white/40'
+                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold transition-colors ${activeTab === tab.id ? `bg-${tab.accent}/10 text-${tab.accent}` : 'bg-white/5 text-white/30'
                           }`}>
                           {tab.count}
                         </span>
@@ -455,29 +458,29 @@ function DashboardContent() {
                 <div className="h-[1px] md:hidden bg-white/5" />
                 <div className="hidden md:block h-[1px] flex-1 bg-white/5" />
 
-                <div className="flex gap-2">
+                <div className="flex gap-2.5">
                   <button
                     onClick={() => toggleSort('date')}
-                    className={`px-4 py-2 rounded-full border text-xs font-bold transition-colors flex items-center gap-2 ${sortConfig.key === 'date'
-                      ? 'border-brand/30 bg-brand/10 text-brand'
-                      : 'border-white/10 hover:bg-white/5 text-white/60'
+                    className={`px-4 py-2.5 rounded-xl border text-xs font-bold transition-colors flex items-center gap-2 ${sortConfig.key === 'date'
+                      ? 'border-brand/20 bg-brand/5 text-brand'
+                      : 'border-white/5 bg-white/[0.02] hover:bg-white/5 text-white/40 hover:text-white/80'
                       }`}
                   >
-                    By Date
+                    Date
                     {sortConfig.key === 'date' && (
-                      sortConfig.direction === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />
+                      sortConfig.direction === 'desc' ? <ArrowDown size={14} /> : <ArrowUp size={14} />
                     )}
                   </button>
                   <button
                     onClick={() => toggleSort('confidence')}
-                    className={`px-4 py-2 rounded-full border text-xs font-bold transition-colors flex items-center gap-2 ${sortConfig.key === 'confidence'
-                      ? 'border-brand/30 bg-brand/10 text-brand'
-                      : 'border-white/10 hover:bg-white/5 text-white/60'
+                    className={`px-4 py-2.5 rounded-xl border text-xs font-bold transition-colors flex items-center gap-2 ${sortConfig.key === 'confidence'
+                      ? 'border-brand/20 bg-brand/5 text-brand'
+                      : 'border-white/5 bg-white/[0.02] hover:bg-white/5 text-white/40 hover:text-white/80'
                       }`}
                   >
-                    By Confidence
+                    Confidence
                     {sortConfig.key === 'confidence' && (
-                      sortConfig.direction === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />
+                      sortConfig.direction === 'desc' ? <ArrowDown size={14} /> : <ArrowUp size={14} />
                     )}
                   </button>
                 </div>
