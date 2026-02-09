@@ -235,41 +235,36 @@ function DashboardContent() {
     <SubscriptionGuard status={subscriptionStatus} daysRemaining={daysRemaining}>
       <div className="min-h-screen text-white selection:bg-brand selection:text-white pb-20">
 
-        {/* Sticky Global Navigation & Token HUD */}
+        {/* Unified Sticky Command Bar */}
         {profile && (
-          <div className="fixed top-4 right-6 sm:top-8 sm:right-12 z-[100] pointer-events-none flex items-center gap-4">
-            {/* Desktop Navigation Links */}
-            <div className="hidden lg:flex items-center gap-6 px-6 py-3 btn-glass border-white/5 bg-[#020405]/60 backdrop-blur-2xl shadow-2xl pointer-events-auto rounded-2xl">
-              <Link href="/dashboard" className="flex flex-col items-center gap-1 text-brand group transition-all">
-                <Home size={20} className="group-hover:scale-110 transition-transform" />
-                <span className="text-[8px] font-black uppercase tracking-tighter">Home</span>
-              </Link>
+          <div className="fixed top-4 right-6 sm:top-8 sm:right-12 z-[100] pointer-events-none flex items-center gap-3">
+            <div className="flex items-center btn-glass border-white/5 bg-[#020405]/40 backdrop-blur-3xl shadow-2xl pointer-events-auto rounded-[20px] p-1.5 tactile-item">
+              {/* Navigation Links */}
+              <div className="flex items-center gap-1 sm:gap-2 mr-4 ml-2 border-r border-white/10 pr-4">
+                <Link href="/dashboard" title="Home" className="p-2.5 rounded-xl text-brand transition-all hover:bg-brand/10">
+                  <Home size={18} />
+                </Link>
+                <Link href="/analytics" title="Insights" className="p-2.5 rounded-xl text-white/40 hover:text-white transition-all hover:bg-white/5">
+                  <PieChart size={18} />
+                </Link>
+                <Link href="/profile" title="Profile" className="p-2.5 rounded-xl text-white/40 hover:text-white transition-all hover:bg-white/5">
+                  <User size={18} />
+                </Link>
+              </div>
 
-              <Link href="/analytics" className="flex flex-col items-center gap-1 text-white/40 hover:text-white group transition-all">
-                <PieChart size={20} className="group-hover:scale-110 transition-transform" />
-                <span className="text-[8px] font-black uppercase tracking-tighter">Insights</span>
-              </Link>
-
-              <Link href="/profile" className="flex flex-col items-center gap-1 text-white/40 hover:text-white group transition-all">
-                <User size={20} className="group-hover:scale-110 transition-transform" />
-                <span className="text-[8px] font-black uppercase tracking-tighter">Profile</span>
-              </Link>
+              {/* Token Status */}
+              <div className="flex items-center gap-4 px-3 py-1.5 bg-brand-accent/5 rounded-[14px]">
+                <div className="p-1.5 rounded-lg bg-brand-accent/10">
+                  <Coins size={14} className="text-brand-accent" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[7px] uppercase text-brand-accent/60 font-black tracking-widest leading-none mb-1">Refill</span>
+                  <span className="font-mono font-bold text-white/90 leading-none text-sm">
+                    {profile.token_balance.toLocaleString()}
+                  </span>
+                </div>
+              </div>
             </div>
-
-            {/* Token Status Pill */}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="btn-glass px-5 py-3 flex items-center gap-4 border-brand-accent/30 bg-[#020405]/80 backdrop-blur-2xl shadow-2xl pointer-events-auto rounded-2xl"
-            >
-              <div className="p-2 rounded-xl bg-brand-accent/10">
-                <Coins size={18} className="text-brand-accent" />
-              </div>
-              <div>
-                <p className="text-[9px] uppercase text-brand-accent/60 font-black tracking-widest mb-0.5 leading-none">Refill Status</p>
-                <p className="font-mono font-bold text-white/90 leading-none text-base">{profile.token_balance.toLocaleString()} <span className="text-xs text-white/20 font-normal">/ {profile.monthly_token_allowance.toLocaleString()}</span></p>
-              </div>
-            </motion.div>
           </div>
         )}
 
@@ -292,22 +287,23 @@ function DashboardContent() {
           onClose={() => setShowTokenModal(false)}
         />
 
-        <header className="pt-8 sm:pt-14 pb-8 sm:pb-10 px-6 sm:px-12 max-w-[1600px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6 sm:gap-8">
+        <header className="pt-12 sm:pt-20 pb-8 sm:pb-12 px-6 sm:px-12 max-w-[1600px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8 header-glow">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
+            className="relative"
           >
-            <div className="flex items-center gap-2.5 mb-2 text-xs sm:text-sm">
-              <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${isDemo ? 'bg-brand-accent' : 'bg-brand'} animate-pulse shadow-[0_0_10px_rgba(0,223,216,0.5)]`} />
-              <span className={`text-[10px] sm:text-xs font-bold tracking-[0.2em] ${isDemo ? 'text-brand-accent' : 'text-brand'} uppercase opacity-80`}>
-                {isDemo ? 'Demo Environment' : 'Live Sync Active'}
+            <div className="flex items-center gap-2.5 mb-3 text-xs sm:text-sm">
+              <span className={`w-1.5 h-1.5 rounded-full ${isDemo ? 'bg-brand-accent' : 'bg-brand'} animate-pulse shadow-[0_0_12px_rgba(0,223,216,0.6)]`} />
+              <span className={`text-[10px] font-black tracking-[0.3em] ${isDemo ? 'text-brand-accent' : 'text-brand'} uppercase`}>
+                {isDemo ? 'Demo Mode' : 'Live Sync'}
               </span>
             </div>
-            <h1 className="text-4xl sm:text-6xl font-bold tracking-tighter mb-2 text-white">
+            <h1 className="text-5xl sm:text-7xl font-black tracking-tighter mb-3 leading-none heading-shimmer">
               Dashboard
             </h1>
-            <p className="text-white/40 text-sm sm:text-base max-w-md font-medium leading-relaxed">
-              Welcome back, <strong className="text-white/90">{user?.firstName || 'User'}</strong>.
+            <p className="text-white/30 text-sm sm:text-base font-medium max-w-sm">
+              Syncing activity for <span className="text-white/80">{user?.firstName || 'User'}</span>
             </p>
           </motion.div>
 
@@ -315,40 +311,34 @@ function DashboardContent() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex md:flex-wrap gap-4 items-center overflow-x-auto pb-4 md:pb-0 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0"
+            className="flex items-center gap-3"
           >
-            {/* Tokens are now handled by a sticky fixed overlay */}
+            {/* Tactical Control Area */}
+            <div className="flex items-center bg-white/[0.02] border border-white/5 rounded-2xl p-1 shadow-2xl">
+              {(isConnected || isDemo) && (
+                <button
+                  onClick={() => setShowAccountModal(true)}
+                  className="px-5 py-3 flex items-center gap-3 hover:bg-white/5 rounded-xl transition-all text-white/50 hover:text-white"
+                >
+                  <Building2 size={16} />
+                  <span className="text-xs font-bold uppercase tracking-wider">Accounts</span>
+                </button>
+              )}
 
-            {/* Manage Accounts Button */}
-            {(isConnected || isDemo) && (
+              <div className="w-px h-6 bg-white/5 mx-1" />
+
               <button
-                onClick={() => setShowAccountModal(true)}
-                aria-label="Manage Bank Accounts"
-                className="btn-glass px-5 py-3.5 flex items-center gap-2.5 border-white/10 hover:bg-white/5 text-sm font-semibold text-white/70 hover:text-white transition-all"
+                onClick={handleBulkApprove}
+                disabled={loading || transactions.filter(tx => tx.confidence > 0.9 && tx.status !== 'approved').length === 0}
+                className="px-6 py-3 flex items-center gap-3 group bg-brand/10 hover:bg-brand/20 disabled:opacity-30 rounded-xl transition-all border border-brand/20 hover:border-brand/40"
               >
-                <Building2 size={18} aria-hidden="true" />
-                <span>Accounts</span>
+                <ShieldCheck size={16} className="text-brand" />
+                <div className="flex flex-col items-start leading-none">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-brand mb-0.5">Auto-Pilot</span>
+                  <span className="text-xs font-bold text-white/90">Batch Approve</span>
+                </div>
               </button>
-            )}
-
-
-            <button
-              onClick={handleBulkApprove}
-              disabled={loading || transactions.filter(tx => tx.confidence > 0.9 && tx.status !== 'approved').length === 0}
-              aria-label="Batch Approve High Confidence Transactions"
-              className="btn-glass px-6 py-3.5 flex items-center gap-3 group border-brand/20 hover:border-brand/40 hover:bg-brand/5 disabled:opacity-50 relative overflow-hidden transition-all"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-              <div className="relative z-10 p-1.5 rounded-lg bg-brand/10 text-brand group-hover:bg-brand group-hover:text-white transition-colors">
-                <ShieldCheck size={18} aria-hidden="true" />
-              </div>
-              <div className="text-left relative z-10">
-                <span className="block text-[9px] uppercase tracking-widest font-bold text-brand group-hover:text-white transition-colors">Auto-Pilot</span>
-                <span className="text-xs font-bold text-white">Batch Approve</span>
-              </div>
-            </button>
-
-            {/* Desktop Navigation moved to sticky HUD */}
+            </div>
           </motion.div>
         </header>
 
@@ -578,7 +568,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.53.5</span></p>
+          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.53.6</span></p>
         </footer>
 
         {/* Mobile/Tablet Bottom Nav */}
