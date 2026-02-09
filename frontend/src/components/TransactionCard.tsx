@@ -335,7 +335,7 @@ export default function TransactionCard({
                         </div>
 
                         {typingStage.category && tx.tax_deduction_note && (
-                            <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex gap-3 hover:bg-white/[0.04] transition-colors">
+                            <div className="p-3 rounded-xl bg-brand-accent/5 border border-brand-accent/30 flex gap-3 hover:bg-brand-accent/10 transition-colors">
                                 <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center shrink-0">
                                     <Info size={12} className="text-white/40" />
                                 </div>
