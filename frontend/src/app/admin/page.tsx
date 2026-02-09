@@ -35,9 +35,16 @@ export default function AdminDashboard() {
         }
     };
 
+    const [isMounted, setIsMounted] = useState(false);
+
     useEffect(() => {
+        setIsMounted(true);
         fetchUsage();
     }, []);
+
+    if (!isMounted) {
+        return null;
+    }
 
     const totalUsers = usageData.length;
     const totalItemsProcessed = usageData.reduce((acc, curr) => acc + curr.totalItems, 0);

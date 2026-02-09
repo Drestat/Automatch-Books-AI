@@ -7,6 +7,8 @@ import { track } from '@/lib/analytics';
 import { Bot, RefreshCw, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+export const dynamic = 'force-dynamic';
+
 const API_BASE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run') + '/api/v1';
 
 interface AnalyticsEvent {
@@ -64,9 +66,16 @@ export default function AdminAnalyticsPage() {
         }
     };
 
+    const [isMounted, setIsMounted] = useState(false);
+
     useEffect(() => {
+        setIsMounted(true);
         fetchEvents();
     }, []);
+
+    if (!isMounted) {
+        return null; // Prevent server-side rendering of Clerk components during build
+    }
 
     return (
         <div className="min-h-screen py-12 px-6 lg:px-12 max-w-7xl mx-auto">

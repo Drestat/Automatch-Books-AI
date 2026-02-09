@@ -12,11 +12,23 @@ import { UserButton } from "@clerk/nextjs";
 import { useAnalytics } from '@/hooks/useAnalytics';
 import Footer from '@/components/Footer';
 
+export const dynamic = 'force-dynamic';
+
 import Skeleton from '@/components/Skeleton';
 
 
 export default function AnalyticsPage() {
     const { spendTrend, categoryData, kpi, loading } = useAnalytics();
+
+    const [isMounted, setIsMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return null;
+    }
 
     if (loading) return (
         <div className="min-h-screen py-12 px-6 lg:px-12 max-w-7xl mx-auto">

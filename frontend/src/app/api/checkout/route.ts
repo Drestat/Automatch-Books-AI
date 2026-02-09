@@ -3,9 +3,11 @@ import { auth } from '@clerk/nextjs/server';
 import Stripe from 'stripe';
 
 // @ts-ignore - Some Stripe versions use custom identifiers
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2024-06-20' as any,
-});
+const stripe = process.env.STRIPE_SECRET_KEY
+    ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+        apiVersion: '2024-06-20' as any,
+    })
+    : null as any;
 
 export async function POST(req: Request) {
     const { userId } = await auth();

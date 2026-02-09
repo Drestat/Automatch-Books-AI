@@ -1,47 +1,21 @@
 "use client";
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, User, Zap, LogOut, Settings, Shield, ChevronRight, Cloud } from 'lucide-react';
 import Link from 'next/link';
-import { UserProfile, useClerk } from "@clerk/nextjs";
-import { dark } from "@clerk/themes";
+import { useClerk } from "@clerk/nextjs";
 import { useQBO } from '@/hooks/useQBO';
 import Footer from '@/components/Footer';
+import dynamicLoader from 'next/dynamic';
 
-export default function ProfilePage() {
+const ClerkParameters = dynamicLoader(() => import('@/components/ClerkParameters'), { ssr: false });
+
+export const dynamic = 'force-dynamic';
+
+function ProfileContent() {
     const { sync, disconnect, loading, isConnected } = useQBO();
     const { signOut } = useClerk();
-
-    const clerkAppearance = {
-        baseTheme: dark,
-        variables: {
-            colorPrimary: '#00DFD8',
-            colorBackground: 'transparent',
-            colorText: '#ffffff',
-            colorTextSecondary: 'rgba(255, 255, 255, 0.45)',
-            colorInputBackground: 'rgba(255, 255, 255, 0.03)',
-            colorInputText: '#ffffff',
-            borderRadius: '1rem',
-            fontFamily: 'inherit',
-        },
-        elements: {
-            card: 'bg-transparent shadow-none border-none p-0',
-            navbar: 'hidden',
-            header: 'hidden',
-            profileSectionTitleText: 'text-brand font-bold uppercase tracking-[0.15em] text-[11px] mb-6',
-            scrollBox: 'bg-transparent overflow-visible',
-            userPreviewMainIdentifier: 'text-white font-semibold text-base',
-            userPreviewSecondaryIdentifier: 'text-white/40 font-medium text-sm',
-            accordionTriggerButton: 'hover:bg-white/5 transition-all duration-200 rounded-xl px-4',
-            profilePage: 'p-0',
-            userButtonPopoverCard: 'hidden',
-            breadcrumbs: 'hidden',
-            formButtonPrimary: 'btn-primary font-bold py-2.5 px-6 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all',
-            formFieldInput: 'bg-white/5 border-white/10 focus:border-brand/40 transition-all rounded-xl py-3 px-4',
-            activeDeviceIcon: 'text-brand',
-        }
-    };
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -57,6 +31,16 @@ export default function ProfilePage() {
         hidden: { opacity: 0, y: 10 },
         visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
     };
+
+    const [isMounted, setIsMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return null;
+    }
 
     return (
         <div className="min-h-screen pb-24 md:pb-12 bg-[#020405] text-white selection:bg-brand/30">
@@ -146,7 +130,7 @@ export default function ProfilePage() {
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Version</span>
-                                    <span className="text-[10px] text-white/60 font-bold">v3.32.0</span>
+                                    <span className="text-[10px] text-white/60 font-bold">v3.53.0</span>
                                 </div>
                             </div>
                         </motion.div>
@@ -182,7 +166,7 @@ export default function ProfilePage() {
                             </div>
 
                             <div className="flex-1 w-full max-w-full clerk-professional-skin">
-                                <UserProfile appearance={clerkAppearance} />
+                                <ClerkParameters />
                             </div>
                         </div>
                     </motion.div>
@@ -229,5 +213,13 @@ export default function ProfilePage() {
                 }
             `}</style>
         </div>
+    );
+}
+
+export default function ProfilePage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-[#020405] text-white flex items-center justify-center">Loading Profile...</div>}>
+            <ProfileContent />
+        </Suspense>
     );
 }
