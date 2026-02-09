@@ -30,7 +30,8 @@ image = (
         "rapidfuzz",
         "python-multipart",
         "pytz",
-        "alembic"
+        "alembic",
+        "tenacity"
     )
     .add_local_dir(os.path.join(base_dir, "app"), remote_path="/root/app")
     .add_local_dir(os.path.join(base_dir, "alembic"), remote_path="/root/alembic")

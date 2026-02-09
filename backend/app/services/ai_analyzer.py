@@ -4,6 +4,7 @@ except ImportError:
     genai = None
 
 import json
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception
 from app.core.config import settings
 from app.core.prompts import TRANSACTION_ANALYSIS_PROMPT, RECEIPT_ANALYSIS_PROMPT, ANALYTICS_INSIGHTS_PROMPT
 from rapidfuzz import process, fuzz
@@ -17,6 +18,11 @@ class AIAnalyzer:
             print("⚠️ [AIAnalyzer] Generative AI not available (Missing lib or Key)")
             self.model = None
 
+    @retry(
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        stop=stop_after_attempt(5),
+        reraise=True
+    )
     def analyze_batch(self, transactions, context):
         """
         Analyzes a batch of transactions using Gemini Pro.
@@ -76,6 +82,11 @@ class AIAnalyzer:
             # Fallback: return empty list to avoid crashing app
             return []
 
+    @retry(
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        stop=stop_after_attempt(5),
+        reraise=True
+    )
     def process_receipt(self, file_content: bytes, mime_type: str = "image/jpeg"):
         """
         Extracts data from receipt image using Gemini Vision.
@@ -107,6 +118,11 @@ class AIAnalyzer:
                  print(f"❌ Raw text that failed: {vision_result.text}")
             raise ValueError("Could not parse receipt data from AI")
 
+    @retry(
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        stop=stop_after_attempt(5),
+        reraise=True
+    )
     def generate_insights(self, events):
         """
         Analyzes user event logs to provide strategic insights.

@@ -26,8 +26,8 @@ export const SpendTrendChart = ({ data }: SpendTrendChartProps) => {
                 >
                     <defs>
                         <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#00ff9d" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#00ff9d" stopOpacity={0} />
+                            <stop offset="5%" stopColor="#00dfd8" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#00dfd8" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#005f56" stopOpacity={0.3} />
@@ -58,7 +58,7 @@ export const SpendTrendChart = ({ data }: SpendTrendChartProps) => {
                         name="Income"
                         type="monotone"
                         dataKey="income"
-                        stroke="#00ff9d"
+                        stroke="#00dfd8"
                         strokeWidth={3}
                         fillOpacity={1}
                         fill="url(#colorIncome)"

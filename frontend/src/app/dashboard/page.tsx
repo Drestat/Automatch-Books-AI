@@ -20,12 +20,16 @@ import {
   Edit2,
   Building2,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  LayoutDashboard,
+  PieChart,
+  Home,
+  Check,
+  User
 } from 'lucide-react';
 import { AccountSelectorModal } from '@/components/AccountSelectorModal';
 import { TokenDepletedModal } from '@/components/TokenDepletedModal';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UserButton } from "@clerk/nextjs";
 import { track } from '@/lib/analytics';
 import { useUser } from '@/hooks/useUser';
 
@@ -250,21 +254,21 @@ function DashboardContent() {
           onClose={() => setShowTokenModal(false)}
         />
 
-        <header className="pt-8 md:pt-12 pb-8 px-4 sm:px-6 md:px-12 max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <header className="pt-6 sm:pt-12 pb-6 sm:pb-8 px-4 sm:px-12 max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6 sm:gap-8">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            <div className="flex items-center gap-2 mb-2">
-              <span className={`w-2 h-2 rounded-full ${isDemo ? 'bg-brand-accent' : 'bg-brand'} animate-pulse`} />
-              <span className={`text-xs font-bold tracking-[0.2em] ${isDemo ? 'text-brand-accent' : 'text-brand'} uppercase`}>
-                {isDemo ? 'Demo Mode Active' : 'Live Sync Active'}
+            <div className="flex items-center gap-2 mb-1.5 sm:mb-2 text-xs sm:text-sm">
+              <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${isDemo ? 'bg-brand-accent' : 'bg-brand'} animate-pulse`} />
+              <span className={`text-[10px] sm:text-xs font-black tracking-[0.2em] ${isDemo ? 'text-brand-accent' : 'text-brand'} uppercase`}>
+                {isDemo ? 'Demo Mode' : 'Live Sync'}
               </span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">
+            <h1 className="text-3xl sm:text-5xl font-black tracking-tight mb-1 sm:mb-2">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">Dashboard</span>
             </h1>
-            <p className="text-white/40 text-base md:text-lg max-w-md">
+            <p className="text-white/40 text-sm sm:text-lg max-w-md">
               Welcome back, <strong className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-brand-secondary">{user?.firstName || 'User'}</strong>.
             </p>
           </motion.div>
@@ -273,7 +277,7 @@ function DashboardContent() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex flex-wrap gap-4 items-center"
+            className="flex md:flex-wrap gap-4 items-center overflow-x-auto pb-4 md:pb-0 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0"
           >
             {profile && (
               <div className="btn-glass px-4 py-3 flex items-center gap-2 border-brand-accent/30 bg-brand/5">
@@ -377,68 +381,75 @@ function DashboardContent() {
             </button>
 
 
-            <button
-              onClick={() => sync()}
-              disabled={loading}
-              aria-label="Sync with QuickBooks Online"
-              className="btn-primary h-full min-h-[64px] px-8 flex items-center gap-3 group disabled:opacity-50"
+            {/* Premium Profile Action Hub - Desktop Only */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="hidden md:flex items-center"
             >
-              <Zap size={20} className={`group-hover:animate-pulse ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
-              <span className="font-bold tracking-wide">{loading ? 'Syncing...' : 'Sync Now'}</span>
-            </button>
-            <div className="ml-2 flex items-center gap-3">
-              <button
-                onClick={disconnect}
-                className="px-4 py-2 text-red-400 hover:text-red-300 transition-colors rounded-lg hover:bg-red-500/10 border border-red-500/20 hover:border-red-500/40 flex items-center gap-2"
-                title="Disconnect from QuickBooks"
-                aria-label="Disconnect from QuickBooks"
-              >
-                <Zap size={14} className="rotate-45" aria-hidden="true" />
-                <span className="text-sm font-medium">Disconnect</span>
-              </button>
-              <UserButton afterSignOutUrl="/" />
-            </div>
+              <div className="btn-glass p-2 pl-4 flex items-center gap-4 border-brand/20 bg-brand/5 backdrop-blur-xl group hover:border-brand-accent/50 transition-all duration-300">
+                <div className="text-right hidden sm:block">
+                  <p className="text-[10px] uppercase text-brand-accent/70 font-black tracking-widest leading-none mb-1">Authenticated</p>
+                  <p className="text-xs font-bold text-white/90 leading-none">{user?.firstName || 'User'}</p>
+                </div>
+                <div className="w-[1px] h-8 bg-white/10 hidden sm:block" />
+                <Link
+                  href="/profile"
+                  className="w-10 h-10 rounded-full border border-white/10 overflow-hidden hover:border-brand-accent/50 transition-colors"
+                >
+                  {user?.imageUrl ? (
+                    <img
+                      src={user.imageUrl}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-brand/10 flex items-center justify-center text-brand">
+                      <User size={20} />
+                    </div>
+                  )}
+                </Link>
+              </div>
+            </motion.div>
           </motion.div>
         </header>
 
-        <main className="px-4 sm:px-6 md:px-12">
+        <main className="px-4 sm:px-6 md:px-12 pb-24 md:pb-0">
           <BentoGrid>
             {/* Quick Stats & Action Cards */}
 
             {/* Transactions List */}
             <div className="md:col-span-3 mt-8">
-              <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8">
-                <div className="flex glass-panel p-1 rounded-xl border border-white/5 shadow-2xl">
-                  <button
-                    onClick={() => setActiveTab('review')}
-                    className={`flex-1 md:flex-none px-4 sm:px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 border ${activeTab === 'review' ? 'bg-brand/20 border-brand-accent/50 text-brand-accent shadow-[0_0_20px_-5px_rgba(212,175,55,0.3)]' : 'border-transparent text-white/40 hover:text-white hover:bg-white/5'
-                      }`}
-                  >
-                    For review
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${activeTab === 'review' ? 'bg-brand-accent/20 text-brand-accent' : 'bg-white/5 text-white/40'}`}>
-                      {toReviewTxs.length}
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('matched')}
-                    className={`flex-1 md:flex-none px-4 sm:px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 border ${activeTab === 'matched' ? 'bg-brand/20 border-brand/50 text-brand shadow-[0_0_20px_-5px_rgba(0,95,86,0.3)]' : 'border-transparent text-white/40 hover:text-white hover:bg-white/5'
-                      }`}
-                  >
-                    Categorized
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${activeTab === 'matched' ? 'bg-brand/20 text-brand' : 'bg-white/5 text-white/40'}`}>
-                      {alreadyMatchedTxs.length}
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('excluded')}
-                    className={`flex-1 md:flex-none px-4 sm:px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 ${activeTab === 'excluded' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'text-white/40 hover:text-white hover:bg-white/5'
-                      }`}
-                  >
-                    Excluded
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${activeTab === 'excluded' ? 'bg-black/20 text-white' : 'bg-white/5 text-white/40'}`}>
-                      {excludedTxs.length}
-                    </span>
-                  </button>
+              <div className="sticky-tabs flex flex-col md:flex-row md:items-center gap-6 mb-8 -mx-4 px-4 md:mx-0">
+                <div className="flex glass-panel p-1.5 rounded-2xl border border-white/10 shadow-2xl w-full md:w-auto overflow-x-auto no-scrollbar relative">
+                  {[
+                    { id: 'review', label: 'For review', count: toReviewTxs.length, accent: 'brand-accent' },
+                    { id: 'matched', label: 'Categorized', count: alreadyMatchedTxs.length, accent: 'brand' },
+                    { id: 'excluded', label: 'Excluded', count: excludedTxs.length, accent: 'rose-500' }
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id as any)}
+                      className={`relative flex-1 md:flex-none px-6 py-2.5 rounded-xl text-sm font-black transition-all duration-500 flex items-center justify-center gap-2 group/tab select-none ${activeTab === tab.id ? 'text-white' : 'text-white/30 hover:text-white/60'
+                        }`}
+                    >
+                      {activeTab === tab.id && (
+                        <motion.div
+                          layoutId="activeTab"
+                          className={`absolute inset-0 rounded-xl bg-white/[0.08] border border-white/10 shadow-[0_4px_20px_-1px_rgba(0,0,0,0.5)]`}
+                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        />
+                      )}
+                      <span className="relative z-10 flex items-center gap-2">
+                        {tab.label}
+                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-black transition-colors ${activeTab === tab.id ? `bg-${tab.accent}/20 text-${tab.accent}` : 'bg-white/5 text-white/40'
+                          }`}>
+                          {tab.count}
+                        </span>
+                      </span>
+                    </button>
+                  ))}
                 </div>
 
                 <div className="h-[1px] md:hidden bg-white/5" />
@@ -516,21 +527,77 @@ function DashboardContent() {
 
                 {currentTabTransactions.length === 0 && (
                   <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="col-span-full py-20 flex flex-col items-center justify-center glass-panel"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="col-span-full py-24 flex flex-col items-center justify-center glass-panel border border-white/5 text-center px-10 relative overflow-hidden"
                   >
-                    <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${activeTab === 'review' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-brand/10 text-brand'}`}>
-                      {activeTab === 'review' ? <ShieldCheck size={40} /> : <Building2 size={40} />}
-                    </div>
-                    <h3 className="text-2xl font-bold mb-2">
-                      {activeTab === 'review' ? 'All Caught Up!' : 'No Matches Found'}
+                    <div className="absolute inset-0 bg-gradient-to-b from-brand/10 to-transparent opacity-30" />
+
+                    {/* Shimmering background glow */}
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.1, 0.2, 0.1]
+                      }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                      className="absolute w-[500px] h-[500px] bg-brand/20 blur-[100px] rounded-full -z-10"
+                    />
+
+                    <motion.div
+                      initial={{ y: 0 }}
+                      animate={{
+                        y: [-10, 10, -10],
+                        boxShadow: activeTab === 'review' ? [
+                          "0 0 0px 0px rgba(0,223,216,0)",
+                          "0 0 50px 10px rgba(0,223,216,0.1)",
+                          "0 0 0px 0px rgba(0,223,216,0)"
+                        ] : "none"
+                      }}
+                      transition={{
+                        y: { duration: 6, repeat: Infinity, ease: "easeInOut" },
+                        boxShadow: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+                      }}
+                      className={`w-28 h-28 rounded-[2.5rem] flex items-center justify-center mb-8 relative z-10 ${activeTab === 'review' ? 'bg-brand/10 border border-brand/20 text-brand' : 'bg-white/5 border border-white/10 text-white/40'}`}
+                    >
+                      {activeTab === 'review' ? (
+                        <div className="relative">
+                          <ShieldCheck size={56} className="drop-shadow-[0_0_12px_rgba(0,223,216,0.5)]" />
+                          <motion.div
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.8, type: "spring", stiffness: 200 }}
+                            className="absolute -top-1 -right-1 w-8 h-8 bg-brand-accent rounded-full border-4 border-[#020405] flex items-center justify-center shadow-lg"
+                          >
+                            <Check size={16} className="text-[#020405] stroke-[4]" />
+                          </motion.div>
+                        </div>
+                      ) : <Building2 size={56} />}
+                    </motion.div>
+
+                    <h3 className="text-4xl font-black mb-3 relative z-10 tracking-tight">
+                      {activeTab === 'review' ? 'Perfectly Sync’d' : 'Nothing To Show'}
                     </h3>
-                    <p className="text-white/40">
+                    <p className="text-white/40 max-w-sm relative z-10 text-lg leading-relaxed font-medium">
                       {activeTab === 'review'
-                        ? "You've cleared all pending transactions for today."
-                        : "No transactions were automatically matched by QuickBooks."}
+                        ? "You've crushed your bookkeeping goal. Every transaction is accounted for and matched with precision."
+                        : "We couldn't find any historical records matching this specific filter."}
                     </p>
+
+                    {activeTab === 'review' && (
+                      <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 1.2, type: "spring" }}
+                        className="mt-12 group"
+                      >
+                        <div className="relative">
+                          <div className="absolute inset-0 bg-brand/40 blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
+                          <div className="relative px-8 py-3 rounded-2xl bg-brand/5 border border-brand/20 text-brand text-[10px] font-black uppercase tracking-[0.3em] backdrop-blur-md">
+                            AI Performance: Peak Efficiency
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
                   </motion.div>
                 )}
               </div>
@@ -538,13 +605,51 @@ function DashboardContent() {
           </BentoGrid>
         </main>
 
-        <footer className="mt-24 border-t border-white/5 pt-12 text-center">
+        <footer className="mt-24 border-t border-white/5 pt-12 pb-32 md:pb-12 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.52.0</span></p>
+          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.52.0</span></p>
         </footer>
+
+        {/* Mobile Bottom Nav */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-6 pb-6 pt-2 bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none">
+          <div className="glass-panel py-2 px-3 sm:px-6 flex items-center justify-between border-white/10 shadow-2xl pointer-events-auto backdrop-blur-xl">
+            <Link href="/dashboard" className="bottom-nav-item active">
+              <Home size={22} />
+              <span className="text-[9px] font-bold">Home</span>
+            </Link>
+
+            <Link href="/analytics" className="bottom-nav-item">
+              <PieChart size={22} />
+              <span className="text-[9px] font-bold">Insights</span>
+            </Link>
+
+            <button
+              onClick={() => sync()}
+              disabled={loading}
+              className="w-12 h-12 bg-brand rounded-full flex items-center justify-center shadow-xl shadow-brand/40 border-4 border-[#020405] active:scale-95 transition-transform"
+            >
+              <Zap size={20} className={loading ? 'animate-spin' : ''} />
+            </button>
+
+            <Link href="/profile" className="bottom-nav-item">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-2 flex items-center justify-center min-w-[50px] min-h-[50px] overflow-hidden">
+                {user?.imageUrl ? (
+                  <img
+                    src={user.imageUrl}
+                    alt="Profile"
+                    className="w-full h-full object-cover rounded-xl"
+                  />
+                ) : (
+                  <User size={22} className="text-white/40" />
+                )}
+              </div>
+              <span className="text-[9px] font-bold mt-1 text-white/40">Profile</span>
+            </Link>
+          </div>
+        </div>
 
       </div>
     </SubscriptionGuard>
