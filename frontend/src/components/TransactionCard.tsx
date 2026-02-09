@@ -308,7 +308,19 @@ export default function TransactionCard({
                                 ? "bg-brand-accent/10 border-brand-accent/30 shadow-[0_0_10px_-2px_var(--glow-brand)]"
                                 : "bg-brand-accent/5 border-brand-accent/10 group-hover/ai-module:border-brand-accent/30"
                                 }`}>
-                                <Sparkles size={14} className="text-brand-accent" />
+                                <motion.div
+                                    animate={{
+                                        scale: [1, 1.2, 1],
+                                        opacity: [0.8, 1, 0.8]
+                                    }}
+                                    transition={{
+                                        duration: 2,
+                                        repeat: Infinity,
+                                        ease: "easeInOut"
+                                    }}
+                                >
+                                    <Sparkles size={14} className="text-brand-accent" />
+                                </motion.div>
                             </div>
                             <div className="space-y-2 pt-0.5">
                                 {tx.vendor_reasoning && (
@@ -464,7 +476,20 @@ export default function TransactionCard({
                             }}
                             className="flex-1 bg-[#061a18] border border-brand-accent/10 hover:border-brand-accent/40 rounded-xl flex items-center justify-center text-brand-trend font-bold text-[10px] uppercase tracking-[0.15em] transition-all active:scale-95 group/ai hover:bg-[#0a2825] hover:shadow-[0_0_25px_-10px_var(--glow-brand)]"
                         >
-                            <Sparkles size={14} className="mr-2 text-brand-accent group-hover/ai:rotate-12 group-hover/ai:scale-110 transition-transform" />
+                            <motion.div
+                                animate={{
+                                    scale: [1, 1.2, 1],
+                                    opacity: [0.8, 1, 0.8]
+                                }}
+                                transition={{
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    ease: "easeInOut"
+                                }}
+                                className="mr-2"
+                            >
+                                <Sparkles size={14} className="text-brand-accent" />
+                            </motion.div>
                             {isAnalyzing ? "..." : "AI Analyze"}
                         </button>
 
