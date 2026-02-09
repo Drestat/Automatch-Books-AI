@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.52.3 - FIX: TAX STRATEGY BOX STYLING
+# v3.52.4 - UI: MOBILE NAV REFACTOR
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.
@@ -73,13 +73,13 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.52.3"}
+    return {"status": "ok", "version": "3.52.4"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.52.3",
+        "version": "3.52.4",
         "status": "ready"
     }
 

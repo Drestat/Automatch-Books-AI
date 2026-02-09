@@ -613,43 +613,25 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.52.3</span></p>
+          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.52.4</span></p>
         </footer>
 
         {/* Mobile Bottom Nav */}
         <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-6 pb-6 pt-2 bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none">
-          <div className="glass-panel py-2 px-3 sm:px-6 flex items-center justify-between border-white/10 shadow-2xl pointer-events-auto backdrop-blur-xl">
-            <Link href="/dashboard" className="bottom-nav-item active">
-              <Home size={22} />
+          <div className="glass-panel py-3 px-6 flex items-center justify-around border-white/10 shadow-2xl pointer-events-auto backdrop-blur-xl">
+            <Link href="/dashboard" className="flex flex-col items-center gap-1 opacity-100 text-brand">
+              <Home size={20} />
               <span className="text-[9px] font-bold">Home</span>
             </Link>
 
-            <Link href="/analytics" className="bottom-nav-item">
-              <PieChart size={22} />
+            <Link href="/analytics" className="flex flex-col items-center gap-1 opacity-40 text-white hover:opacity-100 transition-opacity">
+              <PieChart size={20} />
               <span className="text-[9px] font-bold">Insights</span>
             </Link>
 
-            <button
-              onClick={() => sync()}
-              disabled={loading}
-              className="w-12 h-12 bg-brand rounded-full flex items-center justify-center shadow-xl shadow-brand/40 border-4 border-[#020405] active:scale-95 transition-transform"
-            >
-              <Zap size={20} className={loading ? 'animate-spin' : ''} />
-            </button>
-
-            <Link href="/profile" className="bottom-nav-item">
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-2 flex items-center justify-center min-w-[50px] min-h-[50px] overflow-hidden">
-                {user?.imageUrl ? (
-                  <img
-                    src={user.imageUrl}
-                    alt="Profile"
-                    className="w-full h-full object-cover rounded-xl"
-                  />
-                ) : (
-                  <User size={22} className="text-white/40" />
-                )}
-              </div>
-              <span className="text-[9px] font-bold mt-1 text-white/40">Profile</span>
+            <Link href="/profile" className="flex flex-col items-center gap-1 opacity-40 text-white hover:opacity-100 transition-opacity">
+              <User size={20} />
+              <span className="text-[9px] font-bold">Profile</span>
             </Link>
           </div>
         </div>
