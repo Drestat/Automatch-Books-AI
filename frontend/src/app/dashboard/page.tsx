@@ -281,11 +281,11 @@ function DashboardContent() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="flex flex-col items-end gap-5"
           >
-            {/* Unified Command Bar (Desktop only, scrolling) */}
+            {/* Unified Command Bar (Scrolling) */}
             {profile && (
-              <div className="hidden lg:flex items-center btn-glass border-white/5 bg-white/[0.03] backdrop-blur-3xl shadow-2xl rounded-[20px] p-1.5 tactile-item mb-1">
-                {/* Navigation Links */}
-                <div className="flex items-center gap-1 sm:gap-2 mr-4 ml-2 border-r border-white/10 pr-4">
+              <div className="flex items-center btn-glass border-white/5 bg-white/[0.03] backdrop-blur-3xl shadow-2xl rounded-[20px] p-1.5 tactile-item mb-1">
+                {/* Navigation Links (Desktop only) */}
+                <div className="hidden lg:flex items-center gap-1 sm:gap-2 mr-4 ml-2 border-r border-white/10 pr-4">
                   <Link href="/dashboard" title="Home" className="p-2 rounded-xl text-brand transition-all hover:bg-brand/10">
                     <Home size={18} />
                   </Link>
@@ -297,8 +297,8 @@ function DashboardContent() {
                   </Link>
                 </div>
 
-                {/* Token Status */}
-                <div className="flex items-center gap-4 px-3 py-1.5 bg-brand-accent/5 rounded-[14px]">
+                {/* Token Status (Visible on all devices) */}
+                <div className="flex items-center gap-3 sm:gap-4 px-3 py-1.5 bg-brand-accent/5 rounded-[14px]">
                   <div className="p-1.5 rounded-lg bg-brand-accent/10">
                     <Coins size={14} className="text-brand-accent" />
                   </div>
@@ -567,7 +567,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.53.7</span></p>
+          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.53.8</span></p>
         </footer>
 
         {/* Mobile/Tablet Bottom Nav */}
