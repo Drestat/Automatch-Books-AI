@@ -301,56 +301,6 @@ function DashboardContent() {
               </button>
             )}
 
-            {/* Account Filter */}
-            {isConnected && accounts.length > 0 && !isDemo && (
-              <div className="relative group/filter">
-                <button
-                  aria-label="Filter Transactions by Account"
-                  className={`btn-glass px-5 py-3.5 flex items-center gap-2.5 border-white/10 hover:border-brand-accent/30 hover:bg-white/5 text-sm transition-all duration-300 ${selectedAccounts.length > 0 ? 'text-brand-accent border-brand-accent/20' : 'text-white/70'}`}
-                >
-                  <Filter size={18} className={selectedAccounts.length > 0 ? 'text-brand-accent' : 'text-white/40'} aria-hidden="true" />
-                  <span className={selectedAccounts.length > 0 ? 'text-brand-accent font-bold' : 'font-semibold'}>{selectedAccounts.length > 0 ? `${selectedAccounts.length} Filtered` : 'Filter'}</span>
-                </button>
-                {/* Dropdown */}
-                <div className="absolute top-full right-0 mt-2 w-64 glass-panel border border-white/10 rounded-2xl shadow-2xl overflow-hidden hidden group-hover/filter:block z-50 bg-[#020405]/95 backdrop-blur-2xl">
-                  <div className="p-2 space-y-1">
-                    {accounts.map(acc => (
-                      <div
-                        key={acc.id}
-                        className={`w-full text-left px-4 py-3 rounded-xl text-xs flex items-center justify-between transition-colors group/acc cursor-pointer ${selectedAccounts.includes(acc.id) ? 'bg-brand/10 text-brand' : 'hover:bg-white/5 text-white/60'}`}
-                        onClick={() => toggleAccount(acc.id)}
-                      >
-                        <span className="flex-1 truncate font-medium">
-                          {acc.nickname || acc.name}
-                        </span>
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const newName = window.prompt("Rename this account (Nickname):", acc.nickname || acc.name);
-                              if (newName) updateBankNickname(acc.id, newName);
-                            }}
-                            aria-label={`Rename account ${acc.nickname || acc.name}`}
-                            className="opacity-0 group-hover/acc:opacity-100 hover:text-white transition-opacity text-white/30"
-                          >
-                            <Edit2 size={12} aria-hidden="true" />
-                          </button>
-                          {selectedAccounts.includes(acc.id) && <div className="w-2 h-2 rounded-full bg-brand shadow-[0_0_8px_var(--color-brand)]" />}
-                        </div>
-                      </div>
-                    ))}
-                    {selectedAccounts.length > 0 && (
-                      <button
-                        onClick={() => setSelectedAccounts([])}
-                        className="w-full text-center py-3 text-xs text-brand hover:text-brand-accent border-t border-white/5 mt-2 font-bold tracking-wide uppercase"
-                      >
-                        Clear Filters
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
 
             <Link href="/analytics" onClick={() => track('nav_analytics', {}, user?.id)}>
               <button
@@ -613,7 +563,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.52.6</span></p>
+          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.52.7</span></p>
         </footer>
 
         {/* Mobile Bottom Nav */}
