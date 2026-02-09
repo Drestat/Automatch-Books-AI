@@ -310,8 +310,7 @@ export default function TransactionCard({
                                 }`}>
                                 <motion.div
                                     animate={{
-                                        scale: [1, 1.2, 1],
-                                        opacity: [0.8, 1, 0.8]
+                                        opacity: [0.5, 1, 0.5]
                                     }}
                                     transition={{
                                         duration: 2,
@@ -478,8 +477,7 @@ export default function TransactionCard({
                         >
                             <motion.div
                                 animate={{
-                                    scale: [1, 1.2, 1],
-                                    opacity: [0.8, 1, 0.8]
+                                    opacity: [0.5, 1, 0.5]
                                 }}
                                 transition={{
                                     duration: 2,
