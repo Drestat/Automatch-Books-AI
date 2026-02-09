@@ -353,6 +353,50 @@ function DashboardContent() {
 
             {/* Transactions List */}
             <div className="md:col-span-3 mt-8">
+
+              {/* Horizontal Account Filter Bar */}
+              {isConnected && accounts.length > 0 && !isDemo && (
+                <div className="mb-8 -mx-4 px-4 md:mx-0 overflow-hidden">
+                  <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2 pt-1 px-1">
+                    <div className="flex-shrink-0 text-white/30 text-[9px] uppercase font-black tracking-[0.2em] mr-2 flex items-center gap-2">
+                      <Building2 size={12} className="text-white/20" />
+                      <span className="opacity-50">Filter Accounts</span>
+                    </div>
+                    {accounts.map(acc => {
+                      const isSelected = selectedAccounts.includes(acc.id);
+                      return (
+                        <button
+                          key={acc.id}
+                          onClick={() => toggleAccount(acc.id)}
+                          className={`flex-shrink-0 px-5 py-2.5 rounded-2xl border text-xs font-bold transition-all duration-300 flex items-center gap-3 group relative overflow-hidden ${isSelected
+                              ? 'border-brand/40 bg-brand/10 text-brand shadow-[0_0_20px_rgba(0,223,216,0.15)] ring-1 ring-brand/20'
+                              : 'border-white/5 bg-white/[0.02] text-white/40 hover:border-white/10 hover:bg-white/[0.04] hover:text-white/70'
+                            }`}
+                        >
+                          <div className={`w-2 h-2 rounded-full transition-all duration-500 ${isSelected ? 'bg-brand shadow-[0_0_8px_var(--color-brand)] scale-110' : 'bg-white/10 group-hover:bg-white/30'}`} />
+                          <span className="truncate max-w-[150px]">{acc.nickname || acc.name}</span>
+                          {isSelected && (
+                            <motion.div
+                              layoutId="activeAccountRing"
+                              className="absolute inset-0 border border-brand/20 rounded-2xl"
+                              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
+                    {selectedAccounts.length > 0 && (
+                      <button
+                        onClick={() => setSelectedAccounts([])}
+                        className="flex-shrink-0 px-4 py-2.5 rounded-2xl border border-rose-500/20 bg-rose-500/5 text-rose-500 text-[10px] font-black uppercase tracking-wider hover:bg-rose-500/10 transition-all hover:scale-105 active:scale-95 ml-2"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8 -mx-4 px-4 md:mx-0">
                 <div className="flex glass-panel p-1.5 rounded-2xl border border-white/5 bg-[#020405]/60 backdrop-blur-xl shadow-2xl w-full md:w-auto overflow-x-auto no-scrollbar relative">
                   {[
@@ -541,7 +585,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.53.1</span></p>
+          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.53.2</span></p>
         </footer>
 
         {/* Mobile/Tablet Bottom Nav */}
