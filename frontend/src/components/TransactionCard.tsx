@@ -133,38 +133,38 @@ export default function TransactionCard({
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.005, y: -2 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="glass-card overflow-hidden group w-full mb-6 ring-1 ring-white/10 hover:ring-brand-accent/40 transition-all duration-500"
+            className="glass-card overflow-hidden group w-full mb-3 ring-1 ring-white/10 hover:ring-brand-accent/40 transition-all duration-500"
         >
-            <div className="p-5 md:p-8 relative z-10">
+            <div className="p-4 md:p-5 relative z-10">
                 {/* 1. High-Fidelity Header */}
-                <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8">
-                    <div className="flex gap-4 sm:gap-6 items-start">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-4">
+                    <div className="flex gap-3 sm:gap-4 items-start">
                         {/* Date & Time */}
-                        <div className="text-white shrink-0 min-w-[3.5rem]">
-                            <h4 className="text-base sm:text-lg font-black tracking-tight leading-none uppercase">
+                        <div className="text-white shrink-0 min-w-[3rem]">
+                            <h4 className="text-sm sm:text-base font-black tracking-tight leading-none uppercase">
                                 {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(tx.date))}
                             </h4>
-                            <p className="text-[10px] sm:text-sm font-black text-white/40 uppercase mt-1 leading-none">
+                            <p className="text-[9px] sm:text-[10px] font-black text-white/40 uppercase mt-1 leading-none">
                                 {new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }).format(new Date(tx.date))}
                             </p>
                         </div>
 
                         {/* Payee Identity */}
                         <div className="min-w-0">
-                            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-tight sm:leading-none break-words">
+                            <h2 className="text-lg sm:text-xl font-black text-white tracking-tight leading-tight sm:leading-none break-words">
                                 {tx.payee || tx.suggested_payee || "Unassigned"}
                             </h2>
-                            <p className="text-[10px] sm:text-xs font-medium text-white/30 mt-2 line-clamp-2 sm:line-clamp-none">
-                                {(!tx.description || tx.description.trim() === '') ? "No bank description at the moment" : tx.description}
+                            <p className="text-[10px] font-medium text-white/30 mt-1 line-clamp-1 sm:line-clamp-none">
+                                {(!tx.description || tx.description.trim() === '') ? "No bank description" : tx.description}
                             </p>
                         </div>
                     </div>
 
                     {/* Right Side: Confidence & Amount */}
-                    <div className="flex items-center justify-between w-full sm:w-auto gap-4 sm:gap-4 mt-2 sm:mt-0 pt-4 sm:pt-0 border-t border-white/5 sm:border-0">
+                    <div className="flex items-center justify-between w-full sm:w-auto gap-3 sm:gap-4 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t border-white/5 sm:border-0">
                         {/* Confidence Circle (esk) */}
                         <motion.div
-                            className="relative w-12 h-12 flex items-center justify-center"
+                            className="relative w-10 h-10 flex items-center justify-center"
                             animate={tx.confidence > 0.9 ? {
                                 filter: ["drop-shadow(0 0 2px var(--color-brand-accent))", "drop-shadow(0 0 8px var(--color-brand-accent))", "drop-shadow(0 0 2px var(--color-brand-accent))"],
                             } : {}}
@@ -172,87 +172,87 @@ export default function TransactionCard({
                         >
                             <svg className="absolute inset-0 w-full h-full -rotate-90">
                                 <circle
-                                    cx="24"
-                                    cy="24"
-                                    r="20"
+                                    cx="20"
+                                    cy="20"
+                                    r="16"
                                     fill="none"
                                     stroke="currentColor"
                                     strokeWidth="2.5"
                                     className="text-white/5"
                                 />
                                 <motion.circle
-                                    cx="24"
-                                    cy="24"
-                                    r="20"
+                                    cx="20"
+                                    cy="20"
+                                    r="16"
                                     fill="none"
                                     stroke="currentColor"
                                     strokeWidth="2.5"
-                                    strokeDasharray="125.66"
-                                    initial={{ strokeDashoffset: 125.66 }}
-                                    animate={{ strokeDashoffset: 125.66 * (1 - tx.confidence) }}
+                                    strokeDasharray="100.53"
+                                    initial={{ strokeDashoffset: 100.53 }}
+                                    animate={{ strokeDashoffset: 100.53 * (1 - tx.confidence) }}
                                     transition={{ duration: 1.5, ease: "circOut" }}
                                     className="text-brand-accent"
                                 />
                             </svg>
-                            <span className="text-[12px] font-black text-brand-accent relative z-10">{Math.round(tx.confidence * 100)}%</span>
+                            <span className="text-[10px] font-black text-brand-accent relative z-10">{Math.round(tx.confidence * 100)}%</span>
                         </motion.div>
 
-                        <span className="text-2xl font-black text-white/90 ml-2">
+                        <span className="text-xl font-black text-white/90 ml-1">
                             {tx.amount === 0 ? '' : (isExpense ? '-' : '+')} {Math.abs(tx.amount).toLocaleString('en-US', { style: 'currency', currency: tx.currency })}
                         </span>
                     </div>
                 </div>
 
                 {/* 2. Bento Grid Selectors */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                     {/* Payee Hub */}
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-1.5">
                         <div className="flex items-center justify-between px-1">
-                            <span className="text-[10px] uppercase tracking-widest font-bold text-white/40">Payee</span>
+                            <span className="text-[9px] uppercase tracking-widest font-bold text-white/40">Payee</span>
                             {tx.suggested_payee && (
                                 <button
                                     onClick={() => onPayeeChange && onPayeeChange(tx.id, tx.suggested_payee!)}
-                                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-brand-accent/5 border border-brand-accent/20 text-brand-accent text-[9px] font-bold uppercase hover:bg-brand-accent/10 transition-all"
+                                    className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-brand-accent/5 border border-brand-accent/20 text-brand-accent text-[8px] font-bold uppercase hover:bg-brand-accent/10 transition-all"
                                 >
-                                    <Sparkles size={10} /> Suggested: {tx.suggested_payee}
+                                    <Sparkles size={8} /> Suggested: {tx.suggested_payee}
                                 </button>
                             )}
                         </div>
                         <div
                             onClick={() => setIsEditingPayee(true)}
-                            className="bg-white/5 border border-white/5 rounded-2xl p-4 hover:bg-white/[0.08] hover:border-white/10 transition-all cursor-pointer group/selector backdrop-blur-md"
+                            className="bg-white/5 border border-white/5 rounded-xl p-3 hover:bg-white/[0.08] hover:border-white/10 transition-all cursor-pointer group/selector backdrop-blur-md"
                         >
                             <div className="flex items-center justify-between">
-                                <p className="text-sm font-semibold text-white/90 truncate mr-2">
+                                <p className="text-xs sm:text-sm font-semibold text-white/90 truncate mr-2">
                                     {tx.payee || tx.suggested_payee || "Select Payee"}
                                 </p>
-                                <Edit2 size={14} className="opacity-0 -translate-x-2 group-hover/selector:opacity-50 group-hover/selector:translate-x-0 transition-all text-white/50" />
+                                <Edit2 size={12} className="opacity-0 -translate-x-2 group-hover/selector:opacity-50 group-hover/selector:translate-x-0 transition-all text-white/50" />
                             </div>
                         </div>
                     </div>
 
                     {/* Category Hub */}
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-1.5">
                         <div className="flex items-center justify-between px-1">
-                            <span className="text-[10px] uppercase tracking-widest font-bold text-white/40">Category</span>
+                            <span className="text-[9px] uppercase tracking-widest font-bold text-white/40">Category</span>
                             {!tx.category_name && tx.suggested_category_name && (
                                 <button
                                     onClick={() => onCategoryChange && onCategoryChange(tx.id, tx.suggested_category_id || '', tx.suggested_category_name)}
-                                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-brand-accent/5 border border-brand-accent/20 text-brand-accent text-[9px] font-bold uppercase hover:bg-brand-accent/10 transition-all"
+                                    className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-brand-accent/5 border border-brand-accent/20 text-brand-accent text-[8px] font-bold uppercase hover:bg-brand-accent/10 transition-all"
                                 >
-                                    <Sparkles size={10} /> Suggested: {tx.suggested_category_name}
+                                    <Sparkles size={8} /> Suggested: {tx.suggested_category_name}
                                 </button>
                             )}
                         </div>
                         <div
                             onClick={() => setIsEditingCategory(true)}
-                            className="bg-white/5 border border-white/5 rounded-2xl p-4 hover:bg-white/[0.08] hover:border-white/10 transition-all cursor-pointer group/selector backdrop-blur-md"
+                            className="bg-white/5 border border-white/5 rounded-xl p-3 hover:bg-white/[0.08] hover:border-white/10 transition-all cursor-pointer group/selector backdrop-blur-md"
                         >
                             <div className="flex items-center justify-between">
-                                <p className="text-sm font-semibold text-white/90 truncate mr-2">
+                                <p className="text-xs sm:text-sm font-semibold text-white/90 truncate mr-2">
                                     {tx.category_name || tx.suggested_category_name || "Select Category"}
                                 </p>
-                                <Edit2 size={14} className="opacity-0 -translate-x-2 group-hover/selector:opacity-50 group-hover/selector:translate-x-0 transition-all text-white/50" />
+                                <Edit2 size={12} className="opacity-0 -translate-x-2 group-hover/selector:opacity-50 group-hover/selector:translate-x-0 transition-all text-white/50" />
                             </div>
                         </div>
                     </div>
@@ -270,7 +270,7 @@ export default function TransactionCard({
                         opacity: { delay: 0.2 },
                         backgroundColor: { duration: 2, repeat: Infinity, ease: "linear" }
                     }}
-                    className={`border border-white/5 rounded-3xl p-6 mb-6 relative overflow-hidden group/ai-module ${isAnalyzing ? 'ring-1 ring-brand-accent/20' : ''}`}
+                    className={`border border-white/5 rounded-2xl p-4 mb-4 relative overflow-hidden group/ai-module ${isAnalyzing ? 'ring-1 ring-brand-accent/20' : ''}`}
                 >
                     {isAnalyzing && (
                         <motion.div
@@ -280,26 +280,26 @@ export default function TransactionCard({
                             className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-accent/10 to-transparent skew-x-12"
                         />
                     )}
-                    <div className="flex items-center gap-3 mb-5">
-                        <span className="text-[10px] font-bold text-brand-accent uppercase tracking-widest opacity-80 group-hover/ai-module:opacity-100 transition-opacity">AI Analysis</span>
+                    <div className="flex items-center gap-2 mb-3">
+                        <span className="text-[9px] font-bold text-brand-accent uppercase tracking-widest opacity-80 group-hover/ai-module:opacity-100 transition-opacity">AI Analysis</span>
                         <div className="h-[1px] flex-1 bg-white/5 group-hover/ai-module:bg-brand-accent/10 transition-colors" />
                     </div>
 
-                    <div className="space-y-5">
-                        <div className="flex gap-5">
-                            <div className="w-10 h-10 rounded-xl bg-brand-accent/5 flex items-center justify-center shrink-0 border border-brand-accent/10 group-hover/ai-module:border-brand-accent/30 transition-all">
-                                <Sparkles size={18} className="text-brand-accent" />
+                    <div className="space-y-3">
+                        <div className="flex gap-4">
+                            <div className="w-8 h-8 rounded-lg bg-brand-accent/5 flex items-center justify-center shrink-0 border border-brand-accent/10 group-hover/ai-module:border-brand-accent/30 transition-all">
+                                <Sparkles size={14} className="text-brand-accent" />
                             </div>
-                            <div className="space-y-3 pt-0.5">
+                            <div className="space-y-2 pt-0.5">
                                 {tx.vendor_reasoning && (
-                                    <p className="text-[13px] text-white/70 leading-normal font-medium max-w-2xl">
-                                        <span className="text-brand-accent/80 font-bold mr-2 text-[10px] uppercase tracking-wider">Vendor Match</span>
+                                    <p className="text-[11px] text-white/70 leading-normal font-medium max-w-2xl">
+                                        <span className="text-brand-accent/80 font-bold mr-2 text-[9px] uppercase tracking-wider">Vendor Match</span>
                                         {tx.vendor_reasoning}
                                     </p>
                                 )}
                                 {tx.category_reasoning && (
-                                    <p className="text-[13px] text-white/70 leading-normal font-medium max-w-2xl">
-                                        <span className="text-brand-accent/80 font-bold mr-2 text-[10px] uppercase tracking-wider">Category Logic</span>
+                                    <p className="text-[11px] text-white/70 leading-normal font-medium max-w-2xl">
+                                        <span className="text-brand-accent/80 font-bold mr-2 text-[9px] uppercase tracking-wider">Category Logic</span>
                                         {tx.category_reasoning}
                                     </p>
                                 )}
@@ -307,13 +307,13 @@ export default function TransactionCard({
                         </div>
 
                         {tx.tax_deduction_note && (
-                            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex gap-4 hover:bg-white/[0.04] transition-colors">
-                                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
-                                    <Info size={14} className="text-white/40" />
+                            <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex gap-3 hover:bg-white/[0.04] transition-colors">
+                                <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center shrink-0">
+                                    <Info size={12} className="text-white/40" />
                                 </div>
-                                <div className="flex flex-col gap-1">
-                                    <span className="text-[9px] font-bold text-brand-accent/60 uppercase tracking-widest">Tax Strategy</span>
-                                    <p className="text-[12px] text-white/60 leading-relaxed font-medium">
+                                <div className="flex flex-col gap-0.5">
+                                    <span className="text-[8px] font-bold text-brand-accent/60 uppercase tracking-widest">Tax Strategy</span>
+                                    <p className="text-[10px] text-white/60 leading-relaxed font-medium">
                                         {tx.tax_deduction_note}
                                     </p>
                                 </div>
@@ -327,35 +327,35 @@ export default function TransactionCard({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3 }}
-                    className="bg-white/[0.02] border border-white/5 rounded-3xl p-6 mb-8 group/collab hover:bg-white/[0.04] transition-colors"
+                    className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 mb-4 group/collab hover:bg-white/[0.04] transition-colors"
                 >
-                    <div className="flex items-center gap-3 mb-5">
-                        <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest group-hover/collab:text-white/50 transition-colors">Collaboration</span>
+                    <div className="flex items-center gap-2 mb-3">
+                        <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest group-hover/collab:text-white/50 transition-colors">Collaboration</span>
                         <div className="h-[1px] flex-1 bg-white/5 group-hover/collab:bg-white/10 transition-colors" />
                     </div>
 
-                    <div className="space-y-5">
+                    <div className="space-y-3">
                         <div className="relative">
                             <input
                                 type="text"
                                 defaultValue={tx.note || ''}
                                 placeholder="Add a collaborative note..."
-                                className="w-full bg-black/20 border border-white/5 rounded-xl px-5 py-3.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-brand-accent/30 transition-all font-medium focus:bg-black/40 focus:shadow-[0_0_15px_-5px_rgba(0,223,216,0.1)]"
+                                className="w-full bg-black/20 border border-white/5 rounded-lg px-4 py-2.5 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-brand-accent/30 transition-all font-medium focus:bg-black/40 focus:shadow-[0_0_15px_-5px_rgba(0,223,216,0.1)]"
                                 onBlur={(e) => {
                                     if (e.target.value !== (tx.note || '') && onNoteChange) {
                                         onNoteChange(tx.id, e.target.value);
                                     }
                                 }}
                             />
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20 pointer-events-none">
-                                <Edit2 size={14} className="text-white" />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-20 pointer-events-none">
+                                <Edit2 size={12} className="text-white" />
                             </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-2.5 items-center">
+                        <div className="flex flex-wrap gap-2 items-center">
                             {tx.tags && tx.tags.map((tag, i) => (
-                                <span key={i} className="px-3 py-1.5 rounded-lg bg-brand-accent/5 border border-brand-accent/15 text-[10px] text-brand-accent font-bold uppercase flex items-center gap-2 group/tag hover:bg-brand-accent/10 transition-all cursor-default">
-                                    <Tags size={10} /> {tag}
+                                <span key={i} className="px-2.5 py-1 rounded-md bg-brand-accent/5 border border-brand-accent/15 text-[9px] text-brand-accent font-bold uppercase flex items-center gap-1.5 group/tag hover:bg-brand-accent/10 transition-all cursor-default">
+                                    <Tags size={9} /> {tag}
                                     <button onClick={() => onTagRemove && onTagRemove(tx.id, tag)} className="hover:text-rose-400 opacity-40 hover:opacity-100 transition-opacity cursor-pointer p-0.5">×</button>
                                 </span>
                             ))}
@@ -363,61 +363,61 @@ export default function TransactionCard({
                                 <button
                                     key={`suggested-${i}`}
                                     onClick={() => onTagAdd && onTagAdd(tx.id, tag)}
-                                    className="px-3 py-1.5 rounded-lg bg-white/5 border border-dashed border-white/10 text-[10px] text-white/30 font-bold uppercase flex items-center gap-2 hover:border-brand-accent/30 hover:text-brand-accent transition-all hover:bg-brand-accent/5 backdrop-blur-sm"
+                                    className="px-2.5 py-1 rounded-md bg-white/5 border border-dashed border-white/10 text-[9px] text-white/30 font-bold uppercase flex items-center gap-1.5 hover:border-brand-accent/30 hover:text-brand-accent transition-all hover:bg-brand-accent/5 backdrop-blur-sm"
                                 >
-                                    <Sparkles size={10} /> {tag}
+                                    <Sparkles size={9} /> {tag}
                                 </button>
                             ))}
                             <button
                                 onClick={() => setIsAddingTag(true)}
-                                className="px-3 py-1.5 rounded-lg border border-dashed border-white/10 text-[10px] text-white/20 font-bold uppercase hover:bg-white/5 hover:text-white/50 transition-all flex items-center gap-1.5"
+                                className="px-2.5 py-1 rounded-md border border-dashed border-white/10 text-[9px] text-white/20 font-bold uppercase hover:bg-white/5 hover:text-white/50 transition-all flex items-center gap-1"
                             >
-                                <span className="text-sm leading-none">+</span> Tag
+                                <span className="text-xs leading-none">+</span> Tag
                             </button>
                         </div>
                     </div>
                 </motion.div>
 
                 {/* 5. Master Actions */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                     {/* Row 1: Actions & Icons */}
-                    <div className="flex gap-3 h-14">
+                    <div className="flex gap-2.5 h-10">
                         <button
                             onClick={() => fileInputRef.current?.click()}
                             disabled={isUploading}
-                            className={`flex-[3] sm:flex-[2] px-4 bg-[#061a18] border border-brand-accent/20 rounded-2xl flex items-center justify-center font-bold gap-2 sm:gap-3 text-brand-trend transition-all active:scale-95 hover:bg-[#0a2825] hover:border-brand-accent/40 hover:shadow-[0_0_20px_-5px_var(--glow-brand)]`}
+                            className={`flex-[3] sm:flex-[2] px-3 bg-[#061a18] border border-brand-accent/20 rounded-xl flex items-center justify-center font-bold gap-2 text-brand-trend transition-all active:scale-95 hover:bg-[#0a2825] hover:border-brand-accent/40 hover:shadow-[0_0_20px_-5px_var(--glow-brand)]`}
                         >
                             {isUploading ? (
-                                <div className="w-4 h-4 border-2 border-brand-accent border-t-transparent rounded-full animate-spin" />
+                                <div className="w-3 h-3 border-2 border-brand-accent border-t-transparent rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    <FilePlus size={18} />
-                                    <span className="text-[10px] sm:text-xs uppercase tracking-[0.15em] font-bold">Upload Receipt</span>
+                                    <FilePlus size={16} />
+                                    <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.1em] font-bold">Receipt</span>
                                 </>
                             )}
                         </button>
 
                         <IconButton
-                            icon={<SplitIcon size={18} />}
+                            icon={<SplitIcon size={16} />}
                             title="Split Transaction (Coming Soon)"
                         />
 
                         <IconButton
-                            icon={<Edit2 size={18} />}
+                            icon={<Edit2 size={16} />}
                             title="Edit Details"
                             onClick={() => setIsEditingPayee(true)}
                         />
 
                         {tx.is_excluded ? (
                             <IconButton
-                                icon={<CheckCircle2 size={18} />}
+                                icon={<CheckCircle2 size={16} />}
                                 title="Include Transaction"
                                 onClick={() => onInclude && onInclude(tx.id)}
                                 active={true}
                             />
                         ) : (
                             <IconButton
-                                icon={<SplitIcon size={18} className="rotate-45" />}
+                                icon={<SplitIcon size={16} className="rotate-45" />}
                                 title="Exclude Transaction"
                                 onClick={() => onExclude && onExclude(tx.id)}
                             />
@@ -425,7 +425,7 @@ export default function TransactionCard({
                     </div>
 
                     {/* Row 2: AI & Confirm */}
-                    <div className="flex gap-3 h-16">
+                    <div className="flex gap-2.5 h-10">
                         <button
                             onClick={async () => {
                                 if (onAnalyze) {
@@ -434,23 +434,23 @@ export default function TransactionCard({
                                     setIsAnalyzing(false);
                                 }
                             }}
-                            className="flex-1 bg-[#061a18] border border-brand-accent/10 hover:border-brand-accent/40 rounded-2xl flex items-center justify-center text-brand-trend font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 group/ai hover:bg-[#0a2825] hover:shadow-[0_0_25px_-10px_var(--glow-brand)]"
+                            className="flex-1 bg-[#061a18] border border-brand-accent/10 hover:border-brand-accent/40 rounded-xl flex items-center justify-center text-brand-trend font-bold text-[10px] uppercase tracking-[0.15em] transition-all active:scale-95 group/ai hover:bg-[#0a2825] hover:shadow-[0_0_25px_-10px_var(--glow-brand)]"
                         >
-                            <Sparkles size={16} className="mr-3 text-brand-accent group-hover/ai:rotate-12 group-hover/ai:scale-110 transition-transform" />
-                            {isAnalyzing ? "Analyzing..." : "Analyze with AI"}
+                            <Sparkles size={14} className="mr-2 text-brand-accent group-hover/ai:rotate-12 group-hover/ai:scale-110 transition-transform" />
+                            {isAnalyzing ? "..." : "AI Analyze"}
                         </button>
 
                         <button
                             onClick={handleAccept}
                             disabled={isSyncing}
-                            className="flex-1 bg-brand hover:brightness-110 rounded-2xl flex items-center justify-center text-white font-bold text-xs uppercase tracking-[0.2em] transition-all active:scale-95 shadow-xl shadow-brand/20 border border-white/10 group/confirm"
+                            className="flex-1 bg-brand hover:brightness-110 rounded-xl flex items-center justify-center text-white font-bold text-[10px] uppercase tracking-[0.15em] transition-all active:scale-95 shadow-xl shadow-brand/20 border border-white/10 group/confirm"
                         >
                             {isSyncing ? (
-                                <div className="w-4 h-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin" />
+                                <div className="w-3 h-3 border-2 border-white/80 border-t-transparent rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    <Check size={18} className="mr-3 group-hover/confirm:scale-110 transition-transform" />
-                                    Confirm Match
+                                    <Check size={16} className="mr-2 group-hover/confirm:scale-110 transition-transform" />
+                                    Confirm
                                 </>
                             )}
                         </button>
@@ -507,14 +507,14 @@ function IconButton({
             whileTap={{ scale: 0.95 }}
             onClick={onClick}
             disabled={loading}
-            className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all duration-300 ${active
+            className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all duration-300 ${active
                 ? 'bg-brand/20 text-brand border-brand/30 shadow-[0_0_15px_-5px_var(--glow-brand)]'
                 : 'bg-white/5 text-white/40 hover:text-white hover:bg-white/10 hover:border-white/20 border-white/5'
                 }`}
             title={title}
         >
             {loading ? (
-                <div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" />
             ) : icon}
         </motion.button>
     );
