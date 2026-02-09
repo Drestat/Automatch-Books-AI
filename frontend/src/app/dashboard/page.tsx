@@ -375,8 +375,7 @@ function DashboardContent() {
                   ))}
                 </div>
 
-                <div className="h-[1px] md:hidden bg-white/5" />
-                <div className="hidden md:block h-[1px] flex-1 bg-white/5" />
+                <div className="flex-1" />
 
                 <div className="flex gap-2.5">
                   <button
@@ -533,7 +532,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.52.8</span></p>
+          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.52.9</span></p>
         </footer>
 
         {/* Mobile/Tablet Bottom Nav */}
