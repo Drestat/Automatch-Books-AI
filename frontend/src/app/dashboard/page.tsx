@@ -235,6 +235,23 @@ function DashboardContent() {
     <SubscriptionGuard status={subscriptionStatus} daysRemaining={daysRemaining}>
       <div className="min-h-screen text-white selection:bg-brand selection:text-white pb-20">
 
+        {/* Sticky Token HUD */}
+        {profile && (
+          <div className="fixed top-4 right-6 sm:top-8 sm:right-12 z-[100] pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="btn-glass px-5 py-3 flex items-center gap-3 border-brand-accent/30 bg-[#020405]/80 backdrop-blur-2xl shadow-2xl pointer-events-auto rounded-2xl"
+            >
+              <Coins size={18} className="text-brand-accent" />
+              <div>
+                <p className="text-[9px] uppercase text-brand-accent/60 font-bold tracking-widest mb-0.5">Refill Status</p>
+                <p className="font-mono font-bold text-white/90 leading-none text-sm">{profile.token_balance.toLocaleString()} <span className="text-[10px] text-white/30">/ {profile.monthly_token_allowance.toLocaleString()}</span></p>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
         <AccountSelectorModal
           isOpen={showAccountModal}
           onClose={() => setShowAccountModal(false)}
@@ -279,15 +296,7 @@ function DashboardContent() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="flex md:flex-wrap gap-4 items-center overflow-x-auto pb-4 md:pb-0 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0"
           >
-            {profile && (
-              <div className="btn-glass px-5 py-3.5 flex items-center gap-3 border-brand-accent/20 bg-[#020405]/60 backdrop-blur-xl">
-                <Coins size={18} className="text-brand-accent" />
-                <div>
-                  <p className="text-[9px] uppercase text-brand-accent/60 font-bold tracking-widest mb-0.5">Tokens</p>
-                  <p className="font-mono font-bold text-white/90 leading-none text-sm">{profile.token_balance.toLocaleString()} <span className="text-[10px] text-white/30">/ {profile.monthly_token_allowance.toLocaleString()}</span></p>
-                </div>
-              </div>
-            )}
+            {/* Tokens are now handled by a sticky fixed overlay */}
 
             {/* Manage Accounts Button */}
             {(isConnected || isDemo) && (
@@ -344,7 +353,7 @@ function DashboardContent() {
 
             {/* Transactions List */}
             <div className="md:col-span-3 mt-8">
-              <div className="sticky-tabs flex flex-col md:flex-row md:items-center gap-6 mb-8 -mx-4 px-4 md:mx-0">
+              <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8 -mx-4 px-4 md:mx-0">
                 <div className="flex glass-panel p-1.5 rounded-2xl border border-white/5 bg-[#020405]/60 backdrop-blur-xl shadow-2xl w-full md:w-auto overflow-x-auto no-scrollbar relative">
                   {[
                     { id: 'review', label: 'For review', count: toReviewTxs.length, accent: 'brand-accent' },
@@ -532,7 +541,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.53.0</span></p>
+          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.53.1</span></p>
         </footer>
 
         {/* Mobile/Tablet Bottom Nav */}
