@@ -282,7 +282,7 @@ export default function TransactionCard({
                     }}
                     transition={{
                         opacity: { delay: 0.2 },
-                        backgroundColor: { duration: 2, repeat: Infinity, ease: "linear" },
+                        backgroundColor: isAnalyzing ? { duration: 2, repeat: Infinity, ease: "linear" } : { duration: 0.3 },
                         borderColor: { duration: 3, repeat: Infinity, ease: "easeInOut" }
                     }}
                     className={`border rounded-2xl p-4 mb-4 relative overflow-hidden group/ai-module`}
