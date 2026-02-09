@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.53.8 - UI: RESTORE MOBILE TOKEN VISIBILITY
+# v3.53.9 - UI: MOBILE HORIZONTAL OVERFLOW FIX
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.
@@ -73,13 +73,13 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.53.8"}
+    return {"status": "ok", "version": "3.53.9"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "3.53.8",
+        "version": "3.53.9",
         "status": "ready"
     }
 
