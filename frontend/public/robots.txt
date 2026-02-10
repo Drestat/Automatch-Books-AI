@@ -3,4 +3,4 @@ Disallow: /dashboard
 Disallow: /analytics
 Disallow: /api
 Allow: /
-Sitemap: https://automatchbooks.ai/sitemap.xml
+Sitemap: https://automatchbooksai.com/sitemap.xml

@@ -53,7 +53,9 @@ export default function PrivacyPage() {
                     <section>
                         <h2 className="text-2xl font-bold text-white mb-4">5. Contact</h2>
                         <p>
-                            Questions about your privacy? Reach out to us at <a href="mailto:privacy@automatchbooks.ai" className="text-brand hover:underline">privacy@automatchbooks.ai</a>.
+                            Questions about your privacy? Reach              <a href="mailto:support@automatchbooksai.com" className="text-brand hover:underline">
+                                support@automatchbooksai.com
+                            </a>.
                         </p>
                     </section>
                 </div>

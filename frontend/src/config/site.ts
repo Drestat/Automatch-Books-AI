@@ -1,8 +1,8 @@
 export const siteConfig = {
     name: "AutoMatch Books AI",
     description: "Seamlessly match and sync your bank transactions with QuickBooks Online using Gemini 3 Flash. Next-generation financial intelligence for modern businesses.",
-    url: "https://automatchbooks.ai",
-    ogImage: "https://automatchbooks.ai/og-image.png",
+    url: "https://automatchbooksai.com",
+    ogImage: "https://automatchbooksai.com/og-image.png",
     links: {
         twitter: "https://twitter.com/automatchbooks",
         github: "https://github.com/automatchbooks",

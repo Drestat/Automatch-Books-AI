@@ -50,7 +50,9 @@ export default function ContactPage() {
                                 </div>
                                 <div>
                                     <p className="font-bold text-white">Technical Support</p>
-                                    <a href="mailto:support@automatchbooks.ai" className="text-white/40 hover:text-brand transition-colors text-sm">support@automatchbooks.ai</a>
+                                    <a href="mailto:support@automatchbooksai.com" className="hover:text-white transition-colors">
+                                        support@automatchbooksai.com
+                                    </a>
                                 </div>
                             </div>
                         </div>

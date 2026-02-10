@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Andres" }],
   creator: 'Andres',
   publisher: 'AutoMatch Books AI',
-  metadataBase: new URL("https://automatchbooks.ai"),
+  metadataBase: new URL("https://automatchbooksai.com"),
   alternates: {
     canonical: '/',
   },

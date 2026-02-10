@@ -13,7 +13,9 @@ export default function Footer() {
                         <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center group-hover:scale-110 transition-transform">
                             <Sparkles className="text-white" size={16} aria-hidden="true" />
                         </div>
-                        <span className="font-bold tracking-tight text-lg">AutoMatch Books AI</span>
+                        <Link href="https://automatchbooksai.com" className="text-sm font-semibold tracking-wider text-white uppercase">
+                            AutoMatch Books AI
+                        </Link>
                     </Link>
                     <p className="text-white/40 max-w-xs leading-relaxed">
                         Revolutionizing financial intelligence with Gemini 3 Flash. Seamlessly matching your reality to your books.
