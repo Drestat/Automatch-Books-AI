@@ -48,7 +48,9 @@ interface Alias {
     vendor_name: string;
 }
 
-export default function RulesPage() {
+import { Suspense } from 'react';
+
+function RulesPageContent() {
     const { realmId, categories, vendors, showToast } = useQBO();
     const [activeTab, setActiveTab] = useState<'rules' | 'aliases'>('rules');
     const [rules, setRules] = useState<Rule[]>([]);
@@ -130,7 +132,7 @@ export default function RulesPage() {
     };
 
     const handleDeleteRule = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this rule?")) return;
+        if (typeof window !== 'undefined' && !window.confirm("Are you sure you want to delete this rule?")) return;
         try {
             const res = await fetch(`${API_BASE_URL}/rules/${id}?realm_id=${realmId}`, {
                 method: 'DELETE'
@@ -145,7 +147,7 @@ export default function RulesPage() {
     };
 
     const handleDeleteAlias = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this alias?")) return;
+        if (typeof window !== 'undefined' && !window.confirm("Are you sure you want to delete this alias?")) return;
         try {
             const res = await fetch(`${API_BASE_URL}/aliases/${id}?realm_id=${realmId}`, {
                 method: 'DELETE'
@@ -450,6 +452,18 @@ export default function RulesPage() {
 
             <Footer />
         </main>
+    );
+}
+
+export default function RulesPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-brand/20 border-t-brand rounded-full animate-spin" />
+            </div>
+        }>
+            <RulesPageContent />
+        </Suspense>
     );
 }
 
