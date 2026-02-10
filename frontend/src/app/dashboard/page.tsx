@@ -89,7 +89,8 @@ function DashboardContent() {
     includeTransaction,
     vendors,
     showTokenModal,
-    setShowTokenModal
+    setShowTokenModal,
+    splitTransaction
   } = useQBO();
 
   const [loading, setLoading] = useState(false); // Local loading for UI actions
@@ -293,8 +294,9 @@ function DashboardContent() {
                   <Link href="/dashboard" title="Home" className="p-2 rounded-xl text-brand transition-all hover:bg-brand/10">
                     <Home size={18} />
                   </Link>
-                  <Link href="/rules" title="Automation Rules" className="p-2 rounded-xl text-white/40 hover:text-white transition-all hover:bg-white/5">
+                  <Link href="/rules" title="Autonomous Rules Engine" className="p-2 rounded-xl text-white/40 hover:text-white transition-all hover:bg-white/5 group/nav relative">
                     <ShieldCheck size={18} />
+                    <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-black/80 border border-white/10 px-2 py-1 rounded text-[8px] font-bold uppercase tracking-widest opacity-0 group-hover/nav:opacity-100 transition-opacity whitespace-nowrap">Engine</span>
                   </Link>
                   <Link href="/analytics" title="Insights" className="p-2 rounded-xl text-white/40 hover:text-white transition-all hover:bg-white/5">
                     <PieChart size={18} />
@@ -424,7 +426,15 @@ function DashboardContent() {
                                 }
                               }
                             }}
-                            onExclude={excludeTransaction}
+                            onExclude={async (id) => {
+                              if (excludeTransaction) {
+                                await excludeTransaction(id);
+                                if (zenIndex >= sortedTransactions.length - 1) {
+                                  if (sortedTransactions.length === 1) setZenMode(false);
+                                  else setZenIndex(Math.max(0, sortedTransactions.length - 2));
+                                }
+                              }
+                            }}
                             onInclude={includeTransaction}
                             onUpdate={updateTransaction}
                             onReceiptUpload={uploadReceipt}
@@ -445,6 +455,30 @@ function DashboardContent() {
                             onTagRemove={async (txId, tag) => {
                               const currentTags = sortedTransactions[zenIndex].tags || [];
                               await updateTransaction(txId, { tags: currentTags.filter(t => t !== tag) });
+                            }}
+                            onSplit={splitTransaction}
+                            drag="x"
+                            dragConstraints={{ left: 0, right: 0 }}
+                            onDragEnd={async (_, info) => {
+                              const tx = sortedTransactions[zenIndex];
+                              if (info.offset.x > 100) {
+                                // Swipe Right -> Accept
+                                await approveMatch(tx.id);
+                                setSessionsApproved(s => s + 1);
+                                if (zenIndex >= sortedTransactions.length - 1) {
+                                  if (sortedTransactions.length === 1) setZenMode(false);
+                                  else setZenIndex(Math.max(0, sortedTransactions.length - 2));
+                                }
+                              } else if (info.offset.x < -100) {
+                                // Swipe Left -> Exclude
+                                if (excludeTransaction) {
+                                  await excludeTransaction(tx.id);
+                                  if (zenIndex >= sortedTransactions.length - 1) {
+                                    if (sortedTransactions.length === 1) setZenMode(false);
+                                    else setZenIndex(Math.max(0, sortedTransactions.length - 2));
+                                  }
+                                }
+                              }
                             }}
                           />
                         </motion.div>
@@ -600,6 +634,7 @@ function DashboardContent() {
                           await updateTransaction(txId, { tags: currentTags.filter(t => t !== tag) });
                         }}
                         onUpdate={updateTransaction}
+                        onSplit={splitTransaction}
                       />
                     </motion.div>
                   ))}
@@ -685,7 +720,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.61.0</span></p>
+          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v4.0.0</span></p>
         </footer>
 
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-6 pb-6 pt-2 bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none">
@@ -693,6 +728,10 @@ function DashboardContent() {
             <Link href="/dashboard" className="flex flex-col items-center gap-1 opacity-100 text-brand">
               <Home size={20} />
               <span className="text-[9px] font-bold">Home</span>
+            </Link>
+            <Link href="/rules" className="flex flex-col items-center gap-1 opacity-40 text-white hover:opacity-100 transition-opacity">
+              <ShieldCheck size={20} />
+              <span className="text-[9px] font-bold tracking-tight">Rules</span>
             </Link>
             <Link href="/analytics" className="flex flex-col items-center gap-1 opacity-40 text-white hover:opacity-100 transition-opacity">
               <PieChart size={20} />

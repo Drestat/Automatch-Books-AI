@@ -1,10 +1,11 @@
 "use client";
 
 import React from 'react';
-import { Check, Edit2, Info, ArrowUpRight, FilePlus, FileCheck, Tags, Split as SplitIcon, ExternalLink, CheckCircle2, Sparkles, Building2 } from 'lucide-react';
+import { Check, Edit2, Info, ArrowUpRight, FilePlus, FileCheck, Tags, Split as SplitIcon, ExternalLink, CheckCircle2, Sparkles, Building2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import VendorSelector from './VendorSelector';
 import CategorySelector from './CategorySelector';
+import SplitEditorModal from './SplitEditorModal';
 import StreamingText from './StreamingText';
 
 interface Split {
@@ -41,6 +42,8 @@ interface Transaction {
     status: string;
     reasoning: string;
     confidence: number;
+    potential_duplicate_id?: string;
+    duplicate_confidence?: number;
     is_split?: boolean;
     splits?: Split[];
     receipt_url?: string;
@@ -76,6 +79,10 @@ interface TransactionCardProps {
     onPayeeChange?: (txId: string, payee: string) => void;
     onNoteChange?: (txId: string, note: string) => void;
     onUpdate?: (txId: string, updates: Partial<Transaction>) => void;
+    onSplit?: (txId: string, splits: { category_name: string, amount: number, description: string }[]) => Promise<any>;
+    drag?: boolean | "x" | "y";
+    dragConstraints?: any;
+    onDragEnd?: (event: any, info: any) => void;
 }
 
 export default function TransactionCard({
@@ -93,7 +100,11 @@ export default function TransactionCard({
     onInclude,
     onPayeeChange,
     onNoteChange,
-    onUpdate
+    onUpdate,
+    onSplit,
+    drag,
+    dragConstraints,
+    onDragEnd
 }: TransactionCardProps) {
     const expenseTypes = ['Purchase', 'Expense', 'Check', 'CreditCard', 'BillPayment', 'Cash', 'CreditCardCharge'];
     // QBO sends positive TotalAmt for expenses. Identify by type OR if manually negative.
@@ -104,7 +115,9 @@ export default function TransactionCard({
     const [isUploading, setIsUploading] = React.useState(false);
     const [isEditingCategory, setIsEditingCategory] = React.useState(false);
     const [isEditingPayee, setIsEditingPayee] = React.useState(false);
+    const [isEditingSplits, setIsEditingSplits] = React.useState(false);
     const [isAddingTag, setIsAddingTag] = React.useState(false);
+    const [showReceipt, setShowReceipt] = React.useState(false);
     const [isSyncing, setIsSyncing] = React.useState(false);
     const [newTag, setNewTag] = React.useState("");
     const [payeeInput, setPayeeInput] = React.useState(tx.payee || "");
@@ -135,13 +148,36 @@ export default function TransactionCard({
     return (
         <motion.div
             layout
+            drag={drag}
+            dragConstraints={dragConstraints}
+            onDragEnd={onDragEnd}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ scale: 1.005, y: -2 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="glass-card overflow-hidden group w-full mb-3 ring-1 ring-white/10 hover:ring-brand-accent/40 transition-all duration-500"
+            className="glass-card overflow-hidden group w-full mb-3 ring-1 ring-white/10 hover:ring-brand-accent/40 transition-all duration-500 cursor-grab active:cursor-grabbing"
         >
             <div className="p-4 md:p-5 relative z-10">
+                {/* 0. Duplicate Warning Banner */}
+                {(tx.status === 'potential_duplicate' || (tx.duplicate_confidence && tx.duplicate_confidence > 0.8)) && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        className="mb-4 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 flex items-start gap-3 overflow-hidden"
+                    >
+                        <div className="p-1.5 bg-amber-500/20 rounded-lg text-amber-500 shrink-0">
+                            <Info size={16} />
+                        </div>
+                        <div>
+                            <h4 className="text-xs font-bold text-amber-500 uppercase tracking-wider mb-1">Potential Duplicate Detected</h4>
+                            <p className="text-[10px] text-amber-200/60 leading-relaxed font-medium">
+                                We found a similar transaction {tx.potential_duplicate_id ? `(ID: ${tx.potential_duplicate_id})` : ''} with {Math.round((tx.duplicate_confidence || 0) * 100)}% confidence.
+                                Confirming this may create a double entry.
+                            </p>
+                        </div>
+                    </motion.div>
+                )}
+
                 {/* 1. High-Fidelity Header */}
                 {/* 1. High-Fidelity Header */}
                 <div className="flex flex-row justify-between items-start gap-3 mb-4">
@@ -446,25 +482,36 @@ export default function TransactionCard({
                 <div className="space-y-3">
                     {/* Row 1: Actions & Icons */}
                     <div className="flex gap-2.5 h-10">
-                        <button
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isUploading}
-                            className={`flex-[3] sm:flex-[2] px-3 bg-[#061a18] border border-brand-accent/20 rounded-xl flex items-center justify-center font-bold gap-2 text-brand-trend transition-all active:scale-95 hover:bg-[#0a2825] hover:border-brand-accent/40 hover:shadow-[0_0_20px_-5px_var(--glow-brand)]`}
-                        >
-                            {isUploading ? (
-                                <div className="w-3 h-3 border-2 border-brand-accent border-t-transparent rounded-full animate-spin" />
-                            ) : (
-                                <>
-                                    <FilePlus size={16} />
-                                    <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.1em] font-bold">Receipt</span>
-                                </>
-                            )}
-                        </button>
+                        {tx.receipt_url ? (
+                            <button
+                                onClick={() => setShowReceipt(true)}
+                                className={`flex-[3] sm:flex-[2] px-3 bg-[#061a18] border border-brand/40 rounded-xl flex items-center justify-center font-bold gap-2 text-brand transition-all active:scale-95 hover:bg-[#0a2825] hover:border-brand/60 hover:shadow-[0_0_20px_-5px_var(--glow-brand)]`}
+                            >
+                                <FileCheck size={16} />
+                                <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.1em] font-bold">View Receipt</span>
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={isUploading}
+                                className={`flex-[3] sm:flex-[2] px-3 bg-[#061a18] border border-brand-accent/20 rounded-xl flex items-center justify-center font-bold gap-2 text-brand-trend transition-all active:scale-95 hover:bg-[#0a2825] hover:border-brand-accent/40 hover:shadow-[0_0_20px_-5px_var(--glow-brand)]`}
+                            >
+                                {isUploading ? (
+                                    <div className="w-3 h-3 border-2 border-brand-accent border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                    <>
+                                        <FilePlus size={16} />
+                                        <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.1em] font-bold">Receipt</span>
+                                    </>
+                                )}
+                            </button>
+                        )}
 
                         <IconButton
                             icon={<SplitIcon size={16} />}
                             title="Split Details"
                             active={tx.is_split}
+                            onClick={() => setIsEditingSplits(true)}
                         />
 
                         <IconButton
@@ -519,15 +566,24 @@ export default function TransactionCard({
 
                         <button
                             onClick={handleAccept}
-                            disabled={isSyncing}
-                            className="flex-1 bg-brand hover:brightness-110 rounded-xl flex items-center justify-center text-white font-bold text-[10px] uppercase tracking-[0.15em] transition-all active:scale-95 shadow-xl shadow-brand/20 border border-white/10 group/confirm"
+                            disabled={isSyncing || (tx.status === 'potential_duplicate' && !tx.forced_review)}
+                            className={`flex-1 rounded-xl flex items-center justify-center font-bold text-[10px] uppercase tracking-[0.15em] transition-all active:scale-95 shadow-xl border border-white/10 group/confirm ${tx.status === 'potential_duplicate' && !tx.forced_review
+                                ? 'bg-white/5 text-white/20 cursor-not-allowed border-white/5'
+                                : 'bg-brand hover:brightness-110 text-white shadow-brand/20'
+                                }`}
                         >
                             {isSyncing ? (
                                 <div className="w-3 h-3 border-2 border-white/80 border-t-transparent rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    <Check size={16} className="mr-2 group-hover/confirm:scale-110 transition-transform" />
-                                    Confirm
+                                    {tx.status === 'potential_duplicate' && !tx.forced_review ? (
+                                        <>Review Needed</>
+                                    ) : (
+                                        <>
+                                            <Check size={16} className="mr-2 group-hover/confirm:scale-110 transition-transform" />
+                                            Confirm
+                                        </>
+                                    )}
                                 </>
                             )}
                         </button>
@@ -558,6 +614,60 @@ export default function TransactionCard({
                     availableCategories={availableCategories}
                     currentCategory={tx.category_name || tx.suggested_category_name}
                 />
+
+                <SplitEditorModal
+                    isOpen={isEditingSplits}
+                    onClose={() => setIsEditingSplits(false)}
+                    totalAmount={tx.amount}
+                    currency={tx.currency}
+                    availableCategories={availableCategories}
+                    initialSplits={tx.splits}
+                    transactionDescription={tx.description || ""}
+                    onSave={async (splits) => {
+                        if (onSplit) await onSplit(tx.id, splits);
+                    }}
+                />
+
+                <AnimatePresence>
+                    {showReceipt && (
+                        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setShowReceipt(false)}
+                                className="absolute inset-0 bg-black/95 backdrop-blur-xl"
+                            />
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                                animate={{ scale: 1, opacity: 1, y: 0 }}
+                                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                                className="relative max-w-[90vw] max-h-[90vh] bg-[#020405] border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col"
+                            >
+                                <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                                    <div>
+                                        <h3 className="text-sm font-black text-white/90">Receipt Image</h3>
+                                        <p className="text-[10px] text-white/30 font-medium">{tx.payee || "Transaction"}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowReceipt(false)}
+                                        className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all"
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                                <div className="flex-1 overflow-auto p-4 flex items-center justify-center bg-black/40">
+                                    <img
+                                        src={tx.receipt_url}
+                                        alt="Receipt"
+                                        className="max-w-full h-auto rounded-xl shadow-lg ring-1 ring-white/10"
+                                    />
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
             </div>
         </motion.div >

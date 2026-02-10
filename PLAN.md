@@ -144,6 +144,8 @@ graph TD
 - [x] **Rules & Aliases API**: Implemented management endpoints for Natural Language Rules and Vendor Aliasing.
 - [x] **Optimistic Sync Engine**: Decoupled QBO synchronization from the UI for "Zero-Wait" performance.
 - [x] **Auto-Accept Core**: Implemented background worker for high-confidence automated categorization.
+- [x] **Advanced UX**: Implemented "Tinder for Taxes" swipe review, visual counters, and receipt lightbox.
+- [x] **Duplicate Detection**: Implemented "Duplicate Shield" warning in UI for safer matching.
 
 ---
 
@@ -309,10 +311,10 @@ We are doing what they cannot.
 
 ## 9. QC Audit Findings (2026-02-03)
 ### Critical (Must Fix)
-- [ ] **UI/UX**: Navigation Header is missing on `/pricing` and `/features` pages. Only visible on Landing Page.
+- [x] **UI/UX**: Navigation Header is missing on `/pricing` and `/features` pages. Only visible on Landing Page.
 - [ ] **Auth**: Dashboard (`/dashboard`) is inaccessible for testing without a bypass or test account (Clerk in keyless dev mode).
-- [ ] **Config**: Live Environment is using Clerk Development Keys (console warning observed).
-- [ ] **Polish**: Version string (`f3.10.2`) is visible next to the logo on the landing page (likely debug artifact).
+- [x] **Config**: Live Environment is using Clerk Development Keys (console warning observed).
+- [x] **Polish**: Version string (`f3.10.2`) is visible next to the logo on the landing page (likely debug artifact).
 - [ ] **E2E Testing**: No automated mechanism to bypass Clerk Auth for full user flow auditing.
 
 ### Observations

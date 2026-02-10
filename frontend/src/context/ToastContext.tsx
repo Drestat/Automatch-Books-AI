@@ -16,10 +16,11 @@ interface Toast {
     message: string;
     type: ToastType;
     action?: ToastAction;
+    duration?: number;
 }
 
 interface ToastContextType {
-    showToast: (message: string, type?: ToastType, action?: ToastAction) => void;
+    showToast: (message: string, type?: ToastType, action?: ToastAction, duration?: number) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -27,12 +28,11 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
     const [toasts, setToasts] = useState<Toast[]>([]);
 
-    const showToast = useCallback((message: string, type: ToastType = 'info', action?: ToastAction) => {
+    const showToast = useCallback((message: string, type: ToastType = 'info', action?: ToastAction, customDuration?: number) => {
         const id = Math.random().toString(36).substring(2, 9);
-        setToasts(prev => [...prev, { id, message, type, action }]);
+        const duration = customDuration || (action ? 10000 : 5000);
+        setToasts(prev => [...prev, { id, message, type, action, duration }]);
 
-        // Extended duration for toasts with actions
-        const duration = action ? 8000 : 5000;
 
         setTimeout(() => {
             setToasts(prev => prev.filter(t => t.id !== id));
@@ -56,9 +56,18 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
                             exit={{ opacity: 0, scale: 0.8, x: 20 }}
                             className="pointer-events-auto"
                         >
-                            <div className={`glass-panel px-6 py-4 flex items-center gap-4 min-w-[320px] shadow-2xl border-white/10 ${toast.type === 'success' ? 'bg-emerald-500/10' :
+                            <div className={`glass-panel px-6 py-4 flex items-center gap-4 min-w-[320px] shadow-2xl border-white/10 relative overflow-hidden ${toast.type === 'success' ? 'bg-emerald-500/10' :
                                 toast.type === 'error' ? 'bg-rose-500/10' : 'bg-white/5'
                                 }`}>
+                                {/* Progress Bar */}
+                                {toast.action && (
+                                    <motion.div
+                                        initial={{ width: "100%" }}
+                                        animate={{ width: "0%" }}
+                                        transition={{ duration: (toast.duration || 10000) / 1000, ease: "linear" }}
+                                        className="absolute bottom-0 left-0 h-[0.5px] bg-brand shadow-[0_0_10px_var(--color-brand)]"
+                                    />
+                                )}
                                 <div className={
                                     toast.type === 'success' ? 'text-emerald-400' :
                                         toast.type === 'error' ? 'text-rose-400' : 'text-brand'
