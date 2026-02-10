@@ -7,74 +7,13 @@ import { Sparkles, ShieldCheck, Zap, ArrowRight, CheckCircle } from 'lucide-reac
 import { SignedIn, SignedOut } from '@clerk/nextjs';
 import Footer from '@/components/Footer';
 import Navbar from '@/components/Navbar';
+import { JsonLd } from '@/components/JsonLd';
 
 export default function LandingPage() {
     return (
         <div className="min-h-screen text-white selection:bg-brand selection:text-white">
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
-                        "@context": "https://schema.org",
-                        "@graph": [
-                            {
-                                "@type": "WebSite",
-                                "@id": "https://automatchbooks.ai/#website",
-                                "url": "https://automatchbooks.ai",
-                                "name": "AutoMatch Books AI",
-                                "description": "AI-Powered QuickBooks Automation",
-                                "publisher": { "@id": "https://automatchbooks.ai/#organization" },
-                                "inLanguage": "en-US"
-                            },
-                            {
-                                "@type": "Organization",
-                                "@id": "https://automatchbooks.ai/#organization",
-                                "name": "AutoMatch Books AI",
-                                "url": "https://automatchbooks.ai",
-                                "logo": {
-                                    "@type": "ImageObject",
-                                    "url": "https://automatchbooks.ai/logo.png",
-                                    "width": 512,
-                                    "height": 512
-                                },
-                                "sameAs": ["https://twitter.com/automatchbooks"]
-                            },
-                            {
-                                "@type": "SoftwareApplication",
-                                "@id": "https://automatchbooks.ai/#application",
-                                "name": "AutoMatch Books AI",
-                                "operatingSystem": "Cloud-based (Web)",
-                                "applicationCategory": "FinanceApplication",
-                                "description": "AI-powered transaction matching for QuickBooks Online. Automate bookkeeping with 99% accuracy using Gemini 3 Flash.",
-                                "publisher": { "@id": "https://automatchbooks.ai/#organization" },
-                                "offers": {
-                                    "@type": "Offer",
-                                    "price": "0",
-                                    "priceCurrency": "USD",
-                                    "availability": "https://schema.org/InStock"
-                                },
-                                "aggregateRating": {
-                                    "@type": "AggregateRating",
-                                    "ratingValue": "4.9",
-                                    "ratingCount": "120"
-                                }
-                            },
-                            {
-                                "@type": "BreadcrumbList",
-                                "@id": "https://automatchbooks.ai/#breadcrumbs",
-                                "itemListElement": [
-                                    {
-                                        "@type": "ListItem",
-                                        "position": 1,
-                                        "name": "Home",
-                                        "item": "https://automatchbooks.ai"
-                                    }
-                                ]
-                            }
-                        ]
-                    })
-                }}
-            />
+            <JsonLd />
+
             {/* Navigation */}
             <Navbar />
 

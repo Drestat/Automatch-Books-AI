@@ -3,6 +3,7 @@
 import React, { useState, Suspense, useEffect } from 'react';
 import Link from 'next/link';
 import TransactionCard from '@/components/TransactionCard';
+import { GamificationHUD } from '@/components/GamificationHUD';
 import { BentoGrid } from '@/components/BentoGrid';
 import { BentoTile } from '@/components/BentoTile';
 import { useQBO } from '@/hooks/useQBO';
@@ -304,6 +305,10 @@ function DashboardContent() {
                   <Link href="/profile" title="Profile" className="p-2 rounded-xl text-white/40 hover:text-white transition-all hover:bg-white/5">
                     <User size={18} />
                   </Link>
+                </div>
+
+                <div className="mr-4">
+                  <GamificationHUD />
                 </div>
 
                 <div className="flex items-center gap-3 sm:gap-4 px-3 py-1.5 bg-brand-accent/5 rounded-[14px]">
@@ -720,7 +725,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v4.0.0</span></p>
+          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v4.1.0</span></p>
         </footer>
 
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-6 pb-6 pt-2 bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none">

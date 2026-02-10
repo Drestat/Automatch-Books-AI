@@ -237,15 +237,24 @@ class AnalysisService:
 
         # Handle Splits
         splits_data = analysis.get('splits', [])
+        
+        # IDEMPOTENCY FIX: Clear existing splits first (if any) to prevent duplication on re-run
+        if splits_data or tx.splits:
+            # Look for existing splits bound to this tx and delete them
+            self.db.query(TransactionSplit).filter(TransactionSplit.transaction_id == tx.id).delete()
+            tx.is_split = False # Reset flag, will set to True if new splits exist
+
         if splits_data:
             tx.is_split = True
             for s in splits_data:
                 s_cat_name = s['category']
-                s_cat_match = next((c for c in categories_obj if c.name == s_cat_name), None)
+                # Use dict lookup (O(1)) instead of iteration
+                s_cat_match = categories_obj.get(s_cat_name)
+                
                 if not s_cat_match:
                     sf_match = process.extractOne(s_cat_name, category_list, scorer=fuzz.WRatio)
                     if sf_match and sf_match[1] > 80:
-                        s_cat_match = next((c for c in categories_obj if c.name == sf_match[0]), None)
+                        s_cat_match = categories_obj.get(sf_match[0])
                 
                 split = TransactionSplit(
                     transaction_id=tx.id,
@@ -256,7 +265,7 @@ class AnalysisService:
                 if s_cat_match:
                     split.category_id = s_cat_match.id
                 
-                tx.splits.append(split)
+                self.db.add(split)
         
         self.db.add(tx)
 

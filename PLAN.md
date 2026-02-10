@@ -295,7 +295,40 @@ We are doing what they cannot.
 
 ---
 
-## 8. Technical Debt & optimization Log
+## 8. The Hook (Gamification & Retention)
+
+> [!TIP]
+> **Core Action**: "Review & Accept". The user's primary habit is turning chaos (Review Feed) into order (Matched/Categorized).
+> **The Reward**: "Financial Clarity". The peace of mind of having a clean set of books.
+
+### 8.1 The "Clarity Streak" (Variable Reward: Tribe & Self)
+*   **Trigger**: Opening the app.
+*   **Action**: Categorizing at least **1 transaction**.
+*   **Variable Reward**:
+    *   **Visual**: A "Streak Flame" that grows in intensity/color (Blue -> Purple -> Gold) as days stack.
+    *   **Loss Aversion**: "Don't break the chain." A missed day grays out the flame.
+    *   **Recovery**: A "Streak Freeze" item can be earned (rare drop) to save a broken streak.
+
+### 8.2 The "Clarity Score" (XP & Leveling)
+Instead of arbitrary "points," we use **AP (Accounting Points)** and **Levels** that reflect professional mastery.
+*   **XP Actions**:
+    *   **+10 AP**: Categorize a transaction.
+    *   **+50 AP**: Create a new Rule (Asset building).
+    *   **+100 AP**: Clean "Inbox Zero" (Clear entire feed).
+*   **Levels**:
+    *   Lvl 1: **Bookkeeper** (0 AP)
+    *   Lvl 10: **Controller** (2,500 AP)
+    *   Lvl 50: **CFO** (15,000 AP) - Unlocks "Dark Mode" Gold Theme.
+
+### 8.3 The Compulsion Loop (Daily Workflow)
+1.  **Notification (8:00 AM)**: "4 new transactions from similar vendors found. Quick sort?" (Curiosity Gap).
+2.  **Action**: User swipes left/right on mobile or confident-clicks on desktop.
+3.  **Feedback**: Sound + Haptic "Thud" + Visual "Paper Stack" diminishing (Progress visualization).
+4.  **Completion**: "Inbox Zero" screen with specific daily summary stats ("You saved $450 in deductions today").
+
+---
+
+## 9. Technical Debt & optimization Log
 ### Critical (Must Fix)
 - [x] **Security**: `backend/app/main.py` has `allow_origins=["*"]`. This must be restricted to frontend domains.
 - [x] **Dead Code**: `backend/app/services/ai_service.py` is unused and redundant.
@@ -309,7 +342,7 @@ We are doing what they cannot.
 - [x] **Refactor**: `SyncService` is becoming a "God Class". Logic for Receipts, Sync, and AI should fundamentally be separated.
 - [ ] **PgBouncer Deployment**: External connection pooler configured in code, needs cloud deployment (see `architecture/pgbouncer_setup.md`) - *Deferred to Infrastructure Sprint*
 
-## 9. QC Audit Findings (2026-02-03)
+## 10. QC Audit Findings (2026-02-03)
 ### Critical (Must Fix)
 - [x] **UI/UX**: Navigation Header is missing on `/pricing` and `/features` pages. Only visible on Landing Page.
 - [ ] **Auth**: Dashboard (`/dashboard`) is inaccessible for testing without a bypass or test account (Clerk in keyless dev mode).
@@ -321,7 +354,7 @@ We are doing what they cannot.
 - **Public Pages**: Landing page, Pricing, and Features load correctly (except missing header).
 - **Backend**: API docs at `http://localhost:8000/docs` are accessible and healthy.
 
-## 10. Bug Fixes & Enhancements (2026-02-08)
+## 11. Bug Fixes & Enhancements (2026-02-08)
 ### Fixed
 - [x] **Receipt Upload to QBO**: Fixed receipt attachment failing due to invalid entity type mapping. Added `_map_to_qbo_attachable_type()` function to properly map internal transaction types (Payment, CreditCard, etc.) to valid QBO Attachable EntityRef types (Purchase, BillPayment, etc.).
   - **Issue**: Receipts uploaded via `/upload-receipt` were stored in DB but not synced to QuickBooks on transaction approval.

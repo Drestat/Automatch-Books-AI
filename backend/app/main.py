@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v4.0.0 - PRO MAX UI + PLATFORM STABILITY
+# v4.1.0 - MOBILE HAPTICS + AI SPLITS + ARCHITECTURAL CLEANUP
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.
@@ -21,6 +21,7 @@ async def lifespan(app: FastAPI):
     try:
         from app.db.session import engine, Base
         from sqlalchemy import text
+        from app.models.gamification import UserGamificationStats, GamificationEvent
         
         # Ensure tables exist (for new tables)
         Base.metadata.create_all(bind=engine)
@@ -65,7 +66,7 @@ app = FastAPI(
 # CORS - Allow All for Production Resilience
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

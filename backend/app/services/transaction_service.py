@@ -118,7 +118,19 @@ class TransactionService:
             self.db.commit()
             
             self._log("approve", "transaction", 1, "success", {"tx_id": tx_id, "is_split": tx.is_split})
-            return {"status": "success", "message": "Transaction synchronized with QuickBooks"}
+            
+            # [Gamification] Award XP for Categorization
+            try:
+                from app.services.gamification_service import GamificationService
+                gs = GamificationService(self.db)
+                # "categorize" action yields 10 XP
+                xp_result = gs.add_xp(self.connection.user_id, "categorize", {"tx_id": tx_id})
+                print(f"🎮 [Gamification] {self.connection.user_id} gained XP: {xp_result}")
+            except Exception as gx:
+                print(f"⚠️ [Gamification] Failed to award XP: {gx}")
+
+            return {"status": "success", "message": "Transaction synchronized with QuickBooks", "xp_earned": 10}
+
 
         except Exception as e:
             print(f"❌ [SyncToQBO] Write-Back Failed: {e}")
@@ -266,7 +278,108 @@ class TransactionService:
                 else:
                     raise e
             else:
-                raise e
+                # GUARDIAN LOGIC: Handle Object Not Found (610) / Deleted / Voided
+                # If QBO says "Object Not Found", it means the ID changed or was deleted.
+                # We attempt to find a replacement by Amount + Approximate Date.
+                is_not_found = False
+                try:
+                    if hasattr(e, "response") and e.response is not None:
+                        err_body = e.response.text
+                        if "Object Not Found" in err_body or "610" in err_body:
+                            is_not_found = True
+                except:
+                    pass
+
+                if is_not_found:
+                    print(f"🛡️ [Guardian] Transaction {tx.id} is GHOSTED in QBO (Object Not Found). Hunting for replacement...")
+                    
+                    # 1. Search for replacement in QBO
+                    # Range: +/- 3 days? Or just match Amount exactly?
+                    # Let's try exact Amount for now since date might shift slightly on posting.
+                    query = f"select * from Purchase where TotalAmt = '{tx.amount}'"
+                    result = await self.client.query(query)
+                    candidates = result.get("QueryResponse", {}).get("Purchase", [])
+                    
+                    # Filter candidates by Date (strict +/- 4 days)
+                    from datetime import timedelta
+                    target_date = tx.date.date()
+                    found_replacement = None
+                    
+                    for cand in candidates:
+                        # Parse QBO date (YYYY-MM-DD)
+                        # Minimal parsing
+                        c_date_str = cand.get("TxnDate")
+                        if not c_date_str: continue
+                        
+                        y, m, d = map(int, c_date_str.split('-'))
+                        c_date = datetime(y, m, d).date()
+                        
+                        diff = abs((c_date - target_date).days)
+                        if diff <= 4:
+                            found_replacement = cand
+                            break
+
+                    if found_replacement:
+                        new_id = found_replacement["Id"]
+                        print(f"✅ [Guardian] Found Replacement: {new_id} (Date: {found_replacement['TxnDate']}). Heal/Swizzle...")
+                        
+                        # DELETE any existing local transaction that might have the new ID (to avoid PK collision)
+                        existing_new = self.db.query(Transaction).filter(
+                            Transaction.id == new_id, 
+                            Transaction.realm_id == self.connection.realm_id
+                        ).first()
+                        
+                        if existing_new:
+                            print(f"🗑️ [Guardian] Deleting collision record {new_id} to make way for swap.")
+                            # We might want to migrate splits from existing_new? 
+                            # Usually existing_new is just a raw feed item, so safe to nuke.
+                            self.db.delete(existing_new)
+                            self.db.commit()
+
+                        # Heal the current transaction (update PK)
+                        # Direct SQL update to avoid ORM complexity with PKs
+                        from sqlalchemy import text
+                        self.db.execute(
+                            text("UPDATE transactions SET id = :new_id, sync_token = :new_token WHERE id = :old_id"),
+                            {"new_id": new_id, "new_token": found_replacement.get("SyncToken"), "old_id": tx.id}
+                        )
+                        # Also update splits
+                        self.db.execute(
+                             text("UPDATE transaction_splits SET transaction_id = :new_id WHERE transaction_id = :old_id"),
+                             {"new_id": new_id, "old_id": tx.id}
+                        )
+                        self.db.commit()
+                        
+                        # Update object in memory
+                        tx.id = new_id
+                        tx.sync_token = found_replacement.get("SyncToken")
+                        
+                        print(f"🔄 [Guardian] Retry update with NEW ID: {tx.id}")
+                        
+                        # Recursive retry
+                        updated = await self.client.update_purchase(
+                            purchase_id=tx.id,
+                            category_id=cat_id,
+                            category_name=cat_name,
+                            sync_token=tx.sync_token,
+                            entity_type=tx.transaction_type or "Purchase",
+                            entity_ref=entity_ref,
+                            payment_type=payment_type,
+                            txn_status="Closed",
+                            global_tax_calculation=global_tax,
+                            existing_line_override=existing_line,
+                            tags=tx.tags,
+                            note=tx.note,
+                            description=tx.description,
+                            append_memo=append_memo,
+                            deposit_to_account_ref=tx.raw_json.get("DepositToAccountRef") if tx.raw_json else None,
+                            from_account_ref=tx.raw_json.get("FromAccountRef") if tx.raw_json else None
+                        )
+                    else:
+                        print(f"❌ [Guardian] No replacement found. Transaction is truly lost.")
+                        raise e
+                else:
+                    raise e
         
         if updated.get("SyncToken"):
             tx.sync_token = updated.get("SyncToken")

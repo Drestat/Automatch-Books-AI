@@ -7,6 +7,7 @@ from uuid import UUID
 from app.api.v1.endpoints.qbo import get_db
 from app.api.deps import verify_subscription
 from app.models.qbo import ClassificationRule, QBOConnection
+from app.services.gamification_service import GamificationService
 
 router = APIRouter()
 
@@ -59,6 +60,16 @@ def create_rule(
     db.add(rule)
     db.commit()
     db.refresh(rule)
+    db.refresh(rule)
+    
+    # [Gamification] Award XP for Rule Creation (Asset Building)
+    try:
+        gs = GamificationService(db)
+        # "rule_create" action yields 50 XP
+        gs.add_xp(connection.user_id, "rule_create", {"rule_id": str(rule.id)})
+    except Exception as e:
+        print(f"⚠️ [Gamification] Failed to award XP for rule creation: {e}")
+        
     return rule
 
 @router.delete("/{rule_id}")

@@ -260,7 +260,7 @@ def update_transaction(realm_id: str, tx_id: str, update: TransactionUpdate, db:
     return tx
 
 @router.post("/upload-receipt")
-def upload_receipt(
+async def upload_receipt(
     realm_id: str,
     tx_id: Optional[str] = Query(None),
     file: UploadFile = File(...),
@@ -282,8 +282,10 @@ def upload_receipt(
         file_path = os.path.join(upload_dir, f"{realm_id}_{safe_filename}")
         
         print(f"📂 [Upload] Saving to {file_path}")
+        # Async read/write
+        content = await file.read() 
         with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+            buffer.write(content)
         
         from app.services.token_service import TokenService
         
@@ -299,9 +301,7 @@ def upload_receipt(
         
         token_service.deduct_tokens(connection.user_id, receipt_cost, reason="Receipt Scan")
 
-        with open(file_path, "rb") as f:
-            content = f.read()
-        
+        # Reuse content read above
         mime_type = file.content_type or "image/jpeg"
         print(f"📊 [Upload] Detected MIME: {mime_type}")
         
@@ -309,6 +309,7 @@ def upload_receipt(
             print("🚀 [Upload] Triggering Modal analysis...")
             from modal_app import process_receipt_modal
             
+            # Note: calling remote() is blocking, but acceptable in this context given the architecture
             result = process_receipt_modal.remote(realm_id, content, file.filename, mime_type=mime_type)
             
             if "error" in result:
@@ -337,6 +338,7 @@ def upload_receipt(
         match_id = tx_id or result.get('match_id')
         extracted = result.get('extracted')
         
+        match = None
         # If manual tx_id was provided, ensure it's updated (service might not have found it if provided manually)
         if tx_id:
             match = db.query(Transaction).filter(Transaction.id == tx_id).first()
@@ -346,6 +348,17 @@ def upload_receipt(
                 match.receipt_data = extracted
                 db.add(match)
                 db.commit()
+
+        # REACTIVE SYNC: If transaction is already QBO-matched, push the receipt logic immediately
+        if match and (match.is_qbo_matched or match.status == 'approved'):
+            print(f"🔄 [Upload] Transaction {match.id} is already matched. Triggering QBO attachment upload...")
+            try:
+                service = TransactionService(db, connection)
+                await service._upload_receipt(match)
+                print(f"✅ [Upload] Immediate attachment sync successful for {match.id}")
+            except Exception as e:
+                print(f"⚠️ [Upload] Immediate attachment sync failed: {e}")
+                # Don't fail the request, just log it
 
         return {
             "message": "Receipt processed",

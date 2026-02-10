@@ -195,7 +195,7 @@ export default function TransactionCard({
                         {/* Payee Identity */}
                         <div className="min-w-0 pr-2">
                             <h2 className="text-lg sm:text-xl font-black text-white tracking-tight leading-tight sm:leading-none break-words line-clamp-2">
-                                {tx.payee || tx.suggested_payee || "Unassigned"}
+                                {tx.payee || tx.suggested_payee || (tx.description && tx.description.length < 30 ? tx.description : "Unassigned")}
                             </h2>
                             <p className="text-[10px] font-medium text-white/30 mt-1 line-clamp-1">
                                 {(!tx.description || tx.description.trim() === '') ? "No bank description" : tx.description}

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import qbo, transactions, stripe_routes, analytics, users, qbo_webhooks, accounts, rules, aliases
+from app.api.v1.endpoints import qbo, transactions, stripe_routes, analytics, users, qbo_webhooks, accounts, rules, aliases, gamification
 
 api_router = APIRouter()
 api_router.include_router(qbo.router, prefix="/qbo", tags=["qbo"])
@@ -11,3 +11,4 @@ api_router.include_router(users.router, prefix="/users", tags=["users"])
 api_router.include_router(qbo_webhooks.router, prefix="/qbo-webhooks", tags=["qbo-webhooks"])
 api_router.include_router(rules.router, prefix="/rules", tags=["rules"])
 api_router.include_router(aliases.router, prefix="/aliases", tags=["aliases"])
+api_router.include_router(gamification.router, prefix="/gamification", tags=["gamification"])
