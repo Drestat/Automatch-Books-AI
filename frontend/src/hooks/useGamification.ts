@@ -20,7 +20,8 @@ export function useGamification() {
             const token = await getToken();
             if (!token) return;
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/gamification/stats`, {
+            const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run';
+            const res = await fetch(`${baseUrl}/api/v1/gamification/stats`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
