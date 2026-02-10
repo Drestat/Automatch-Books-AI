@@ -78,27 +78,40 @@ export default function AdminAnalyticsPage() {
     }
 
     return (
-        <div className="min-h-screen py-12 px-6 lg:px-12 max-w-7xl mx-auto">
-            <header className="mb-12 flex items-center justify-between">
-                <div>
-                    <h1 className="text-4xl font-black mb-2">Admin Analytics</h1>
-                    <p className="text-white/40">Internal Data Lake & AI Analysis</p>
-                </div>
+        <div className="min-h-screen py-12 px-6 lg:px-12 max-w-7xl mx-auto selection:bg-brand selection:text-white pb-32">
+            <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8 header-glow">
+                <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                >
+                    <div className="flex items-center gap-2.5 mb-3 text-xs sm:text-sm">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse shadow-[0_0_12px_rgba(0,223,216,0.6)]" />
+                        <span className="text-[10px] font-black tracking-[0.3em] text-brand uppercase">
+                            Data Intelligence
+                        </span>
+                    </div>
+                    <h1 className="text-5xl sm:text-7xl font-black tracking-tighter mb-3 leading-none heading-shimmer">
+                        Analytics
+                    </h1>
+                    <p className="text-white/30 text-sm sm:text-base font-medium max-w-sm">
+                        Internal Data Lake & Strategic AI Analysis
+                    </p>
+                </motion.div>
                 <div className="flex gap-4">
                     <a
                         href={`https://analytics.google.com/analytics/web/`}
                         target="_blank"
                         rel="noreferrer"
-                        className="btn-glass px-4 py-2 flex items-center gap-2 text-sm text-white/60 hover:text-white"
+                        className="btn-glass px-5 py-3 flex items-center gap-2.5 text-xs font-black uppercase tracking-widest text-white/60 hover:text-white transition-all tactile-item"
                     >
-                        <ExternalLink size={16} /> Open Google Analytics
+                        <ExternalLink size={16} className="text-brand" /> GA4 Portal
                     </a>
                     <button
                         onClick={fetchEvents}
                         disabled={loading}
-                        className="btn-glass px-4 py-2 flex items-center gap-2 text-sm"
+                        className="btn-glass px-5 py-3 flex items-center gap-2.5 text-xs font-black uppercase tracking-widest transition-all tactile-item bg-white/[0.03]"
                     >
-                        <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Refresh Stream
+                        <RefreshCw size={16} className={`${loading ? 'animate-spin' : ''} text-brand`} /> Refresh
                     </button>
                 </div>
             </header>
@@ -167,38 +180,48 @@ export default function AdminAnalyticsPage() {
                 </BentoTile>
 
                 {/* Live Event Stream */}
-                <BentoTile className="md:col-span-3 md:row-span-2">
-                    <h3 className="text-xl font-bold mb-4">Live Event Stream</h3>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm">
-                            <thead className="text-white/40 border-b border-white/10">
+                <BentoTile className="md:col-span-3 min-h-[500px] overflow-hidden">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-1.5 h-6 bg-brand rounded-full" />
+                        <h3 className="text-xl font-black tracking-tight uppercase">Live Activity Stream</h3>
+                    </div>
+                    <div className="overflow-x-auto -mx-2">
+                        <table className="w-full text-left text-sm border-separate border-spacing-y-2">
+                            <thead className="text-[10px] uppercase font-black tracking-[0.2em] text-white/20">
                                 <tr>
-                                    <th className="pb-3 pl-2">Timestamp</th>
-                                    <th className="pb-3">Event</th>
-                                    <th className="pb-3">User</th>
-                                    <th className="pb-3">Properties</th>
+                                    <th className="pb-4 pl-4">Time (UTC)</th>
+                                    <th className="pb-4">Event Signature</th>
+                                    <th className="pb-4">Identity</th>
+                                    <th className="pb-4 text-right pr-4">Payload</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/5">
+                            <tbody>
                                 {events.map((e) => (
-                                    <tr key={e.id} className="hover:bg-white/5 transition-colors">
-                                        <td className="py-3 pl-2 text-white/60 text-xs font-mono">
-                                            {new Date(e.timestamp).toLocaleString()}
+                                    <tr key={e.id} className="group transition-all hover:bg-white/[0.02]">
+                                        <td className="py-4 pl-4 text-white/40 text-[10px] font-mono data-field border-t border-white/5 first:rounded-l-2xl">
+                                            {new Date(e.timestamp).toLocaleTimeString()}
                                         </td>
-                                        <td className="py-3 font-bold text-brand">
-                                            {e.event_name}
+                                        <td className="py-4 font-black text-brand tracking-tight border-t border-white/5 uppercase text-xs">
+                                            {e.event_name.replace(/_/g, ' ')}
                                         </td>
-                                        <td className="py-3 text-white/60 text-xs font-mono">
-                                            {e.user_id}
+                                        <td className="py-4 text-white/60 text-[10px] font-mono data-field border-t border-white/5">
+                                            {e.user_id.substring(0, 12)}...
                                         </td>
-                                        <td className="py-3 text-white/40 text-xs font-mono">
-                                            {JSON.stringify(e.properties)}
+                                        <td className="py-4 text-white/30 text-[10px] font-mono data-field border-t border-white/5 text-right pr-4 last:rounded-r-2xl">
+                                            <div className="max-w-[300px] ml-auto overflow-hidden text-ellipsis whitespace-nowrap">
+                                                {JSON.stringify(e.properties)}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
                                 {events.length === 0 && (
                                     <tr>
-                                        <td colSpan={4} className="py-8 text-center text-white/20">No events found. Start using the app to generate data.</td>
+                                        <td colSpan={4} className="py-20 text-center">
+                                            <div className="flex flex-col items-center gap-3 opacity-20">
+                                                <RefreshCw size={32} className="animate-spin-slow" />
+                                                <p className="text-[10px] uppercase font-black tracking-widest">Awaiting Data Stream...</p>
+                                            </div>
+                                        </td>
                                     </tr>
                                 )}
                             </tbody>

@@ -5,7 +5,7 @@ import os
 import shutil
 from datetime import datetime
 
-from app.api.v1.endpoints.qbo import get_db
+from app.db.session import get_db
 from app.api.deps import verify_subscription
 from app.models.qbo import QBOConnection, Transaction, TransactionSplit, Category
 from app.services.transaction_service import TransactionService

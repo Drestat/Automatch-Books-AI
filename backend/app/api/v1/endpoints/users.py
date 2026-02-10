@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import datetime, timedelta, timezone
-from app.api.v1.endpoints.qbo import get_db
+from app.db.session import get_db
 from app.models.user import User
 from app.schemas.user import UserSync, UserPreferences
 
@@ -32,7 +32,7 @@ def sync_user(user_in: UserSync, db: Session = Depends(get_db)):
     return {"status": "synced"}
 
 @router.get("/me")
-def get_current_user(user_id: str, db: Session = Depends(get_db)):
+def fetch_my_profile(user_id: str, db: Session = Depends(get_db)):
     """
     Proxy to get_user for 'me' path, using query param.
     """

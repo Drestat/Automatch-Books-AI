@@ -133,7 +133,7 @@ function ProfileContent() {
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Version</span>
-                                    <span className="text-[10px] text-white/60 font-bold">v3.60.0</span>
+                                    <span className="text-[10px] text-white/60 font-bold">v3.61.0</span>
                                 </div>
                             </div>
                         </motion.div>

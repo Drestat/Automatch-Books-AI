@@ -43,8 +43,9 @@ export const CategoryPieChart = ({ data }: CategoryPieChartProps) => {
             </ResponsiveContainer>
             {/* Center Label */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
-                <p className="text-[10px] text-white/30 font-black uppercase tracking-widest">Expenses</p>
-                <p className="text-lg font-black text-white">Top 5</p>
+                <p className="text-[8px] text-white/20 font-black uppercase tracking-[0.4em] mb-1">Momentum</p>
+                <p className="text-2xl font-black text-white tracking-tighter leading-none">TOP 5</p>
+                <div className="w-8 h-0.5 bg-brand mx-auto mt-2 rounded-full shadow-[0_0_12px_rgba(0,223,216,0.8)]" />
             </div>
         </div>
     );

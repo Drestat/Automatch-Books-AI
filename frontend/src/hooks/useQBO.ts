@@ -135,6 +135,7 @@ export const useQBO = () => {
     const [vendors, setVendors] = useState<Vendor[]>([]);
     const [subscriptionStatus, setSubscriptionStatus] = useState<'active' | 'inactive' | 'free' | 'expired' | 'trial' | 'no_plan' | null>(null);
     const [daysRemaining, setDaysRemaining] = useState<number>(0);
+    const [pendingUndo, setPendingUndo] = useState<Record<string, { timer: NodeJS.Timeout, originalTx: Transaction }>>({});
 
     useEffect(() => {
         // Check for Demo Mode flag on mount
@@ -505,45 +506,74 @@ export const useQBO = () => {
 
     const approveMatch = async (txId: string) => {
         if (!realmId && !isDemo) return;
-        try {
-            if (isDemo) {
-                setTransactions(prev => prev.filter(tx => tx.id !== txId));
-                showToast('Demo: Transaction Approved', 'success');
-                track('match_approve', { txId, mode: 'demo' }, user?.id);
-                return true;
-            }
-            const response = await fetch(`${API_BASE_URL}/transactions/${txId}/approve?realm_id=${realmId}`, { method: 'POST' });
 
-            if (response.ok) {
-                // Trigger Haptic Feedback for mobile users
-                try {
-                    const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
-                    await Haptics.impact({ style: ImpactStyle.Medium });
-                } catch {
-                    // Ignore if not in a capacitor environment
+        const originalTx = transactions.find(t => t.id === txId);
+        if (!originalTx) return;
+
+        // Optimistic update: remove from list
+        setTransactions(prev => prev.filter(tx => tx.id !== txId));
+
+        // Trigger Haptic Feedback immediately
+        try {
+            const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
+            await Haptics.impact({ style: ImpactStyle.Medium });
+        } catch { }
+
+        // Start 10-second undo timer
+        const timer = setTimeout(async () => {
+            // Remove from pending undo
+            setPendingUndo(prev => {
+                const updated = { ...prev };
+                delete updated[txId];
+                return updated;
+            });
+
+            try {
+                if (isDemo) {
+                    track('match_approve', { txId, mode: 'demo' }, user?.id);
+                    return;
                 }
 
-                // Optimistic update
-                setTransactions(prev => prev.filter(tx => tx.id !== txId));
-                showToast('Reconciled successfully', 'success');
-                track('match_approve', { txId, mode: 'live' }, user?.id);
-                return true;
+                const response = await fetch(`${API_BASE_URL}/transactions/${txId}/approve?realm_id=${realmId}`, { method: 'POST' });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+                    showToast(formatApprovalError(errorData.detail || 'Failed'), 'error');
+                    // Put it back on failure
+                    setTransactions(prev => [...prev, originalTx]);
+                } else {
+                    track('match_approve', { txId, mode: 'live' }, user?.id);
+                }
+            } catch (error) {
+                console.error('Approve Error:', error);
+                showToast('Sync error. Transaction restored.', 'error');
+                setTransactions(prev => [...prev, originalTx]);
             }
+        }, 10000); // 10 seconds buffer (Zen Mode)
 
-            // EXTRACT ACTUAL ERROR MESSAGE FROM BACKEND
-            const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
-            const backendError = errorData.detail || errorData.message || 'Failed to approve match';
-            const userFriendlyMessage = formatApprovalError(backendError);
+        setPendingUndo(prev => ({ ...prev, [txId]: { timer, originalTx } }));
 
-            console.error('Approve Error Response:', errorData);
-            showToast(userFriendlyMessage, 'error');
-            return false;
+        showToast('Approved! You have 10s to undo.', 'success', {
+            label: 'Undo',
+            onClick: () => undoApprove(txId)
+        });
 
-        } catch (error) {
-            console.error('Approve Error:', error);
-            showToast('Communication error with backend', 'error');
-            return false;
+        return true;
+    };
+
+    const undoApprove = (txId: string) => {
+        const pending = pendingUndo[txId];
+        if (pending) {
+            clearTimeout(pending.timer);
+            setTransactions(prev => [pending.originalTx, ...prev]);
+            setPendingUndo(prev => {
+                const updated = { ...prev };
+                delete updated[txId];
+                return updated;
+            });
+            showToast('Action reversed', 'info');
+            return true;
         }
+        return false;
     };
 
     const bulkApprove = async (txIds: string[]) => {
@@ -841,11 +871,33 @@ export const useQBO = () => {
             setTransactions([]);
             setAccounts([]);
 
-            showToast('Disconnected locally (backend error)', 'info');
-            window.location.reload();
         } finally {
             setLoading(false);
         }
+    };
+
+    const splitTransaction = async (txId: string, splits: TransactionSplit[]) => {
+        if (!realmId) return;
+        try {
+            const response = await fetch(`${API_BASE_URL}/transactions/${txId}/split?realm_id=${realmId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(splits)
+            });
+            if (response.ok) {
+                showToast('Transaction split successfully', 'success');
+                // Optimistic update
+                setTransactions(prev => prev.map(tx => tx.id === txId ? { ...tx, is_split: true, splits, status: 'pending_approval' } : tx));
+                return true;
+            } else {
+                const data = await response.json();
+                showToast(data.detail || 'Split failed', 'error');
+            }
+        } catch (e) {
+            console.error("Split failed", e);
+            showToast('Communication error during split', 'error');
+        }
+        return false;
     };
 
     return {
@@ -874,8 +926,12 @@ export const useQBO = () => {
         reAnalyze,
         excludeTransaction,
         includeTransaction,
+        splitTransaction,
+        undoApprove,
         disconnect,
         showTokenModal,
-        setShowTokenModal
+        setShowTokenModal,
+        realmId,
+        showToast
     };
 };

@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v3.60.0 - ENGINE: OPTIMISTIC SYNC + AUTO-ACCEPT GOVERNANCE
+# v3.61.0 - PRO MAX UI + PLATFORM STABILITY
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.

@@ -198,10 +198,12 @@ export default function TransactionCard({
                                     initial={{ strokeDashoffset: 100.53 }}
                                     animate={{ strokeDashoffset: 100.53 * (1 - tx.confidence) }}
                                     transition={{ duration: 1.5, ease: "circOut" }}
-                                    className="text-brand-accent"
+                                    className={tx.confidence > 0.8 ? "text-emerald-500" : tx.confidence > 0.5 ? "text-amber-500" : "text-rose-500"}
                                 />
                             </svg>
-                            <span className="text-[10px] font-black text-brand-accent relative z-10">{Math.round(tx.confidence * 100)}%</span>
+                            <span className={`text-[10px] font-black relative z-10 ${tx.confidence > 0.8 ? "text-emerald-500" : tx.confidence > 0.5 ? "text-amber-500" : "text-rose-500"}`}>
+                                {Math.round(tx.confidence * 100)}%
+                            </span>
                         </motion.div>
 
                         <span className="text-xl font-black text-white/90 whitespace-nowrap">
@@ -264,6 +266,29 @@ export default function TransactionCard({
                         </div>
                     </div>
                 </div>
+
+                {/* 2.5 Split Breakdown (Conditional) */}
+                {tx.is_split && tx.splits && tx.splits.length > 0 && (
+                    <div className="mb-4 bg-white/[0.02] border border-white/5 rounded-2xl p-4 backdrop-blur-md">
+                        <div className="flex items-center gap-2 mb-3">
+                            <SplitIcon size={14} className="text-brand-accent" />
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-white/40">Partial Splits</span>
+                        </div>
+                        <div className="space-y-2">
+                            {tx.splits.map((split, i) => (
+                                <div key={i} className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
+                                    <div className="flex flex-col">
+                                        <span className="text-[11px] font-bold text-white/80">{split.category_name}</span>
+                                        <span className="text-[9px] text-white/30 font-medium italic">{split.description}</span>
+                                    </div>
+                                    <span className="text-xs font-black text-white">
+                                        {tx.amount === 0 ? '' : (isExpense ? '-' : '+')} {Math.abs(split.amount).toLocaleString('en-US', { style: 'currency', currency: tx.currency })}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* 3. AI Intelligence Module */}
                 <motion.div
@@ -438,7 +463,8 @@ export default function TransactionCard({
 
                         <IconButton
                             icon={<SplitIcon size={16} />}
-                            title="Split Transaction (Coming Soon)"
+                            title="Split Details"
+                            active={tx.is_split}
                         />
 
                         <IconButton

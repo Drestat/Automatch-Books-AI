@@ -7,25 +7,45 @@ import { BentoGrid } from '@/components/BentoGrid';
 import { BentoTile } from '@/components/BentoTile';
 import { useQBO } from '@/hooks/useQBO';
 import {
-  ShieldCheck,
-  Zap,
-  Clock,
-  Layers,
   Sparkles,
-  ArrowRight,
-  Lock,
-  BarChart3,
-  Coins,
-  Filter,
-  Edit2,
-  Building2,
-  ArrowUp,
-  ArrowDown,
-  LayoutDashboard,
+  Search,
+  ExternalLink,
+  ChevronDown,
   PieChart,
+  User,
+  LogOut,
+  Settings,
+  CreditCard,
+  ShieldCheck,
+  RefreshCw,
   Home,
   Check,
-  User
+  Building2,
+  Trash2,
+  AlertCircle,
+  Clock,
+  Zap,
+  Tag,
+  Loader2,
+  Filter,
+  Eye,
+  Menu,
+  X,
+  Plus,
+  LayoutGrid,
+  List,
+  CheckCircle2,
+  HelpCircle,
+  MoreVertical,
+  Lock,
+  Coins,
+  ArrowRight,
+  ArrowDown,
+  ArrowUp,
+  BarChart3,
+  Layers,
+  LayoutDashboard,
+  Activity
 } from 'lucide-react';
 import { AccountSelectorModal } from '@/components/AccountSelectorModal';
 import { TokenDepletedModal } from '@/components/TokenDepletedModal';
@@ -77,6 +97,9 @@ function DashboardContent() {
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [sortConfig, setSortConfig] = useState<{ key: 'date' | 'confidence', direction: 'asc' | 'desc' }>({ key: 'date', direction: 'desc' });
   const [activeTab, setActiveTab] = useState<'review' | 'matched' | 'excluded'>('review');
+  const [zenMode, setZenMode] = useState(false);
+  const [zenIndex, setZenIndex] = useState(0);
+  const [sessionsApproved, setSessionsApproved] = useState(0);
 
   const toggleSort = (key: 'date' | 'confidence') => {
     setSortConfig(prev => ({
@@ -85,19 +108,11 @@ function DashboardContent() {
     }));
   };
 
-  // SHOW ALL TRANSACTIONS: Bank feed imports + manual entries
-  // User wants complete view of all Mastercard activity
-
-  // CORRECT STRATEGY: Use is_qbo_matched (which checks LinkedTxn in QBO)
-  // A transaction is "Categorized" ONLY if QBO has accepted/matched it (LinkedTxn exists)
-  // Everything else is "For Review", even if it has a suggested category
   // FILTERING LOGIC
-  // 1. Filter by Selected Accounts (if active)
   const filteredTransactions = selectedAccounts.length > 0
     ? transactions.filter(tx => tx.account_id && selectedAccounts.includes(tx.account_id))
     : transactions;
 
-  // 2. Filter by Status (Review vs Matched vs Excluded)
   const toReviewTxs = filteredTransactions.filter(tx => {
     return !tx.is_excluded && !tx.is_qbo_matched && tx.status !== 'approved';
   });
@@ -139,9 +154,6 @@ function DashboardContent() {
     }
   }, [isConnected, isDemo, isLoaded]);
 
-  // Auto-filter is now handled by useQBO hook (Effect 4)
-  // selectedAccounts is only used for manual UI filtering in the dropdown
-
   const toggleAccount = (accId: string) => {
     setSelectedAccounts(prev =>
       prev.includes(accId) ? prev.filter(id => id !== accId) : [...prev, accId]
@@ -159,10 +171,9 @@ function DashboardContent() {
   };
 
   const handleBulkApprove = async () => {
-    // Bulk approve high confidence items in NEEDS_REVIEW
     const highConfidence = transactions.filter(tx =>
       tx.confidence > 0.9 &&
-      tx.status === 'NEEDS_REVIEW' // Only approve things needing review
+      tx.status === 'NEEDS_REVIEW'
     ).map(tx => tx.id);
 
     if (highConfidence.length > 0) {
@@ -171,8 +182,6 @@ function DashboardContent() {
       setLoading(false);
     }
   };
-
-  const approvedCount = transactions.filter(tx => tx.status === 'approved').length;
 
   if (!isConnected && !isDemo) {
     return (
@@ -199,7 +208,7 @@ function DashboardContent() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={connect}
-              disabled={false} // DEBUG: Force enabled
+              disabled={false}
               aria-label="Connect to QuickBooks Online"
               className="w-full btn-primary py-4 text-lg font-bold flex items-center justify-center gap-3 group relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -235,16 +244,13 @@ function DashboardContent() {
     <SubscriptionGuard status={subscriptionStatus} daysRemaining={daysRemaining}>
       <div className="min-h-screen text-white selection:bg-brand selection:text-white pb-20 overflow-x-hidden">
 
-
         <AccountSelectorModal
           isOpen={showAccountModal}
           onClose={() => setShowAccountModal(false)}
           onSuccess={() => {
-            // Refresh data
             const realm = localStorage.getItem('qbo_realm_id');
             if (realm) {
-              // Force refresh of accounts and transactions
-              window.location.reload(); // Simplest way to refresh everything including hook state
+              window.location.reload();
             }
           }}
           realmId={localStorage.getItem('qbo_realm_id') || ''}
@@ -281,13 +287,14 @@ function DashboardContent() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="flex flex-col items-end gap-5"
           >
-            {/* Unified Command Bar (Scrolling) */}
             {profile && (
-              <div className="flex items-center btn-glass border-white/5 bg-white/[0.03] backdrop-blur-3xl shadow-2xl rounded-[20px] p-1.5 tactile-item mb-1">
-                {/* Navigation Links (Desktop only) */}
-                <div className="hidden lg:flex items-center gap-1 sm:gap-2 mr-4 ml-2 border-r border-white/10 pr-4">
+              <div className="hidden lg:flex items-center btn-glass border-white/5 bg-white/[0.03] backdrop-blur-3xl shadow-2xl rounded-[20px] p-1.5 tactile-item mb-1">
+                <div className="flex items-center gap-1 sm:gap-2 mr-4 ml-2 border-r border-white/10 pr-4">
                   <Link href="/dashboard" title="Home" className="p-2 rounded-xl text-brand transition-all hover:bg-brand/10">
                     <Home size={18} />
+                  </Link>
+                  <Link href="/rules" title="Automation Rules" className="p-2 rounded-xl text-white/40 hover:text-white transition-all hover:bg-white/5">
+                    <ShieldCheck size={18} />
                   </Link>
                   <Link href="/analytics" title="Insights" className="p-2 rounded-xl text-white/40 hover:text-white transition-all hover:bg-white/5">
                     <PieChart size={18} />
@@ -297,7 +304,6 @@ function DashboardContent() {
                   </Link>
                 </div>
 
-                {/* Token Status (Visible on all devices) */}
                 <div className="flex items-center gap-3 sm:gap-4 px-3 py-1.5 bg-brand-accent/5 rounded-[14px]">
                   <div className="p-1.5 rounded-lg bg-brand-accent/10">
                     <Coins size={14} className="text-brand-accent" />
@@ -312,17 +318,40 @@ function DashboardContent() {
               </div>
             )}
 
-            {/* Tactical Control Area */}
             <div className="flex items-center bg-white/[0.02] border border-white/5 rounded-2xl p-1 shadow-2xl">
-              {(isConnected || isDemo) && (
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:flex flex-col items-end mr-4">
+                  <div className="flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-white/40 mb-1">
+                    <Activity size={10} className="text-brand" /> Session Momentum
+                  </div>
+                  <div className="w-32 h-1 bg-white/5 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(100, (sessionsApproved / 10) * 100)}%` }}
+                      className="h-full bg-brand shadow-[0_0_10px_rgba(0,95,86,0.5)]"
+                    />
+                  </div>
+                </div>
+
                 <button
-                  onClick={() => setShowAccountModal(true)}
-                  className="px-5 py-3 flex items-center gap-3 hover:bg-white/5 rounded-xl transition-all text-white/50 hover:text-white"
+                  onClick={() => setZenMode(!zenMode)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all border ${zenMode ? 'bg-brand/10 border-brand text-brand' : 'bg-white/5 border-white/5 text-white/40 hover:text-white'}`}
+                  title="Zen Mode: Review One-by-One"
                 >
-                  <Building2 size={16} />
-                  <span className="text-xs font-bold uppercase tracking-wider">Accounts</span>
+                  <Zap size={16} className={zenMode ? 'animate-pulse' : ''} />
+                  <span className="text-[10px] font-black uppercase tracking-widest hidden md:inline">{zenMode ? 'Zen Active' : 'Zen Mode'}</span>
                 </button>
-              )}
+
+                {(isConnected || isDemo) && (
+                  <button
+                    onClick={() => setShowAccountModal(true)}
+                    className="btn-glass flex items-center gap-2 px-4 py-2 tactile-item border-white/5 bg-white/[0.03]"
+                  >
+                    <Settings size={16} className="text-white/40" />
+                    <span className="text-[10px] font-black uppercase tracking-widest hidden md:inline">Channels</span>
+                  </button>
+                )}
+              </div>
 
               <div className="w-px h-6 bg-white/5 mx-1" />
 
@@ -342,13 +371,108 @@ function DashboardContent() {
         </header>
 
         <main className="px-4 sm:px-6 md:px-12 pb-24 md:pb-0 max-w-[1600px] mx-auto">
+          <AnimatePresence mode="wait">
+            {zenMode && sortedTransactions.length > 0 ? (
+              <motion.div
+                key="zen-container"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.05 }}
+                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-3xl pt-24"
+              >
+                <div className="w-full max-w-4xl relative">
+                  <div className="absolute -top-12 left-0 right-0 flex justify-between items-end">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest font-black text-brand mb-1">Queue Focus</p>
+                      <h2 className="text-2xl font-black tracking-tighter">ZEN <span className="text-white/20 font-light">REVIEW</span></h2>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] uppercase tracking-widest font-black text-white/20 mb-1">Batch Progress</p>
+                      <p className="text-lg font-black font-mono">{Math.min(sortedTransactions.length, zenIndex + 1)} / {sortedTransactions.length}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-8">
+                    <button
+                      onClick={() => setZenIndex(i => Math.max(0, i - 1))}
+                      disabled={zenIndex === 0}
+                      className="p-4 rounded-full bg-white/5 border border-white/5 hover:bg-white/10 disabled:opacity-20 transition-all"
+                    >
+                      <ChevronDown className="rotate-90" />
+                    </button>
+
+                    <div className="flex-1">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={sortedTransactions[zenIndex]?.id}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                        >
+                          <TransactionCard
+                            tx={sortedTransactions[zenIndex]}
+                            availableCategories={categories}
+                            availableVendors={vendors}
+                            onAccept={async (id) => {
+                              const ok = await approveMatch(id);
+                              if (ok) {
+                                setSessionsApproved(s => s + 1);
+                                if (zenIndex >= sortedTransactions.length - 1) {
+                                  if (sortedTransactions.length === 1) setZenMode(false);
+                                  else setZenIndex(Math.max(0, sortedTransactions.length - 2));
+                                }
+                              }
+                            }}
+                            onExclude={excludeTransaction}
+                            onInclude={includeTransaction}
+                            onUpdate={updateTransaction}
+                            onReceiptUpload={uploadReceipt}
+                            onAnalyze={reAnalyze}
+                            availableTags={tags}
+                            onPayeeChange={(txId, payee) => updateTransaction(txId, { payee })}
+                            onNoteChange={(txId, note) => updateTransaction(txId, { note })}
+                            onCategoryChange={(txId, catId, catName) => updateTransaction(txId, { suggested_category_id: catId, suggested_category_name: catName })}
+                            onTagAdd={async (txId, tag) => {
+                              const currentTags = sortedTransactions[zenIndex].tags || [];
+                              if (!currentTags.includes(tag)) {
+                                await updateTransaction(txId, { tags: [...currentTags, tag] });
+                                if (!tags.find(t => t.name === tag)) {
+                                  createTag(tag);
+                                }
+                              }
+                            }}
+                            onTagRemove={async (txId, tag) => {
+                              const currentTags = sortedTransactions[zenIndex].tags || [];
+                              await updateTransaction(txId, { tags: currentTags.filter(t => t !== tag) });
+                            }}
+                          />
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+
+                    <button
+                      onClick={() => setZenIndex(i => Math.min(sortedTransactions.length - 1, i + 1))}
+                      disabled={zenIndex === sortedTransactions.length - 1}
+                      className="p-4 rounded-full bg-white/5 border border-white/5 hover:bg-white/10 disabled:opacity-20 transition-all"
+                    >
+                      <ChevronDown className="-rotate-90" />
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => setZenMode(false)}
+                    className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all text-xs font-black uppercase tracking-widest opacity-60 hover:opacity-100"
+                  >
+                    <X size={14} /> Exit Zen Review
+                  </button>
+                </div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+
           <BentoGrid>
-            {/* Quick Stats & Action Cards */}
-
-            {/* Transactions List */}
             <div className="md:col-span-3 mt-8">
-
-              {/* Horizontal Account Filter Bar */}
               {isConnected && accounts.length > 0 && !isDemo && (
                 <div className="mb-8 -mx-4 px-4 md:mx-0 overflow-hidden">
                   <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-3 px-1">
@@ -466,7 +590,6 @@ function DashboardContent() {
                           const currentTags = tx.tags || [];
                           if (!currentTags.includes(tag)) {
                             await updateTransaction(txId, { tags: [...currentTags, tag] });
-                            // Create global tag if new
                             if (!tags.find(t => t.name === tag)) {
                               createTag(tag);
                             }
@@ -489,8 +612,6 @@ function DashboardContent() {
                     className="col-span-full py-24 flex flex-col items-center justify-center glass-panel border border-white/5 text-center px-10 relative overflow-hidden"
                   >
                     <div className="absolute inset-0 bg-gradient-to-b from-brand/10 to-transparent opacity-30" />
-
-                    {/* Shimmering background glow */}
                     <motion.div
                       animate={{
                         scale: [1, 1.2, 1],
@@ -499,7 +620,6 @@ function DashboardContent() {
                       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                       className="absolute w-[500px] h-[500px] bg-brand/20 blur-[100px] rounded-full -z-10"
                     />
-
                     <motion.div
                       initial={{ y: 0 }}
                       animate={{
@@ -530,7 +650,6 @@ function DashboardContent() {
                         </div>
                       ) : <Building2 size={56} />}
                     </motion.div>
-
                     <h3 className="text-4xl font-black mb-3 relative z-10 tracking-tight">
                       {activeTab === 'review' ? 'Perfectly Sync’d' : 'Nothing To Show'}
                     </h3>
@@ -539,7 +658,6 @@ function DashboardContent() {
                         ? "You've crushed your bookkeeping goal. Every transaction is accounted for and matched with precision."
                         : "We couldn't find any historical records matching this specific filter."}
                     </p>
-
                     {activeTab === 'review' && (
                       <motion.div
                         initial={{ scale: 0, opacity: 0 }}
@@ -567,29 +685,25 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.60.0</span></p>
+          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v3.61.0</span></p>
         </footer>
 
-        {/* Mobile/Tablet Bottom Nav */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-6 pb-6 pt-2 bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none">
           <div className="glass-panel py-3 px-6 flex items-center justify-around border-white/10 shadow-2xl pointer-events-auto backdrop-blur-xl">
             <Link href="/dashboard" className="flex flex-col items-center gap-1 opacity-100 text-brand">
               <Home size={20} />
               <span className="text-[9px] font-bold">Home</span>
             </Link>
-
             <Link href="/analytics" className="flex flex-col items-center gap-1 opacity-40 text-white hover:opacity-100 transition-opacity">
               <PieChart size={20} />
               <span className="text-[9px] font-bold">Insights</span>
             </Link>
-
             <Link href="/profile" className="flex flex-col items-center gap-1 opacity-40 text-white hover:opacity-100 transition-opacity">
               <User size={20} />
               <span className="text-[9px] font-bold">Profile</span>
             </Link>
           </div>
         </div>
-
       </div>
     </SubscriptionGuard>
   );

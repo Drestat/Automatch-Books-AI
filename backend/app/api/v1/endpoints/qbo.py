@@ -49,30 +49,48 @@ def debug_config(user=Depends(verify_subscription)):
 
 @router.get("/callback")
 def callback(code: str, state: str, realmId: str, db: Session = Depends(get_db)):
-    auth_client = AuthClient(
-        client_id=settings.QBO_CLIENT_ID,
-        client_secret=settings.QBO_CLIENT_SECRET,
-        redirect_uri=settings.QBO_REDIRECT_URI,
-        environment=settings.QBO_ENVIRONMENT,
-    )
-    auth_client.get_bearer_token(code, realm_id=realmId)
-    
-    # State holds the user_id in this implementation
-    user = db.query(User).filter(User.id == state).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+    try:
+        print(f">>> [qbo.py] Callback received. State: {state}, RealmId: {realmId}")
+        auth_client = AuthClient(
+            client_id=settings.QBO_CLIENT_ID,
+            client_secret=settings.QBO_CLIENT_SECRET,
+            redirect_uri=settings.QBO_REDIRECT_URI,
+            environment=settings.QBO_ENVIRONMENT,
+        )
+        
+        # Exchange code for tokens
+        try:
+            auth_client.get_bearer_token(code, realm_id=realmId)
+        except Exception as e:
+            print(f"❌ [qbo.py] Token exchange failed: {str(e)}")
+            raise HTTPException(status_code=400, detail=f"OAuth Token Exchange Failed: {str(e)}")
+        
+        # State holds the user_id in our implementation
+        user = db.query(User).filter(User.id == state).first()
+        if not user:
+            print(f"❌ [qbo.py] User not found for state: {state}")
+            raise HTTPException(status_code=404, detail="User not found (matching state parameter)")
 
-    connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realmId).first()
-    if not connection:
-        connection = QBOConnection(user_id=user.id, realm_id=realmId)
-    
-    connection.refresh_token = auth_client.refresh_token
-    connection.access_token = auth_client.access_token
-    db.add(connection)
-    db.commit()
-    
-    redirect_url = f"{settings.NEXT_PUBLIC_APP_URL}/dashboard?code={code}&state={state}&realmId={realmId}"
-    return RedirectResponse(url=redirect_url)
+        connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realmId).first()
+        if not connection:
+            connection = QBOConnection(user_id=user.id, realm_id=realmId)
+        
+        connection.refresh_token = auth_client.refresh_token
+        connection.access_token = auth_client.access_token
+        db.add(connection)
+        db.commit()
+        
+        print(f"✅ [qbo.py] Connection saved for user {user.id} and realm {realmId}")
+        
+        redirect_url = f"{settings.NEXT_PUBLIC_APP_URL}/dashboard?code={code}&state={state}&realmId={realmId}"
+        return RedirectResponse(url=redirect_url)
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        print(f"❌ [qbo.py] Unexpected error in callback: {str(e)}")
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Internal Server Error in Callback: {str(e)}")
 
 from app.models.qbo import BankAccount
 from app.services.transaction_service import TransactionService

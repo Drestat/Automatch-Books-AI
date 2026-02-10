@@ -2,7 +2,7 @@ import stripe
 import requests
 from fastapi import APIRouter, Depends, HTTPException, Request, Header
 from sqlalchemy.orm import Session
-from app.api.v1.endpoints.qbo import get_db
+from app.db.session import get_db
 from app.api.deps import get_current_user
 from app.models.user import User
 from app.services.stripe_service import StripeService

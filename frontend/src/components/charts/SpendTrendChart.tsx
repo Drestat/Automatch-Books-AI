@@ -34,45 +34,49 @@ export const SpendTrendChart = ({ data }: SpendTrendChartProps) => {
                             <stop offset="95%" stopColor="#005f56" stopOpacity={0} />
                         </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
                     <XAxis
                         dataKey="name"
-                        stroke="rgba(255,255,255,0.2)"
-                        fontSize={10}
+                        stroke="rgba(255,255,255,0.1)"
+                        fontSize={9}
                         tickLine={false}
                         axisLine={false}
-                        tick={{ fill: 'rgba(255,255,255,0.4)', fontWeight: 600 }}
+                        tick={{ fill: 'rgba(255,255,255,0.2)', fontWeight: 800 }}
                         minTickGap={30}
+                        dy={10}
                     />
                     <YAxis
-                        stroke="rgba(255,255,255,0.2)"
-                        fontSize={10}
+                        stroke="rgba(255,255,255,0.1)"
+                        fontSize={9}
                         tickLine={false}
                         axisLine={false}
                         tickFormatter={(value) => `$${value}`}
-                        tick={{ fill: 'rgba(255,255,255,0.4)', fontWeight: 600 }}
+                        tick={{ fill: 'rgba(255,255,255,0.2)', fontWeight: 800 }}
+                        dx={-10}
                     />
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(0,223,216,0.2)', strokeWidth: 1 }} />
 
                     <Area
                         name="Income"
                         type="monotone"
                         dataKey="income"
                         stroke="#00dfd8"
-                        strokeWidth={3}
+                        strokeWidth={2}
                         fillOpacity={1}
                         fill="url(#colorIncome)"
                         animationDuration={1500}
+                        className="drop-shadow-[0_0_8px_rgba(0,223,216,0.3)]"
                     />
                     <Area
                         name="Expense"
                         type="monotone"
                         dataKey="expense"
                         stroke="#005f56"
-                        strokeWidth={3}
+                        strokeWidth={2}
                         fillOpacity={1}
                         fill="url(#colorExpense)"
                         animationDuration={1500}
+                        className="drop-shadow-[0_0_8px_rgba(0,95,86,0.3)]"
                     />
                 </AreaChart>
             </ResponsiveContainer>

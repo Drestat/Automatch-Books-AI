@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.api.v1.endpoints.qbo import get_db
+from app.db.session import get_db
 from app.models.qbo import BankAccount, Category, Tag, Transaction, QBOConnection, Vendor
 from typing import List, Optional
 from pydantic import BaseModel
