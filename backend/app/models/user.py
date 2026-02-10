@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, Integer
+from sqlalchemy import Column, String, DateTime, Integer, Boolean
 from sqlalchemy.sql import func
 from app.db.session import Base
 
@@ -11,6 +11,9 @@ class User(Base):
     subscription_status = Column(String, default="inactive")
     trial_ends_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Preferences
+    auto_accept_enabled = Column(Boolean, default=True)
     
     # Token System
     token_balance = Column(Integer, default=50)

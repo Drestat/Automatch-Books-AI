@@ -141,6 +141,9 @@ graph TD
 - [x] **Serverless Offloading**: Migrated receipt processing to Modal for scalable AI workloads.
 - [x] **Serverless Scale**: Migrated QBO Webhooks and Bulk Transaction matching to Modal background workers.
 - [x] **SaaS Gating**: Enforced subscription limits on sync and analysis endpoints.
+- [x] **Rules & Aliases API**: Implemented management endpoints for Natural Language Rules and Vendor Aliasing.
+- [x] **Optimistic Sync Engine**: Decoupled QBO synchronization from the UI for "Zero-Wait" performance.
+- [x] **Auto-Accept Core**: Implemented background worker for high-confidence automated categorization.
 
 ---
 

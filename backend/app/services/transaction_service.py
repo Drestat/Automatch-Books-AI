@@ -49,10 +49,11 @@ class TransactionService:
         self.db.add(log)
         self.db.commit()
 
-    async def approve_transaction(self, tx_id: str):
+    async def approve_transaction(self, tx_id: str, optimistic: bool = True):
         """
-        Finalizes a transaction and writes it back to QBO.
-        Supports standard categorization and Split transactions.
+        Finalizes a transaction locally. 
+        If optimistic=True, returns immediately after marking status as 'pending_qbo'.
+        If optimistic=False, runs synchronously (legacy/testing).
         """
         tx = self.db.query(Transaction).filter(
             Transaction.id == tx_id,
@@ -62,47 +63,71 @@ class TransactionService:
         if not tx:
             raise ValueError(f"Transaction {tx_id} not found")
         
-        if tx.status == 'approved':
-            print(f"🔄 [Approve] Transaction {tx_id} already approved. Re-syncing metadata (Notes/Receipts)...")
-            # We proceed to re-run the QBO update, which will handle sparse updates of notes/tags/receipts
-            # but preserve ledger lines via its skip_line_update optimization if no new category is provided.
+        # Local state update
+        tx.status = 'pending_qbo' # Trigger for Worker
+        tx.forced_review = False
+        self.db.add(tx)
+        self.db.commit()
+
+        if not optimistic:
+            print(f"🔄 [Approve] Synchronous approval requested for {tx_id}")
+            return await self.sync_approved_to_qbo(tx_id)
+
+        print(f"🚀 [Approve] Transaction {tx_id} marked as 'pending_qbo'. Returning optimistically.")
+        return {"status": "success", "message": "Transaction queued for approval", "tx_id": tx_id}
+
+    async def sync_approved_to_qbo(self, tx_id: str):
+        """
+        Backgroundable method to actually push an approved transaction to QBO.
+        """
+        tx = self.db.query(Transaction).filter(
+            Transaction.id == tx_id,
+            Transaction.realm_id == self.connection.realm_id
+        ).first()
+
+        if not tx or tx.status != 'pending_qbo':
+            print(f"⚠️ [SyncToQBO] Transaction {tx_id} not found or not in pending state.")
+            return
 
         try:
             if tx.is_split and tx.splits:
-                print(f"✂️ [Approve] Processing SPLIT transaction {tx.id}...")
+                print(f"✂️ [SyncToQBO] Processing SPLIT transaction {tx.id}...")
                 await self._update_qbo_split_transaction(tx)
             else:
-                print(f"🏷️ [Approve] Processing standard transaction {tx.id}...")
+                print(f"🏷️ [SyncToQBO] Processing standard transaction {tx.id}...")
                 await self._update_qbo_transaction(tx)
             
             # Post-Process: Upload Receipt (if any)
             await self._upload_receipt(tx)
             
-        except Exception as e:
-            print(f"❌ [Approve] Write-Back Failed: {e}")
-            raise e
+            # Cleanup amount if was 0
+            if not tx.amount or tx.amount == 0:
+                try:
+                    qbo_tx = await self.client.get_purchase(tx.id)
+                    purchase_data = qbo_tx.get("Purchase", {})
+                    real_amount = purchase_data.get("TotalAmt")
+                    if real_amount:
+                        tx.amount = real_amount
+                except Exception as e:
+                    print(f"⚠️ [SyncToQBO] Failed to fetch amount: {e}")
 
-        if not tx.amount or tx.amount == 0:
-            print(f"⚠️ [Approve] Transaction {tx.id} has 0.00 amount. Fetching from QBO to preserve value...")
-            try:
-                qbo_tx = await self.client.get_purchase(tx.id)
-                purchase_data = qbo_tx.get("Purchase", {})
-                real_amount = purchase_data.get("TotalAmt")
-                if real_amount:
-                    tx.amount = real_amount
-                    print(f"✅ [Approve] Restored amount to {real_amount} from QBO.")
-            except Exception as e:
-                print(f"❌ [Approve] Failed to fetch original amount: {e}")
-                
-        # Local Update
-        tx.status = 'approved' 
-        tx.forced_review = False
-        tx.is_qbo_matched = True
-        self.db.add(tx)
-        self.db.commit()
-        
-        self._log("approve", "transaction", 1, "success", {"tx_id": tx_id, "is_split": tx.is_split})
-        return {"status": "success", "message": "Transaction updated in QuickBooks"}
+            # Final success state
+            tx.status = 'approved'
+            tx.is_qbo_matched = True
+            self.db.add(tx)
+            self.db.commit()
+            
+            self._log("approve", "transaction", 1, "success", {"tx_id": tx_id, "is_split": tx.is_split})
+            return {"status": "success", "message": "Transaction synchronized with QuickBooks"}
+
+        except Exception as e:
+            print(f"❌ [SyncToQBO] Write-Back Failed: {e}")
+            tx.status = 'error_qbo'
+            tx.reasoning = f"QBO Sync Failed: {str(e)}"
+            self.db.add(tx)
+            self.db.commit()
+            self._log("approve", "transaction", 1, "error", {"tx_id": tx_id, "error": str(e)})
+            raise e
 
     async def _update_qbo_transaction(self, tx):
         """

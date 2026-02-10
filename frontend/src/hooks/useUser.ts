@@ -12,6 +12,7 @@ export interface UserProfile {
     subscription_status: string;
     token_balance: number;
     monthly_token_allowance: number;
+    auto_accept_enabled: boolean;
 }
 
 export const useUser = () => {

@@ -4,7 +4,7 @@ from sqlalchemy import func
 from datetime import datetime, timedelta, timezone
 from app.api.v1.endpoints.qbo import get_db
 from app.models.user import User
-from app.schemas.user import UserSync
+from app.schemas.user import UserSync, UserPreferences
 
 router = APIRouter()
 
@@ -102,5 +102,27 @@ def get_user(user_id: str, db: Session = Depends(get_db)):
         "trial_ends_at": user.trial_ends_at,
         "days_remaining": days_remaining,
         "token_balance": user.token_balance,
-        "monthly_token_allowance": user.monthly_token_allowance
+        "monthly_token_allowance": user.monthly_token_allowance,
+        "auto_accept_enabled": user.auto_accept_enabled
     }
+
+@router.patch("/{user_id}/preferences")
+def update_user_preferences(
+    user_id: str, 
+    prefs: UserPreferences, 
+    db: Session = Depends(get_db)
+):
+    """
+    Update user preferences like Auto-Accept.
+    """
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Gating check: Auto-accept is only for Founder/Empire
+    # However, we allow the DB write if they are premium, but the UI should handle the graying out.
+    # On the backend, we should also enforce tier-based execution.
+    
+    user.auto_accept_enabled = prefs.auto_accept_enabled
+    db.commit()
+    return {"status": "success", "auto_accept_enabled": user.auto_accept_enabled}

@@ -2,10 +2,11 @@
 
 import React, { Suspense } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, User, Zap, LogOut, Settings, Shield, ChevronRight, Cloud } from 'lucide-react';
+import { ArrowLeft, User, Zap, LogOut, Settings, Shield, ChevronRight, Cloud, HelpCircle, ToggleLeft, ToggleRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useClerk } from "@clerk/nextjs";
 import { useQBO } from '@/hooks/useQBO';
+import { useUser } from '@/hooks/useUser';
 import Footer from '@/components/Footer';
 import dynamicLoader from 'next/dynamic';
 
@@ -14,8 +15,10 @@ const ClerkParameters = dynamicLoader(() => import('@/components/ClerkParameters
 export const dynamic = 'force-dynamic';
 
 function ProfileContent() {
-    const { sync, disconnect, loading, isConnected } = useQBO();
-    const { signOut } = useClerk();
+    const { sync, disconnect, loading: qboLoading, isConnected } = useQBO();
+    const { profile, refreshProfile } = useUser();
+    const { signOut, user } = useClerk();
+    const [updatingPrefs, setUpdatingPrefs] = React.useState(false);
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -107,11 +110,11 @@ function ProfileContent() {
                             <div className="space-y-4">
                                 <button
                                     onClick={() => sync()}
-                                    disabled={loading}
+                                    disabled={qboLoading}
                                     className="w-full btn-primary py-4 rounded-xl flex items-center justify-center gap-3 font-bold text-sm hover:translate-y-[-2px] active:translate-y-[1px] transition-all shadow-lg shadow-brand/10"
                                 >
-                                    <Zap size={18} className={loading ? 'animate-spin' : ''} />
-                                    {loading ? 'SYNCING DATA...' : 'SYNC NOW'}
+                                    <Zap size={18} className={qboLoading ? 'animate-spin' : ''} />
+                                    {qboLoading ? 'SYNCING DATA...' : 'SYNC NOW'}
                                 </button>
 
                                 <button
@@ -130,7 +133,62 @@ function ProfileContent() {
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Version</span>
-                                    <span className="text-[10px] text-white/60 font-bold">v3.53.0</span>
+                                    <span className="text-[10px] text-white/60 font-bold">v3.60.0</span>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        {/* Autonomous Engine Control */}
+                        <motion.div variants={itemVariants} className="glass-panel p-8 border-white/5 bg-white/[0.01] backdrop-blur-2xl relative overflow-hidden group">
+                            <div className="flex items-center justify-between mb-8">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3.5 rounded-2xl bg-brand/10 text-brand border border-brand/20">
+                                        <Zap size={22} />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-lg tracking-tight">Autonomous Engine</h3>
+                                        <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold">Background Worker</p>
+                                    </div>
+                                </div>
+                                {!(profile?.subscription_tier === 'founder' || profile?.subscription_tier === 'empire') && (
+                                    <div className="group/tooltip relative">
+                                        <HelpCircle size={16} className="text-white/20 hover:text-white/40 transition-colors cursor-help" />
+                                        <div className="absolute bottom-full right-0 mb-2 w-48 p-3 rounded-xl bg-black border border-white/10 text-[10px] leading-relaxed text-white/60 font-medium opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl backdrop-blur-xl">
+                                            This feature is reserved for our <span className="text-brand">Founder</span> and <span className="text-brand">Empire</span> partners.
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className={`p-4 rounded-2xl border transition-all ${(profile?.subscription_tier === 'founder' || profile?.subscription_tier === 'empire')
+                                ? 'bg-white/[0.02] border-white/5'
+                                : 'bg-black/40 border-white/5 opacity-40 grayscale pointer-events-none'
+                                }`}>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="font-bold text-sm text-white/80">Auto-Accept</p>
+                                        <p className="text-[10px] text-white/30 font-medium max-w-[180px] mt-1">Automatically approve matches with 95%+ AI confidence.</p>
+                                    </div>
+                                    <button
+                                        disabled={updatingPrefs}
+                                        onClick={async () => {
+                                            if (!profile || !user?.id) return;
+                                            setUpdatingPrefs(true);
+                                            try {
+                                                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run'}/api/v1/users/${user.id}/preferences`, {
+                                                    method: 'PATCH',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ auto_accept_enabled: !profile.auto_accept_enabled })
+                                                });
+                                                if (res.ok) await refreshProfile();
+                                            } finally {
+                                                setUpdatingPrefs(false);
+                                            }
+                                        }}
+                                        className="text-brand transition-all hover:scale-110 active:scale-95 disabled:opacity-50"
+                                    >
+                                        {updatingPrefs ? <Loader2 size={24} className="animate-spin" /> : (profile?.auto_accept_enabled ? <ToggleRight size={32} /> : <ToggleLeft size={32} className="text-white/20" />)}
+                                    </button>
                                 </div>
                             </div>
                         </motion.div>

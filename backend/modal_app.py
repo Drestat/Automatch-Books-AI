@@ -205,6 +205,98 @@ def process_receipt_modal(realm_id: str, file_content: bytes, filename: str, mim
     finally:
         db.close()
 
+@app.function(image=image, secrets=[secrets], timeout=300)
+async def process_single_approval(realm_id: str, tx_id: str):
+    """
+    Background worker to push a single optimistic approval to QBO.
+    """
+    print(f"🔄 [Modal] Syncing optimistic approval for {tx_id} in {realm_id}")
+    import sys
+    if "/root" not in sys.path:
+        sys.path.append("/root")
+
+    from app.services.transaction_service import TransactionService
+    from app.models.qbo import QBOConnection
+    from app.db.session import SessionLocal
+
+    db = SessionLocal()
+    try:
+        connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
+        if not connection:
+            print("❌ Connection not found")
+            return
+            
+        service = TransactionService(db, connection)
+        await service.sync_approved_to_qbo(tx_id)
+        print(f"✅ Sync complete for {tx_id}")
+        
+    except Exception as e:
+        print(f"❌ Sync failed for {tx_id}: {e}")
+    finally:
+        db.close()
+
+@app.function(image=image, secrets=[secrets], timeout=600, schedule=modal.Cron("0 */6 * * *"))
+async def auto_accept_worker():
+    """
+    Worker to auto-approve high-confidence matches for Founder/Empire tiers.
+    """
+    print("🤖 [Modal] Starting Auto-Accept Cron Job...")
+    import sys
+    if "/root" not in sys.path:
+        sys.path.append("/root")
+
+    from app.models.user import User
+    from app.models.qbo import Transaction, QBOConnection
+    from app.services.transaction_service import TransactionService
+    from app.db.session import SessionLocal
+
+    db = SessionLocal()
+    try:
+        # 1. Target Premium Users who have Auto-Accept ENABLED
+        premium_users = db.query(User).filter(
+            User.subscription_tier.in_(['founder', 'empire']),
+            User.auto_accept_enabled == True
+        ).all()
+        user_ids = [u.id for u in premium_users]
+        
+        if not user_ids:
+            print("ℹ️ No premium users found for auto-accept.")
+            return
+
+        # 2. Find High Confidence Matches (>95%)
+        # Note: We filter by realm_id associated with these users
+        connections = db.query(QBOConnection).filter(QBOConnection.user_id.in_(user_ids)).all()
+        
+        for conn in connections:
+            service = TransactionService(db, conn)
+            
+            # Find txs: unmatched, high confidence, not forced_review
+            candidates = db.query(Transaction).filter(
+                Transaction.realm_id == conn.realm_id,
+                Transaction.status == 'unmatched',
+                Transaction.confidence >= 0.95,
+                Transaction.forced_review == False
+            ).all()
+            
+            if not candidates:
+                continue
+                
+            print(f"🚀 [Auto-Accept] Processing {len(candidates)} candidates for realm {conn.realm_id}")
+            for tx in candidates:
+                # Use synchronous-ish path here as we are already in a background worker
+                try:
+                    # We use approve_transaction(optimistic=False) to run it sequentially in this worker
+                    await service.approve_transaction(tx.id, optimistic=False)
+                except Exception as e:
+                    print(f"⚠️ Failed auto-accept for {tx.id}: {e}")
+
+        print("✅ Auto-Accept Cron Job complete.")
+        
+    except Exception as e:
+        print(f"❌ Auto-Accept Job failed: {e}")
+    finally:
+        db.close()
+
 @app.function(image=image, secrets=[secrets])
 def daily_maintenance():
     print("Running daily maintenance tasks...")

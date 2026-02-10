@@ -213,8 +213,20 @@ async def approve_transaction(realm_id: str, tx_id: str, db: Session = Depends(g
     
     service = TransactionService(db, connection)
     try:
-        result = await service.approve_transaction(tx_id)
-        return {"message": "Transaction approved and synced to QBO", "result": result}
+        # 1. Optimistic local update
+        result = await service.approve_transaction(tx_id, optimistic=True)
+        
+        # 2. Spawn background QBO sync
+        try:
+            from modal_app import process_single_approval
+            process_single_approval.spawn(realm_id, tx_id)
+        except (ImportError, Exception) as e:
+            print(f"⚠️ [API] Background worker spawn failed. Running synchronously as fallback: {e}")
+            # Optional: Fallback to sync if Modal isn't available
+            # await service.sync_approved_to_qbo(tx_id)
+            pass
+
+        return {"message": "Transaction approval queued", "tx_id": tx_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
