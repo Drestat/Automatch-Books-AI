@@ -11,19 +11,20 @@ export interface GamificationStats {
 }
 
 export function useGamification() {
-    const { getToken } = useAuth();
+    const { getToken, userId } = useAuth();
     const [stats, setStats] = useState<GamificationStats | null>(null);
     const [loading, setLoading] = useState(true);
 
     const fetchStats = async () => {
         try {
             const token = await getToken();
-            if (!token) return;
+            if (!token || !userId) return;
 
             const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run';
             const res = await fetch(`${baseUrl}/api/v1/gamification/stats`, {
                 headers: {
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${token}`,
+                    'X-User-Id': userId
                 }
             });
 
