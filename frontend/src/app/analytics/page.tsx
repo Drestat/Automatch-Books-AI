@@ -125,7 +125,7 @@ export default function AnalyticsPage() {
                                     <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
                                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">{cat.name}</span>
                                 </div>
-                                <span className="text-xs font-mono font-bold text-white data-field">${cat.value.toLocaleString()}</span>
+                                <span className="text-xs font-mono font-bold text-white data-field">${cat.value.toLocaleString('en-US')}</span>
                             </div>
                         ))}
                     </div>
@@ -134,7 +134,7 @@ export default function AnalyticsPage() {
                 {/* KPI Cards */}
                 <BentoTile delay={0.1} className="tactile-item border-white/5">
                     <p className="text-[10px] text-white/20 font-black uppercase tracking-[0.2em] mb-4">Gross Outflow</p>
-                    <h4 className="text-4xl font-black text-white tracking-tighter mb-4">${kpi.totalSpend.toLocaleString()}</h4>
+                    <h4 className="text-4xl font-black text-white tracking-tighter mb-4">${kpi.totalSpend.toLocaleString('en-US')}</h4>
                     <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-rose-400 bg-rose-400/10 px-2.5 py-1.5 rounded-xl w-fit">
                         <TrendingUp size={12} /> +12.5% vs Prev
                     </div>
@@ -142,7 +142,7 @@ export default function AnalyticsPage() {
 
                 <BentoTile delay={0.2} className="border-brand/20 bg-brand/5 tactile-item">
                     <p className="text-[10px] text-brand/60 font-black uppercase tracking-[0.2em] mb-4">Total Inflow</p>
-                    <h4 className="text-4xl font-black text-white tracking-tighter mb-4">${kpi.totalIncome.toLocaleString()}</h4>
+                    <h4 className="text-4xl font-black text-white tracking-tighter mb-4">${kpi.totalIncome.toLocaleString('en-US')}</h4>
                     <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-400/10 px-2.5 py-1.5 rounded-xl w-fit">
                         <TrendingUp size={12} /> +5.2% vs Prev
                     </div>
@@ -151,7 +151,7 @@ export default function AnalyticsPage() {
                 <BentoTile delay={0.3} className="tactile-item border-white/5">
                     <p className="text-[10px] text-white/20 font-black uppercase tracking-[0.2em] mb-4">Net Liquidity</p>
                     <h4 className="text-4xl font-black text-white tracking-tighter mb-4 font-mono">
-                        {kpi.netFlow >= 0 ? '+' : ''}${kpi.netFlow.toLocaleString()}
+                        {kpi.netFlow >= 0 ? '+' : ''}${kpi.netFlow.toLocaleString('en-US')}
                     </h4>
                     <p className="text-[10px] font-black uppercase tracking-widest text-white/20 mt-2">
                         {kpi.netFlow >= 0 ? "Margin Optimized" : "Burn Accelerated"}

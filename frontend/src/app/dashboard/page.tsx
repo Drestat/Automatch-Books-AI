@@ -97,7 +97,8 @@ function DashboardContent() {
     vendors,
     showTokenModal,
     setShowTokenModal,
-    splitTransaction
+    splitTransaction,
+    realmId
   } = useQBO();
 
   const [loading, setLoading] = useState(false); // Local loading for UI actions
@@ -257,12 +258,11 @@ function DashboardContent() {
           isOpen={showAccountModal}
           onClose={() => setShowAccountModal(false)}
           onSuccess={() => {
-            const realm = typeof window !== 'undefined' ? localStorage.getItem('qbo_realm_id') : null;
-            if (realm) {
+            if (realmId) {
               window.location.reload();
             }
           }}
-          realmId={typeof window !== 'undefined' ? (localStorage.getItem('qbo_realm_id') || '') : ''}
+          realmId={realmId || ''}
         />
 
         <TokenDepletedModal
@@ -286,7 +286,7 @@ function DashboardContent() {
               Dashboard
             </h1>
             <p className="text-white/30 text-sm sm:text-base font-medium max-w-sm">
-              Syncing activity for <span className="text-white/80">{isLoaded && user?.firstName ? user.firstName : 'User'}</span>
+              Syncing activity for <span className="text-white/80">{isClient && isLoaded && user?.firstName ? user.firstName : 'User'}</span>
             </p>
           </motion.div>
 
@@ -325,7 +325,7 @@ function DashboardContent() {
                   <div className="flex flex-col">
                     <span className="text-[7px] uppercase text-brand-accent/60 font-black tracking-widest leading-none mb-1">Refill</span>
                     <span className="font-mono font-bold text-white/90 leading-none text-sm">
-                      {profile.token_balance.toLocaleString()}
+                      {profile.token_balance.toLocaleString('en-US')}
                     </span>
                   </div>
                 </div>

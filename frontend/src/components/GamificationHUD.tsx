@@ -120,7 +120,7 @@ export function GamificationHUD() {
                     </span>
                     <div className="flex items-center gap-2">
                         <span className="font-mono font-bold text-white/90 leading-none text-xs">
-                            {stats.total_xp.toLocaleString()} AP
+                            {stats.total_xp.toLocaleString('en-US')} AP
                         </span>
                     </div>
                 </div>
