@@ -185,10 +185,10 @@ export default function TransactionCard({
                         {/* Date & Time */}
                         <div className="text-white shrink-0 min-w-[3rem]">
                             <h4 className="text-sm sm:text-base font-black tracking-tight leading-none uppercase">
-                                {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(tx.date))}
+                                {new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(tx.date))}
                             </h4>
                             <p className="text-[9px] sm:text-[10px] font-black text-white/40 uppercase mt-1 leading-none">
-                                {new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }).format(new Date(tx.date))}
+                                {new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'UTC' }).format(new Date(tx.date))}
                             </p>
                         </div>
 
