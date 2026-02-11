@@ -148,7 +148,6 @@ function DashboardContent() {
   });
 
   const isClient = useIsClient();
-  if (!isClient) return null;
 
   // Auto-open modal if connected but no accounts active (and not demo)
   useEffect(() => {
@@ -258,12 +257,12 @@ function DashboardContent() {
           isOpen={showAccountModal}
           onClose={() => setShowAccountModal(false)}
           onSuccess={() => {
-            const realm = localStorage.getItem('qbo_realm_id');
+            const realm = typeof window !== 'undefined' ? localStorage.getItem('qbo_realm_id') : null;
             if (realm) {
               window.location.reload();
             }
           }}
-          realmId={localStorage.getItem('qbo_realm_id') || ''}
+          realmId={typeof window !== 'undefined' ? (localStorage.getItem('qbo_realm_id') || '') : ''}
         />
 
         <TokenDepletedModal
@@ -287,7 +286,7 @@ function DashboardContent() {
               Dashboard
             </h1>
             <p className="text-white/30 text-sm sm:text-base font-medium max-w-sm">
-              Syncing activity for <span className="text-white/80">{user?.firstName || 'User'}</span>
+              Syncing activity for <span className="text-white/80">{isLoaded && user?.firstName ? user.firstName : 'User'}</span>
             </p>
           </motion.div>
 
