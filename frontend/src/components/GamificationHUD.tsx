@@ -42,25 +42,11 @@ const getNextLevelXP = (currentLevel: number) => {
 export function GamificationHUD() {
     const { stats, loading } = useGamification();
 
-    if (loading || !stats) return null;
-
-    const isStreakActive = stats.current_streak > 0;
-    const streakColor = stats.current_streak >= 7 ? "text-yellow-400" : stats.current_streak >= 3 ? "text-purple-400" : "text-blue-400";
-    const streakBg = stats.current_streak >= 7 ? "bg-yellow-400/10" : stats.current_streak >= 3 ? "bg-purple-400/10" : "bg-blue-400/10";
-    const streakBorder = stats.current_streak >= 7 ? "border-yellow-400/20" : stats.current_streak >= 3 ? "border-purple-400/20" : "border-blue-400/20";
+    const prevStatsRef = React.useRef(stats);
 
     // Haptics on Level Up or Streak Increase
     React.useEffect(() => {
         if (loading || !stats) return;
-
-        // We could store previous state in a ref to only trigger on *change*, 
-        // but for now, let's just trigger on mount if they have a high streak to celebrate?
-        // No, that's annoying. We need a ref for previous.
-    }, [stats, loading]);
-
-    const prevStatsRef = React.useRef(stats);
-    React.useEffect(() => {
-        if (!stats) return;
         const prev = prevStatsRef.current;
 
         if (prev) {
@@ -68,14 +54,20 @@ export function GamificationHUD() {
             if (stats.current_level > prev.current_level) {
                 import('@/lib/haptics').then(({ triggerHapticFeedback }) => triggerHapticFeedback());
             }
-            // Streak Increase -> Light Haptic (simulated by same function for now, or we can enhance haptics.ts later)
-            // For now, just trigger event.
+            // Streak Increase -> Light Haptic
             if (stats.current_streak > prev.current_streak) {
                 import('@/lib/haptics').then(({ triggerHapticFeedback }) => triggerHapticFeedback());
             }
         }
         prevStatsRef.current = stats;
-    }, [stats]);
+    }, [stats, loading]);
+
+    if (loading || !stats) return null;
+
+    const isStreakActive = stats.current_streak > 0;
+    const streakColor = stats.current_streak >= 7 ? "text-yellow-400" : stats.current_streak >= 3 ? "text-purple-400" : "text-blue-400";
+    const streakBg = stats.current_streak >= 7 ? "bg-yellow-400/10" : stats.current_streak >= 3 ? "bg-purple-400/10" : "bg-blue-400/10";
+    const streakBorder = stats.current_streak >= 7 ? "border-yellow-400/20" : stats.current_streak >= 3 ? "border-purple-400/20" : "border-blue-400/20";
 
     return (
         <div className="flex items-center gap-3">
