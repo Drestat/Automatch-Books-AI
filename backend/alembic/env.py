@@ -13,6 +13,7 @@ from app.db.session import Base
 from app.models.user import User
 from app.models.qbo import QBOConnection, Transaction
 from app.models.analytics import AnalyticsEvent
+from app.models.gamification import UserGamificationStats, GamificationEvent
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
