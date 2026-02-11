@@ -61,6 +61,7 @@ import { useUser } from '@/hooks/useUser';
 
 import { SubscriptionGuard } from '@/components/SubscriptionGuard';
 import Skeleton from '@/components/Skeleton';
+import { useIsClient } from '@/hooks/useIsClient';
 
 function DashboardContent() {
   const {
@@ -146,6 +147,8 @@ function DashboardContent() {
     return sortConfig.direction === 'asc' ? comparison : -comparison;
   });
 
+  const isClient = useIsClient();
+  if (!isClient) return null;
 
   // Auto-open modal if connected but no accounts active (and not demo)
   useEffect(() => {
