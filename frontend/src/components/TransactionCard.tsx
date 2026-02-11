@@ -136,12 +136,30 @@ export default function TransactionCard({
         await onAccept(tx.id);
     };
 
+    const [uploadError, setUploadError] = React.useState(false);
+
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file && onReceiptUpload) {
             setIsUploading(true);
-            await onReceiptUpload(tx.id, file);
-            setIsUploading(false);
+            setUploadError(false);
+            try {
+                await onReceiptUpload(tx.id, file);
+            } catch {
+                setUploadError(true);
+                setTimeout(() => setUploadError(false), 3000);
+            } finally {
+                setIsUploading(false);
+            }
+        }
+    };
+
+    const handleTagSubmit = () => {
+        const trimmed = newTag.trim();
+        if (trimmed && onTagAdd) {
+            onTagAdd(tx.id, trimmed);
+            setNewTag("");
+            setIsAddingTag(false);
         }
     };
 
@@ -468,12 +486,42 @@ export default function TransactionCard({
                                     <Sparkles size={9} /> {tag}
                                 </button>
                             ))}
-                            <button
-                                onClick={() => setIsAddingTag(true)}
-                                className="px-2.5 py-1 rounded-md border border-dashed border-white/10 text-[9px] text-white/20 font-bold uppercase hover:bg-white/5 hover:text-white/50 transition-all flex items-center gap-1"
-                            >
-                                <span className="text-xs leading-none">+</span> Tag
-                            </button>
+                            {isAddingTag ? (
+                                <div className="flex items-center gap-1.5 animate-in fade-in slide-in-from-left-2 duration-200">
+                                    <input
+                                        type="text"
+                                        value={newTag}
+                                        onChange={(e) => setNewTag(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') handleTagSubmit();
+                                            if (e.key === 'Escape') { setIsAddingTag(false); setNewTag(""); }
+                                        }}
+                                        autoFocus
+                                        placeholder="Tag name..."
+                                        className="w-24 px-2 py-1 rounded-md bg-white/5 border border-brand-accent/30 text-[10px] text-white font-bold uppercase placeholder:text-white/20 focus:outline-none focus:border-brand-accent/60 transition-colors"
+                                    />
+                                    <button
+                                        onClick={handleTagSubmit}
+                                        disabled={!newTag.trim()}
+                                        className="p-1 rounded-md bg-brand-accent/10 border border-brand-accent/20 text-brand-accent hover:bg-brand-accent/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                    >
+                                        <Check size={10} />
+                                    </button>
+                                    <button
+                                        onClick={() => { setIsAddingTag(false); setNewTag(""); }}
+                                        className="p-1 rounded-md text-white/20 hover:text-white/60 transition-colors"
+                                    >
+                                        <X size={10} />
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setIsAddingTag(true)}
+                                    className="px-2.5 py-1 rounded-md border border-dashed border-white/10 text-[9px] text-white/20 font-bold uppercase hover:bg-white/5 hover:text-white/50 transition-all flex items-center gap-1"
+                                >
+                                    <span className="text-xs leading-none">+</span> Tag
+                                </button>
+                            )}
                         </div>
                     </div>
                 </motion.div>
@@ -494,10 +542,18 @@ export default function TransactionCard({
                             <button
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={isUploading}
-                                className={`flex-[3] sm:flex-[2] px-3 bg-[#061a18] border border-brand-accent/20 rounded-xl flex items-center justify-center font-bold gap-2 text-brand-trend transition-all active:scale-95 hover:bg-[#0a2825] hover:border-brand-accent/40 hover:shadow-[0_0_20px_-5px_var(--glow-brand)]`}
+                                className={`flex-[3] sm:flex-[2] px-3 bg-[#061a18] border ${uploadError ? 'border-rose-500/40' : 'border-brand-accent/20'} rounded-xl flex items-center justify-center font-bold gap-2 ${uploadError ? 'text-rose-400' : 'text-brand-trend'} transition-all active:scale-95 hover:bg-[#0a2825] hover:border-brand-accent/40 hover:shadow-[0_0_20px_-5px_var(--glow-brand)]`}
                             >
                                 {isUploading ? (
-                                    <div className="w-3 h-3 border-2 border-brand-accent border-t-transparent rounded-full animate-spin" />
+                                    <>
+                                        <div className="w-3.5 h-3.5 border-2 border-brand-accent border-t-transparent rounded-full animate-spin" />
+                                        <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.1em] font-bold">Uploading…</span>
+                                    </>
+                                ) : uploadError ? (
+                                    <>
+                                        <X size={16} />
+                                        <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.1em] font-bold">Failed</span>
+                                    </>
                                 ) : (
                                     <>
                                         <FilePlus size={16} />
