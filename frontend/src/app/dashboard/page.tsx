@@ -3,7 +3,12 @@
 import React, { useState, Suspense, useEffect } from 'react';
 import Link from 'next/link';
 import TransactionCard from '@/components/TransactionCard';
-import { GamificationHUD } from '@/components/GamificationHUD';
+import dynamic from 'next/dynamic';
+
+const GamificationHUD = dynamic(
+  () => import('@/components/GamificationHUD').then((mod) => mod.GamificationHUD),
+  { ssr: false }
+);
 import { BentoGrid } from '@/components/BentoGrid';
 import { BentoTile } from '@/components/BentoTile';
 import { useQBO } from '@/hooks/useQBO';

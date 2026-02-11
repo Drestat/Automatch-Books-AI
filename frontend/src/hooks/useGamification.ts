@@ -40,8 +40,10 @@ export function useGamification() {
     };
 
     useEffect(() => {
-        fetchStats();
-    }, []);
+        if (userId) {
+            fetchStats();
+        }
+    }, [userId]);
 
     return { stats, loading, refreshStats: fetchStats };
 }
