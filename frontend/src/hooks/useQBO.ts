@@ -477,6 +477,20 @@ export const useQBO = () => {
     };
 
 
+    const disableDemo = () => {
+        setIsDemo(false);
+        localStorage.removeItem('is_demo_mode');
+        // If connected, sync will auto-restore data via effects
+        if (realmId && isConnected) {
+            fetchTransactions(realmId);
+            showToast('Live Mode Restored', 'success');
+        } else {
+            // If not connected, clear data
+            setTransactions([]);
+            showToast('Demo Mode Deactivated', 'info');
+        }
+    };
+
     const sync = async (overrideRealm?: string) => {
         const targetRealm = overrideRealm || realmId;
         if (!targetRealm && !isDemo) return;
@@ -938,6 +952,7 @@ export const useQBO = () => {
         showTokenModal,
         setShowTokenModal,
         realmId,
-        showToast
+        showToast,
+        disableDemo
     };
 };

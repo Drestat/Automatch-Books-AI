@@ -105,7 +105,8 @@ function DashboardContent() {
     showTokenModal,
     setShowTokenModal,
     splitTransaction,
-    realmId
+    realmId,
+    disableDemo
   } = useQBO();
 
   const [loading, setLoading] = useState(false); // Local loading for UI actions
@@ -326,10 +327,17 @@ function DashboardContent() {
             className="relative"
           >
             <div className="flex items-center gap-2.5 mb-3 text-xs sm:text-sm">
-              <span className={`w-1.5 h-1.5 rounded-full ${isDemo ? 'bg-brand-accent' : 'bg-brand'} animate-pulse shadow-[0_0_12px_rgba(0,223,216,0.6)]`} />
-              <span className={`text-[10px] font-black tracking-[0.3em] ${isDemo ? 'text-brand-accent' : 'text-brand'} uppercase`}>
-                {isDemo ? 'Demo Mode' : 'Live Sync'}
-              </span>
+              <button
+                onClick={isDemo ? disableDemo : undefined}
+                disabled={!isDemo}
+                className={`flex items-center gap-2.5 ${isDemo ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'cursor-default'}`}
+                title={isDemo ? "Click to exit Demo Mode" : "Live Mode Active"}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${isDemo ? 'bg-brand-accent' : 'bg-brand'} animate-pulse shadow-[0_0_12px_rgba(0,223,216,0.6)]`} />
+                <span className={`text-[10px] font-black tracking-[0.3em] ${isDemo ? 'text-brand-accent' : 'text-brand'} uppercase`}>
+                  {isDemo ? 'Demo Mode' : 'Live Sync'}
+                </span>
+              </button>
             </div>
             <h1 className="text-5xl sm:text-7xl font-black tracking-tighter mb-3 leading-none heading-shimmer">
               Dashboard
