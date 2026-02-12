@@ -323,13 +323,11 @@ export const useQBO = () => {
     const connect = async () => {
         // DEBUG: Check user existence immediately
         if (!user) {
-            alert('Connect Aborted: NO USER FOUND. You appear to be logged out or Clerk failed to load.');
+            showToast('Please sign in to connect to QuickBooks.', 'error');
             return;
         }
         track('sync_start', { type: 'connect_flow' }, user.id);
         setLoading(true);
-        // DEBUG: Alert user to connection attempt
-        alert(`Requesting Auth URL from: ${API_BASE_URL}/qbo/authorize?user_id=${user.id}`);
 
         try {
             // Add a timeout to catch cold starts
@@ -338,7 +336,6 @@ export const useQBO = () => {
             const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
 
             // USE PROXY to bypass CORS
-            // Was: ${API_BASE_URL}/qbo/authorize?user_id=${user.id}
             const proxyUrl = `/api/qbo-proxy?endpoint=qbo/authorize&user_id=${user.id}`;
 
             const response = await fetch(proxyUrl, {
@@ -346,27 +343,22 @@ export const useQBO = () => {
             });
             clearTimeout(timeoutId);
 
-            alert(`Response Status: ${response.status}`);
-
             if (!response.ok) {
                 const text = await response.text();
-                alert(`Error Body: ${text}`);
                 throw new Error(`Server returned ${response.status}: ${text}`);
             }
 
             const data = await response.json() as ConnectResponse;
-            alert(`Received Auth URL: ${data.auth_url || 'MISSING'}`);
 
             if (data.auth_url) {
                 window.location.href = data.auth_url;
+            } else {
+                showToast('Failed to get authorization URL. Please try again.', 'error');
             }
         } catch (error: any) {
             console.error('Connect Error:', error);
-            // DEBUG: Extract explicit error details because JSON.stringify(Error) returns {}
             const errorMsg = error.message || 'Unknown Error';
-            const errorName = error.name || 'Error';
-            alert(`Network/Code Error: ${errorName} - ${errorMsg}`);
-            showToast('Connection failed. Please check network/console.', 'error');
+            showToast(`Connection failed: ${errorMsg}`, 'error');
         } finally {
             setLoading(false);
         }

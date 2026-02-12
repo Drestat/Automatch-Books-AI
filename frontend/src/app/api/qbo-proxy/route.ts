@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 
 const TARGET_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run') + '/api/v1';
 
@@ -10,8 +11,13 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Endpoint required' }, { status: 400 });
     }
 
-    // Construct target URL
-    // endpoint passed like 'qbo/authorize' properties are passed as regular params
+    // Get the authenticated user's ID from Clerk
+    const { userId } = await auth();
+    if (!userId) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Forward all params except 'endpoint'
     const forwardParams = new URLSearchParams();
     searchParams.forEach((value, key) => {
         if (key !== 'endpoint') {
@@ -23,7 +29,11 @@ export async function GET(request: NextRequest) {
     console.log(`[Proxy] Forwarding to: ${url}`);
 
     try {
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            headers: {
+                'X-User-Id': userId,
+            },
+        });
         const data = await response.json();
         return NextResponse.json(data, { status: response.status });
     } catch (error: any) {
