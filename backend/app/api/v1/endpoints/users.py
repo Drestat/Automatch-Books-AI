@@ -8,26 +8,53 @@ from app.schemas.user import UserSync, UserPreferences
 
 router = APIRouter()
 
+# All valid subscription tiers in the system
+VALID_TIERS = {'free', 'personal', 'business', 'corporate', 'starter', 'pro', 'founder', 'empire'}
+
+# Token allowances per tier
+TIER_TOKEN_ALLOWANCES = {
+    'free': 50,
+    'personal': 200,
+    'business': 500,
+    'corporate': 2000,
+    'starter': 200,
+    'pro': 500,
+    'founder': 2000,
+    'empire': 5000,
+}
+
 @router.post("/sync")
 def sync_user(user_in: UserSync, db: Session = Depends(get_db)):
     """
-    Sync user from Clerk webhook.
+    Sync user from Clerk webhook or Stripe webhook.
     Creates user if not exists, updates if exists.
+    Handles: email, stripe_customer_id, subscription_tier, subscription_status.
     """
     user = db.query(User).filter(User.id == user_in.id).first()
     if not user:
         user = User(
             id=user_in.id, 
-            email=user_in.email,
-            stripe_customer_id=user_in.stripe_customer_id
+            email=user_in.email or f"{user_in.id}@clerk.internal",
+            stripe_customer_id=user_in.stripe_customer_id,
+            subscription_tier=user_in.subscription_tier or "free",
         )
         db.add(user)
     else:
-        user.email = user_in.email
+        # Update fields only if provided (non-None)
+        if user_in.email:
+            user.email = user_in.email
         if user_in.stripe_customer_id:
             user.stripe_customer_id = user_in.stripe_customer_id
+        if user_in.subscription_tier and user_in.subscription_tier in VALID_TIERS:
+            user.subscription_tier = user_in.subscription_tier
+            # Update token allowance when tier changes
+            user.monthly_token_allowance = TIER_TOKEN_ALLOWANCES.get(user_in.subscription_tier, 50)
+            # Grant tokens immediately on upgrade
+            if user.token_balance < user.monthly_token_allowance:
+                user.token_balance = user.monthly_token_allowance
+        if user_in.subscription_status:
+            user.subscription_status = user_in.subscription_status
     
-    db.commit()
     db.commit()
     return {"status": "synced"}
 
@@ -42,10 +69,8 @@ def fetch_my_profile(user_id: str, db: Session = Depends(get_db)):
 def get_user(user_id: str, db: Session = Depends(get_db)):
     """
     Get user by ID with computed subscription status.
-    Active -> Paid plan
-    Trial -> Free plan within 7 days
-    Expired -> Free plan after 7 days
-    No Plan -> New user
+    Active -> Paid plan or free plan
+    No Plan -> Unknown tier
     """
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -53,7 +78,7 @@ def get_user(user_id: str, db: Session = Depends(get_db)):
         # but haven't been synced yet (e.g. if webhooks are down)
         user = User(
             id=user_id,
-            email=f"{user_id}@clerk.internal", # Unique placeholder, will be updated on next sync
+            email=f"{user_id}@clerk.internal",
             subscription_tier="free",
         )
         db.add(user)
@@ -61,28 +86,18 @@ def get_user(user_id: str, db: Session = Depends(get_db)):
         db.refresh(user)
 
     # Calculate computed status
-    current_time = func.now()
-    
-    status = "no_plan"
-    days_remaining = 0
-    
-    if user.subscription_tier in ['personal', 'business', 'corporate', 'starter', 'pro', 'founder', 'empire']:
+    if user.subscription_tier in VALID_TIERS:
         status = "active"
-    elif user.subscription_tier == 'free':
-        status = "active"  # Free forever tier
     else:
         status = "no_plan"
 
-    # Attach computed fields to response (pydantic schema usually filters this, 
-    # so we might need to return a dict or update the schema.
-    # We'll return a dict to be safe and flexible.)
     return {
         "id": user.id,
         "email": user.email,
         "subscription_status": status,
         "subscription_tier": user.subscription_tier,
         "trial_ends_at": user.trial_ends_at,
-        "days_remaining": days_remaining,
+        "days_remaining": 0,
         "token_balance": user.token_balance,
         "monthly_token_allowance": user.monthly_token_allowance,
         "auto_accept_enabled": user.auto_accept_enabled
@@ -100,10 +115,6 @@ def update_user_preferences(
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    # Gating check: Auto-accept is only for Founder/Empire
-    # However, we allow the DB write if they are premium, but the UI should handle the graying out.
-    # On the backend, we should also enforce tier-based execution.
     
     user.auto_accept_enabled = prefs.auto_accept_enabled
     db.commit()

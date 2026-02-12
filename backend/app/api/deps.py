@@ -29,7 +29,9 @@ def get_subscription_status(user: User):
     Computes subscription status.
     Returns: active, no_plan
     """
-    if user.subscription_tier in ['free', 'free_user', 'personal', 'business', 'corporate', 'starter', 'pro', 'founder', 'empire']:
+    # All recognized tiers are active
+    VALID_TIERS = {'free', 'free_user', 'personal', 'business', 'corporate', 'starter', 'pro', 'founder', 'empire'}
+    if user.subscription_tier in VALID_TIERS:
         return "active"
     
     return "no_plan"
