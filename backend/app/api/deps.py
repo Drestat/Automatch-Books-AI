@@ -9,10 +9,19 @@ from typing import Optional
 def get_current_user(x_user_id: str = Header(..., alias="X-User-Id"), db: Session = Depends(get_db)) -> User:
     """
     Retrieves the current user based on the X-User-Id header.
+    Auto-creates the user if they don't exist yet (lazy registration from Clerk).
     """
     user = db.query(User).filter(User.id == x_user_id).first()
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        # Lazy Registration: Create user if they exist in Clerk but haven't been synced yet
+        user = User(
+            id=x_user_id,
+            email=f"{x_user_id}@clerk.internal",
+            subscription_tier="free",
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
     return user
 
 def get_subscription_status(user: User):
