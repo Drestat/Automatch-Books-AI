@@ -13,6 +13,7 @@ export interface UserProfile {
     token_balance: number;
     monthly_token_allowance: number;
     auto_accept_enabled: boolean;
+    realm_id: string | null;
 }
 
 export const useUser = () => {

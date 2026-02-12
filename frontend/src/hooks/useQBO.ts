@@ -119,7 +119,7 @@ export interface Category {
 }
 
 export const useQBO = () => {
-    const { user, isLoaded, refreshProfile } = useUser();
+    const { user, isLoaded, refreshProfile, profile } = useUser();
     const router = useRouter();
     const searchParams = useSearchParams();
     const { showToast } = useToast();
@@ -258,6 +258,20 @@ export const useQBO = () => {
     useEffect(() => {
         if (!isLoaded || !user) return;
 
+        // Sync Realm ID from Profile (Backfill if LocalStorage empty)
+        if (profile?.realm_id && !realmId) {
+            console.log('Restoring QBO connection from user profile:', profile.realm_id);
+            setRealmId(profile.realm_id);
+            setIsConnected(true);
+            localStorage.setItem('qbo_realm_id', profile.realm_id);
+
+            // Trigger data fetches
+            fetchAccounts(profile.realm_id);
+            fetchTags(profile.realm_id);
+            fetchCategories(profile.realm_id);
+            fetchVendors(profile.realm_id);
+        }
+
         // ... rest of user fetch logic ...
         const safetyTimer = setTimeout(() => {
             setSubscriptionStatus(prev => prev || 'trial');
@@ -285,7 +299,7 @@ export const useQBO = () => {
         fetchUserStatus();
 
         return () => clearTimeout(safetyTimer);
-    }, [isLoaded, user]);
+    }, [isLoaded, user, profile, realmId]); // Added profile and realmId dependency
 
     // Effect 3: Restore Session from LocalStorage
     useEffect(() => {
