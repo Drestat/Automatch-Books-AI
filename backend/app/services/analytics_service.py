@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func, case
-from app.models.qbo import Transaction, Category, SyncLog, QBOConnection
+from app.models.qbo import Transaction, Category, SyncLog, QBOConnection, BankAccount
+from app.models.user import User
 from datetime import datetime, timedelta
 
 class AnalyticsService:
@@ -91,36 +92,93 @@ class AnalyticsService:
         }
 
     def get_all_user_usage(self):
-        """Admin: Aggregates usage stats for all realms"""
-        # 1. Get transaction counts per realm
+        """Admin: Aggregates usage stats for all realms + Business Intelligence"""
+        
+        # 1. User & Subscription Stats
+        users = self.db.query(User).all()
+        
+        tier_pricing = {
+            "free": 0,
+            "free_user": 0,
+            "personal": 2.99,
+            "business": 8.99,
+            "corporate": 49.99,
+            "starter": 2.99, # Legacy
+            "pro": 2.99, # Legacy
+            "founder": 29.99, # Legacy
+            "empire": 99.99 # Legacy
+        }
+        
+        mrr = 0.0
+        tier_counts = {}
+        
+        for u in users:
+            # MRR
+            price = tier_pricing.get(u.subscription_tier, 0)
+            mrr += price
+            
+            # Tiers
+            tier = u.subscription_tier or "free"
+            tier_counts[tier] = tier_counts.get(tier, 0) + 1
+
+        # 2. Global Volume (Total Transaction Value Processed)
+        # We sum absolute value of all transactions to show "Activity Volume"
+        total_vol_query = self.db.query(func.sum(func.abs(Transaction.amount))).scalar()
+        total_volume = float(total_vol_query) if total_vol_query else 0.0
+
+        # 3. Location Proxy (via Currency)
+        # Group BankAccounts by Currency to guess region
+        currency_stats = self.db.query(
+            BankAccount.currency,
+            func.count(BankAccount.id)
+        ).group_by(BankAccount.currency).all()
+        
+        location_data = []
+        for curr, count in currency_stats:
+            if not curr: continue
+            region = "Global"
+            if curr == "USD": region = "United States"
+            elif curr == "CAD": region = "Canada"
+            elif curr == "GBP": region = "United Kingdom"
+            elif curr == "EUR": region = "Europe"
+            elif curr == "AUD": region = "Australia"
+            elif curr == "INR": region = "India"
+            
+            location_data.append({"currency": curr, "region": region, "count": count})
+
+        # 4. User Leaderboard Data (Existing logic)
         tx_stats = self.db.query(
             Transaction.realm_id,
             func.count(Transaction.id).label('tx_count')
         ).group_by(Transaction.realm_id).subquery()
 
-        # 2. Aggregated Sync Logs
         sync_stats = self.db.query(
             SyncLog.realm_id,
             func.count(case((SyncLog.operation == 'sync', 1))).label('total_syncs'),
             func.sum(SyncLog.count).label('total_items')
         ).group_by(SyncLog.realm_id).subquery()
 
-        # 3. Join with Connections to get names/dates
         results = self.db.query(
             QBOConnection.realm_id,
             QBOConnection.updated_at,
             func.coalesce(sync_stats.c.total_syncs, 0).label('syncs'),
             func.coalesce(sync_stats.c.total_items, 0).label('items'),
-            func.coalesce(tx_stats.c.tx_count, 0).label('transactions')
+            func.coalesce(tx_stats.c.tx_count, 0).label('transactions'),
+            User.email, 
+            User.subscription_tier
         ).outerjoin(
             sync_stats, QBOConnection.realm_id == sync_stats.c.realm_id
         ).outerjoin(
             tx_stats, QBOConnection.realm_id == tx_stats.c.realm_id
+        ).outerjoin(
+            User, QBOConnection.user_id == User.id
         ).all()
 
-        return [
+        leaderboard = [
             {
                 "realmId": row.realm_id,
+                "email": row.email, # Admin only
+                "tier": row.subscription_tier,
                 "lastActive": row.updated_at.isoformat() if row.updated_at else None,
                 "totalSyncs": int(row.syncs),
                 "totalItems": int(row.items),
@@ -128,3 +186,17 @@ class AnalyticsService:
             }
             for row in results
         ]
+        
+        return {
+            "kpi": {
+                "mrr": mrr,
+                "totalVolume": total_volume,
+                "activeUsers": len(users),
+                "avgRevenuePerUser": mrr / len(users) if users else 0
+            },
+            "distributions": {
+                "tiers": [{"name": k, "value": v} for k, v in tier_counts.items()],
+                "locations": location_data
+            },
+            "leaderboard": leaderboard
+        }
