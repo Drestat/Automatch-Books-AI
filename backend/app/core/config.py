@@ -56,6 +56,12 @@ class Settings(BaseSettings):
     # Clerk Settings
     CLERK_SECRET_KEY: str = os.getenv("CLERK_SECRET_KEY", "")
 
+    # Admin God Mode Whitelist (Clerk User IDs)
+    ADMIN_USERS: list[str] = [
+        "user_38gfoio189CGrr2AO1a9ssier7w", # User 1
+        "user_395GWw3SraKqcc7qjFToVMxH5v1", # User 2 (Likely Developer)
+    ]
+
     class Config:
         case_sensitive = True
         env_file = ".env"

@@ -89,6 +89,54 @@ export default function AdminDashboard() {
 
             <main>
                 <BentoGrid>
+                    {/* God Mode Control Panel */}
+                    <BentoTile className="md:col-span-3 border-brand-secondary/20 bg-brand-secondary/5 mt-8 mb-8">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-2 rounded-lg bg-brand-secondary text-white">
+                                <Trophy size={20} />
+                            </div>
+                            <h2 className="text-xl font-black text-white">GOD MODE: Subscription Override</h2>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            {['free', 'personal', 'business', 'corporate', 'expired'].map((tier) => (
+                                <button
+                                    key={tier}
+                                    onClick={async () => {
+                                        try {
+                                            const res = await fetch(`${API_BASE_URL}/admin/set-tier`, {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    // Since this is admin page, we assume Clerk middleware adds auth, 
+                                                    // but we might need to manually pass the active user ID if not automatically handled by proxy
+                                                    // For now, let's rely on the user being logged in via ClerkProvider
+                                                },
+                                                body: JSON.stringify({
+                                                    target_user_id: "me", // Targets the requester
+                                                    tier: tier,
+                                                    token_balance: tier === 'corporate' ? 1000 : 100
+                                                })
+                                            });
+                                            if (res.ok) {
+                                                alert(`Successfully switched to ${tier.toUpperCase()} tier!`);
+                                                window.location.reload();
+                                            } else {
+                                                const err = await res.json();
+                                                alert(`Failed: ${err.detail || 'Unknown error'}`);
+                                            }
+                                        } catch (e) {
+                                            alert("Network error executing God Mode.");
+                                        }
+                                    }}
+                                    className="btn-glass py-3 px-4 font-bold uppercase text-xs tracking-wider hover:bg-white/10"
+                                >
+                                    Set to {tier}
+                                </button>
+                            ))}
+                        </div>
+                    </BentoTile>
+
                     {/* Global KPIs */}
                     <BentoTile className="md:col-span-1 bg-gradient-to-br from-brand/10 to-transparent border-brand/20">
                         <div className="flex items-center gap-4 mb-4">
