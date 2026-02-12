@@ -17,6 +17,22 @@ export async function POST(req: Request) {
 
     const { tierName } = await req.json();
 
+    // Map tier backend key → price in cents
+    const TIER_PRICES: Record<string, number> = {
+        personal: 299,    // $2.99/mo
+        business: 899,    // $8.99/mo
+        corporate: 4999,  // $49.99/mo
+    };
+
+    const TIER_LABELS: Record<string, string> = {
+        personal: 'Personal Plan',
+        business: 'Business Plan',
+        corporate: 'Corporate Plan',
+    };
+
+    const unitAmount = TIER_PRICES[tierName] || 2900;
+    const label = TIER_LABELS[tierName] || 'Founder Plan';
+
     try {
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
@@ -25,10 +41,10 @@ export async function POST(req: Request) {
                     price_data: {
                         currency: 'usd',
                         product_data: {
-                            name: tierName || 'Founder Plan',
+                            name: label,
                             description: 'AutoMatch Books AI Subscription',
                         },
-                        unit_amount: tierName === 'Founder' ? 2900 : tierName === 'Empire' ? 7900 : 900,
+                        unit_amount: unitAmount,
                         recurring: {
                             interval: 'month',
                         },
@@ -39,9 +55,10 @@ export async function POST(req: Request) {
             mode: 'subscription',
             success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+            client_reference_id: userId,
             metadata: {
                 clerkId: userId,
-                tierName: tierName,
+                tierName: tierName,  // backend key: starter, founder, empire
             },
         });
 

@@ -70,31 +70,34 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None),
 
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
-        user_id = session.get('client_reference_id')
+        user_id = session.get('client_reference_id') or session.get('metadata', {}).get('clerkId')
         customer_id = session.get('customer')
+        
+        # Read the tier the user actually selected
+        tier_name = session.get('metadata', {}).get('tierName', 'free_user')
         
         user = db.query(User).filter(User.id == user_id).first()
         if user:
             user.stripe_customer_id = customer_id
             user.subscription_status = 'active'
-            user.subscription_tier = 'pro'
-            # Calculate trial end if present
-            if session.get('subscription_data', {}).get('trial_end'):
-                 # Note: Timestamp from Stripe is unix epoch
-                 ts = session.get('subscription_data', {}).get('trial_end')
-                 user.trial_ends_at = datetime.fromtimestamp(ts)
+            user.subscription_tier = tier_name  # starter, founder, or empire
             
             # Token Refill (Based on Tier)
-            # Hardcoded logic for now. Ideally fetched from price_id metadata.
-            if user.subscription_tier == 'pro':
-                user.monthly_token_allowance = 1000
-                user.token_balance = 1000
-            elif user.subscription_tier == 'business':
-                 user.monthly_token_allowance = 10000
-                 user.token_balance = 10000
-            else:
-                 user.monthly_token_allowance = 50
-                 user.token_balance = 50
+            TIER_TOKENS = {
+                'free_user': 25,
+                'personal': 100,
+                'business': 300,
+                'corporate': 700,
+                # Legacy keys
+                'starter': 100,
+                'founder': 300,
+                'empire': 700,
+                'pro': 300,
+                'free': 25,
+            }
+            allowance = TIER_TOKENS.get(tier_name, 25)
+            user.monthly_token_allowance = allowance
+            user.token_balance = allowance
 
             
             db.add(user)

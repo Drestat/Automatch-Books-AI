@@ -18,21 +18,11 @@ def get_current_user(x_user_id: str = Header(..., alias="X-User-Id"), db: Sessio
 def get_subscription_status(user: User):
     """
     Computes subscription status.
-    Returns: active, trial, expired, no_plan
+    Returns: active, no_plan
     """
-    if user.subscription_tier in ['pro', 'founder', 'empire']:
+    if user.subscription_tier in ['free', 'free_user', 'personal', 'business', 'corporate', 'starter', 'pro', 'founder', 'empire']:
         return "active"
     
-    if user.subscription_tier == 'free':
-        if user.trial_ends_at:
-            now = datetime.now(timezone.utc)
-            if user.trial_ends_at > now:
-                return "trial"
-            else:
-                return "expired"
-        else:
-            return "no_plan"
-            
     return "no_plan"
 
 async def verify_subscription(realm_id: str, db: Session = Depends(get_db)):

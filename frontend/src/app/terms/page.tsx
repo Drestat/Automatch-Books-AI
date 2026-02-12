@@ -56,6 +56,20 @@ export default function TermsPage() {
                             All software, designs, and AI prompts used in AutoMatch Books AI are the intellectual property of AutoMatch Books AI Engine. You are granted a limited, non-exclusive license to use the service for your business purposes.
                         </p>
                     </section>
+
+                    <section>
+                        <h2 className="text-2xl font-bold text-white mb-4">6. Indemnification</h2>
+                        <p>
+                            You agree to indemnify and hold harmless AutoMatch Books AI and its affiliates from any claims, damages, or expenses arising from your use of the service, including any meaningful errors in financial reporting or tax filings resulting from AI suggestions.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-bold text-white mb-4">7. Governing Law</h2>
+                        <p>
+                            These Terms shall be governed by and construed in accordance with the laws of the State of Florida, without regard to its conflict of law provisions.
+                        </p>
+                    </section>
                 </div>
             </main>
             <Footer />

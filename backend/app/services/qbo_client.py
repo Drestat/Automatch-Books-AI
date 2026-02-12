@@ -3,6 +3,7 @@ import asyncio
 from sqlalchemy.orm import Session
 from app.models.qbo import QBOConnection
 from app.core.config import settings
+from app.core.encryption import encrypt_token, decrypt_token
 from intuitlib.client import AuthClient
 
 class QBOClient:
@@ -15,7 +16,7 @@ class QBOClient:
             client_secret=settings.QBO_CLIENT_SECRET,
             redirect_uri=settings.QBO_REDIRECT_URI,
             environment=settings.QBO_ENVIRONMENT,
-            refresh_token=self.connection.refresh_token,
+            refresh_token=decrypt_token(self.connection.refresh_token),
             realm_id=self.connection.realm_id
         )
 
@@ -24,8 +25,8 @@ class QBOClient:
         # or use an async-compatible auth library. usage: blocking for now.
         print("🔄 [QBOClient] Refreshing Access Token...")
         self.auth_client.refresh()
-        self.connection.access_token = self.auth_client.access_token
-        self.connection.refresh_token = self.auth_client.refresh_token
+        self.connection.access_token = encrypt_token(self.auth_client.access_token)
+        self.connection.refresh_token = encrypt_token(self.auth_client.refresh_token)
         self.db.add(self.connection)
         self.db.commit()
         return self.auth_client.access_token
@@ -33,6 +34,16 @@ class QBOClient:
     def _get_api_url(self, endpoint):
         base_url = "https://sandbox-quickbooks.api.intuit.com" if settings.QBO_ENVIRONMENT == "sandbox" else "https://quickbooks.api.intuit.com"
         return f"{base_url}/v3/company/{self.connection.realm_id}/{endpoint}"
+
+                except httpx.HTTPStatusError as e:
+                    tid = e.response.headers.get('intuit_tid', 'N/A')
+                    print(f"❌ [QBOClient] HTTP Error: {e.response.text} (TID: {tid})")
+                    raise
+
+    async def _log_tid(self, response):
+        tid = response.headers.get('intuit_tid')
+        if tid:
+            print(f"📡 [QBOClient] Request ID (intuit_tid): {tid}")
 
     async def request(self, method: str, endpoint: str, params: dict = None, json_payload: dict = None):
         """
@@ -43,7 +54,7 @@ class QBOClient:
         """
         url = self._get_api_url(endpoint)
         headers = {
-            'Authorization': f'Bearer {self.connection.access_token}',
+            'Authorization': f'Bearer {decrypt_token(self.connection.access_token)}',
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
@@ -56,6 +67,9 @@ class QBOClient:
                 try:
                     res = await client.request(method, url, headers=headers, params=params, json=json_payload)
                     
+                    # Capture Intuit TID for compliance/debugging
+                    await self._log_tid(res)
+
                     if res.status_code == 401:
                         # Refresh logic (blocking DB write, but acceptable for rare auth refresh)
                         token = self._refresh_access_token() 
@@ -76,7 +90,8 @@ class QBOClient:
                     print(f"❌ [QBOClient] Network Error: {e}")
                     raise
                 except httpx.HTTPStatusError as e:
-                    print(f"❌ [QBOClient] HTTP Error: {e.response.text}")
+                    tid = e.response.headers.get('intuit_tid', 'N/A')
+                    print(f"❌ [QBOClient] HTTP Error: {e.response.text} (TID: {tid})")
                     raise
 
     async def query(self, query_str):
@@ -334,7 +349,7 @@ class QBOClient:
         endpoint = "upload"
         url = self._get_api_url(endpoint)
         headers = {
-            'Authorization': f'Bearer {self.connection.access_token}',
+            'Authorization': f'Bearer {decrypt_token(self.connection.access_token)}',
             'Accept': 'application/json'
             # Content-Type is set automatically by httpx for multipart
         }
@@ -391,7 +406,7 @@ class QBOClient:
     def revoke(self):
         try:
             print(f"🔌 [QBOClient] Revoking token...")
-            self.auth_client.revoke(token=self.connection.refresh_token)
+            self.auth_client.revoke(token=decrypt_token(self.connection.refresh_token))
             return True
         except Exception:
             return False

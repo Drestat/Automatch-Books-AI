@@ -159,7 +159,7 @@ class AnalysisService:
                     # --- Rule 3: Auto-Approve High Confidence (Founder/Empire Tier) ---
                     from app.models.user import User
                     user = self.db.query(User).filter(User.id == user_id).first()
-                    if tx.confidence and tx.confidence >= 0.95 and user and user.subscription_tier in ['founder', 'empire']:
+                    if tx.confidence and tx.confidence >= 0.95 and user and user.subscription_tier in ['business', 'corporate', 'founder', 'empire']:
                         print(f"🚀 [Auto-Approve] High confidence ({tx.confidence}) for {tx.id} (Tier: {user.subscription_tier})")
                         tx.status = 'pending_approval'
                     elif tx.confidence and tx.confidence >= 0.8:

@@ -55,7 +55,6 @@ def get_user(user_id: str, db: Session = Depends(get_db)):
             id=user_id,
             email=f"{user_id}@clerk.internal", # Unique placeholder, will be updated on next sync
             subscription_tier="free",
-            trial_ends_at=datetime.now(timezone.utc) + timedelta(days=7)
         )
         db.add(user)
         db.commit()
@@ -67,29 +66,12 @@ def get_user(user_id: str, db: Session = Depends(get_db)):
     status = "no_plan"
     days_remaining = 0
     
-    if user.subscription_tier in ['pro', 'founder', 'empire']:
+    if user.subscription_tier in ['personal', 'business', 'corporate', 'starter', 'pro', 'founder', 'empire']:
         status = "active"
     elif user.subscription_tier == 'free':
-        if user.trial_ends_at:
-             # Logic to compare dates would typically happen in Python or SQL
-             # For simplicity here, we assume the frontend or a service handles the precise date diff
-             # But let's verify if we can do it here. 
-             # Since 'user' is an ORM object, we can do pythonic comparison if it's loaded.
-             now = datetime.now(timezone.utc)
-             # user.trial_ends_at is a datetime (timezone aware hopefully)
-             
-             # Naive check for now, assuming naive datetimes or compatible
-             if user.trial_ends_at and user.trial_ends_at > now:
-                 status = "trial"
-                 delta = user.trial_ends_at - now
-                 days_remaining = delta.days
-             else:
-                 status = "expired"
-        else:
-            # Free tier but no trial date? Assume expired or new?
-            # Let's assume expired if they are 'free' but have no trial date marked (legacy?)
-            # Or assume they haven't started trial?
-            status = "no_plan" 
+        status = "active"  # Free forever tier
+    else:
+        status = "no_plan"
 
     # Attach computed fields to response (pydantic schema usually filters this, 
     # so we might need to return a dict or update the schema.

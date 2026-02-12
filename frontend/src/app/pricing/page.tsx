@@ -14,55 +14,83 @@ import Navbar from '@/components/Navbar';
 
 const TIERS = [
     {
-        name: "Freelancer",
-        price: "$9",
+        name: "Free",
+        key: "free_user",
+        price: "$0",
+        period: "/forever",
+        description: "Get started with zero risk. No credit card required.",
+        icon: Zap,
+        features: [
+            "1 Connected Bank Account",
+            "25 AI Tokens / Month",
+            "Manual Sync (On Demand)",
+            "Basic AI Categorization",
+            "30-Day History",
+            "Community Support"
+        ],
+        cta: "Get Started Free",
+        highlight: false,
+        isFree: true
+    },
+    {
+        name: "Personal",
+        key: "personal",
+        price: "$2.99",
         period: "/mo",
         description: "Perfect for side hustles and solo operators.",
         icon: Zap,
         features: [
-            "1 Connected Bank Account",
+            "2 Connected Bank Accounts",
+            "100 AI Tokens / Month",
             "Manual Sync (On Demand)",
-            "Basic AI Categorization",
-            "30-Day History",
+            "AI Categorization & Matching",
+            "Unlimited History",
             "Email Support"
         ],
-        cta: "Start Free Trial",
-        highlight: false
+        cta: "Subscribe Now",
+        highlight: false,
+        isFree: false
     },
     {
-        name: "Founder",
-        price: "$29",
+        name: "Business",
+        key: "business",
+        price: "$8.99",
         period: "/mo",
         description: "The growth engine for modern startups.",
         icon: Sparkles,
         features: [
             "Unlimited Connected Accounts",
-            "Auto-Sync (Midnight Run)",
+            "300 AI Tokens / Month",
+            "Auto-Sync (Every 6 Hours)",
             "High-Confidence Auto-Approve",
-            "Reasoning Narratives",
+            "AI Reasoning Narratives",
             "Unlimited History",
             "Priority Support"
         ],
-        cta: "Start Free Trial",
+        cta: "Subscribe Now",
         highlight: true,
-        badge: "Most Popular"
+        badge: "Most Popular",
+        isFree: false
     },
     {
-        name: "Empire",
-        price: "$79",
+        name: "Corporate",
+        key: "corporate",
+        price: "$49.99",
         period: "/mo",
         description: "For scaling teams and heavy transaction volume.",
         icon: Crown,
         features: [
+            "Everything in Business, plus:",
+            "700 AI Tokens / Month",
             "Multi-User Access (5 Seats)",
-            "Concierge Onboarding",
             "Custom AI Rules Engine",
             "Advanced Anomaly Detection",
-            "Dedicated Account Manager",
-            "API Access"
+            "Concierge Onboarding",
+            "Dedicated Account Manager"
         ],
         cta: "Contact Sales",
-        highlight: false
+        highlight: false,
+        isFree: false
     }
 ];
 
@@ -107,7 +135,7 @@ export default function PricingPage() {
                         </motion.div>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8 items-start">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
                         {TIERS.map((tier, index) => (
                             <motion.div
                                 key={tier.name}
@@ -150,7 +178,7 @@ export default function PricingPage() {
                                 </ul>
 
                                 <button
-                                    onClick={() => handleCheckout(tier.name, tier.name === 'Freelancer' ? 'price_HB1_free' : tier.name === 'Founder' ? 'price_HB1_pro' : 'price_HB1_ent')}
+                                    onClick={() => tier.isFree ? window.location.assign('/sign-up') : handleCheckout(tier.key, tier.key)}
                                     className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all group ${tier.highlight
                                         ? 'bg-brand text-white hover:bg-brand-secondary hover:scale-[1.02]'
                                         : 'bg-white/5 text-white hover:bg-white/10'
@@ -159,12 +187,6 @@ export default function PricingPage() {
                                     {tier.cta}
                                     {tier.highlight && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
                                 </button>
-
-                                {tier.highlight && (
-                                    <p className="text-center text-xs text-white/30 mt-4 font-medium">
-                                        7-Day Free Trial • Cancel Anytime
-                                    </p>
-                                )}
                             </motion.div>
                         ))}
                     </div>

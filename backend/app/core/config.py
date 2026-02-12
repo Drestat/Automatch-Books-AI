@@ -25,12 +25,17 @@ class Settings(BaseSettings):
             self.DATABASE_URL = f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}/{self.POSTGRES_DB}?sslmode={ssl_mode}"
 
     # Security
-    BACKEND_CORS_ORIGINS: list[str] = ["*"]
+    BACKEND_CORS_ORIGINS: list[str] = [
+        "https://automatchbooksai.com",
+        "https://www.automatchbooksai.com",
+        "http://localhost:3000",  # Local dev only
+    ]
+    FERNET_KEY: str = os.getenv("FERNET_KEY", "")
 
     # QuickBooks Settings (Shared across SaaS)
     QBO_CLIENT_ID: str = os.getenv("QBO_CLIENT_ID", "")
     QBO_CLIENT_SECRET: str = os.getenv("QBO_CLIENT_SECRET", "")
-    QBO_REDIRECT_URI: str = os.getenv("QBO_REDIRECT_URI", "http://localhost:3000/callback")
+    QBO_REDIRECT_URI: str = os.getenv("QBO_REDIRECT_URI", "https://automatchbooksai.com/callback")
     QBO_ENVIRONMENT: str = os.getenv("QBO_ENVIRONMENT", "sandbox")
     QBO_WEBHOOK_VERIFIER: str = os.getenv("QBO_WEBHOOK_VERIFIER", "")
 

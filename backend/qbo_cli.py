@@ -19,7 +19,8 @@ qbo_secrets = modal.Secret.from_dict({
     "QBO_CLIENT_ID": config.get("QBO_CLIENT_ID", ""),
     "QBO_CLIENT_SECRET": config.get("QBO_CLIENT_SECRET", ""),
     "QBO_ENVIRONMENT": config.get("QBO_ENVIRONMENT", "sandbox"),
-    "QBO_REDIRECT_URI": config.get("QBO_REDIRECT_URI", "")
+    "QBO_REDIRECT_URI": config.get("QBO_REDIRECT_URI", ""),
+    "FERNET_KEY": config.get("FERNET_KEY", "")
 })
 
 @app.function(image=image, secrets=[qbo_secrets])
@@ -61,10 +62,11 @@ def query(sql_query: str):
     
     # 3. Refresh Token
     try:
-        auth_client.refresh(refresh_token=conn.refresh_token)
-        # Update DB with new tokens
-        conn.access_token = auth_client.access_token
-        conn.refresh_token = auth_client.refresh_token
+        from app.core.encryption import decrypt_token, encrypt_token
+        auth_client.refresh(refresh_token=decrypt_token(conn.refresh_token))
+        # Update DB with new encrypted tokens
+        conn.access_token = encrypt_token(auth_client.access_token)
+        conn.refresh_token = encrypt_token(auth_client.refresh_token)
         session.commit()
     except Exception as e:
         print(f"❌ Failed to refresh token: {e}")
@@ -76,7 +78,7 @@ def query(sql_query: str):
     url = f"{base_url}/v3/company/{realm_id}/query"
     
     headers = {
-        "Authorization": f"Bearer {conn.access_token}",
+        "Authorization": f"Bearer {auth_client.access_token}",
         "Accept": "application/json",
         "Content-Type": "application/text"
     }
@@ -154,9 +156,10 @@ def inspect_id(entity: str, entity_id: str):
         redirect_uri=redirect_uri,
     )
     try:
-        auth_client.refresh(refresh_token=conn.refresh_token)
-        conn.access_token = auth_client.access_token
-        conn.refresh_token = auth_client.refresh_token
+        from app.core.encryption import decrypt_token, encrypt_token
+        auth_client.refresh(refresh_token=decrypt_token(conn.refresh_token))
+        conn.access_token = encrypt_token(auth_client.access_token)
+        conn.refresh_token = encrypt_token(auth_client.refresh_token)
         session.commit()
     except Exception as e:
         print(f"❌ Token refresh failed: {e}")
@@ -168,7 +171,7 @@ def inspect_id(entity: str, entity_id: str):
     url = f"{base_url}/v3/company/{realm_id}/{entity.lower()}/{entity_id}"
     
     headers = {
-        "Authorization": f"Bearer {conn.access_token}",
+        "Authorization": f"Bearer {auth_client.access_token}",
         "Accept": "application/json"
     }
     

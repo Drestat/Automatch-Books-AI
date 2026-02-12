@@ -150,17 +150,17 @@ function ProfileContent() {
                                         <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold">Background Worker</p>
                                     </div>
                                 </div>
-                                {!(profile?.subscription_tier === 'founder' || profile?.subscription_tier === 'empire') && (
+                                {!(profile?.subscription_tier === 'business' || profile?.subscription_tier === 'corporate') && (
                                     <div className="group/tooltip relative">
                                         <HelpCircle size={16} className="text-white/20 hover:text-white/40 transition-colors cursor-help" />
                                         <div className="absolute bottom-full right-0 mb-2 w-48 p-3 rounded-xl bg-black border border-white/10 text-[10px] leading-relaxed text-white/60 font-medium opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl backdrop-blur-xl">
-                                            This feature is reserved for our <span className="text-brand">Founder</span> and <span className="text-brand">Empire</span> partners.
+                                            This feature is reserved for our <span className="text-brand">Business</span> and <span className="text-brand">Corporate</span> partners.
                                         </div>
                                     </div>
                                 )}
                             </div>
 
-                            <div className={`p-4 rounded-2xl border transition-all ${(profile?.subscription_tier === 'founder' || profile?.subscription_tier === 'empire')
+                            <div className={`p-4 rounded-2xl border transition-all ${(profile?.subscription_tier === 'business' || profile?.subscription_tier === 'corporate')
                                 ? 'bg-white/[0.02] border-white/5'
                                 : 'bg-black/40 border-white/5 opacity-40 grayscale pointer-events-none'
                                 }`}>

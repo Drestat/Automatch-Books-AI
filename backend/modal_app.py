@@ -31,7 +31,8 @@ image = (
         "python-multipart",
         "pytz",
         "alembic",
-        "tenacity"
+        "tenacity",
+        "cryptography"
     )
     .add_local_dir(os.path.join(base_dir, "app"), remote_path="/root/app")
     .add_local_dir(os.path.join(base_dir, "alembic"), remote_path="/root/alembic")
@@ -57,6 +58,7 @@ secrets = modal.Secret.from_dict({
     "GEMINI_API_KEY": env_vars.get("GEMINI_API_KEY", ""),
     "GEMINI_MODEL": env_vars.get("GEMINI_MODEL", "gemini-1.5-flash"), # Fallback to stable 1.5 if missing
     "NEXT_PUBLIC_APP_URL": env_vars.get("NEXT_PUBLIC_APP_URL", ""),
+    "FERNET_KEY": env_vars.get("FERNET_KEY", ""),
 })
 
 @app.function(image=image, secrets=[secrets], min_containers=1, timeout=300)
@@ -254,7 +256,7 @@ async def auto_accept_worker():
     try:
         # 1. Target Premium Users who have Auto-Accept ENABLED
         premium_users = db.query(User).filter(
-            User.subscription_tier.in_(['founder', 'empire']),
+            User.subscription_tier.in_(['business', 'corporate', 'founder', 'empire']),
             User.auto_accept_enabled == True
         ).all()
         user_ids = [u.id for u in premium_users]

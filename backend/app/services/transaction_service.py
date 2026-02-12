@@ -31,6 +31,12 @@ class TransactionService:
         
         limits = {
             "free": 1,
+            "free_user": 1,
+            "personal": 2,
+            "business": 100,
+            "corporate": 1000,
+            # Legacy keys
+            "starter": 1,
             "pro": 5,
             "founder": 100,
             "empire": 1000

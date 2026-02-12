@@ -51,9 +51,43 @@ export default function PrivacyPage() {
                     </section>
 
                     <section>
-                        <h2 className="text-2xl font-bold text-white mb-4">5. Contact</h2>
+                        <h2 className="text-2xl font-bold text-white mb-4">5. Google API Services Compliance</h2>
                         <p>
-                            Questions about your privacy? Reach              <a href="mailto:support@automatchbooksai.com" className="text-brand hover:underline">
+                            AutoMatch Books AI's use and transfer to any other app of information received from Google APIs will adhere to <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" className="text-brand hover:underline">Google API Services User Data Policy</a>, including the Limited Use requirements. We do not use Google user data for developing, improving, or training generalized/non-personalized AI and/or ML models.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-bold text-white mb-4">6. Intuit Data Compliance</h2>
+                        <p>
+                            We strictly adhere to the <a href="https://developer.intuit.com/app/developer/qbo/docs/go-live/publish-app/legal-agreements" target="_blank" rel="noopener noreferrer" className="text-brand hover:underline">Intuit Developer Terms</a>. We do not sell, rent, or trade your QuickBooks Online data to any third parties. Your financial data is used solely for the purpose of categorizing transactions within your account.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-bold text-white mb-4">7. Data Retention & Deletion</h2>
+                        <p>
+                            We retain your data only as long as your account is active. Upon subscription cancellation or explicit request, all synced financial data is permanently deleted from our servers within 30 days. You may request immediate data deletion by contacting support.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-bold text-white mb-4">8. Third-Party Sharing</h2>
+                        <p>
+                            We share data only with essential service providers necessary to operate the service:
+                            <ul className="list-disc pl-5 mt-2 space-y-1">
+                                <li><strong>Clerk:</strong> For authentication and user management.</li>
+                                <li><strong>Stripe:</strong> For payment processing (we do not store credit card details).</li>
+                                <li><strong>Google Gemini:</strong> For AI processing (anonymized data snippets only).</li>
+                                <li><strong>Neon/AWS:</strong> for encrypted database hosting.</li>
+                            </ul>
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-bold text-white mb-4">9. Contact</h2>
+                        <p>
+                            Questions about your privacy? Reach <a href="mailto:support@automatchbooksai.com" className="text-brand hover:underline">
                                 support@automatchbooksai.com
                             </a>.
                         </p>
