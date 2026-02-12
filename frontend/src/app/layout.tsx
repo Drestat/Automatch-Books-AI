@@ -84,6 +84,15 @@ export default function RootLayout({
       <html lang="en">
         <head>
           <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap" rel="stylesheet" />
+          {/* PWA Manifest */}
+          <link rel="manifest" href="/manifest.json" />
+          {/* Apple PWA Meta Tags */}
+          <meta name="apple-mobile-web-app-capable" content="yes" />
+          <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+          <meta name="apple-mobile-web-app-title" content="AutoMatch" />
+          <link rel="apple-touch-icon" href="/icon.png" />
+          {/* Theme color for address bar */}
+          <meta name="theme-color" content="#000000" />
         </head>
         <body
           className="font-sans antialiased text-white selection:bg-brand selection:text-white"
@@ -104,6 +113,14 @@ export default function RootLayout({
               gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', {
                 page_path: window.location.pathname,
               });
+            `}
+          </Script>
+          {/* Service Worker Registration for PWA */}
+          <Script id="sw-register" strategy="afterInteractive">
+            {`
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+              }
             `}
           </Script>
           <ToastProvider>
