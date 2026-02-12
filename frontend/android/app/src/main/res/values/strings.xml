@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Automatch Books AI</string>
-    <string name="title_activity_main">Automatch Books AI</string>
-    <string name="package_name">com.qbo.matcher</string>
-    <string name="custom_url_scheme">com.qbo.matcher</string>
+    <string name="app_name">AutoMatch Books AI</string>
+    <string name="title_activity_main">AutoMatch Books AI</string>
+    <string name="package_name">com.automatchbooks.ai</string>
+    <string name="custom_url_scheme">com.automatchbooks.ai</string>
 </resources>

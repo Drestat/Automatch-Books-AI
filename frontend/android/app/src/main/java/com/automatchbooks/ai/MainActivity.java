@@ -1,4 +1,4 @@
-package com.qbo.matcher;
+package com.automatchbooks.ai;
 
 import com.getcapacitor.BridgeActivity;
 
