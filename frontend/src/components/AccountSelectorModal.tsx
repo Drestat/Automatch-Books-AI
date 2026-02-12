@@ -36,13 +36,16 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
     const [previewStats, setPreviewStats] = useState<{ total_transactions: number, already_matched: number, to_analyze: number } | null>(null);
 
     useEffect(() => {
-        if (isOpen && realmId) {
-            // Reset state when modal opens
-            setStep('select');
-            setPreviewStats(null);
-            setPreviewLoading(false);
-            // Fetch accounts
-            fetchAccounts();
+        if (isOpen) {
+            if (realmId) {
+                // Reset state when modal opens
+                setStep('select');
+                setPreviewStats(null);
+                setPreviewLoading(false);
+                fetchAccounts();
+            } else {
+                setLoading(false);
+            }
         }
     }, [isOpen, realmId]);
 
