@@ -1,12 +1,13 @@
 "use client";
 
 import React from 'react';
-import { Check, Edit2, Info, ArrowUpRight, FilePlus, FileCheck, Tags, Split as SplitIcon, ExternalLink, CheckCircle2, Sparkles, Building2, X } from 'lucide-react';
+import { Check, Edit2, Info, ArrowUpRight, FilePlus, FileCheck, Tags, Split as SplitIcon, ExternalLink, CheckCircle2, Sparkles, Building2, X, Camera } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import VendorSelector from './VendorSelector';
 import CategorySelector from './CategorySelector';
 import SplitEditorModal from './SplitEditorModal';
 import StreamingText from './StreamingText';
+import { triggerHaptic, takePhoto, isNative } from '@/lib/native-bridge';
 
 interface Split {
     category_name: string;
@@ -131,8 +132,7 @@ export default function TransactionCard({
     }, [tx.id, tx.reasoning]);
 
     const handleAccept = async () => {
-        const { triggerHapticFeedback } = await import('@/lib/haptics');
-        triggerHapticFeedback();
+        triggerHaptic('success');
         await onAccept(tx.id);
     };
 
@@ -151,6 +151,32 @@ export default function TransactionCard({
             } finally {
                 setIsUploading(false);
             }
+        }
+    };
+
+    // Native camera receipt capture
+    const handleNativeReceipt = async () => {
+        if (!onReceiptUpload) return;
+        setIsUploading(true);
+        setUploadError(false);
+        try {
+            const base64 = await takePhoto();
+            if (base64) {
+                triggerHaptic('success');
+                // Convert base64 to File for existing upload handler
+                const byteString = atob(base64);
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+                const blob = new Blob([ab], { type: 'image/jpeg' });
+                const file = new File([blob], 'receipt.jpg', { type: 'image/jpeg' });
+                await onReceiptUpload(tx.id, file);
+            }
+        } catch {
+            setUploadError(true);
+            setTimeout(() => setUploadError(false), 3000);
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -540,7 +566,7 @@ export default function TransactionCard({
                             </button>
                         ) : (
                             <button
-                                onClick={() => fileInputRef.current?.click()}
+                                onClick={() => isNative() ? handleNativeReceipt() : fileInputRef.current?.click()}
                                 disabled={isUploading}
                                 className={`flex-[3] sm:flex-[2] px-3 bg-[#061a18] border ${uploadError ? 'border-rose-500/40' : 'border-brand-accent/20'} rounded-xl flex items-center justify-center font-bold gap-2 ${uploadError ? 'text-rose-400' : 'text-brand-trend'} transition-all active:scale-95 hover:bg-[#0a2825] hover:border-brand-accent/40 hover:shadow-[0_0_20px_-5px_var(--glow-brand)]`}
                             >
@@ -556,8 +582,8 @@ export default function TransactionCard({
                                     </>
                                 ) : (
                                     <>
-                                        <FilePlus size={16} />
-                                        <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.1em] font-bold">Receipt</span>
+                                        {isNative() ? <Camera size={16} /> : <FilePlus size={16} />}
+                                        <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.1em] font-bold">{isNative() ? 'Scan' : 'Receipt'}</span>
                                     </>
                                 )}
                             </button>
@@ -587,7 +613,7 @@ export default function TransactionCard({
                             <IconButton
                                 icon={<SplitIcon size={16} className="rotate-45" />}
                                 title="Exclude Transaction"
-                                onClick={() => onExclude && onExclude(tx.id)}
+                                onClick={() => { triggerHaptic('warning'); onExclude && onExclude(tx.id); }}
                             />
                         )}
                     </div>

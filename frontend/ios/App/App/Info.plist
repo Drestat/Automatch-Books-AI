@@ -47,5 +47,14 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<!-- Camera Permission (Receipt Scanning) -->
+	<key>NSCameraUsageDescription</key>
+	<string>AutoMatch Books needs camera access to scan and attach receipts to your transactions.</string>
+	<!-- Photo Library Permission (Pick existing receipt photos) -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>AutoMatch Books needs photo library access to attach receipt images to your transactions.</string>
+	<!-- Face ID Permission (Biometric Auth) -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>AutoMatch Books uses Face ID to securely verify your identity when opening the app.</string>
 </dict>
 </plist>

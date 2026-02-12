@@ -62,6 +62,13 @@ import { useUser } from '@/hooks/useUser';
 import { SubscriptionGuard } from '@/components/SubscriptionGuard';
 import Skeleton from '@/components/Skeleton';
 import { useIsClient } from '@/hooks/useIsClient';
+import {
+  hideSplashScreen,
+  registerForPush,
+  updateBadgeCount,
+  authenticateWithBiometrics,
+  isNative,
+} from '@/lib/native-bridge';
 
 function DashboardContent() {
   const {
@@ -109,6 +116,41 @@ function DashboardContent() {
   const [zenMode, setZenMode] = useState(false);
   const [zenIndex, setZenIndex] = useState(0);
   const [sessionsApproved, setSessionsApproved] = useState(0);
+
+  // ─── Native App Initialization ──────────────────────────────
+  useEffect(() => {
+    if (!isNative()) return;
+
+    const initNative = async () => {
+      // 1. Hide splash screen
+      await hideSplashScreen();
+
+      // 2. Biometric auth on launch
+      const authed = await authenticateWithBiometrics();
+      if (!authed) {
+        // If biometric fails, could redirect — for now just log
+        console.warn('Biometric auth failed');
+      }
+
+      // 3. Register for push notifications
+      const pushToken = await registerForPush();
+      if (pushToken) {
+        // Send token to backend for storage
+        try {
+          const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+          await fetch(`${API}/api/v1/push/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: pushToken }),
+          });
+        } catch {
+          // Silent fail — push registration is best-effort
+        }
+      }
+    };
+
+    initNative();
+  }, []);
 
   const toggleSort = (key: 'date' | 'confidence') => {
     setSortConfig(prev => ({
@@ -163,6 +205,13 @@ function DashboardContent() {
       }
     }
   }, [isConnected, isDemo, isLoaded]);
+
+  // Sync native app badge with pending review count
+  useEffect(() => {
+    if (isNative()) {
+      updateBadgeCount(toReviewTxs.length);
+    }
+  }, [toReviewTxs.length]);
 
   const toggleAccount = (accId: string) => {
     setSelectedAccounts(prev =>
