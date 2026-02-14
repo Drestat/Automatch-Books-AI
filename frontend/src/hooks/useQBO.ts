@@ -190,6 +190,9 @@ export const useQBO = () => {
                 url += `&account_ids=${accountIds.join(',')}`;
             }
 
+            // Add cache buster
+            url += `&_t=${Date.now()}`;
+
             const response = await fetch(url);
             if (response.ok) {
                 const data = await response.json();
