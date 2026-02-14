@@ -6,6 +6,8 @@ import { BentoTile } from '@/components/BentoTile';
 import { Users, BarChart3, Database, RefreshCw, Trophy, Activity, Globe, DollarSign, PieChart as PieChartIcon, Map } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { TierDistributionChart, LocationBarChart } from '@/components/admin/AdminCharts';
+import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run') + '/api/v1';
 
@@ -51,14 +53,23 @@ export default function AdminDashboard() {
     };
 
     const [isMounted, setIsMounted] = useState(false);
+    const { user, isLoaded } = useUser();
+    const router = useRouter();
 
     useEffect(() => {
         setIsMounted(true);
         fetchUsage();
     }, []);
 
-    if (!isMounted) {
-        return null;
+    // Redirect if not admin
+    useEffect(() => {
+        if (isLoaded && user && user.id !== 'user_39ZWbRkFIGQwOHwSzNldksd7EY9') {
+            router.push('/dashboard');
+        }
+    }, [isLoaded, user, router]);
+
+    if (!isMounted || !isLoaded || !user || user.id !== 'user_39ZWbRkFIGQwOHwSzNldksd7EY9') {
+        return null; // Or a loading spinner
     }
 
     return (

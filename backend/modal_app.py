@@ -40,7 +40,7 @@ image = (
 )
 
 app = modal.App("qbo-sync-engine")
-print("🔄 [Modal] forcing invalidation...")
+print("🔄 [Modal] forcing invalidation... v2")
 
 
 

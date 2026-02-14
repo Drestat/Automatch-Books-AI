@@ -91,6 +91,11 @@ def get_user(user_id: str, db: Session = Depends(get_db)):
     else:
         status = "no_plan"
 
+    # Fetch realm_id if connected
+    from app.models.qbo import QBOConnection
+    connection = db.query(QBOConnection).filter(QBOConnection.user_id == user.id).first()
+    realm_id = connection.realm_id if connection else None
+
     return {
         "id": user.id,
         "email": user.email,
@@ -100,7 +105,8 @@ def get_user(user_id: str, db: Session = Depends(get_db)):
         "days_remaining": 0,
         "token_balance": user.token_balance,
         "monthly_token_allowance": user.monthly_token_allowance,
-        "auto_accept_enabled": user.auto_accept_enabled
+        "auto_accept_enabled": user.auto_accept_enabled,
+        "realm_id": realm_id
     }
 
 @router.patch("/{user_id}/preferences")

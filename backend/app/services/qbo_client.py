@@ -35,10 +35,8 @@ class QBOClient:
         base_url = "https://sandbox-quickbooks.api.intuit.com" if settings.QBO_ENVIRONMENT == "sandbox" else "https://quickbooks.api.intuit.com"
         return f"{base_url}/v3/company/{self.connection.realm_id}/{endpoint}"
 
-                except httpx.HTTPStatusError as e:
-                    tid = e.response.headers.get('intuit_tid', 'N/A')
-                    print(f"❌ [QBOClient] HTTP Error: {e.response.text} (TID: {tid})")
-                    raise
+    # v3: Fixed syntax error
+
 
     async def _log_tid(self, response):
         tid = response.headers.get('intuit_tid')

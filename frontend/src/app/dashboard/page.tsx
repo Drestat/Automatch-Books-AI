@@ -85,8 +85,6 @@ function DashboardContent() {
     bulkApprove,
     uploadReceipt,
     isLoaded,
-    isDemo,
-    enableDemo,
     user,
     subscriptionStatus,
     daysRemaining,
@@ -105,8 +103,7 @@ function DashboardContent() {
     showTokenModal,
     setShowTokenModal,
     splitTransaction,
-    realmId,
-    disableDemo
+    realmId
   } = useQBO();
 
   const [loading, setLoading] = useState(false); // Local loading for UI actions
@@ -193,9 +190,9 @@ function DashboardContent() {
 
   const isClient = useIsClient();
 
-  // Auto-open modal if connected but no accounts active (and not demo)
+  // Auto-open modal if connected but no accounts active
   useEffect(() => {
-    if (isConnected && !isDemo && isLoaded) {
+    if (isConnected && isLoaded) {
       const urlParams = new URLSearchParams(window.location.search);
       const isNewConnection = localStorage.getItem('is_new_connection') === 'true';
 
@@ -205,7 +202,7 @@ function DashboardContent() {
         localStorage.removeItem('is_new_connection');
       }
     }
-  }, [isConnected, isDemo, isLoaded]);
+  }, [isConnected, isLoaded]);
 
   // Sync native app badge with pending review count
   useEffect(() => {
@@ -243,7 +240,7 @@ function DashboardContent() {
     }
   };
 
-  if (!isConnected && !isDemo) {
+  if (!isConnected) {
     return (
       <SubscriptionGuard status={subscriptionStatus} daysRemaining={daysRemaining}>
         <div className="min-h-screen text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
@@ -283,14 +280,6 @@ function DashboardContent() {
               )}
             </motion.button>
 
-            <button
-              onClick={enableDemo}
-              disabled={qboLoading || !isLoaded}
-              className="w-full py-4 text-sm font-bold text-white/40 hover:text-white transition-colors disabled:opacity-50"
-            >
-              Try Demo Mode
-            </button>
-
             <p className="text-center text-xs text-white/20 font-medium">
               Uses bank-grade 256-bit encryption.
             </p>
@@ -327,17 +316,10 @@ function DashboardContent() {
             className="relative"
           >
             <div className="flex items-center gap-2.5 mb-3 text-xs sm:text-sm">
-              <button
-                onClick={isDemo ? disableDemo : undefined}
-                disabled={!isDemo}
-                className={`flex items-center gap-2.5 ${isDemo ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'cursor-default'}`}
-                title={isDemo ? "Click to exit Demo Mode" : "Live Mode Active"}
-              >
-                <span className={`w-1.5 h-1.5 rounded-full ${isDemo ? 'bg-brand-accent' : 'bg-brand'} animate-pulse shadow-[0_0_12px_rgba(0,223,216,0.6)]`} />
-                <span className={`text-[10px] font-black tracking-[0.3em] ${isDemo ? 'text-brand-accent' : 'text-brand'} uppercase`}>
-                  {isDemo ? 'Demo Mode' : 'Live Sync'}
-                </span>
-              </button>
+              <span className={`w-1.5 h-1.5 rounded-full bg-brand animate-pulse shadow-[0_0_12px_rgba(0,223,216,0.6)]`} />
+              <span className={`text-[10px] font-black tracking-[0.3em] text-brand uppercase`}>
+                Live Sync
+              </span>
             </div>
             <h1 className="text-5xl sm:text-7xl font-black tracking-tighter mb-3 leading-none heading-shimmer">
               Dashboard
@@ -369,6 +351,12 @@ function DashboardContent() {
                   <Link href="/profile" title="Profile" className="p-2 rounded-xl text-white/40 hover:text-white transition-all hover:bg-white/5">
                     <User size={18} />
                   </Link>
+                  {/* God Mode Link */}
+                  {user?.id === 'user_39ZWbRkFIGQwOHwSzNldksd7EY9' && (
+                    <Link href="/admin" title="God Mode" className="p-2 rounded-xl text-brand-secondary hover:text-brand-secondary/80 transition-all hover:bg-white/5">
+                      <Zap size={18} />
+                    </Link>
+                  )}
                 </div>
 
                 <div className="mr-4">
@@ -413,7 +401,7 @@ function DashboardContent() {
                   <span className="text-[10px] font-black uppercase tracking-widest hidden md:inline">{zenMode ? 'Zen Active' : 'Zen Mode'}</span>
                 </button>
 
-                {(isConnected || isDemo) && (
+                {(isConnected) && (
                   <button
                     onClick={() => setShowAccountModal(true)}
                     className="btn-glass flex items-center gap-2 px-4 py-2 tactile-item border-white/5 bg-white/[0.03]"
@@ -576,7 +564,7 @@ function DashboardContent() {
 
           <BentoGrid>
             <div className="md:col-span-3 mt-8">
-              {isConnected && accounts.length > 0 && !isDemo && (
+              {isConnected && accounts.length > 0 && (
                 <div className="mb-8 -mx-4 px-4 md:mx-0 overflow-hidden">
                   <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-3 px-1">
                     {accounts.filter(acc => acc.is_active).map(acc => {
@@ -789,7 +777,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v4.1.0</span></p>
+          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v4.2.0</span></p>
         </footer>
 
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-6 pb-6 pt-2 bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none">
@@ -810,10 +798,16 @@ function DashboardContent() {
               <User size={20} />
               <span className="text-[9px] font-bold">Profile</span>
             </Link>
+            {user?.id === 'user_39ZWbRkFIGQwOHwSzNldksd7EY9' && (
+              <Link href="/admin" className="flex flex-col items-center gap-1 opacity-100 text-brand-secondary">
+                <Zap size={20} />
+                <span className="text-[9px] font-bold">Admin</span>
+              </Link>
+            )}
           </div>
         </div>
       </div>
-    </SubscriptionGuard>
+    </SubscriptionGuard >
   );
 }
 

@@ -60,6 +60,7 @@ class Settings(BaseSettings):
     ADMIN_USERS: list[str] = [
         "user_38gfoio189CGrr2AO1a9ssier7w", # User 1
         "user_395GWw3SraKqcc7qjFToVMxH5v1", # User 2 (Likely Developer)
+        "user_39ZWbRkFIGQwOHwSzNldksd7EY9", # Active User (Empire)
     ]
 
     class Config:

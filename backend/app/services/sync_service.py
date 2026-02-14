@@ -78,33 +78,46 @@ class SyncService:
 
         active_account_ids = [b.id for b in active_banks]
         entity_types = [
-            "Purchase", "Deposit", "CreditCardCredit", "JournalEntry", 
+            "Purchase", "Deposit", "JournalEntry", 
             "Transfer", "BillPayment", "Payment", "SalesReceipt", 
             "RefundReceipt", "CreditMemo"
         ]
         
         all_txs = []
+        
+        # Date Filter: Last 365 Days (and future)
+        from datetime import timedelta, date
+        start_date = (date.today() - timedelta(days=365)).isoformat()
+        
+        print(f"🔄 [SyncService] Fetching history since {start_date}...")
+        
         batch_size = 1000
         
         for entity in entity_types:
-            start = 1
+            start_pos = 1
             while True:
-                query = f"SELECT * FROM {entity} STARTPOSITION {start} MAXRESULTS {batch_size}"
+                # Add 'TxnDate' filter
+                query = f"SELECT * FROM {entity} WHERE TxnDate >= '{start_date}' STARTPOSITION {start_pos} MAXRESULTS {batch_size}"
                 try:
                     res = await self.client.query(query)
                     batch = res.get("QueryResponse", {}).get(entity, [])
+                    
                     if not batch: break
                     
-                    # Tag each item with its source entity type
+                    # Tag with source entity
                     for item in batch:
                         item["_source_entity"] = entity
                     
                     all_txs.extend(batch)
+                    
                     if len(batch) < batch_size: break
-                    start += len(batch)
+                    start_pos += len(batch)
+                    
                 except Exception as e:
                     print(f"⚠️ Error syncing {entity}: {e}")
                     break
+        
+        print(f"📥 [SyncService] Retrieved {len(all_txs)} raw items from QBO.")
         
         synced_ids = set()
         valid_count = 0
@@ -156,11 +169,14 @@ class SyncService:
             
             # Extract existing category if present
             qbo_cat_id, qbo_cat_name = self._extract_category(p)
-            if qbo_cat_name and tx.status not in ['pending_approval', 'approved']:
-                tx.suggested_category_name = qbo_cat_name
-                tx.suggested_category_id = qbo_cat_id
-                tx.confidence = 0.9
-                tx.reasoning = f"Imported existing category '{qbo_cat_name}' from QuickBooks."
+            
+            # [MODIFIED v4.2] Disable QBO Auto-Cat Import per user request.
+            # We want Antigravity AI to be the sole source of truth.
+            # if qbo_cat_name and tx.status not in ['pending_approval', 'approved']:
+            #     tx.suggested_category_name = qbo_cat_name
+            #     tx.suggested_category_id = qbo_cat_id
+            #     tx.confidence = 0.9
+            #     tx.reasoning = f"Imported existing category '{qbo_cat_name}' from QuickBooks."
 
             self.db.add(tx)
         

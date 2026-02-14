@@ -126,7 +126,7 @@ export const useQBO = () => {
 
     const [realmId, setRealmId] = useState<string | null>(null);
     const [isConnected, setIsConnected] = useState(false);
-    const [isDemo, setIsDemo] = useState(false);
+    // Removed isDemo state
     const [loading, setLoading] = useState(false);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [accounts, setAccounts] = useState<Account[]>([]);
@@ -136,14 +136,6 @@ export const useQBO = () => {
     const [subscriptionStatus, setSubscriptionStatus] = useState<'active' | 'inactive' | 'free' | 'expired' | 'trial' | 'no_plan' | null>(null);
     const [daysRemaining, setDaysRemaining] = useState<number>(0);
     const [pendingUndo, setPendingUndo] = useState<Record<string, { timer: NodeJS.Timeout, originalTx: Transaction }>>({});
-
-    useEffect(() => {
-        // Check for Demo Mode flag on mount
-        const demoFlag = localStorage.getItem('is_demo_mode');
-        if (demoFlag === 'true') {
-            setIsDemo(true);
-        }
-    }, []);
 
     // Simplified: Backend now handles the full token exchange and redirects to dashboard on success.
     // We just need to capture the realmId and update state.
@@ -378,134 +370,14 @@ export const useQBO = () => {
         }
     };
 
-    const enableDemo = () => {
-        setIsDemo(true);
-        localStorage.setItem('is_demo_mode', 'true');
-        track('demo_start', {}, user?.id);
-        setTransactions([
-            {
-                id: 'demo1',
-                date: '2023-10-25',
-                description: 'STARBUCKS STORE 192',
-                amount: -6.45,
-                currency: 'USD',
-                status: 'unmatched',
-                suggested_category_name: 'Meals & Entertainment',
-                reasoning: 'Coffee shop patterns detected',
-                vendor_reasoning: 'Identified "STARBUCKS" as a known coffee chain.',
-                category_reasoning: 'Transactions under $15 at coffee shops are classified as Meals & Entertainment.',
-                note_reasoning: 'Frequent vendor match found.',
-                confidence: 0.95,
-                is_exported: true
-            },
-            {
-                id: 'demo2',
-                date: '2023-10-26',
-                description: 'APPLECARD GOOGLE PAYMENT',
-                amount: -12.99,
-                currency: 'USD',
-                status: 'unmatched',
-                suggested_category_name: 'Software & Subscriptions',
-                reasoning: 'Recurring tech subscription',
-                vendor_reasoning: 'Identified "GOOGLE PAYMENT" via Apple Card.',
-                category_reasoning: 'Amount matches standard monthly G-Suite / Cloud storage pricing.',
-                note_reasoning: 'Recurring monthly charge detected.',
-                confidence: 0.88
-            },
-            {
-                id: 'demo3',
-                date: '2023-10-27',
-                description: 'UBER TRIP 8485',
-                amount: -24.30,
-                currency: 'USD',
-                status: 'unmatched',
-                suggested_category_name: 'Travel',
-                reasoning: 'Rideshare service',
-                vendor_reasoning: 'Recognized "UBER" as transport provider.',
-                category_reasoning: 'Classified as Travel/Ground Transportation.',
-                note_reasoning: 'Trip ID 8485 extracted.',
-                confidence: 0.92
-            },
-            {
-                id: 'demo4',
-                date: '2023-10-28',
-                description: 'OFFICE DEPOT 112',
-                amount: -145.20,
-                currency: 'USD',
-                status: 'unmatched',
-                suggested_category_name: 'Office Supplies',
-                reasoning: 'Office supply vendor',
-                vendor_reasoning: 'Explicit match for "OFFICE DEPOT".',
-                category_reasoning: 'Merchant Category Code (MCC) maps to Office Supplies.',
-                note_reasoning: 'High confidence vendor match.',
-                confidence: 0.98
-            },
-            {
-                id: 'demo5',
-                date: '2023-10-29',
-                description: 'SHELL OIL 5235235',
-                amount: -45.00,
-                currency: 'USD',
-                status: 'unmatched',
-                suggested_category_name: 'Fuel',
-                reasoning: 'Gas station',
-                vendor_reasoning: 'Identified "SHELL OIL" as fuel provider.',
-                category_reasoning: 'Fuel/Auto category applied.',
-                note_reasoning: 'Consistent with previous fuel purchases.',
-                confidence: 0.91
-            },
-            {
-                id: 'demo6',
-                date: '2023-10-30',
-                description: 'AMAZON.COM RETAIL',
-                amount: -125.50,
-                currency: 'USD',
-                status: 'unmatched',
-                suggested_category_name: 'Mixed - Split',
-                reasoning: 'Multi-item purchase detected via Amazon integration.',
-                vendor_reasoning: 'Verified Amazon retail purchase.',
-                category_reasoning: 'Identified multiple items requiring split classification.',
-                confidence: 0.94,
-                is_split: true,
-                splits: [
-                    { category_name: 'Office Supplies', amount: 75.50, description: 'Office Chair' },
-                    { category_name: 'Software', amount: 50.00, description: 'Adobe Subscription' }
-                ]
-            }
-        ]);
-        showToast('Demo Mode Activated', 'success');
-    };
 
-
-    const disableDemo = () => {
-        setIsDemo(false);
-        localStorage.removeItem('is_demo_mode');
-        // If connected, sync will auto-restore data via effects
-        if (realmId && isConnected) {
-            fetchTransactions(realmId);
-            showToast('Live Mode Restored', 'success');
-        } else {
-            // If not connected, clear data
-            setTransactions([]);
-            showToast('Demo Mode Deactivated', 'info');
-        }
-    };
+    // Removed enableDemo and disableDemo functions
 
     const sync = async (overrideRealm?: string) => {
         const targetRealm = overrideRealm || realmId;
-        if (!targetRealm && !isDemo) return;
+        if (!targetRealm) return;
 
         try {
-            if (isDemo) {
-                setLoading(true);
-                track('sync_start', { mode: 'demo' }, user?.id);
-                setTimeout(() => {
-                    setLoading(false);
-                    showToast('Demo Sync Complete', 'success');
-                }, 1500);
-                return;
-            }
-
             track('sync_start', { mode: 'live', realmId: targetRealm }, user?.id);
             await fetch(`${API_BASE_URL}/transactions/sync?realm_id=${targetRealm}`, { method: 'POST' });
             showToast('Syncing with QuickBooks...', 'info');
@@ -525,7 +397,7 @@ export const useQBO = () => {
     };
 
     const approveMatch = async (txId: string) => {
-        if (!realmId && !isDemo) return;
+        if (!realmId) return;
 
         const originalTx = transactions.find(t => t.id === txId);
         if (!originalTx) return;
@@ -549,11 +421,6 @@ export const useQBO = () => {
             });
 
             try {
-                if (isDemo) {
-                    track('match_approve', { txId, mode: 'demo' }, user?.id);
-                    return;
-                }
-
                 const response = await fetch(`${API_BASE_URL}/transactions/${txId}/approve?realm_id=${realmId}`, { method: 'POST' });
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
@@ -597,17 +464,9 @@ export const useQBO = () => {
     };
 
     const bulkApprove = async (txIds: string[]) => {
-        if ((!realmId && !isDemo) || txIds.length === 0) return;
+        if (!realmId || txIds.length === 0) return;
         setLoading(true);
-        if (isDemo) {
-            setTimeout(() => {
-                setTransactions(prev => prev.filter(tx => !txIds.includes(tx.id)));
-                setLoading(false);
-                showToast('Demo: Bulk Approved', 'success');
-                track('match_approve', { count: txIds.length, mode: 'demo_bulk' }, user?.id);
-            }, 1000);
-            return true;
-        }
+
         try {
             const response = await fetch(`${API_BASE_URL}/transactions/bulk-approve?realm_id=${realmId}`, {
                 method: 'POST',
@@ -843,14 +702,7 @@ export const useQBO = () => {
     };
 
     const disconnect = async () => {
-        if (!realmId && !isDemo) {
-            // Just clear demo mode
-            localStorage.removeItem('is_demo_mode');
-            setIsDemo(false);
-            showToast('Demo mode cleared', 'info');
-            window.location.reload();
-            return;
-        }
+        if (!realmId) return;
 
         try {
             setLoading(true);
@@ -869,10 +721,8 @@ export const useQBO = () => {
 
             // Clear local state
             localStorage.removeItem('qbo_realm_id');
-            localStorage.removeItem('is_demo_mode');
             setRealmId(null);
             setIsConnected(false);
-            setIsDemo(false);
             setTransactions([]);
             setAccounts([]);
             showToast('Disconnected from QuickBooks', 'success');
@@ -884,10 +734,8 @@ export const useQBO = () => {
 
             // Even if backend fails, clear local state
             localStorage.removeItem('qbo_realm_id');
-            localStorage.removeItem('is_demo_mode');
             setRealmId(null);
             setIsConnected(false);
-            setIsDemo(false);
             setTransactions([]);
             setAccounts([]);
 
@@ -924,9 +772,7 @@ export const useQBO = () => {
         isConnected,
         loading,
         transactions,
-        isDemo,
         connect,
-        enableDemo,
         sync,
         approveMatch,
         bulkApprove,
@@ -952,7 +798,6 @@ export const useQBO = () => {
         showTokenModal,
         setShowTokenModal,
         realmId,
-        showToast,
-        disableDemo
+        showToast
     };
 };

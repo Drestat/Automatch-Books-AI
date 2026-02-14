@@ -1,0 +1,96 @@
+import modal
+import sys
+import os
+import asyncio
+from dotenv import dotenv_values
+
+# 1. Setup Paths
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# Backend root is one level up from scripts/
+backend_dir = os.path.dirname(current_dir)
+env_path = os.path.join(backend_dir, ".env")
+
+# 2. Load Env Vars
+env_vars = dotenv_values(env_path)
+
+# 3. Define Image (Copy from modal_app.py)
+image = (
+    modal.Image.debian_slim()
+    .pip_install(
+        "fastapi", 
+        "uvicorn", 
+        "psycopg2-binary", 
+        "pydantic-settings", 
+        "python-dotenv",
+        "sqlalchemy",
+        "intuit-oauth",
+        "requests",
+        "httpx",
+        "google-generativeai",
+        "stripe",
+        "rapidfuzz",
+        "python-multipart",
+        "pytz",
+        "alembic",
+        "tenacity",
+        "cryptography"
+    )
+    .add_local_dir(os.path.join(backend_dir, "app"), remote_path="/root/app")
+)
+
+# 4. Define Secret
+secrets = modal.Secret.from_dict({
+    "POSTGRES_USER": env_vars.get("POSTGRES_USER", ""),
+    "POSTGRES_PASSWORD": env_vars.get("POSTGRES_PASSWORD", ""),
+    "POSTGRES_HOST": env_vars.get("POSTGRES_HOST", ""),
+    "POSTGRES_DB": env_vars.get("POSTGRES_DB", ""),
+    "DATABASE_URL": env_vars.get("DATABASE_URL", ""),
+    "QBO_CLIENT_ID": env_vars.get("QBO_CLIENT_ID", ""),
+    "QBO_CLIENT_SECRET": env_vars.get("QBO_CLIENT_SECRET", ""),
+    "QBO_REDIRECT_URI": env_vars.get("QBO_REDIRECT_URI", ""),
+    "QBO_ENVIRONMENT": env_vars.get("QBO_ENVIRONMENT", "sandbox"),
+    "GEMINI_API_KEY": env_vars.get("GEMINI_API_KEY", ""),
+    "GEMINI_MODEL": env_vars.get("GEMINI_MODEL", "gemini-1.5-flash"),
+    "NEXT_PUBLIC_APP_URL": env_vars.get("NEXT_PUBLIC_APP_URL", ""),
+    "FERNET_KEY": env_vars.get("FERNET_KEY", ""),
+})
+
+# 5. Define App
+app = modal.App("qbo-check-count-script")
+
+@app.function(image=image, secrets=[secrets], timeout=600)
+async def check_count_remote():
+    import sys
+    if "/root" not in sys.path:
+        sys.path.append("/root")
+
+    from app.db.session import SessionLocal
+    from app.models.qbo import QBOConnection, Transaction, BankAccount
+    
+    db = SessionLocal()
+    try:
+        user_id = "user_39ZWbRkFIGQwOHwSzNldksd7EY9"
+        conn = db.query(QBOConnection).filter(QBOConnection.user_id == user_id).first()
+        
+        if not conn:
+            print(f"❌ [Remote] No connection found for user {user_id}")
+            return
+
+        print(f"🔍 [Remote] Checking Realm: {conn.realm_id}")
+        
+        # Check total count
+        total_count = db.query(Transaction).filter(Transaction.realm_id == conn.realm_id).count()
+        print(f"📊 [Remote] Total Tx Count: {total_count}")
+        
+        # Check specifically for Venture X
+        vx = db.query(BankAccount).filter(BankAccount.realm_id == conn.realm_id, BankAccount.name.like("%Venture%")).first()
+        if vx:
+             vx_count = db.query(Transaction).filter(Transaction.realm_id == conn.realm_id, Transaction.account_id == vx.id).count()
+             print(f"📊 [Remote] Venture X (ID: {vx.id}) Tx Count: {vx_count}")
+        else:
+             print("⚠️ [Remote] Venture X account not found by name search.")
+
+    except Exception as e:
+        print(f"❌ [Remote] Error: {e}")
+    finally:
+        db.close()

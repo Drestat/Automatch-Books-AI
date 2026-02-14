@@ -27,7 +27,7 @@ def authorize(current_user: User = Depends(get_current_user)):
             redirect_uri=settings.QBO_REDIRECT_URI,
             environment=settings.QBO_ENVIRONMENT,
         )
-        scopes = [Scopes.ACCOUNTING, Scopes.PAYMENT, Scopes.PROFILE] 
+        scopes = [Scopes.ACCOUNTING] 
         # State parameter binds this flow to the authenticated user to prevent CSRF
         auth_url = auth_client.get_authorization_url(scopes, state_token=current_user.id)
         return {"auth_url": auth_url}
