@@ -192,16 +192,18 @@ class SyncService:
             is_qbo_matched, _ = FeedLogic.analyze(p)
             tx.is_qbo_matched = is_qbo_matched
             
-            # Extract existing category if present
-            qbo_cat_id, qbo_cat_name = self._extract_category(p)
-            
-            # [MODIFIED v4.2] Disable QBO Auto-Cat Import per user request.
-            # We want Antigravity AI to be the sole source of truth.
-            # if qbo_cat_name and tx.status not in ['pending_approval', 'approved']:
-            #     tx.suggested_category_name = qbo_cat_name
-            #     tx.suggested_category_id = qbo_cat_id
-            #     tx.confidence = 0.9
-            #     tx.reasoning = f"Imported existing category '{qbo_cat_name}' from QuickBooks."
+            # [MODIFIED v4.3.1] Strict "Zero Suggestions" Policy
+            # Every sync/re-sync starts with a clean slate. 
+            # Suggestions ONLY populate if History/Rules find a match in AnalysisService.
+            tx.suggested_category_name = None
+            tx.suggested_category_id = None
+            tx.suggested_payee = None
+            tx.confidence = None
+            tx.reasoning = None
+            tx.matching_method = 'none'
+            tx.vendor_reasoning = None
+            tx.category_reasoning = None
+            tx.tax_deduction_note = None
 
             self.db.add(tx)
         
