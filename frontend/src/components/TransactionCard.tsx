@@ -62,6 +62,10 @@ interface Transaction {
     category_id?: string;
     category_name?: string;
     payee?: string;
+    account_id?: string;
+    account_name?: string;
+    sync_token?: string;
+    matching_method?: 'none' | 'ai' | 'history' | 'rule';
 }
 
 interface TransactionCardProps {
@@ -327,9 +331,16 @@ export default function TransactionCard({
                             {!tx.category_name && tx.suggested_category_name && (
                                 <button
                                     onClick={() => onCategoryChange && onCategoryChange(tx.id, tx.suggested_category_id || '', tx.suggested_category_name)}
-                                    className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-brand-accent/5 border border-brand-accent/20 text-brand-accent text-[8px] font-bold uppercase hover:bg-brand-accent/10 transition-all"
+                                    className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[8px] font-bold uppercase transition-all ${tx.matching_method === 'history' || tx.matching_method === 'rule'
+                                            ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                                            : "bg-brand-accent/5 border-brand-accent/20 text-brand-accent hover:bg-brand-accent/10"
+                                        }`}
                                 >
-                                    <Sparkles size={8} /> Suggested: {tx.suggested_category_name}
+                                    {tx.matching_method === 'history' || tx.matching_method === 'rule' ? (
+                                        <><CheckCircle2 size={8} /> Learned from You</>
+                                    ) : (
+                                        <><Sparkles size={8} /> Suggested: {tx.suggested_category_name}</>
+                                    )}
                                 </button>
                             )}
                         </div>
@@ -381,8 +392,8 @@ export default function TransactionCard({
                             : "rgba(255, 255, 255, 0.02)",
                         borderColor: (tx.vendor_reasoning || tx.category_reasoning) && !isAnalyzing
                             ? ["rgba(0, 223, 216, 0.2)", "rgba(0, 223, 216, 0.6)", "rgba(0, 223, 216, 0.2)"] // Deep Cyan Breathing (Done)
-                            : isAnalyzing
-                                ? "rgba(0, 223, 216, 0.3)" // Analyzing
+                            : (tx.matching_method === 'history' || tx.matching_method === 'rule')
+                                ? "rgba(16, 185, 129, 0.3)" // Emerald Border for Learned
                                 : ["rgba(255, 255, 255, 0.05)", "rgba(255, 255, 255, 0.15)", "rgba(255, 255, 255, 0.05)"] // Idle Breathing
                     }}
                     transition={{
@@ -401,17 +412,21 @@ export default function TransactionCard({
                         />
                     )}
                     <div className="flex items-center gap-2 mb-3">
-                        <span className={`text-[9px] font-bold uppercase tracking-widest transition-opacity ${(tx.vendor_reasoning || tx.category_reasoning) ? "text-brand-accent" : "text-brand-accent opacity-80 group-hover/ai-module:opacity-100"
-                            }`}>AI Analysis</span>
+                        <span className={`text-[9px] font-bold uppercase tracking-widest transition-opacity ${(tx.matching_method === 'history' || tx.matching_method === 'rule') ? "text-emerald-400" : (tx.vendor_reasoning || tx.category_reasoning) ? "text-brand-accent" : "text-brand-accent opacity-80 group-hover/ai-module:opacity-100"
+                            }`}>
+                            {tx.matching_method === 'history' || tx.matching_method === 'rule' ? "Personal Training" : "AI Analysis"}
+                        </span>
                         <div className={`h-[1px] flex-1 transition-colors ${(tx.vendor_reasoning || tx.category_reasoning) ? "bg-brand-accent/20" : "bg-white/5 group-hover/ai-module:bg-brand-accent/10"
                             }`} />
                     </div>
 
                     <div className="space-y-3">
                         <div className="flex gap-4">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border transition-all ${(tx.vendor_reasoning || tx.category_reasoning)
-                                ? "bg-brand-accent/10 border-brand-accent/30 shadow-[0_0_10px_-2px_var(--glow-brand)]"
-                                : "bg-brand-accent/5 border-brand-accent/10 group-hover/ai-module:border-brand-accent/30"
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border transition-all ${(tx.matching_method === 'history' || tx.matching_method === 'rule')
+                                    ? "bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_10px_-2px_rgba(16,185,129,0.5)]"
+                                    : (tx.vendor_reasoning || tx.category_reasoning)
+                                        ? "bg-brand-accent/10 border-brand-accent/30 shadow-[0_0_10px_-2px_var(--glow-brand)]"
+                                        : "bg-brand-accent/5 border-brand-accent/10 group-hover/ai-module:border-brand-accent/30"
                                 }`}>
                                 <motion.div
                                     animate={{
@@ -423,13 +438,19 @@ export default function TransactionCard({
                                         ease: "easeInOut"
                                     }}
                                 >
-                                    <Sparkles size={14} className="text-brand-accent" />
+                                    {tx.matching_method === 'history' || tx.matching_method === 'rule' ? (
+                                        <CheckCircle2 size={14} className="text-emerald-400" />
+                                    ) : (
+                                        <Sparkles size={14} className="text-brand-accent" />
+                                    )}
                                 </motion.div>
                             </div>
                             <div className="space-y-2 pt-0.5">
                                 {tx.vendor_reasoning && (
                                     <p className="text-[11px] text-white/70 leading-normal font-medium max-w-2xl">
-                                        <span className="text-brand-accent/80 font-bold mr-2 text-[9px] uppercase tracking-wider">Vendor Match</span>
+                                        <span className={`${tx.matching_method === 'history' || tx.matching_method === 'rule' ? "text-emerald-400/80" : "text-brand-accent/80"} font-bold mr-2 text-[9px] uppercase tracking-wider`}>
+                                            {tx.matching_method === 'history' || tx.matching_method === 'rule' ? "User Trained" : "Vendor Match"}
+                                        </span>
                                         <StreamingText
                                             text={tx.vendor_reasoning}
                                             speed={15}

@@ -119,12 +119,32 @@ class SyncService:
         
         print(f"📥 [SyncService] Retrieved {len(all_txs)} raw items from QBO.")
         
+        # [NEW] Report Fallback for Hidden Transfers
+        try:
+            # We use the same start date effectively
+            # Format today for end_date
+            end_date = date.today().isoformat()
+            report_txs = await self._fetch_missing_via_report(start_date[:10], end_date, active_account_ids)
+            if report_txs:
+                all_txs.extend(report_txs)
+        except Exception as e:
+            print(f"⚠️ Report Sync Wrapper failed: {e}")
+        
         synced_ids = set()
         valid_count = 0
         
         for p in all_txs:
             acc_id = self._resolve_account_id(p, active_account_ids)
-            if not acc_id: continue
+            if not acc_id:
+                # DEBUG: Trace skipped items
+                amt = p.get("TotalAmt") or p.get("Amount") or 0
+                if float(amt) > 6000 and float(amt) < 6100:
+                    print(f"❌ SKIPPED TARGET! ID: {p.get('Id')} | Entity: {p.get('_source_entity')} | Amt: {amt}")
+                    print(f"   - AccountRef: {p.get('AccountRef')}")
+                    print(f"   - FromAccountRef: {p.get('FromAccountRef')}")
+                    print(f"   - ToAccountRef: {p.get('ToAccountRef')}")
+                    print(f"   - DepositToAccountRef: {p.get('DepositToAccountRef')}")
+                continue
 
             valid_count += 1
             synced_ids.add(str(p["Id"]))
@@ -141,7 +161,7 @@ class SyncService:
             # If empty, fallback to Vendor/Payee name (Suggestion)
             tx.description = self._resolve_description(p)
             
-            tx.amount = p.get("TotalAmt", 0)
+            tx.amount = p.get("TotalAmt") or p.get("Amount") or 0
             tx.currency = p.get("CurrencyRef", {}).get("value", "USD")
             
             # Tag transaction type
@@ -152,16 +172,21 @@ class SyncService:
                 tx.transaction_type = "CreditCard"
             tx.sync_token = p.get("SyncToken")
             tx.note = p.get("PrivateNote")
-            tx.payee = self._resolve_payee(p)
+            tx.payee = self._resolve_payee(p, acc_id)
             tx.raw_json = p
 
             # Check for duplicates using fuzzy logic (Hubdoc Standard)
-            dup_id, dup_conf = self._check_duplicates(tx)
-            if dup_id:
-                print(f"⚠️ [Duplicate] Potential duplicate found for {tx.id} -> {dup_id} ({dup_conf})")
-                tx.potential_duplicate_id = dup_id
-                tx.duplicate_confidence = dup_conf
-                tx.status = "potential_duplicate" # Prevent auto-categorization
+            # [DISABLED TEMPORARILY FOR DEBUG SPEED]
+            # dup_id, dup_conf = self._check_duplicates(tx)
+            # if dup_id:
+            #     print(f"⚠️ [Duplicate] Potential duplicate found for {tx.id} -> {dup_id} ({dup_conf})")
+            #     tx.potential_duplicate_id = dup_id
+            #     tx.duplicate_confidence = dup_conf
+            #     tx.status = "potential_duplicate" # Prevent auto-categorization
+
+            # LOGGING TARGET
+            if tx.amount > 6000 and tx.amount < 6100:
+                print(f"🎯 PROCESSING TARGET: ID {tx.id} | Date {tx.date} | Desc {tx.description} | Amt {tx.amount} | Type {tx.transaction_type} | Acc {tx.account_id}")
 
 
             is_qbo_matched, _ = FeedLogic.analyze(p)
@@ -191,19 +216,36 @@ class SyncService:
         self._log("sync", "transaction", valid_count, "success")
 
     def _resolve_account_id(self, p, active_ids):
-        if "AccountRef" in p:
-            id = str(p["AccountRef"].get("value"))
-        elif "DepositToAccountRef" in p:
-            id = str(p["DepositToAccountRef"].get("value"))
-        elif "FromAccountRef" in p:
-            id = str(p["FromAccountRef"].get("value"))
-        elif "CheckPayment" in p and "BankAccountRef" in p["CheckPayment"]:
-            id = str(p["CheckPayment"]["BankAccountRef"].get("value"))
-        elif "CreditCardPayment" in p and "CCAccountRef" in p["CreditCardPayment"]:
-            id = str(p["CreditCardPayment"]["CCAccountRef"].get("value"))
-        else:
-            return None
-        return id if id in active_ids else None
+        # Priority 1: Check standard references
+        # [MODIFIED v4.3] Iterate to find the *Active* one.
+        # Previously we just took the first one and checked if it was active, which failed for Transfers (From vs To).
+        potential_keys = ["AccountRef", "DepositToAccountRef", "FromAccountRef", "ToAccountRef"]
+        
+        for key in potential_keys:
+            if key in p:
+                 candidate_id = str(p[key].get("value"))
+                 if candidate_id in active_ids:
+                     return candidate_id
+        
+        # Priority 2: Payment specifics
+        if "CheckPayment" in p and "BankAccountRef" in p["CheckPayment"]:
+            cid = str(p["CheckPayment"]["BankAccountRef"].get("value"))
+            if cid in active_ids: return cid
+            
+        if "CreditCardPayment" in p and "CCAccountRef" in p["CreditCardPayment"]:
+            cid = str(p["CreditCardPayment"]["CCAccountRef"].get("value"))
+            if cid in active_ids: return cid
+            
+        # [FIX] Handle CreditCardPayment Entity directly (top-level keys)
+        if "CCAccountRef" in p:
+            cid = str(p["CCAccountRef"].get("value"))
+            if cid in active_ids: return cid
+            
+        if "BankAccountRef" in p:
+             cid = str(p["BankAccountRef"].get("value"))
+             if cid in active_ids: return cid
+            
+        return None
 
     def _resolve_account_name(self, p):
         if "AccountRef" in p: return p["AccountRef"].get("name")
@@ -224,33 +266,71 @@ class SyncService:
             if desc and desc.strip():
                 return desc
         
-        # 2. Strict: Do NOT fallback to PrivateNote or VendorName.
-        # User wants manual control or explicit suggestion click.
+        # 2. PrivateNote (Memo)
+        # User Request: "check if there is a memo we can put in there instead"
+        private_note = p.get("PrivateNote")
+        if private_note and private_note.strip():
+            return private_note
+            
         return None
 
-    def _resolve_payee(self, p):
+    def _resolve_payee(self, p, active_acc_id=None):
         """
         Resolves the full hierarchical name if possible.
+        Fallback for Transfers: Use the counterpart account name.
         """
         ref = p.get("EntityRef") or p.get("VendorRef") or p.get("CustomerRef")
-        if not ref: return None
         
-        name = ref.get("name")
-        val = ref.get("value")
-        
-        if val:
-            # Try to look up fully_qualified_name from our DB
-            from app.models.qbo import Vendor, Customer
-            # Note: We don't necessarily know if it's a Vendor or Customer from the Ref alone sometimes
-            # but usually it's one of them.
-            entity = self.db.query(Vendor).filter(Vendor.id == val).first()
-            if not entity:
-                entity = self.db.query(Customer).filter(Customer.id == val).first()
+        # Priority 1: Standard QBO Entity (Vendor/Customer)
+        if ref:
+            name = ref.get("name")
+            val = ref.get("value")
             
-            if entity and entity.fully_qualified_name:
-                return entity.fully_qualified_name
+            if val:
+                # Try to look up fully_qualified_name from our DB
+                from app.models.qbo import Vendor, Customer
+                entity = self.db.query(Vendor).filter(Vendor.id == val).first()
+                if not entity:
+                    entity = self.db.query(Customer).filter(Customer.id == val).first()
+                
+                if entity and entity.fully_qualified_name:
+                    return entity.fully_qualified_name
+            return name
+
+        # Priority 2: Fallback for Transfers/CreditCardPayments (No EntityRef)
+        # Use the name of the OTHER account involved in the transaction.
+        entity_type = p.get("_source_entity")
+        if entity_type in ["Transfer", "CreditCardPayment"]:
+            other_acc_name = self._resolve_counterpart_account_name(p, active_acc_id)
+            if other_acc_name:
+                return f"Transfer: {other_acc_name}"
+
+        return None
+
+    def _resolve_counterpart_account_name(self, p, active_acc_id):
+        """Finds the name of the account that is NOT the active_acc_id."""
+        # Check common transfer/payment account pairs
+        pairs = [
+            ("FromAccountRef", "ToAccountRef"),
+            ("AccountRef", "DepositToAccountRef"),
+            ("BankAccountRef", "CCAccountRef"), # CheckPayment vs CreditCardPayment
+        ]
         
-        return name
+        # Flattened list of all account refs to check
+        all_refs = [
+            p.get("FromAccountRef"), p.get("ToAccountRef"),
+            p.get("AccountRef"), p.get("DepositToAccountRef"),
+            p.get("CCAccountRef"), p.get("BankAccountRef")
+        ]
+        # Also check nested refs
+        if "CheckPayment" in p: all_refs.append(p["CheckPayment"].get("BankAccountRef"))
+        if "CreditCardPayment" in p: all_refs.append(p["CreditCardPayment"].get("CCAccountRef"))
+
+        for r in all_refs:
+            if r and r.get("value") and str(r.get("value")) != str(active_acc_id):
+                return r.get("name")
+        
+        return None
 
     def _extract_category(self, p):
         if "Line" in p:
@@ -374,3 +454,115 @@ class SyncService:
             return best_match.id, confidence
 
         return None, None
+
+    async def _fetch_missing_via_report(self, start_date: str, end_date: str, active_account_ids: list[str]) -> list:
+        """
+        Fallback Strategy: Fetch TransactionList report to find Transfers/CreditCardPayments
+        that are hidden by API queries due to Inactive Source Accounts.
+        """
+        print(f"📊 [SyncService] Fetching TransactionList Report for backup sync ({start_date} to {end_date})...")
+        
+        endpoint = "reports/TransactionList"
+        params = {
+            "start_date": start_date,
+            "end_date": end_date,
+            "columns": "tx_date,txn_type,doc_num,name,memo,amount,account_name",
+            # We can't strictly filter by transaction_type in reports easily without stripping others, 
+            # but we can filter in memory.
+        }
+        
+        recovered_items = []
+        
+        try:
+            res = await self.client.request("GET", endpoint, params=params)
+            rows = res.get("Rows", {}).get("Row", [])
+            
+            print(f"📊 [SyncService] Report Check: Found {len(rows)} rows.")
+            
+            # Helper to extract ID
+            def get_col_val(cols, idx): # Safety
+                 if idx < len(cols): return cols[idx].get("value")
+                 return ""
+
+            for row in rows:
+                if "ColData" not in row: continue
+                cols = row["ColData"]
+                
+                # Extract ID (usually in hidden 'id' attribute of the first or type column)
+                target_id = None
+                txn_type_str = ""
+                # DEBUG ROW
+                if "116" in str(row):
+                     print(f"🔎 DEBUG REPORT ROW 116: {cols}")
+                
+                for col in cols:
+                    val = col.get("value")
+                    # Strict Type Check & ID Extraction
+                    if val in ["Transfer", "Credit Card Payment"]:
+                        txn_type_str = val
+                        if col.get("id"):
+                            target_id = col.get("id")
+                
+                if not target_id:
+                     # print("   -> No ID found in row")
+                     continue
+                     
+                if not txn_type_str:
+                     continue
+                
+                # Check if we already have it locally
+                exists = self.db.query(Transaction).filter(Transaction.id == target_id).first()
+                if exists: 
+                    # print(f"   -> ID {target_id} ({txn_type_str}) already exists.")
+                    continue
+                
+                print(f"⚠️ [Report] ID {target_id} ({txn_type_str}) is MISSING locally! Attempting recovery...")
+                
+                # Determine Entity Type for Fetch
+                entity_type = "Transfer"
+                if "Credit Card" in txn_type_str:
+                    entity_type = "CreditCardPayment"
+                elif "Transfer" in txn_type_str:
+                    entity_type = "Transfer"
+                else:
+                    continue # Skip other types
+                
+                print(f"detecting missing {entity_type} {target_id} from report...")
+                
+                # Fetch Full Entity
+                try:
+                     full_tx = await self.client.get_entity(target_id, entity_type)
+                     
+                     tx_data = None
+                     if entity_type == "CreditCardPayment":
+                         tx_data = full_tx.get("CreditCardPayment")
+                         # [FALLBACK] Report says "Credit Card Payment" but API says "Transfer"
+                         if not tx_data:
+                             print(f"⚠️ [SyncService] ID {target_id} returned no CreditCardPayment data. Trying Transfer...")
+                             full_tx_transfer = await self.client.get_entity(target_id, "Transfer")
+                             tx_data = full_tx_transfer.get("Transfer")
+                             if tx_data: 
+                                 entity_type = "Transfer" # Correct the type
+                             
+                     elif entity_type == "Transfer":
+                         tx_data = full_tx.get("Transfer")
+                         
+                     if tx_data:
+                         
+                         # Check if it involves an ACTIVE account
+                         acc_id = self._resolve_account_id(tx_data, active_account_ids)
+                         if acc_id:
+                             print(f"✅ [SyncService] Recovering hidden {entity_type} {target_id} for Account {acc_id}!")
+                             tx_data["_source_entity"] = entity_type
+                             recovered_items.append(tx_data)
+                         else:
+                             # It's a transfer between two inactive accounts? Ignore.
+                             pass
+                except Exception as e:
+                    print(f"⚠️ [SyncService] Failed to fetch details for {target_id}: {e}")
+                    
+        except Exception as e:
+            print(f"❌ [SyncService] Report sync failed: {e}")
+            
+        print(f"📥 [SyncService] Recovered {len(recovered_items)} items via Report.")
+        return recovered_items

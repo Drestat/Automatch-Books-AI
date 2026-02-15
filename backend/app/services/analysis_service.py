@@ -105,7 +105,8 @@ class AnalysisService:
             if not tx_id and tx.description in vendor_mapping:
                 suggested_cat = vendor_mapping[tx.description]
                 print(f"✅ [Deterministic] Matched '{tx.description}' to '{suggested_cat}'")
-                self._apply_suggestion(tx, suggested_cat, "Deterministic match from history.", 1.0, "history", list(categories_obj.values()))
+                reasoning = "Antigravity learned this from your past actions! Your manual categorizations are actively training the system."
+                self._apply_suggestion(tx, suggested_cat, reasoning, 1.0, "history", list(categories_obj.values()))
                 results.append({"id": tx.id, "analysis": {"category": suggested_cat, "method": "history"}})
             else:
                 to_analyze_with_ai.append(tx)
@@ -178,6 +179,7 @@ class AnalysisService:
         tx.reasoning = reasoning
         tx.confidence = confidence
         tx.status = 'pending_approval'
+        tx.matching_method = method
         
         # Reset deeper reasoning for non-AI matches (or we could clear them)
         tx.vendor_reasoning = reasoning
@@ -204,6 +206,7 @@ class AnalysisService:
         tx.note_reasoning = analysis.get('note_reasoning')
         tx.tax_deduction_note = analysis.get('tax_deduction_note')
         tx.confidence = analysis.get('confidence')
+        tx.matching_method = 'ai'
         tx.status = 'unmatched' # Keep as unmatched so it shows in the list
 
         # DESCRIPTION LOGIC: Removed auto-fill per user request (v3.28.17)
@@ -333,6 +336,7 @@ class AnalysisService:
 
                 tx.reasoning = f"Matched rule: {rule.name}"
                 tx.confidence = 1.0 # Rules are absolute
+                tx.matching_method = 'rule'
                 tx.status = 'pending_approval'
                 return True
         

@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v4.1.0 - MOBILE HAPTICS + AI SPLITS + ARCHITECTURAL CLEANUP
+# v4.2.1 - AI LEARNING LOOP + STABLE LIST SORTING
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.

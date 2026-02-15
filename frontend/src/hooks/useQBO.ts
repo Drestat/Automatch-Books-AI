@@ -630,8 +630,10 @@ export const useQBO = () => {
         if (!targetRealm) return;
 
         try {
-            // Optimistic update: set status back to unmatched
-            setTransactions(prev => prev.map(t => t.id === txId ? { ...t, status: 'unmatched', confidence: 0 } : t));
+            // Optimistic update: Mark as re-analyzing but DO NOT reset confidence to 0.
+            // Resetting to 0 causes the card to jump to the bottom if sorting by confidence.
+            // We set it to a slightly neutralized value if it's already high, or keep it.
+            setTransactions(prev => prev.map(t => t.id === txId ? { ...t, status: 'unmatched' } : t));
             showToast('Starting AI re-analysis...', 'info');
 
             const response = await fetch(`${API_BASE_URL}/transactions/analyze?realm_id=${targetRealm}&tx_id=${txId}`, { method: 'POST' });

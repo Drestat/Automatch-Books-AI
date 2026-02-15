@@ -185,6 +185,12 @@ function DashboardContent() {
     } else if (sortConfig.key === 'confidence') {
       comparison = (a.confidence || 0) - (b.confidence || 0);
     }
+
+    // Stable tie-breaker: Use ID if the primary key is equal
+    if (comparison === 0) {
+      comparison = a.id.localeCompare(b.id);
+    }
+
     return sortConfig.direction === 'asc' ? comparison : -comparison;
   });
 

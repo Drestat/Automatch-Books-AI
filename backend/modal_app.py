@@ -117,10 +117,9 @@ async def sync_user_data(realm_id: str):
         await service.sync_all()
         print("✅ Sync complete")
         
-        # CHAIN TO AI
-        print("🧠 Triggering Deterministic Analysis (Rules/History Only)...")
-        # Disable AI for auto-sync to save tokens until user explicitly requests it
-        process_ai_categorization.spawn(realm_id, allow_ai=False)
+        # CHAIN TO AI - REMOVED per user request v3.28.18
+        # We now wait for manual user clicks on "Analyze with AI"
+        pass
         
     except Exception as e:
         print(f"❌ Sync failed: {e}")

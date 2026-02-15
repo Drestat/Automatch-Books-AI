@@ -84,6 +84,7 @@ class Transaction(Base):
     suggested_tags = Column(JSON, default=[]) # AI suggested tags
     status = Column(String, default="unmatched") # unmatched, pending_approval, approved
     sync_token = Column(String) # QBO SyncToken for optimistic locking
+    matching_method = Column(String, default="none") # none, ai, history, rule
     
     # AI Suggestions (Main / Single)
     suggested_category_id = Column(String)

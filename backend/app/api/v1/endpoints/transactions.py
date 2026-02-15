@@ -64,6 +64,7 @@ class TransactionSchema(BaseModel):
     account_id: Optional[str] = None
     account_name: Optional[str] = None
     sync_token: Optional[str] = None
+    matching_method: Optional[str] = "none"
 
     class Config:
         from_attributes = True
