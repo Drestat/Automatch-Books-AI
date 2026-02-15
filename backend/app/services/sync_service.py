@@ -119,6 +119,27 @@ class SyncService:
         
         print(f"📥 [SyncService] Retrieved {len(all_txs)} raw items from QBO.")
         
+        # [MODIFIED v4.3.2] GLOBAL PURGE: To enforce "Zero Suggestions" policy strictly,
+        # we clear any non-history/non-rule suggestions for all unmatched transactions in this realm.
+        from app.models.qbo import Transaction
+        self.db.query(Transaction).filter(
+            Transaction.realm_id == self.connection.realm_id,
+            Transaction.status == 'unmatched',
+            Transaction.matching_method.in_(['none', None, 'ai']) # Purge legacy suggestions
+        ).update({
+            "suggested_category_name": None,
+            "suggested_category_id": None,
+            "suggested_payee": None,
+            "confidence": None,
+            "reasoning": None,
+            "matching_method": 'none',
+            "vendor_reasoning": None,
+            "category_reasoning": None,
+            "tax_deduction_note": None
+        }, synchronize_session=False)
+        self.db.commit()
+        print(f"🧹 [SyncService] Global Suggestion Purge Complete.")
+        
         # [NEW] Report Fallback for Hidden Transfers
         try:
             # We use the same start date effectively
