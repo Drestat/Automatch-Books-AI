@@ -214,8 +214,7 @@ class SyncService:
             tx.is_qbo_matched = is_qbo_matched
             
             # [MODIFIED v4.3.1] Strict "Zero Suggestions" Policy
-            # Every sync/re-sync starts with a clean slate. 
-            # Suggestions ONLY populate if History/Rules find a match in AnalysisService.
+            # Every sync/re-sync starts with a clean slate unless we have persistent memory.
             tx.suggested_category_name = None
             tx.suggested_category_id = None
             tx.suggested_payee = None
@@ -225,6 +224,31 @@ class SyncService:
             tx.vendor_reasoning = None
             tx.category_reasoning = None
             tx.tax_deduction_note = None
+
+            # [MODIFIED v4.4] Persistence Restoration
+            try:
+                from app.models.qbo import TransactionPersistence, Category
+                persist = self.db.query(TransactionPersistence).filter(
+                    TransactionPersistence.user_id == self.connection.user_id,
+                    TransactionPersistence.qbo_id == tx.id
+                ).first()
+                
+                if persist and persist.status == 'approved':
+                    print(f"🧠 [Memory] Restoring 'approved' status for ID {tx.id}")
+                    tx.status = 'approved'
+                    tx.category_name = persist.category_name
+                    tx.payee = persist.payee
+                    tx.matching_method = 'history' # Treat as history to avoid frontend filtering
+                    tx.reasoning = "Restored from your previous session's confirmed actions."
+                    
+                    # Resolve ID if possible
+                    cat = self.db.query(Category).filter(
+                        Category.realm_id == self.connection.realm_id, 
+                        Category.name == persist.category_name
+                    ).first()
+                    if cat: tx.category_id = cat.id
+            except Exception as px:
+                print(f"⚠️ [Memory] Restoration error for {tx.id}: {px}")
 
             self.db.add(tx)
         

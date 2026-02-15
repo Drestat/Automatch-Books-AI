@@ -145,6 +145,29 @@ class VendorAlias(Base):
     vendor_id = Column(String, ForeignKey("vendors.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+class CategorizationLearning(Base):
+    """Global merchant patterns tied to the user, not the realm."""
+    __tablename__ = "categorization_learning"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(String, index=True, nullable=False)
+    vendor_name = Column(String, index=True, nullable=False)
+    category_name = Column(String, nullable=False)
+    # We store matching details to reproduce the badge
+    matching_method = Column(String, default="history") 
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class TransactionPersistence(Base):
+    """Specific transaction approvals that survive realm disconnects."""
+    __tablename__ = "transaction_persistence"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(String, index=True, nullable=False)
+    qbo_id = Column(String, index=True, nullable=False) # QBO Transaction ID
+    realm_id = Column(String, index=True, nullable=False) # Original Realm
+    status = Column(String, default="approved")
+    category_name = Column(String)
+    payee = Column(String)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
 class ClassificationRule(Base):
     __tablename__ = "classification_rules"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

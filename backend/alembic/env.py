@@ -8,6 +8,8 @@ from alembic import context
 # Import models
 import sys
 import os
+from dotenv import load_dotenv
+load_dotenv()
 sys.path.append(os.getcwd())
 from app.db.session import Base
 from app.models.user import User

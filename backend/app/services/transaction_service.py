@@ -122,6 +122,56 @@ class TransactionService:
             tx.is_qbo_matched = True
             self.db.add(tx)
             self.db.commit()
+
+            # [MODIFIED v4.4] Persistence Layer: Global Brain Updates
+            try:
+                from app.models.qbo import CategorizationLearning, TransactionPersistence
+                
+                # 1. Update Global Merchant Memory (Patterns)
+                # We save if it's a history match OR if the user manually changed/confirmed it.
+                if tx.payee and cat_name:
+                    # Upsert learning (Last action wins for simplicity)
+                    learning = self.db.query(CategorizationLearning).filter(
+                        CategorizationLearning.user_id == self.connection.user_id,
+                        CategorizationLearning.vendor_name == tx.payee
+                    ).first()
+                    
+                    if not learning:
+                        learning = CategorizationLearning(
+                            user_id=self.connection.user_id,
+                            vendor_name=tx.payee
+                        )
+                    
+                    learning.category_name = cat_name
+                    learning.matching_method = tx.matching_method if tx.matching_method != 'none' else 'history'
+                    self.db.add(learning)
+
+                # 2. Update Transaction Status Memory (Survival)
+                # This ensures if they disconnect/reconnect, we can put this exact ID back to 'approved'.
+                persist = self.db.query(TransactionPersistence).filter(
+                    TransactionPersistence.user_id == self.connection.user_id,
+                    TransactionPersistence.qbo_id == tx.id,
+                    TransactionPersistence.realm_id == self.connection.realm_id
+                ).first()
+                
+                if not persist:
+                    persist = TransactionPersistence(
+                        user_id=self.connection.user_id,
+                        qbo_id=tx.id,
+                        realm_id=self.connection.realm_id
+                    )
+                
+                persist.status = 'approved'
+                persist.category_name = cat_name
+                persist.payee = tx.payee
+                self.db.add(persist)
+                
+                self.db.commit()
+                print(f"🧠 [Memory] Recorded persistent state for {tx.id}")
+                
+            except Exception as mx:
+                print(f"⚠️ [Memory] Failed to record persistence: {mx}")
+                # Don't fail the sync for memory errors
             
             self._log("approve", "transaction", 1, "success", {"tx_id": tx_id, "is_split": tx.is_split})
             

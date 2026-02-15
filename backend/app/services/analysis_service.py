@@ -36,9 +36,9 @@ class AnalysisService:
         for v in vendors:
             entity_vocabulary.append(v.fully_qualified_name or v.display_name)
         
-        # Vendor history context
+        # Vendor history context (Realm-specific history)
         history = self.db.query(
-            Transaction.description, 
+            Transaction.payee, # Use payee (normalized) rather than raw description
             Transaction.suggested_category_name
         ).filter(
             Transaction.realm_id == self.realm_id,
@@ -46,9 +46,27 @@ class AnalysisService:
         ).all()
         
         vendor_mapping = {}
-        for desc, cat in history:
-            if desc and desc not in vendor_mapping:
-                vendor_mapping[desc] = cat
+        # 1. Start with realm-specific history (Highest relevance)
+        for payee, cat in history:
+            if payee and payee not in vendor_mapping:
+                vendor_mapping[payee] = cat
+        
+        # 2. Layer in Global Memory (Survival/Cross-Connection)
+        try:
+            connection = self.db.query(QBOConnection).filter(QBOConnection.realm_id == self.realm_id).first()
+            if connection:
+                from app.models.qbo import CategorizationLearning
+                global_history = self.db.query(CategorizationLearning).filter(
+                    CategorizationLearning.user_id == connection.user_id
+                ).all()
+                
+                for g in global_history:
+                    # Only add if not already in mapping (local realm history wins for a specific connection)
+                    if g.vendor_name not in vendor_mapping:
+                        vendor_mapping[g.vendor_name] = g.category_name
+                        print(f"🧠 [Memory] Restored global pattern for '{g.vendor_name}' -> '{g.category_name}'")
+        except Exception as e:
+            print(f"⚠️ [Memory] Failed to pull global history: {e}")
 
         return {
             "categories": [c.name for c in categories],
@@ -102,8 +120,10 @@ class AnalysisService:
             
             # 1. History Match
             # Skip history match if we are explicitly analyzing a specific transaction (User Request)
-            if not tx_id and tx.description in vendor_mapping:
-                suggested_cat = vendor_mapping[tx.description]
+            # [MODIFIED v4.4] Match against Payee rather than raw bank description for better accuracy
+            match_key = tx.payee if tx.payee else tx.description
+            if not tx_id and match_key in vendor_mapping:
+                suggested_cat = vendor_mapping[match_key]
                 print(f"✅ [Deterministic] Matched '{tx.description}' to '{suggested_cat}'")
                 reasoning = "Antigravity learned this from your past actions! Your manual categorizations are actively training the system."
                 self._apply_suggestion(tx, suggested_cat, reasoning, 1.0, "history", list(categories_obj.values()))
