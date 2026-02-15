@@ -117,9 +117,9 @@ async def sync_user_data(realm_id: str):
         await service.sync_all()
         print("✅ Sync complete")
         
-        # CHAIN TO AI - REMOVED per user request v3.28.18
-        # We now wait for manual user clicks on "Analyze with AI"
-        pass
+        # Trigger background LEARNING (Deterministic/History only)
+        # Deep AI Analysis remains gated behind the manual "Analyze" button.
+        process_ai_categorization.spawn(realm_id, allow_ai=False)
         
     except Exception as e:
         print(f"❌ Sync failed: {e}")

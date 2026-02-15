@@ -181,9 +181,9 @@ class AnalysisService:
         tx.status = 'pending_approval'
         tx.matching_method = method
         
-        # Reset deeper reasoning for non-AI matches (or we could clear them)
-        tx.vendor_reasoning = reasoning
-        tx.category_reasoning = f"Suggested based on {method} matching history."
+        # Reset reasoning for deterministic matches to keep UI clean until manual analysis
+        tx.vendor_reasoning = None
+        tx.category_reasoning = None
         tx.tax_deduction_note = None
         
         # Resolve ID

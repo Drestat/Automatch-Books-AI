@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api.v1.api import api_router
 
-# v4.2.2 - AI COMMUNICATION PERSISTENCE + LAYOUT STABILITY
+# v4.3.0 - LEARNING-AWARE SUGGESTIONS + MANUAL ANALYSIS GATE
 
 def initialize_app_logic():
     """Compatibility wrapper for Modal cloud deployment.
@@ -74,13 +74,13 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "4.2.2"}
+    return {"status": "ok", "version": "4.3.0"}
 
 @app.get("/")
 def read_root():
     return {
         "message": "Automatch Books AI API is ONLINE",
-        "version": "4.2.2",
+        "version": "4.3.0",
         "status": "ready"
     }
 
