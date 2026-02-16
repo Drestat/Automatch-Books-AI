@@ -365,4 +365,86 @@ Instead of arbitrary "points," we use **AP (Accounting Points)** and **Levels** 
   - **Fix Location**: `backend/app/services/transaction_service.py:407-456`
   - **Impact**: High-integrity receipt attachments for all file types (JPG, PNG, PDF).
 
+## 12. QA Audit & Test Coverage (2026-02-15)
+
+### Test Infrastructure Established
+- **Backend**: pytest + pytest-asyncio + pytest-cov + pytest-mock
+- **Frontend**: Vitest + React Testing Library + Playwright
+- **CI/CD**: GitHub Actions with automated test execution on PR/push
+- **Coverage**: Configured with 70% backend / 50% frontend thresholds
+
+### Critical Bugs Discovered & Test Coverage
+
+#### BUG-001: Duplicate Detection Disabled [CRITICAL]
+- **Location**: `backend/app/services/sync_service.py:200-206`
+- **Issue**: Duplicate detection is completely disabled. Code commented out with `[DISABLED TEMPORARILY FOR DEBUG SPEED]`
+- **Impact**: Users may end up with duplicate transactions in QuickBooks
+- **Test File**: `backend/tests/unit/test_duplicate_detection.py` (10 test cases)
+- **Status**: Tests written, feature needs re-enabling
+
+#### BUG-002: QBO API 5xx Errors Not Retried [HIGH]
+- **Location**: `backend/app/services/qbo_client.py` (retry decorator)
+- **Issue**: Only 429 (rate limit) errors trigger retry. 500/502/503/504 errors fail immediately.
+- **Impact**: Sync failures during transient QBO API issues
+- **Test File**: `backend/tests/unit/test_qbo_client.py` (6 test cases)
+- **Status**: Tests document bug with `pytest.xfail` markers
+
+#### BUG-003: Realm Ownership Security Vulnerability [HIGH]
+- **Location**: `backend/app/api/v1/endpoints/qbo.py:76-86` (OAuth callback)
+- **Issue**: Realm ownership silently reassigned when different user completes OAuth
+- **Impact**: User A could hijack User B's QBO connection
+- **Test File**: `backend/tests/integration/test_qbo_security.py` (7 test cases)
+- **Status**: Tests document vulnerability with `pytest.xfail` markers
+
+#### BUG-004: Silent Receipt Date Parsing [MEDIUM]
+- **Location**: `backend/app/services/receipt_service.py:30`
+- **Issue**: Date parsing fails with bare `except: pass` - no logging, only ISO format supported
+- **Impact**: Non-ISO dates silently fail, affecting fuzzy matching accuracy
+- **Test File**: `backend/tests/unit/test_receipt_service.py` (20+ test cases)
+- **Status**: Tests cover date parsing, fuzzy matching, amount matching, entity mapping
+
+#### BUG-005: Payment Type Categorization [MEDIUM]
+- **Location**: `backend/app/services/transaction_service.py:245-247`
+- **Issue**: Payment/BillPayment types only update memo, not GL account (undocumented)
+- **Impact**: Users think they're categorizing, but GL account doesn't change
+- **Test File**: `backend/tests/unit/test_transaction_service.py`
+- **Status**: Edge case documented in tests
+
+### Additional Findings
+- **Debug Code**: `sync_service.py:541-543` contains debug print for row 116
+- **Disabled Schema Patches**: `main.py:30-51` has disabled schema migration code
+- **Gamification TODO**: `gamification_service.py:112` - Streak Freeze logic unimplemented
+- **Account Auto-Sync**: `accounts.py:63` - TODO for auto-triggering sync on empty
+
+### Test Execution Commands
+```bash
+# Backend: Run all tests with coverage
+cd backend && pytest -v --cov=app --cov-report=html
+
+# Backend: Run critical bugs only
+cd backend && pytest -m critical -v
+
+# Backend: Run security tests only
+cd backend && pytest -m security -v
+
+# Frontend: Run unit tests
+cd frontend && npx vitest run
+
+# Frontend: Run E2E tests
+cd frontend && npx playwright test
+
+# Full CI verification
+cd backend && pytest -v && cd ../frontend && npx vitest run
+```
+
+### Test File Inventory
+| File | Type | Tests | Coverage |
+|------|------|-------|----------|
+| `tests/unit/test_duplicate_detection.py` | Unit | 10 | Duplicate detection logic |
+| `tests/unit/test_qbo_client.py` | Unit | 6 | QBO API retry/error handling |
+| `tests/unit/test_receipt_service.py` | Unit | 20+ | Receipt parsing, fuzzy matching |
+| `tests/unit/test_transaction_service.py` | Unit | 8 | Approval workflow, splits |
+| `tests/integration/test_qbo_security.py` | Integration | 7 | Realm security, CSRF |
+| `tests/integration/test_stripe_webhooks.py` | Integration | 6 | Payment processing |
+| `frontend/tests/e2e/transaction-approval.spec.ts` | E2E | 5 | Critical user flows |
 

@@ -1,0 +1,180 @@
+{
+  "purchase_transaction": {
+    "Purchase": {
+      "Id": "123",
+      "TxnDate": "2024-01-15",
+      "TotalAmt": 150.50,
+      "CurrencyRef": {
+        "value": "USD",
+        "name": "United States Dollar"
+      },
+      "AccountRef": {
+        "value": "35",
+        "name": "Business Checking"
+      },
+      "EntityRef": {
+        "value": "67",
+        "name": "Acme Corp"
+      },
+      "Line": [
+        {
+          "Id": "1",
+          "Amount": 150.50,
+          "DetailType": "AccountBasedExpenseLineDetail",
+          "AccountBasedExpenseLineDetail": {
+            "AccountRef": {
+              "value": "45",
+              "name": "Office Supplies"
+            },
+            "BillableStatus": "NotBillable",
+            "TaxCodeRef": {
+              "value": "NON"
+            }
+          }
+        }
+      ],
+      "SyncToken": "0",
+      "MetaData": {
+        "CreateTime": "2024-01-15T10:00:00Z",
+        "LastUpdatedTime": "2024-01-15T10:00:00Z"
+      },
+      "PrivateNote": "Test transaction note"
+    }
+  },
+  "purchase_with_cleared_status": {
+    "Purchase": {
+      "Id": "456",
+      "TxnDate": "2024-01-20",
+      "TotalAmt": 200.00,
+      "Line": [
+        {
+          "Amount": 200.00,
+          "DetailType": "AccountBasedExpenseLineDetail",
+          "AccountBasedExpenseLineDetail": {
+            "AccountRef": {
+              "value": "46",
+              "name": "Travel Expenses"
+            },
+            "ClrStatus": "Cleared"
+          }
+        }
+      ],
+      "SyncToken": "1",
+      "PrivateNote": "#Accepted"
+    }
+  },
+  "bill_payment": {
+    "BillPayment": {
+      "Id": "789",
+      "TxnDate": "2024-01-25",
+      "TotalAmt": 500.00,
+      "CheckPayment": {
+        "BankAccountRef": {
+          "value": "35",
+          "name": "Business Checking"
+        }
+      },
+      "Line": [
+        {
+          "Amount": 500.00,
+          "LinkedTxn": [
+            {
+              "TxnId": "bill_123",
+              "TxnType": "Bill"
+            }
+          ]
+        }
+      ],
+      "SyncToken": "0"
+    }
+  },
+  "query_purchases": {
+    "QueryResponse": {
+      "Purchase": [
+        {
+          "Id": "123",
+          "TxnDate": "2024-01-15",
+          "TotalAmt": 150.50,
+          "SyncToken": "0"
+        },
+        {
+          "Id": "456",
+          "TxnDate": "2024-01-20",
+          "TotalAmt": 200.00,
+          "SyncToken": "1"
+        }
+      ],
+      "startPosition": 1,
+      "maxResults": 1000
+    }
+  },
+  "query_with_pagination": {
+    "QueryResponse": {
+      "Purchase": [
+        {}
+      ],
+      "startPosition": 1001,
+      "maxResults": 1000,
+      "totalCount": 2500
+    }
+  },
+  "error_rate_limit": {
+    "Fault": {
+      "Error": [
+        {
+          "code": "429",
+          "Message": "Rate limit exceeded. Please retry after some time",
+          "Detail": "Rate limit exceeded"
+        }
+      ],
+      "type": "ValidationFault"
+    }
+  },
+  "error_server": {
+    "Fault": {
+      "Error": [
+        {
+          "code": "500",
+          "Message": "Internal Server Error",
+          "Detail": "An internal error occurred"
+        }
+      ],
+      "type": "SystemFault"
+    }
+  },
+  "error_unauthorized": {
+    "Fault": {
+      "Error": [
+        {
+          "code": "401",
+          "Message": "Unauthorized",
+          "Detail": "Invalid or expired token"
+        }
+      ],
+      "type": "AuthenticationFault"
+    }
+  },
+  "category_list": {
+    "QueryResponse": {
+      "Account": [
+        {
+          "Id": "45",
+          "Name": "Office Supplies",
+          "AccountType": "Expense",
+          "AccountSubType": "SuppliesMaterials",
+          "Active": true,
+          "CurrentBalance": 0
+        },
+        {
+          "Id": "46",
+          "Name": "Travel Expenses",
+          "AccountType": "Expense",
+          "AccountSubType": "Travel",
+          "Active": true,
+          "CurrentBalance": 0
+        }
+      ],
+      "maxResults": 100
+    }
+  }
+}

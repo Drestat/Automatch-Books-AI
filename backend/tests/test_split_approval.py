@@ -13,8 +13,11 @@ Base.metadata.create_all(bind=engine)
 async def test_split_approval():
     db = SessionLocal()
     # Mock connection
+    from app.core.encryption import encrypt_token
     conn = MagicMock()
     conn.realm_id = "123"
+    conn.refresh_token = encrypt_token("test_refresh_token")
+    conn.user_id = "test_user"
     
     # Create a transaction
     tx = Transaction(
@@ -41,7 +44,7 @@ async def test_split_approval():
     service.client.request = AsyncMock(return_value={"Purchase": {"SyncToken": "1"}})
     service._resolve_entity_ref = AsyncMock(return_value={"value": "ven_1", "name": "Test Vendor"})
     
-    result = await service.approve_transaction("tx_1")
+    result = await service.approve_transaction("tx_1", optimistic=False)
     
     assert result["status"] == "success"
     assert tx.status == "approved"

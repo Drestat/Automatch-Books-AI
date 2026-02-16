@@ -47,49 +47,60 @@ class QBOClient:
         """
         Async Unified QBO request handler with:
         - Auto-refresh for 401 Unauthorized
-        - Exponential backoff for 429 Rate Limits
+        - Exponential backoff for 429 Rate Limits, 5xx Server Errors, and Network Timeouts
         - httpx.AsyncClient for non-blocking I/O
         """
         url = self._get_api_url(endpoint)
-        headers = {
-            'Authorization': f'Bearer {decrypt_token(self.connection.access_token)}',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
         
         max_retries = 3
         backoff_factor = 2
         
         async with httpx.AsyncClient() as client:
             for attempt in range(max_retries):
+                # Always get fresh token from connection (it might have been refreshed by another worker)
+                headers = {
+                    'Authorization': f'Bearer {decrypt_token(self.connection.access_token)}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+                
                 try:
-                    res = await client.request(method, url, headers=headers, params=params, json=json_payload)
+                    res = await client.request(method, url, headers=headers, params=params, json=json_payload, timeout=30.0)
                     
                     # Capture Intuit TID for compliance/debugging
                     await self._log_tid(res)
 
                     if res.status_code == 401:
-                        # Refresh logic (blocking DB write, but acceptable for rare auth refresh)
-                        token = self._refresh_access_token() 
+                        # Refresh logic
+                        print(f"🔄 [QBOClient] 401 Unauthorized. Refreshing tokens (Attempt {attempt + 1}/{max_retries})...")
+                        token = self._refresh_access_token()
                         headers['Authorization'] = f'Bearer {token}'
                         continue 
                     
-                    if res.status_code == 429:
+                    if res.status_code == 429 or (500 <= res.status_code <= 599):
                         if attempt < max_retries - 1:
                             wait_time = backoff_factor ** attempt
-                            print(f"⚠️ QBO Rate Limit (429). Retrying in {wait_time}s...")
+                            error_type = "Rate Limit (429)" if res.status_code == 429 else f"Server Error ({res.status_code})"
+                            print(f"⚠️ [QBOClient] {error_type}. Retrying in {wait_time}s... (Attempt {attempt + 1}/{max_retries})")
                             await asyncio.sleep(wait_time)
                             continue
                     
                     res.raise_for_status()
                     return res.json()
                     
-                except httpx.RequestError as e:
-                    print(f"❌ [QBOClient] Network Error: {e}")
+                except (httpx.RequestError, httpx.TimeoutException) as e:
+                    if attempt < max_retries - 1:
+                        wait_time = backoff_factor ** attempt
+                        print(f"⚠️ [QBOClient] Network/Timeout Error ({type(e).__name__}). Retrying in {wait_time}s... (Attempt {attempt + 1}/{max_retries})")
+                        await asyncio.sleep(wait_time)
+                        continue
+                    print(f"❌ [QBOClient] Final Network Error after {max_retries} attempts: {e}")
                     raise
                 except httpx.HTTPStatusError as e:
+                    # If we already reached here, it's not a 401, 429 or 5xx (they were handled above)
+                    # or we exhausted retries for 429/5xx
                     tid = e.response.headers.get('intuit_tid', 'N/A')
-                    print(f"❌ [QBOClient] HTTP Error: {e.response.text} (TID: {tid})")
+                    print(f"❌ [QBOClient] HTTP Error: {e.response.status_code} - {e.response.text} (TID: {tid})")
                     raise
 
     async def query(self, query_str):
@@ -179,8 +190,8 @@ class QBOClient:
                 detail_type: {}
             }
 
-        # Update Category (Account) - Only if it's NOT a BillPayment or Payment
-        if update_line and category_id and entity_type not in ["BillPayment", "Payment"]:
+        # Update Category (Account) - Allow for all supported types if category is present
+        if update_line and category_id:
             # Note: For RefundReceipt/SalesReceipt, QBO requires an ItemRef, not an AccountRef directly.
             # ItemAccountRef is only for Invoice-related reimbursements.
             if detail_type == "SalesItemLineDetail":
@@ -212,7 +223,7 @@ class QBOClient:
             "sparse": True
         }
 
-        if update_line and entity_type not in ["BillPayment", "Payment"]:
+        if update_line:
             update_payload["Line"] = [line_item]
 
         # Date (TxnDate) and TotalAmt are EXCLUDED to prevent accidental overwrites.

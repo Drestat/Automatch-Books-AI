@@ -9,6 +9,10 @@ import SplitEditorModal from './SplitEditorModal';
 import StreamingText from './StreamingText';
 import { triggerHaptic, takePhoto, isNative } from '@/lib/native-bridge';
 
+// Persist viewed communications for the duration of the session
+// This prevents AI from "re-typing" the same thing multiple times
+const VIEWED_COMMUNICATIONS = new Set<string>();
+
 interface Split {
     category_name: string;
     amount: number;
@@ -127,13 +131,33 @@ export default function TransactionCard({
     const [newTag, setNewTag] = React.useState("");
     const [payeeInput, setPayeeInput] = React.useState(tx.payee || "");
     const [isAnalyzing, setIsAnalyzing] = React.useState(false);
-    const [typingStage, setTypingStage] = React.useState({ vendor: false, category: false });
+    // Communication Logic: Track viewed status to prevent re-typing same content
+    const commKeys = {
+        vendor: `${tx.id}-vendor-${tx.vendor_reasoning}`,
+        category: `${tx.id}-category-${tx.category_reasoning}`,
+        tax: `${tx.id}-tax-${tx.tax_deduction_note}`
+    };
+
+    const [typingStage, setTypingStage] = React.useState({
+        vendor: VIEWED_COMMUNICATIONS.has(commKeys.vendor),
+        category: VIEWED_COMMUNICATIONS.has(commKeys.category),
+        tax: VIEWED_COMMUNICATIONS.has(commKeys.tax)
+    });
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     // Reset typing stage when transaction ID or reasoning changes
     React.useEffect(() => {
-        setTypingStage({ vendor: false, category: false });
-    }, [tx.id, tx.reasoning]);
+        setTypingStage({
+            vendor: VIEWED_COMMUNICATIONS.has(commKeys.vendor),
+            category: VIEWED_COMMUNICATIONS.has(commKeys.category),
+            tax: VIEWED_COMMUNICATIONS.has(commKeys.tax)
+        });
+    }, [tx.id, tx.vendor_reasoning, tx.category_reasoning, tx.tax_deduction_note]);
+
+    const handleStageComplete = (stage: 'vendor' | 'category' | 'tax') => {
+        VIEWED_COMMUNICATIONS.add(commKeys[stage]);
+        setTypingStage(prev => ({ ...prev, [stage]: true }));
+    };
 
     const handleAccept = async () => {
         triggerHaptic('success');
@@ -302,7 +326,7 @@ export default function TransactionCard({
                     <div className="flex flex-col gap-1.5">
                         <div className="flex items-center justify-between px-1">
                             <span className="text-[9px] uppercase tracking-widest font-bold text-white/40">Payee</span>
-                            {tx.suggested_payee && (
+                            {tx.suggested_payee && tx.matching_method !== 'none' && (
                                 <button
                                     onClick={() => onPayeeChange && onPayeeChange(tx.id, tx.suggested_payee!)}
                                     className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-brand-accent/5 border border-brand-accent/20 text-brand-accent text-[8px] font-bold uppercase hover:bg-brand-accent/10 transition-all"
@@ -328,12 +352,12 @@ export default function TransactionCard({
                     <div className="flex flex-col gap-1.5">
                         <div className="flex items-center justify-between px-1">
                             <span className="text-[9px] uppercase tracking-widest font-bold text-white/40">Category</span>
-                            {!tx.category_name && tx.suggested_category_name && (
+                            {!tx.category_name && tx.suggested_category_name && tx.matching_method !== 'none' && (
                                 <button
                                     onClick={() => onCategoryChange && onCategoryChange(tx.id, tx.suggested_category_id || '', tx.suggested_category_name)}
                                     className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[8px] font-bold uppercase transition-all ${tx.matching_method === 'history' || tx.matching_method === 'rule'
-                                            ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                                            : "bg-brand-accent/5 border-brand-accent/20 text-brand-accent hover:bg-brand-accent/10"
+                                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                                        : "bg-brand-accent/5 border-brand-accent/20 text-brand-accent hover:bg-brand-accent/10"
                                         }`}
                                 >
                                     {tx.matching_method === 'history' || tx.matching_method === 'rule' ? (
@@ -382,110 +406,119 @@ export default function TransactionCard({
                 )}
 
                 {/* 3. AI Intelligence Module */}
-                <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{
-                        opacity: 1,
-                        x: 0,
-                        backgroundColor: isAnalyzing
-                            ? ["rgba(0, 223, 216, 0.02)", "rgba(0, 223, 216, 0.08)", "rgba(0, 223, 216, 0.02)"]
-                            : "rgba(255, 255, 255, 0.02)",
-                        borderColor: (tx.vendor_reasoning || tx.category_reasoning) && !isAnalyzing
-                            ? ["rgba(0, 223, 216, 0.2)", "rgba(0, 223, 216, 0.6)", "rgba(0, 223, 216, 0.2)"] // Deep Cyan Breathing (Done)
-                            : (tx.matching_method === 'history' || tx.matching_method === 'rule')
-                                ? "rgba(16, 185, 129, 0.3)" // Emerald Border for Learned
-                                : ["rgba(255, 255, 255, 0.05)", "rgba(255, 255, 255, 0.15)", "rgba(255, 255, 255, 0.05)"] // Idle Breathing
-                    }}
-                    transition={{
-                        opacity: { delay: 0.2 },
-                        backgroundColor: isAnalyzing ? { duration: 2, repeat: Infinity, ease: "linear" } : { duration: 0.3 },
-                        borderColor: { duration: 3, repeat: Infinity, ease: "easeInOut" }
-                    }}
-                    className={`border rounded-2xl p-4 mb-4 relative overflow-hidden group/ai-module`}
-                >
-                    {isAnalyzing && (
-                        <motion.div
-                            initial={{ x: "-100%" }}
-                            animate={{ x: "200%" }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                            className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-accent/10 to-transparent skew-x-12"
-                        />
-                    )}
-                    <div className="flex items-center gap-2 mb-3">
-                        <span className={`text-[9px] font-bold uppercase tracking-widest transition-opacity ${(tx.matching_method === 'history' || tx.matching_method === 'rule') ? "text-emerald-400" : (tx.vendor_reasoning || tx.category_reasoning) ? "text-brand-accent" : "text-brand-accent opacity-80 group-hover/ai-module:opacity-100"
-                            }`}>
-                            {tx.matching_method === 'history' || tx.matching_method === 'rule' ? "Personal Training" : "AI Analysis"}
-                        </span>
-                        <div className={`h-[1px] flex-1 transition-colors ${(tx.vendor_reasoning || tx.category_reasoning) ? "bg-brand-accent/20" : "bg-white/5 group-hover/ai-module:bg-brand-accent/10"
-                            }`} />
-                    </div>
+                {(isAnalyzing || tx.vendor_reasoning || tx.category_reasoning || tx.tax_deduction_note) && (
+                    <motion.div
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{
+                            opacity: 1,
+                            x: 0,
+                            backgroundColor: isAnalyzing
+                                ? ["rgba(0, 223, 216, 0.02)", "rgba(0, 223, 216, 0.08)", "rgba(0, 223, 216, 0.02)"]
+                                : "rgba(255, 255, 255, 0.02)",
+                            borderColor: (tx.vendor_reasoning || tx.category_reasoning) && !isAnalyzing
+                                ? ["rgba(0, 223, 216, 0.2)", "rgba(0, 223, 216, 0.6)", "rgba(0, 223, 216, 0.2)"] // Deep Cyan Breathing (Done)
+                                : (tx.matching_method === 'history' || tx.matching_method === 'rule')
+                                    ? "rgba(16, 185, 129, 0.3)" // Emerald Border for Learned
+                                    : ["rgba(255, 255, 255, 0.05)", "rgba(255, 255, 255, 0.15)", "rgba(255, 255, 255, 0.05)"] // Idle Breathing
+                        }}
+                        transition={{
+                            opacity: { delay: 0.2 },
+                            backgroundColor: isAnalyzing ? { duration: 2, repeat: Infinity, ease: "linear" } : { duration: 0.3 },
+                            borderColor: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+                        }}
+                        className={`border rounded-2xl p-4 mb-4 relative overflow-hidden group/ai-module`}
+                    >
+                        {isAnalyzing && (
+                            <motion.div
+                                initial={{ x: "-100%" }}
+                                animate={{ x: "200%" }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                                className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-accent/10 to-transparent skew-x-12"
+                            />
+                        )}
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className={`text-[9px] font-bold uppercase tracking-widest transition-opacity ${(tx.matching_method === 'history' || tx.matching_method === 'rule') ? "text-emerald-400" : (tx.vendor_reasoning || tx.category_reasoning) ? "text-brand-accent" : "text-brand-accent opacity-80 group-hover/ai-module:opacity-100"
+                                }`}>
+                                {tx.matching_method === 'history' || tx.matching_method === 'rule' ? "Personal Training" : "AI Analysis"}
+                            </span>
+                            <div className={`h-[1px] flex-1 transition-colors ${(tx.vendor_reasoning || tx.category_reasoning) ? "bg-brand-accent/20" : "bg-white/5 group-hover/ai-module:bg-brand-accent/10"
+                                }`} />
+                        </div>
 
-                    <div className="space-y-3">
-                        <div className="flex gap-4">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border transition-all ${(tx.matching_method === 'history' || tx.matching_method === 'rule')
+                        <div className="space-y-3">
+                            <div className="flex gap-4">
+                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border transition-all ${(tx.matching_method === 'history' || tx.matching_method === 'rule')
                                     ? "bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_10px_-2px_rgba(16,185,129,0.5)]"
                                     : (tx.vendor_reasoning || tx.category_reasoning)
                                         ? "bg-brand-accent/10 border-brand-accent/30 shadow-[0_0_10px_-2px_var(--glow-brand)]"
                                         : "bg-brand-accent/5 border-brand-accent/10 group-hover/ai-module:border-brand-accent/30"
-                                }`}>
-                                <motion.div
-                                    animate={{
-                                        opacity: [0.5, 1, 0.5]
-                                    }}
-                                    transition={{
-                                        duration: 2,
-                                        repeat: Infinity,
-                                        ease: "easeInOut"
-                                    }}
-                                >
-                                    {tx.matching_method === 'history' || tx.matching_method === 'rule' ? (
-                                        <CheckCircle2 size={14} className="text-emerald-400" />
-                                    ) : (
-                                        <Sparkles size={14} className="text-brand-accent" />
+                                    }`}>
+                                    <motion.div
+                                        animate={{
+                                            opacity: [0.5, 1, 0.5]
+                                        }}
+                                        transition={{
+                                            duration: 2,
+                                            repeat: Infinity,
+                                            ease: "easeInOut"
+                                        }}
+                                    >
+                                        {tx.matching_method === 'history' || tx.matching_method === 'rule' ? (
+                                            <CheckCircle2 size={14} className="text-emerald-400" />
+                                        ) : (
+                                            <Sparkles size={14} className="text-brand-accent" />
+                                        )}
+                                    </motion.div>
+                                </div>
+                                <div className="space-y-2 pt-0.5">
+                                    {tx.vendor_reasoning && (
+                                        <p className="text-[11px] text-white/70 leading-normal font-medium max-w-2xl">
+                                            <span className={`${tx.matching_method === 'history' || tx.matching_method === 'rule' ? "text-emerald-400/80" : "text-brand-accent/80"} font-bold mr-2 text-[9px] uppercase tracking-wider`}>
+                                                {tx.matching_method === 'history' || tx.matching_method === 'rule' ? "User Trained" : "Vendor Match"}
+                                            </span>
+                                            <StreamingText
+                                                text={tx.vendor_reasoning}
+                                                speed={15}
+                                                skipAnimation={VIEWED_COMMUNICATIONS.has(commKeys.vendor)}
+                                                onComplete={() => handleStageComplete('vendor')}
+                                            />
+                                        </p>
                                     )}
-                                </motion.div>
+                                    {typingStage.vendor && tx.category_reasoning && (
+                                        <p className="text-[11px] text-white/70 leading-normal font-medium max-w-2xl">
+                                            <span className="text-brand-accent/80 font-bold mr-2 text-[9px] uppercase tracking-wider">Category Logic</span>
+                                            <StreamingText
+                                                text={tx.category_reasoning}
+                                                speed={15}
+                                                skipAnimation={VIEWED_COMMUNICATIONS.has(commKeys.category)}
+                                                onComplete={() => handleStageComplete('category')}
+                                            />
+                                        </p>
+                                    )}
+                                </div>
                             </div>
-                            <div className="space-y-2 pt-0.5">
-                                {tx.vendor_reasoning && (
-                                    <p className="text-[11px] text-white/70 leading-normal font-medium max-w-2xl">
-                                        <span className={`${tx.matching_method === 'history' || tx.matching_method === 'rule' ? "text-emerald-400/80" : "text-brand-accent/80"} font-bold mr-2 text-[9px] uppercase tracking-wider`}>
-                                            {tx.matching_method === 'history' || tx.matching_method === 'rule' ? "User Trained" : "Vendor Match"}
-                                        </span>
-                                        <StreamingText
-                                            text={tx.vendor_reasoning}
-                                            speed={15}
-                                            onComplete={() => setTypingStage(prev => ({ ...prev, vendor: true }))}
-                                        />
-                                    </p>
-                                )}
-                                {typingStage.vendor && tx.category_reasoning && (
-                                    <p className="text-[11px] text-white/70 leading-normal font-medium max-w-2xl">
-                                        <span className="text-brand-accent/80 font-bold mr-2 text-[9px] uppercase tracking-wider">Category Logic</span>
-                                        <StreamingText
-                                            text={tx.category_reasoning}
-                                            speed={15}
-                                            onComplete={() => setTypingStage(prev => ({ ...prev, category: true }))}
-                                        />
-                                    </p>
-                                )}
-                            </div>
-                        </div>
 
-                        {typingStage.category && tx.tax_deduction_note && (
-                            <div className="p-3 rounded-xl bg-brand-accent/5 border border-brand-accent/30 flex gap-3 hover:bg-brand-accent/10 transition-colors">
-                                <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center shrink-0">
-                                    <Info size={12} className="text-white/40" />
+                            {typingStage.category && tx.tax_deduction_note && (
+                                <div className="p-3 rounded-xl bg-brand-accent/5 border border-brand-accent/30 flex gap-3 hover:bg-brand-accent/10 transition-colors">
+                                    <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center shrink-0">
+                                        <Info size={12} className="text-white/40" />
+                                    </div>
+                                    <div className="flex flex-col gap-0.5">
+                                        <span className="text-[8px] font-bold text-brand-accent/60 uppercase tracking-widest">Tax Strategy</span>
+                                        <p className="text-[10px] text-white/60 leading-relaxed font-medium">
+                                            <StreamingText
+                                                text={tx.tax_deduction_note}
+                                                speed={15}
+                                                skipAnimation={VIEWED_COMMUNICATIONS.has(commKeys.tax)}
+                                                onComplete={() => handleStageComplete('tax')}
+                                            />
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col gap-0.5">
-                                    <span className="text-[8px] font-bold text-brand-accent/60 uppercase tracking-widest">Tax Strategy</span>
-                                    <p className="text-[10px] text-white/60 leading-relaxed font-medium">
-                                        <StreamingText text={tx.tax_deduction_note} speed={15} />
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </motion.div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
 
                 {/* 4. Collaboration Drawer */}
                 <motion.div

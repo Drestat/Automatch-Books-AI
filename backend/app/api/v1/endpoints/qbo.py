@@ -79,10 +79,8 @@ def callback(code: str, state: str, realmId: str, db: Session = Depends(get_db))
         else:
             # Security check: Ensure we aren't hijacking an existing connection for a different user
             if connection.user_id != user.id:
-                 print(f"⚠️ [qbo.py] Realm {realmId} already claimed by user {connection.user_id}. Request by {user.id}")
-                 # In a B2B context, multiple users might share a Realm, but for now we enforce ownership 
-                 # or update it if explicit re-auth.
-                 connection.user_id = user.id # Update ownership to current authenticator
+                 print(f"❌ [qbo.py] SECURITY ALERT: Realm {realmId} already claimed by user {connection.user_id}. Request by {user.id} rejected.")
+                 raise HTTPException(status_code=403, detail="This QuickBooks company is already connected to another user.")
         
         # Encrypt before saving due to Intuit compliance requirements
         connection.refresh_token = encrypt_token(auth_client.refresh_token)
@@ -333,12 +331,12 @@ def force_analyze(realm_id: str, tx_id: str = None, db: Session = Depends(get_db
     return {"status": "success", "message": "AI analysis triggered"}
 
 @router.delete("/disconnect")
-def disconnect_qbo(realm_id: str, db: Session = Depends(get_db)):
+def disconnect_qbo(realm_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     """
     Disconnect from QuickBooks and delete all associated data.
     This removes the connection, transactions, bank accounts, and sync logs.
     """
-    print(f"🔌 [disconnect] Called with realm_id: {realm_id}")
+    print(f"🔌 [disconnect] Called with realm_id: {realm_id} by user: {user.id}")
     from app.models.qbo import Transaction, BankAccount, SyncLog, Category, Customer
     
     connection = db.query(QBOConnection).filter(QBOConnection.realm_id == realm_id).first()
@@ -346,6 +344,11 @@ def disconnect_qbo(realm_id: str, db: Session = Depends(get_db)):
         print(f"❌ [disconnect] No connection found for realm_id: {realm_id}")
         raise HTTPException(status_code=404, detail="Connection not found")
     
+    # Security check
+    if connection.user_id != user.id:
+        print(f"❌ [disconnect] SECURITY ALERT: User {user.id} attempted to disconnect realm {realm_id} owned by {connection.user_id}")
+        raise HTTPException(status_code=403, detail="You do not own this connection.")
+
     print(f"✅ [disconnect] Found connection for user: {connection.user_id}")
     
     try:

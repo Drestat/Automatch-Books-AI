@@ -11,12 +11,14 @@ class TestFeedLogic(unittest.TestCase):
         data = {
             "PurchaseEx": {"any": [{"value": {"Name": "TxnType", "Value": "54"}}]},
             "SyncToken": "0",
-            "Line": [],
+            "Line": [{"AccountBasedExpenseLineDetail": {"AccountRef": {"name": "Office Supplies"}}}],
+            "EntityRef": {"name": "Lara Lamination"},
+            "ClrStatus": "R",
             "DocNumber": None
         }
         matched, reason = FeedLogic.analyze(data)
         self.assertTrue(matched, f"Lara should be Categorized. Reason: {reason}")
-        self.assertIn("Fresh Manual Entry", reason)
+        self.assertIn("Categorized Manual Entry", reason)
 
     def test_tania_nursery_modified_manual(self):
         """
@@ -27,11 +29,12 @@ class TestFeedLogic(unittest.TestCase):
             "PurchaseEx": {"any": [{"value": {"Name": "TxnType", "Value": "54"}}]},
             "SyncToken": "1",
             "Line": [],
-            "DocNumber": "50"
+            "DocNumber": "50",
+            "ClrStatus": "Create"
         }
         matched, reason = FeedLogic.analyze(data)
         self.assertFalse(matched, f"Tania should be For Review. Reason: {reason}")
-        self.assertIn("Modified Manual Entry", reason)
+        self.assertIn("Unreconciled Manual Entry", reason)
 
     def test_norton_lumber_bill_payment_linked(self):
         """
@@ -71,12 +74,13 @@ class TestFeedLogic(unittest.TestCase):
         data = {
             "PurchaseEx": {"any": [{"value": {"Name": "TxnType", "Value": "1"}}]},
             "Line": [],
+            "EntityRef": {"name": "Bob's Burgers"},
             "DocNumber": None,
             "SyncToken": "0"
         }
         matched, reason = FeedLogic.analyze(data)
         self.assertFalse(matched, f"Bank Feed Suggestion should be For Review. Reason: {reason}")
-        self.assertIn("Bank Feed Suggestion", reason)
+        self.assertIn("Missing Specific Category", reason)
 
     def test_bank_feed_finalized(self):
         """
@@ -85,7 +89,8 @@ class TestFeedLogic(unittest.TestCase):
         """
         data = {
             "PurchaseEx": {"any": [{"value": {"Name": "TxnType", "Value": "1"}}]},
-            "Line": [],
+            "Line": [{"AccountBasedExpenseLineDetail": {"AccountRef": {"name": "Meals & Entertainment"}}}],
+            "EntityRef": {"name": "Bob's Burgers"},
             "DocNumber": "101",
             "SyncToken": "0"
         }

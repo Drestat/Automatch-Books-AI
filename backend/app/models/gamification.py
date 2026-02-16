@@ -1,5 +1,4 @@
-from sqlalchemy import Column, String, Integer, Date, DateTime, ForeignKey, Text
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import Column, String, Integer, Date, DateTime, ForeignKey, Text, JSON, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import uuid
@@ -29,5 +28,5 @@ class GamificationEvent(Base):
     user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     event_type = Column(String, nullable=False) # 'categorize', 'rule_create', 'inbox_zero', 'daily_bonus'
     xp_earned = Column(Integer, nullable=False)
-    metadata_ = Column("metadata", JSONB, nullable=True) # avoiding reserved word conflict if any
+    metadata_ = Column("metadata", JSON, nullable=True) # avoiding reserved word conflict if any
     created_at = Column(DateTime(timezone=True), server_default=func.now())

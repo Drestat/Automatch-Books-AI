@@ -160,11 +160,7 @@ class SyncService:
                 # DEBUG: Trace skipped items
                 amt = p.get("TotalAmt") or p.get("Amount") or 0
                 if float(amt) > 6000 and float(amt) < 6100:
-                    print(f"❌ SKIPPED TARGET! ID: {p.get('Id')} | Entity: {p.get('_source_entity')} | Amt: {amt}")
-                    print(f"   - AccountRef: {p.get('AccountRef')}")
-                    print(f"   - FromAccountRef: {p.get('FromAccountRef')}")
-                    print(f"   - ToAccountRef: {p.get('ToAccountRef')}")
-                    print(f"   - DepositToAccountRef: {p.get('DepositToAccountRef')}")
+                    pass
                 continue
 
             valid_count += 1
@@ -197,17 +193,15 @@ class SyncService:
             tx.raw_json = p
 
             # Check for duplicates using fuzzy logic (Hubdoc Standard)
-            # [DISABLED TEMPORARILY FOR DEBUG SPEED]
-            # dup_id, dup_conf = self._check_duplicates(tx)
-            # if dup_id:
-            #     print(f"⚠️ [Duplicate] Potential duplicate found for {tx.id} -> {dup_id} ({dup_conf})")
-            #     tx.potential_duplicate_id = dup_id
-            #     tx.duplicate_confidence = dup_conf
-            #     tx.status = "potential_duplicate" # Prevent auto-categorization
+            dup_id, dup_conf = self._check_duplicates(tx)
+            if dup_id:
+                print(f"⚠️ [Duplicate] Potential duplicate found for {tx.id} -> {dup_id} ({dup_conf})")
+                tx.potential_duplicate_id = dup_id
+                tx.duplicate_confidence = dup_conf
+                tx.status = "potential_duplicate" # Prevent auto-categorization
 
             # LOGGING TARGET
             if tx.amount > 6000 and tx.amount < 6100:
-                print(f"🎯 PROCESSING TARGET: ID {tx.id} | Date {tx.date} | Desc {tx.description} | Amt {tx.amount} | Type {tx.transaction_type} | Acc {tx.account_id}")
 
 
             is_qbo_matched, _ = FeedLogic.analyze(p)
@@ -461,22 +455,31 @@ class SyncService:
         """
         Hubdoc-style Fuzzy Duplicate Detection:
         - Exact Amount (or inverted for credit/debit mix-ups)
-        - Date +/- 2 days
+        - Date +/- 3 days (Hubdoc uses 3-day window)
+        - Same Currency
+        - Same Realm
         - Different ID
         """
         from datetime import timedelta
         
-        # Define search window
-        date_start = tx.date - timedelta(days=2)
-        date_end = tx.date + timedelta(days=2)
+        # Security: Ensure we only check within the same realm
+        realm_id = tx.realm_id or self.connection.realm_id
         
+        # Define search window
+        date_start = tx.date - timedelta(days=3)
+        date_end = tx.date + timedelta(days=3)
+        
+        # $0 Transactions: Skip or return low confidence to avoid false positives
+        if float(tx.amount) == 0:
+            return None, None
+            
         # Query potential matches
         candidates = self.db.query(Transaction).filter(
-            Transaction.realm_id == self.connection.realm_id,
+            Transaction.realm_id == realm_id,
             Transaction.date >= date_start,
             Transaction.date <= date_end,
             Transaction.id != tx.id,
-            # Optimisation: Check amount in Python or DB? DB is faster.
+            Transaction.currency == tx.currency,
             Transaction.amount == tx.amount 
         ).all()
         
@@ -484,20 +487,33 @@ class SyncService:
             # Found exact amount match in date range
             best_match = candidates[0]
             confidence = 0.95 if best_match.date == tx.date else 0.85
+            
+            # Mark as potential duplicate
+            tx.potential_duplicate_id = best_match.id
+            tx.duplicate_confidence = confidence
+            tx.status = "potential_duplicate"
+            
             return best_match.id, confidence
             
         # Check inverted amount (e.g. 100.00 vs -100.00)
         candidates_inv = self.db.query(Transaction).filter(
-            Transaction.realm_id == self.connection.realm_id,
+            Transaction.realm_id == realm_id,
             Transaction.date >= date_start,
             Transaction.date <= date_end,
             Transaction.id != tx.id,
+            Transaction.currency == tx.currency,
             Transaction.amount == -tx.amount 
         ).all()
         
         if candidates_inv:
             best_match = candidates_inv[0]
             confidence = 0.80
+            
+            # Mark as potential duplicate
+            tx.potential_duplicate_id = best_match.id
+            tx.duplicate_confidence = confidence
+            tx.status = "potential_duplicate"
+            
             return best_match.id, confidence
 
         return None, None
@@ -540,7 +556,6 @@ class SyncService:
                 txn_type_str = ""
                 # DEBUG ROW
                 if "116" in str(row):
-                     print(f"🔎 DEBUG REPORT ROW 116: {cols}")
                 
                 for col in cols:
                     val = col.get("value")

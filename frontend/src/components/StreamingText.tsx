@@ -9,13 +9,20 @@ interface StreamingTextProps {
     className?: string;
     startDelay?: number;
     onComplete?: () => void;
+    skipAnimation?: boolean;
 }
 
-export default function StreamingText({ text, speed = 20, className = "", startDelay = 0, onComplete }: StreamingTextProps) {
-    const [displayedText, setDisplayedText] = useState("");
-    const [isComplete, setIsComplete] = useState(false);
+export default function StreamingText({ text, speed = 20, className = "", startDelay = 0, onComplete, skipAnimation = false }: StreamingTextProps) {
+    const [displayedText, setDisplayedText] = useState(skipAnimation ? text : "");
+    const [isComplete, setIsComplete] = useState(skipAnimation);
 
     useEffect(() => {
+        if (skipAnimation) {
+            setDisplayedText(text);
+            setIsComplete(true);
+            return;
+        }
+
         let timeout: NodeJS.Timeout;
 
         if (startDelay > 0) {

@@ -318,7 +318,7 @@ async def upload_receipt(
                  
         except ImportError:
             print("⚠️ Modal not found, running locally")
-            service = ReceiptService(db, realm_id)
+            service = ReceiptService(db, realm_id, user_id=user.id)
             result_obj = service.process_receipt(content, file.filename, mime_type=mime_type)
             match = result_obj.get('match')
             result = {
@@ -328,7 +328,7 @@ async def upload_receipt(
         except Exception as e:
             print(f"❌ Serverless Receipt Error: {e}")
             # Fallback to local
-            service = ReceiptService(db, realm_id)
+            service = ReceiptService(db, realm_id, user_id=user.id)
             result_obj = service.process_receipt(content, file.filename, mime_type=mime_type)
             match = result_obj.get('match')
             result = {

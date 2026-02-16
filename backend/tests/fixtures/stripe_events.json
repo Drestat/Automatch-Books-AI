@@ -1,0 +1,140 @@
+{
+  "checkout_session_completed": {
+    "id": "evt_test_checkout_completed",
+    "type": "checkout.session.completed",
+    "api_version": "2023-10-16",
+    "created": 1705334400,
+    "data": {
+      "object": {
+        "id": "cs_test_123",
+        "object": "checkout.session",
+        "amount_total": 2900,
+        "currency": "usd",
+        "customer": "cus_test_456",
+        "client_reference_id": "test_user_123",
+        "mode": "subscription",
+        "payment_status": "paid",
+        "status": "complete",
+        "metadata": {
+          "tier": "professional",
+          "tokens": "2000",
+          "clerkId": "clerk_test_123"
+        },
+        "subscription": "sub_test_789"
+      }
+    },
+    "livemode": false
+  },
+  "checkout_session_completed_business": {
+    "id": "evt_test_checkout_business",
+    "type": "checkout.session.completed",
+    "api_version": "2023-10-16",
+    "created": 1705334400,
+    "data": {
+      "object": {
+        "id": "cs_test_456",
+        "object": "checkout.session",
+        "amount_total": 8900,
+        "currency": "usd",
+        "customer": "cus_test_789",
+        "client_reference_id": "test_user_business",
+        "mode": "subscription",
+        "payment_status": "paid",
+        "status": "complete",
+        "metadata": {
+          "tier": "business",
+          "tokens": "300",
+          "clerkId": "clerk_test_business"
+        },
+        "subscription": "sub_test_business"
+      }
+    },
+    "livemode": false
+  },
+  "subscription_deleted": {
+    "id": "evt_test_subscription_deleted",
+    "type": "customer.subscription.deleted",
+    "api_version": "2023-10-16",
+    "created": 1705420800,
+    "data": {
+      "object": {
+        "id": "sub_test_789",
+        "object": "subscription",
+        "customer": "cus_test_456",
+        "status": "canceled",
+        "canceled_at": 1705420800,
+        "metadata": {
+          "user_id": "test_user_123"
+        }
+      }
+    },
+    "livemode": false
+  },
+  "invoice_payment_failed": {
+    "id": "evt_test_payment_failed",
+    "type": "invoice.payment_failed",
+    "api_version": "2023-10-16",
+    "created": 1705507200,
+    "data": {
+      "object": {
+        "id": "in_test_failed",
+        "object": "invoice",
+        "customer": "cus_test_456",
+        "subscription": "sub_test_789",
+        "status": "open",
+        "amount_due": 2900,
+        "attempt_count": 3,
+        "metadata": {
+          "user_id": "test_user_123"
+        }
+      }
+    },
+    "livemode": false
+  },
+  "invoice_payment_succeeded": {
+    "id": "evt_test_payment_succeeded",
+    "type": "invoice.payment_succeeded",
+    "api_version": "2023-10-16",
+    "created": 1705593600,
+    "data": {
+      "object": {
+        "id": "in_test_succeeded",
+        "object": "invoice",
+        "customer": "cus_test_456",
+        "subscription": "sub_test_789",
+        "status": "paid",
+        "amount_paid": 2900,
+        "metadata": {
+          "user_id": "test_user_123",
+          "token_grant": "2000"
+        }
+      }
+    },
+    "livemode": false
+  },
+  "customer_subscription_updated": {
+    "id": "evt_test_subscription_updated",
+    "type": "customer.subscription.updated",
+    "api_version": "2023-10-16",
+    "created": 1705680000,
+    "data": {
+      "object": {
+        "id": "sub_test_789",
+        "object": "subscription",
+        "customer": "cus_test_456",
+        "status": "active",
+        "plan": {
+          "id": "price_professional",
+          "amount": 2900,
+          "currency": "usd",
+          "interval": "month"
+        },
+        "metadata": {
+          "user_id": "test_user_123",
+          "tier": "professional"
+        }
+      }
+    },
+    "livemode": false
+  }
+}

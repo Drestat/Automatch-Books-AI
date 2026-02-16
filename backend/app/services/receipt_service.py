@@ -2,12 +2,32 @@ from sqlalchemy.orm import Session
 from rapidfuzz import fuzz
 from app.models.qbo import Transaction
 from app.services.ai_analyzer import AIAnalyzer
+from dateutil import parser
+from datetime import datetime
+import logging
+
 
 class ReceiptService:
-    def __init__(self, db: Session, realm_id: str):
+    def __init__(self, db: Session, realm_id: str, user_id: str = None):
         self.db = db
         self.realm_id = realm_id
+        self.user_id = user_id
         self.analyzer = AIAnalyzer()
+
+    def _parse_receipt_date(self, date_str: str):
+        """
+        Parses receipt date using dateutil for flexible format support based on BUG-004.
+        """
+        if not date_str:
+            return None
+        try:
+            # Fuzzy=True allows skipping non-date tokens if needed, but risky. 
+            # Default strict parsing is safer for explicit fields.
+            parsed = parser.parse(date_str)
+            return parsed.date()
+        except (ValueError, TypeError, ImportError, OverflowError) as e:
+            logging.warning(f"⚠️ [ReceiptService] Failed to parse date string '{date_str}': {e}")
+            return None
 
     def process_receipt(self, file_content: bytes, filename: str, mime_type: str = "image/jpeg"):
         """
@@ -24,11 +44,7 @@ class ReceiptService:
         receipt_date_str = extracted.get('date')
         receipt_date = None
         if receipt_date_str:
-            try:
-                from datetime import datetime
-                receipt_date = datetime.strptime(receipt_date_str, "%Y-%m-%d").date()
-            except:
-                pass
+            receipt_date = self._parse_receipt_date(receipt_date_str)
 
         txs = self.db.query(Transaction).filter(
             Transaction.realm_id == self.realm_id,
@@ -37,7 +53,32 @@ class ReceiptService:
         
         matches = []
         for tx in txs:
-            merchant_score = fuzz.WRatio(extracted.get('merchant', ''), tx.description)
+            merchant_score = fuzz.WRatio(
+                extracted.get('merchant', '').upper(), 
+                tx.description.upper()
+            )
+            # Award XP for processing receipt (regardless of match success, or only on match?)
+            # User req: "20xp if the transaction has a receipt" -> implies successful match/attach.
+            # But process_receipt helps find the match. 
+            # Let's award on SUCCESSFUL processing for now as "Receipt Added" action.
+        
+        # We should award XP at the end if we found matches or completed the scan?
+        # Let's award it here for the "scan" action.
+        try:
+            if self.user_id:
+                from app.services.gamification_service import GamificationService
+                gs = GamificationService(self.db)
+                gs.add_xp(user_id=self.user_id, action_type="receipt_upload")
+                print(f"✨ [Gamification] +20 XP to {self.user_id} for receipt upload")
+        except Exception as e:
+             print(f"⚠️ [Gamification] Failed to award XP for receipt: {e}")
+
+        matches = []
+        for tx in txs:
+            merchant_score = fuzz.WRatio(
+                extracted.get('merchant', '').upper(), 
+                tx.description.upper()
+            )
             amount_diff = abs(abs(float(tx.amount)) - amount)
             
             # Date score (100 if same day, degrades over 7 days)

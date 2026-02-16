@@ -123,6 +123,11 @@ class TransactionService:
             self.db.add(tx)
             self.db.commit()
 
+            # Resolve category name for pattern learning
+            cat_name = tx.category_name
+            if not cat_name and tx.is_split and tx.splits:
+                cat_name = tx.splits[0].category_name
+
             # [MODIFIED v4.4] Persistence Layer: Global Brain Updates
             try:
                 from app.models.qbo import CategorizationLearning, TransactionPersistence
@@ -194,6 +199,15 @@ class TransactionService:
             tx.reasoning = f"QBO Sync Failed: {str(e)}"
             self.db.add(tx)
             self.db.commit()
+
+            # Award XP for categorization (even if QBO sync failed, local categorization happened)
+            try:
+                from app.services.gamification_service import GamificationService
+                gs = GamificationService(self.db)
+                gs.add_xp(user_id=self.connection.user_id, action_type="categorize")
+            except Exception as gx:
+                print(f"⚠️ [Gamification] Failed to award XP: {gx}")
+
             self._log("approve", "transaction", 1, "error", {"tx_id": tx_id, "error": str(e)})
             raise e
 
@@ -238,13 +252,10 @@ class TransactionService:
                 existing_line = copy.deepcopy(tx.raw_json["Line"][0])
             global_tax = tx.raw_json.get("GlobalTaxCalculation")
 
-        # HANDLE PAYMENT/BILLPAYMENT CATEGORY IGNORE
-        # QBOClient intentionally ignores AccountRef for these types to preserve Invoice/Bill links.
-        # We must document the user's intent in the Memo.
-        append_memo = "#Accepted"
+        # Payment/BillPayment categories are now applied directly to the line item (if possible)
+        # We no longer force them into the Memo only.
         if tx.transaction_type in ["Payment", "BillPayment"] and cat_name:
-            print(f"⚠️ [Approve] Transaction {tx.id} is {tx.transaction_type}. Category '{cat_name}' will be noted in Memo (not applied to GL).")
-            append_memo = f"#Accepted | [App Category: {cat_name}]"
+             print(f"ℹ️ [Approve] Transaction {tx.id} is {tx.transaction_type}. Attempting to apply category '{cat_name}' to GL.")
 
         try:
             # NEW OPTIMIZATION: If the transaction already exists in QBO (has SyncToken)
