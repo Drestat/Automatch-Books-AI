@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Flame, Star, Trophy, Zap } from 'lucide-react';
 import { useGamification } from '@/hooks/useGamification';
 import { LeaderboardModal } from '@/components/LeaderboardModal';
@@ -48,7 +48,7 @@ export function GamificationHUD() {
             />
 
             {/* Streak Badge */}
-            <motion.div
+            <m.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border ${streakBorder} ${streakBg} backdrop-blur-md`}
@@ -60,7 +60,7 @@ export function GamificationHUD() {
                         className={`${isStreakActive ? streakColor : "text-white/20"} ${isStreakActive ? "fill-current" : ""}`}
                     />
                     {isStreakActive && (
-                        <motion.div
+                        <m.div
                             animate={{ opacity: [0.5, 1, 0.5], scale: [1, 1.2, 1] }}
                             transition={{ duration: 2, repeat: Infinity }}
                             className={`absolute inset-0 blur-sm ${streakColor} opacity-50`}
@@ -75,7 +75,7 @@ export function GamificationHUD() {
                         {stats.current_streak} <span className="text-[9px] text-white/40 font-normal">wks</span>
                     </span>
                 </div>
-            </motion.div>
+            </m.div>
 
             {/* Level / XP Badge (Clickable for Leaderboard) */}
             <div
@@ -98,7 +98,7 @@ export function GamificationHUD() {
 
                     {/* Progress Bar */}
                     <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden mb-1">
-                        <motion.div
+                        <m.div
                             className="h-full bg-gradient-to-r from-pink-500 to-purple-500"
                             initial={{ width: 0 }}
                             animate={{ width: `${stats.progress_percent}%` }}

@@ -2,14 +2,14 @@
 
 import React from 'react';
 import Footer from '@/components/Footer';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { FileText } from 'lucide-react';
 
 export default function TermsPage() {
     return (
         <div className="min-h-screen bg-black text-white selection:bg-brand selection:text-white">
             <main className="py-24 px-6 max-w-4xl mx-auto">
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-16"
@@ -19,7 +19,7 @@ export default function TermsPage() {
                     </div>
                     <h1 className="text-5xl font-black tracking-tight mb-4">Terms of Service</h1>
                     <p className="text-white/40 text-lg">Effective Date: January 2026</p>
-                </motion.div>
+                </m.div>
 
                 <div className="glass-card p-8 md:p-12 border-white/5 space-y-12 text-white/70 leading-relaxed">
                     <section>

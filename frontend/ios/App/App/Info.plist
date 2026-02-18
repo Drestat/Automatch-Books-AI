@@ -56,5 +56,14 @@
 	<!-- Face ID Permission (Biometric Auth) -->
 	<key>NSFaceIDUsageDescription</key>
 	<string>AutoMatch Books uses Face ID to securely verify your identity when opening the app.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.automatchbooks.ai.sync</string>
+	</array>
 </dict>
 </plist>

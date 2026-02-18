@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -17,7 +17,7 @@ interface BentoTileProps {
 
 export const BentoTile = ({ children, className, delay = 0 }: BentoTileProps) => {
     return (
-        <motion.div
+        <m.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{
@@ -35,6 +35,6 @@ export const BentoTile = ({ children, className, delay = 0 }: BentoTileProps) =>
             )}
         >
             {children}
-        </motion.div>
+        </m.div>
     );
 };

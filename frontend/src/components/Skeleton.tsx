@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 
 interface SkeletonProps {
     className?: string;
@@ -20,7 +20,7 @@ export default function Skeleton({ className = "", width, height, circle = false
                 borderRadius: circle ? '50%' : undefined
             }}
         >
-            <motion.div
+            <m.div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.05] to-transparent"
                 animate={{
                     x: ['-100%', '100%']

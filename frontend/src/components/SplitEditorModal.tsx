@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, AlertCircle, Check, DollarSign } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import CategorySelector from './CategorySelector';
 
 interface SplitLine {
@@ -97,8 +97,8 @@ export default function SplitEditorModal({
                 description: l.description
             })));
             onClose();
-        } catch (err) {
-            console.error("Save split failed", err);
+        } catch {
+            // Split save failed
         } finally {
             setIsSaving(false);
         }
@@ -109,7 +109,7 @@ export default function SplitEditorModal({
     return (
         <AnimatePresence>
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                <motion.div
+                <m.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -117,7 +117,7 @@ export default function SplitEditorModal({
                     className="absolute inset-0 bg-black/80 backdrop-blur-sm"
                 />
 
-                <motion.div
+                <m.div
                     initial={{ scale: 0.9, opacity: 0, y: 20 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -161,7 +161,7 @@ export default function SplitEditorModal({
                     {/* Lines List */}
                     <div className="flex-1 overflow-y-auto p-6 space-y-4">
                         {lines.map((line, index) => (
-                            <motion.div
+                            <m.div
                                 key={line.id}
                                 layout
                                 initial={{ opacity: 0, x: -20 }}
@@ -220,7 +220,7 @@ export default function SplitEditorModal({
                                         </button>
                                     </div>
                                 </div>
-                            </motion.div>
+                            </m.div>
                         ))}
 
                         <button
@@ -272,7 +272,7 @@ export default function SplitEditorModal({
                         availableCategories={availableCategories}
                         currentCategory={isEditingCategoryIndex !== null ? lines[isEditingCategoryIndex].category_name : ""}
                     />
-                </motion.div>
+                </m.div>
             </div>
         </AnimatePresence>
     );

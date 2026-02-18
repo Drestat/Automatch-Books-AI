@@ -5,7 +5,7 @@ import { BentoGrid } from '@/components/BentoGrid';
 import { BentoTile } from '@/components/BentoTile';
 import { SpendTrendChart } from '@/components/charts/SpendTrendChart';
 import { CategoryPieChart } from '@/components/charts/CategoryPieChart';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { TrendingUp, PieChart, Calendar, ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import { UserButton } from "@clerk/nextjs";
@@ -59,7 +59,7 @@ export default function AnalyticsPage() {
         <div className="min-h-screen py-12 px-6 lg:px-12 max-w-7xl mx-auto selection:bg-brand selection:text-white pb-32">
             {/* Header */}
             <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8 header-glow">
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                 >
@@ -75,7 +75,7 @@ export default function AnalyticsPage() {
                     <p className="text-white/30 text-sm sm:text-base font-medium max-w-sm">
                         Real-time intelligence on cash flow and spend velocity.
                     </p>
-                </motion.div>
+                </m.div>
 
                 <div className="flex items-center gap-4">
                     <button className="btn-glass px-5 py-3 text-xs font-black uppercase tracking-widest flex items-center gap-2.5 transition-all tactile-item">

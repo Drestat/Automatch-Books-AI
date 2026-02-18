@@ -2,12 +2,9 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import Stripe from 'stripe';
 
-// @ts-ignore - Some Stripe versions use custom identifiers
 const stripe = process.env.STRIPE_SECRET_KEY
-    ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-        apiVersion: '2024-06-20' as any,
-    })
-    : null as any;
+    ? new Stripe(process.env.STRIPE_SECRET_KEY)
+    : null! as Stripe;
 
 export async function POST(req: Request) {
     const { userId } = await auth();
@@ -64,7 +61,6 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ url: session.url });
     } catch (err: unknown) {
-        console.error('Error creating checkout session:', err);
-        return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 });
     }
 }

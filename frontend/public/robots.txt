@@ -1,6 +1,0 @@
-User-agent: *
-Disallow: /dashboard
-Disallow: /analytics
-Disallow: /api
-Allow: /
-Sitemap: https://automatchbooksai.com/sitemap.xml

@@ -55,7 +55,7 @@ import {
 } from 'lucide-react';
 import { AccountSelectorModal } from '@/components/AccountSelectorModal';
 import { TokenDepletedModal } from '@/components/TokenDepletedModal';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence, LazyMotion, domMax } from 'framer-motion';
 import { track } from '@/lib/analytics';
 import { useUser } from '@/hooks/useUser';
 
@@ -126,8 +126,7 @@ function DashboardContent() {
       // 2. Biometric auth on launch
       const authed = await authenticateWithBiometrics();
       if (!authed) {
-        // If biometric fails, could redirect — for now just log
-        console.warn('Biometric auth failed');
+        // If biometric fails, could redirect — continue anyway
       }
 
       // 3. Register for push notifications
@@ -253,21 +252,21 @@ function DashboardContent() {
           <div className="absolute top-0 left-0 w-full h-full bg-grid-white/[0.02] -z-10" />
           <div className="w-full max-w-md space-y-8 relative z-10">
             <div className="text-center space-y-4">
-              <motion.div
+              <m.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.5 }}
                 className="w-20 h-20 bg-brand/10 rounded-3xl flex items-center justify-center mx-auto ring-1 ring-brand/20 shadow-2xl shadow-brand/20"
               >
                 <Lock size={32} className="text-brand" />
-              </motion.div>
+              </m.div>
               <h1 className="text-4xl font-black tracking-tight">Connect QBO</h1>
               <p className="text-white/40 text-lg">
                 Link your QuickBooks Online account to unlock the magical mirror.
               </p>
             </div>
 
-            <motion.button
+            <m.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={connect}
@@ -284,7 +283,7 @@ function DashboardContent() {
                   <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" aria-hidden="true" />
                 </>
               )}
-            </motion.button>
+            </m.button>
 
             <p className="text-center text-xs text-white/20 font-medium">
               Uses bank-grade 256-bit encryption.
@@ -316,7 +315,7 @@ function DashboardContent() {
         />
 
         <header className="pt-12 sm:pt-20 pb-8 sm:pb-12 px-6 sm:px-12 max-w-[1600px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8 header-glow">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             className="relative"
@@ -333,9 +332,9 @@ function DashboardContent() {
             <p className="text-white/30 text-sm sm:text-base font-medium max-w-sm">
               Syncing activity for <span className="text-white/80">{isClient && isLoaded && user?.firstName ? user.firstName : 'User'}</span>
             </p>
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -390,7 +389,7 @@ function DashboardContent() {
                     <Activity size={10} className="text-brand" /> Session Momentum
                   </div>
                   <div className="w-32 h-1 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div
+                    <m.div
                       initial={{ width: 0 }}
                       animate={{ width: `${Math.min(100, (sessionsApproved / 10) * 100)}%` }}
                       className="h-full bg-brand shadow-[0_0_10px_rgba(0,95,86,0.5)]"
@@ -432,13 +431,13 @@ function DashboardContent() {
                 </div>
               </button>
             </div>
-          </motion.div>
+          </m.div>
         </header>
 
         <main className="px-4 sm:px-6 md:px-12 pb-24 md:pb-0 max-w-[1600px] mx-auto">
           <AnimatePresence mode="wait">
             {zenMode && sortedTransactions.length > 0 ? (
-              <motion.div
+              <m.div
                 key="zen-container"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -468,7 +467,7 @@ function DashboardContent() {
 
                     <div className="flex-1">
                       <AnimatePresence mode="wait">
-                        <motion.div
+                        <m.div
                           key={sortedTransactions[zenIndex]?.id}
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
@@ -544,7 +543,7 @@ function DashboardContent() {
                               }
                             }}
                           />
-                        </motion.div>
+                        </m.div>
                       </AnimatePresence>
                     </div>
 
@@ -564,7 +563,7 @@ function DashboardContent() {
                     <X size={14} /> Exit Zen Review
                   </button>
                 </div>
-              </motion.div>
+              </m.div>
             ) : null}
           </AnimatePresence>
 
@@ -587,7 +586,7 @@ function DashboardContent() {
                           <div className={`w-2 h-2 rounded-full transition-all duration-500 ${isSelected ? 'bg-brand shadow-[0_0_8px_var(--color-brand)] scale-110' : 'bg-white/10 group-hover:bg-white/30'}`} />
                           <span className="truncate max-w-[150px]">{acc.nickname || acc.name}</span>
                           {isSelected && (
-                            <motion.div
+                            <m.div
                               layoutId="activeAccountRing"
                               className="absolute inset-0 border border-brand/20 rounded-2xl"
                               transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
@@ -609,12 +608,12 @@ function DashboardContent() {
                   ].map((tab) => (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id as any)}
+                      onClick={() => setActiveTab(tab.id as 'review' | 'matched' | 'excluded')}
                       className={`relative flex-1 md:flex-none px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-500 flex items-center justify-center gap-2.5 group/tab select-none ${activeTab === tab.id ? 'text-white' : 'text-white/40 hover:text-white/80'
                         }`}
                     >
                       {activeTab === tab.id && (
-                        <motion.div
+                        <m.div
                           layoutId="activeTab"
                           className={`absolute inset-0 rounded-xl bg-white/[0.08] border border-white/5 shadow-lg`}
                           transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
@@ -664,7 +663,7 @@ function DashboardContent() {
               <div className="grid grid-cols-1 gap-6">
                 <AnimatePresence mode="popLayout">
                   {sortedTransactions.map((tx, index) => (
-                    <motion.div
+                    <m.div
                       key={tx.id}
                       layout
                       initial={{ opacity: 0, scale: 0.9 }}
@@ -699,18 +698,18 @@ function DashboardContent() {
                         onUpdate={updateTransaction}
                         onSplit={splitTransaction}
                       />
-                    </motion.div>
+                    </m.div>
                   ))}
                 </AnimatePresence>
 
                 {currentTabTransactions.length === 0 && (
-                  <motion.div
+                  <m.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     className="col-span-full py-24 flex flex-col items-center justify-center glass-panel border border-white/5 text-center px-10 relative overflow-hidden"
                   >
                     <div className="absolute inset-0 bg-gradient-to-b from-brand/10 to-transparent opacity-30" />
-                    <motion.div
+                    <m.div
                       animate={{
                         scale: [1, 1.2, 1],
                         opacity: [0.1, 0.2, 0.1]
@@ -718,7 +717,7 @@ function DashboardContent() {
                       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                       className="absolute w-[500px] h-[500px] bg-brand/20 blur-[100px] rounded-full -z-10"
                     />
-                    <motion.div
+                    <m.div
                       initial={{ y: 0 }}
                       animate={{
                         y: [-10, 10, -10],
@@ -737,17 +736,17 @@ function DashboardContent() {
                       {activeTab === 'review' ? (
                         <div className="relative">
                           <ShieldCheck size={56} className="drop-shadow-[0_0_12px_rgba(0,223,216,0.5)]" />
-                          <motion.div
+                          <m.div
                             initial={{ scale: 0, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{ delay: 0.8, type: "spring", stiffness: 200 }}
                             className="absolute -top-1 -right-1 w-8 h-8 bg-brand-accent rounded-full border-4 border-[#020405] flex items-center justify-center shadow-lg"
                           >
                             <Check size={16} className="text-[#020405] stroke-[4]" />
-                          </motion.div>
+                          </m.div>
                         </div>
                       ) : <Building2 size={56} />}
-                    </motion.div>
+                    </m.div>
                     <h3 className="text-4xl font-black mb-3 relative z-10 tracking-tight">
                       {activeTab === 'review' ? 'Perfectly Sync’d' : 'Nothing To Show'}
                     </h3>
@@ -757,7 +756,7 @@ function DashboardContent() {
                         : "We couldn't find any historical records matching this specific filter."}
                     </p>
                     {activeTab === 'review' && (
-                      <motion.div
+                      <m.div
                         initial={{ scale: 0, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: 1.2, type: "spring" }}
@@ -769,9 +768,9 @@ function DashboardContent() {
                             AI Performance: Peak Efficiency
                           </div>
                         </div>
-                      </motion.div>
+                      </m.div>
                     )}
-                  </motion.div>
+                  </m.div>
                 )}
               </div>
             </div>
@@ -783,7 +782,7 @@ function DashboardContent() {
             <Sparkles className="text-brand animate-pulse" size={16} />
             <span className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">Next-Gen Accounting</span>
           </div>
-          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v4.5.0</span></p>
+          <p className="text-white/20 text-xs text-center">AutoMatch Books AI Engine &copy; 2026. Powered by Google Gemini 3 Flash. <span className="ml-2 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02] text-[10px] font-bold">v4.5.1</span></p>
         </footer>
 
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-6 pb-6 pt-2 bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none">
@@ -819,23 +818,25 @@ function DashboardContent() {
 
 export default function Dashboard() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen p-12 space-y-8">
-        <div className="flex justify-between items-end">
-          <div className="space-y-4">
-            <Skeleton width="200px" height="20px" />
-            <Skeleton width="400px" height="60px" />
+    <LazyMotion features={domMax}>
+      <Suspense fallback={
+        <div className="min-h-screen p-12 space-y-8">
+          <div className="flex justify-between items-end">
+            <div className="space-y-4">
+              <Skeleton width="200px" height="20px" />
+              <Skeleton width="400px" height="60px" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Skeleton height="200px" className="md:col-span-1" />
+            <Skeleton height="200px" className="md:col-span-1" />
+            <Skeleton height="200px" className="md:col-span-1" />
+            <Skeleton height="600px" className="md:col-span-3" />
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Skeleton height="200px" className="md:col-span-1" />
-          <Skeleton height="200px" className="md:col-span-1" />
-          <Skeleton height="200px" className="md:col-span-1" />
-          <Skeleton height="600px" className="md:col-span-3" />
-        </div>
-      </div>
-    }>
-      <DashboardContent />
-    </Suspense>
+      }>
+        <DashboardContent />
+      </Suspense>
+    </LazyMotion>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence, LazyMotion, domMax } from 'framer-motion';
 import {
     ShieldCheck,
     Plus,
@@ -88,8 +88,8 @@ function RulesPageContent() {
 
             if (rulesRes.ok) setRules(await rulesRes.json());
             if (aliasesRes.ok) setAliases(await aliasesRes.json());
-        } catch (error) {
-            console.error("Fetch Data Error:", error);
+        } catch {
+            // Data fetch failed
         } finally {
             setLoading(false);
         }
@@ -174,7 +174,7 @@ function RulesPageContent() {
             <div className="relative z-10 max-w-7xl mx-auto px-4 pt-24 pb-20">
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-                    <motion.div
+                    <m.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                     >
@@ -187,9 +187,9 @@ function RulesPageContent() {
                         <p className="text-white/40 font-medium max-w-xl">
                             Configure deterministic logic to override AI suggestions. Rules and Aliases ensure 100% accuracy for recurring patterns.
                         </p>
-                    </motion.div>
+                    </m.div>
 
-                    <motion.button
+                    <m.button
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         whileHover={{ scale: 1.05 }}
@@ -198,7 +198,7 @@ function RulesPageContent() {
                         className="flex items-center gap-2 px-6 py-3 bg-brand rounded-2xl font-black text-xs uppercase tracking-widest hover:brightness-110 shadow-xl shadow-brand/20 border border-white/10"
                     >
                         <Plus size={18} /> New {activeTab === 'rules' ? 'Rule' : 'Alias'}
-                    </motion.button>
+                    </m.button>
                 </div>
 
                 {/* Tab Switcher */}
@@ -208,21 +208,21 @@ function RulesPageContent() {
                         className={`px-4 py-2 text-[10px] uppercase tracking-widest font-black transition-all relative ${activeTab === 'rules' ? 'text-brand' : 'text-white/30 hover:text-white/60'}`}
                     >
                         Classification Rules
-                        {activeTab === 'rules' && <motion.div layoutId="tab-active" className="absolute bottom-[-1px] left-0 right-0 h-0.5 bg-brand" />}
+                        {activeTab === 'rules' && <m.div layoutId="tab-active" className="absolute bottom-[-1px] left-0 right-0 h-0.5 bg-brand" />}
                     </button>
                     <button
                         onClick={() => setActiveTab('aliases')}
                         className={`px-4 py-2 text-[10px] uppercase tracking-widest font-black transition-all relative ${activeTab === 'aliases' ? 'text-brand' : 'text-white/30 hover:text-white/60'}`}
                     >
                         Vendor Normalization
-                        {activeTab === 'aliases' && <motion.div layoutId="tab-active" className="absolute bottom-[-1px] left-0 right-0 h-0.5 bg-brand" />}
+                        {activeTab === 'aliases' && <m.div layoutId="tab-active" className="absolute bottom-[-1px] left-0 right-0 h-0.5 bg-brand" />}
                     </button>
                 </div>
 
                 {/* Content Area */}
                 <AnimatePresence mode="wait">
                     {loading ? (
-                        <motion.div
+                        <m.div
                             key="loading"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -231,9 +231,9 @@ function RulesPageContent() {
                         >
                             <div className="w-12 h-12 border-4 border-brand/20 border-t-brand rounded-full animate-spin mb-4" />
                             <p className="text-[10px] uppercase tracking-[0.2em] font-black text-white/20">Syncing Logic...</p>
-                        </motion.div>
+                        </m.div>
                     ) : activeTab === 'rules' ? (
-                        <motion.div
+                        <m.div
                             key="rules-list"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -283,9 +283,9 @@ function RulesPageContent() {
                                     </div>
                                 </div>
                             ))}
-                        </motion.div>
+                        </m.div>
                     ) : (
-                        <motion.div
+                        <m.div
                             key="aliases-list"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -332,7 +332,7 @@ function RulesPageContent() {
                                     </tbody>
                                 </table>
                             </div>
-                        </motion.div>
+                        </m.div>
                     )}
                 </AnimatePresence>
 
@@ -340,14 +340,14 @@ function RulesPageContent() {
                 <AnimatePresence>
                     {showCreateModal && (
                         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                            <motion.div
+                            <m.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
                                 onClick={() => setShowCreateModal(false)}
                                 className="absolute inset-0 bg-black/60 backdrop-blur-md"
                             />
-                            <motion.div
+                            <m.div
                                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -444,7 +444,7 @@ function RulesPageContent() {
                                         </button>
                                     </form>
                                 )}
-                            </motion.div>
+                            </m.div>
                         </div>
                     )}
                 </AnimatePresence>
@@ -457,13 +457,15 @@ function RulesPageContent() {
 
 export default function RulesPage() {
     return (
-        <Suspense fallback={
-            <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-                <div className="w-12 h-12 border-4 border-brand/20 border-t-brand rounded-full animate-spin" />
-            </div>
-        }>
-            <RulesPageContent />
-        </Suspense>
+        <LazyMotion features={domMax}>
+            <Suspense fallback={
+                <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+                    <div className="w-12 h-12 border-4 border-brand/20 border-t-brand rounded-full animate-spin" />
+                </div>
+            }>
+                <RulesPageContent />
+            </Suspense>
+        </LazyMotion>
     );
 }
 

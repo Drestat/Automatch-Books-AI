@@ -5,7 +5,7 @@ import { BentoGrid } from '@/components/BentoGrid';
 import { BentoTile } from '@/components/BentoTile';
 import { track } from '@/lib/analytics';
 import { Bot, RefreshCw, ExternalLink } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,8 +40,8 @@ export default function AdminAnalyticsPage() {
             if (Array.isArray(data)) {
                 setEvents(data);
             }
-        } catch (e) {
-            console.error("Failed to fetch events", e);
+        } catch {
+            // Events fetch failed
         } finally {
             setLoading(false);
         }
@@ -55,12 +55,12 @@ export default function AdminAnalyticsPage() {
             });
             const data = await res.json();
             if (data.error) {
-                console.error(data.error);
+                // Insights generation returned error
             } else {
                 setInsights(data);
             }
-        } catch (e) {
-            console.error("Failed to generate insights", e);
+        } catch {
+            // Insights generation failed
         } finally {
             setAiLoading(false);
         }
@@ -80,7 +80,7 @@ export default function AdminAnalyticsPage() {
     return (
         <div className="min-h-screen py-12 px-6 lg:px-12 max-w-7xl mx-auto selection:bg-brand selection:text-white pb-32">
             <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8 header-glow">
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                 >
@@ -96,7 +96,7 @@ export default function AdminAnalyticsPage() {
                     <p className="text-white/30 text-sm sm:text-base font-medium max-w-sm">
                         Internal Data Lake & Strategic AI Analysis
                     </p>
-                </motion.div>
+                </m.div>
                 <div className="flex gap-4">
                     <a
                         href={`https://analytics.google.com/analytics/web/`}

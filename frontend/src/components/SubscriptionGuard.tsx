@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Lock, Sparkles, Clock, AlertCircle, ArrowRight } from 'lucide-react';
 
@@ -45,7 +45,7 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({ status, da
             <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-full bg-grid-white/[0.02] -z-10" />
 
-                <motion.div
+                <m.div
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     className="w-full max-w-md bg-white/5 border border-white/10 backdrop-blur-xl p-8 rounded-3xl text-center shadow-2xl"
@@ -66,7 +66,7 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({ status, da
                     </button>
 
                     <p className="mt-4 text-xs text-white/20">No credit card required for trial.</p>
-                </motion.div>
+                </m.div>
             </div>
         );
     }
@@ -77,7 +77,7 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({ status, da
                 <div className="absolute top-0 left-0 w-full h-full bg-grid-white/[0.02] -z-10" />
                 <div className="absolute inset-0 bg-rose-500/5 backdrop-blur-sm z-0" />
 
-                <motion.div
+                <m.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     className="w-full max-w-md bg-[#0a0a0a] border border-rose-500/20 p-8 rounded-3xl text-center shadow-[0_0_50px_rgba(244,63,94,0.1)] relative z-10"
@@ -96,7 +96,7 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({ status, da
                     >
                         Restore Access
                     </button>
-                </motion.div>
+                </m.div>
             </div>
         );
     }

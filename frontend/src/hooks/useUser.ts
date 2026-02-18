@@ -2,8 +2,7 @@
 
 import { useUser as useClerkUser } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
-
-const API_BASE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run') + '/api/v1';
+import { API_BASE_URL } from '@/lib/api';
 
 export interface UserProfile {
     id: string;
@@ -28,8 +27,8 @@ export const useUser = () => {
             if (res.ok) {
                 setProfile(data);
             }
-        } catch (e) {
-            console.error("Failed to fetch user profile", e);
+        } catch {
+            // Profile fetch failed — will retry on next mount
         }
     };
 

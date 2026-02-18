@@ -4,6 +4,35 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import Script from "next/script";
 import { ToastProvider } from "@/context/ToastContext";
+import MotionProvider from "@/components/MotionProvider";
+import localFont from "next/font/local";
+import { Space_Mono, Syncopate } from "next/font/google";
+
+const satoshi = localFont({
+  src: [
+    { path: "../fonts/Satoshi-Light.woff2", weight: "300", style: "normal" },
+    { path: "../fonts/Satoshi-Regular.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/Satoshi-Medium.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/Satoshi-Bold.woff2", weight: "700", style: "normal" },
+    { path: "../fonts/Satoshi-Black.woff2", weight: "900", style: "normal" },
+  ],
+  variable: "--font-satoshi",
+  display: "swap",
+});
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-space-mono",
+  display: "swap",
+});
+
+const syncopate = Syncopate({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-syncopate",
+  display: "swap",
+});
 
 
 
@@ -32,7 +61,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "AutoMatch Books AI | AI-Powered QuickBooks Automation",
     description: "Seamlessly match and sync your bank transactions with QuickBooks Online using Gemini 3 Flash.",
-    url: "https://automatchbooks.ai",
+    url: "https://automatchbooksai.com",
     siteName: "AutoMatch Books AI",
     images: [
       {
@@ -81,9 +110,8 @@ export default function RootLayout({
         variables: { colorPrimary: '#3b82f6' }
       }}
     >
-      <html lang="en">
+      <html lang="en" className={`${satoshi.variable} ${spaceMono.variable} ${syncopate.variable}`}>
         <head>
-          <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap" rel="stylesheet" />
           {/* PWA Manifest */}
           <link rel="manifest" href="/manifest.json" />
           {/* Apple PWA Meta Tags */}
@@ -123,9 +151,11 @@ export default function RootLayout({
               }
             `}
           </Script>
-          <ToastProvider>
-            {children}
-          </ToastProvider>
+          <MotionProvider>
+            <ToastProvider>
+              {children}
+            </ToastProvider>
+          </MotionProvider>
         </body>
       </html>
     </ClerkProvider>

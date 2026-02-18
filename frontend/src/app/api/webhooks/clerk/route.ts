@@ -41,18 +41,12 @@ export async function POST(req: Request) {
             'svix-signature': svix_signature,
         }) as WebhookEvent
     } catch (err) {
-        console.error('Error verifying webhook:', err)
         return new Response('Error occured', {
             status: 400,
         })
     }
 
-    // Do something with the payload
-    // For this guide, you can log the payload to the console
-    const { id } = evt.data
     const eventType = evt.type
-    console.log(`Webhook with and ID of ${id} and type of ${eventType}`)
-    console.log('Webhook body:', body)
 
     if (eventType === 'user.created' || eventType === 'user.updated') {
         const { id, email_addresses } = evt.data
@@ -71,8 +65,8 @@ export async function POST(req: Request) {
                         email: email,
                     }),
                 })
-            } catch (error) {
-                console.error('Error syncing user with backend:', error)
+            } catch {
+                // User sync failed — non-critical
             }
         }
     }

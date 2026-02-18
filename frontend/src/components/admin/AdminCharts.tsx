@@ -12,7 +12,7 @@ interface ChartData {
     region?: string;
 }
 
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number }> }) => {
     if (active && payload && payload.length) {
         return (
             <div className="bg-black/80 backdrop-blur-xl border border-white/10 p-3 rounded-lg shadow-2xl">
@@ -55,7 +55,13 @@ export const TierDistributionChart = ({ data }: { data: ChartData[] }) => {
     );
 };
 
-export const LocationBarChart = ({ data }: { data: any[] }) => {
+interface LocationData {
+    region: string;
+    count: number;
+    currency?: string;
+}
+
+export const LocationBarChart = ({ data }: { data: LocationData[] }) => {
     // Map data to match BarChart expectations
     const chartData = data.map(d => ({
         name: d.region,

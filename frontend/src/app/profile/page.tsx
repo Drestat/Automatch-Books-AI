@@ -1,7 +1,7 @@
 "use client";
 
 import React, { Suspense } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { ArrowLeft, User, Zap, LogOut, Settings, Shield, ChevronRight, Cloud, HelpCircle, ToggleLeft, ToggleRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useClerk } from "@clerk/nextjs";
@@ -56,7 +56,7 @@ function ProfileContent() {
             <div className="max-w-7xl mx-auto px-6 pt-12 relative z-10">
                 {/* Header Section - Refined & Professional */}
                 <header className="mb-12">
-                    <motion.div
+                    <m.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
@@ -84,10 +84,10 @@ function ProfileContent() {
                                 </span>
                             </div>
                         </div>
-                    </motion.div>
+                    </m.div>
                 </header>
 
-                <motion.div
+                <m.div
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
@@ -96,7 +96,7 @@ function ProfileContent() {
                     {/* Left Column: Vertical Control Center */}
                     <div className="lg:col-span-4 space-y-8">
                         {/* QuickBooks Connection HUB - Simplified Professional */}
-                        <motion.div variants={itemVariants} className="glass-panel p-8 border-white/5 bg-white/[0.01] backdrop-blur-2xl relative group overflow-hidden">
+                        <m.div variants={itemVariants} className="glass-panel p-8 border-white/5 bg-white/[0.01] backdrop-blur-2xl relative group overflow-hidden">
                             <div className="flex items-center gap-4 mb-8">
                                 <div className="p-3.5 rounded-2xl bg-brand/10 text-brand border border-brand/20">
                                     <Cloud size={22} />
@@ -136,10 +136,10 @@ function ProfileContent() {
                                     <span className="text-[10px] text-white/60 font-bold">v3.61.0</span>
                                 </div>
                             </div>
-                        </motion.div>
+                        </m.div>
 
                         {/* Autonomous Engine Control */}
-                        <motion.div variants={itemVariants} className="glass-panel p-8 border-white/5 bg-white/[0.01] backdrop-blur-2xl relative overflow-hidden group">
+                        <m.div variants={itemVariants} className="glass-panel p-8 border-white/5 bg-white/[0.01] backdrop-blur-2xl relative overflow-hidden group">
                             <div className="flex items-center justify-between mb-8">
                                 <div className="flex items-center gap-4">
                                     <div className="p-3.5 rounded-2xl bg-brand/10 text-brand border border-brand/20">
@@ -191,10 +191,10 @@ function ProfileContent() {
                                     </button>
                                 </div>
                             </div>
-                        </motion.div>
+                        </m.div>
 
                         {/* Session Control */}
-                        <motion.div variants={itemVariants} className="glass-panel border-white/5 p-6 bg-white/[0.01] backdrop-blur-2xl">
+                        <m.div variants={itemVariants} className="glass-panel border-white/5 p-6 bg-white/[0.01] backdrop-blur-2xl">
                             <button
                                 onClick={() => signOut()}
                                 className="w-full flex items-center gap-4 py-3 px-4 rounded-xl hover:bg-white/5 transition-all group"
@@ -208,11 +208,11 @@ function ProfileContent() {
                                 </div>
                                 <ChevronRight size={14} className="text-white/10 group-hover:text-white/40 transition-colors" />
                             </button>
-                        </motion.div>
+                        </m.div>
                     </div>
 
                     {/* Right Column: Clerk Integration Area */}
-                    <motion.div
+                    <m.div
                         variants={itemVariants}
                         className="lg:col-span-8"
                     >
@@ -227,8 +227,8 @@ function ProfileContent() {
                                 <ClerkParameters />
                             </div>
                         </div>
-                    </motion.div>
-                </motion.div>
+                    </m.div>
+                </m.div>
             </div>
 
             <Footer />

@@ -28,7 +28,9 @@ export function useGamification() {
         if (!userId) return;
         try {
             const token = await getToken();
-            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8000'; // Default to local for dev
+            // Default to current hostname (for mobile testing) preserving port 8000
+            const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `http://${hostname}:8000`;
 
             const res = await fetch(`${baseUrl}/api/v1/gamification/stats`, {
                 headers: {
@@ -41,8 +43,8 @@ export function useGamification() {
                 const data = await res.json();
                 setStats(data);
             }
-        } catch (error) {
-            console.error("Failed to fetch gamification stats:", error);
+        } catch {
+            // Stats fetch failed
         } finally {
             setLoading(false);
         }
@@ -64,7 +66,8 @@ export function useLeaderboard() {
         if (!userId) return;
         try {
             const token = await getToken();
-            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8000';
+            const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `http://${hostname}:8000`;
 
             const res = await fetch(`${baseUrl}/api/v1/gamification/leaderboard`, {
                 headers: {
@@ -77,8 +80,8 @@ export function useLeaderboard() {
                 const data = await res.json();
                 setLeaderboard(data);
             }
-        } catch (error) {
-            console.error("Failed to fetch leaderboard:", error);
+        } catch {
+            // Leaderboard fetch failed
         } finally {
             setLoading(false);
         }

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Check, Edit2, Info, ArrowUpRight, FilePlus, FileCheck, Tags, Split as SplitIcon, ExternalLink, CheckCircle2, Sparkles, Building2, X, Camera } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import VendorSelector from './VendorSelector';
 import CategorySelector from './CategorySelector';
 import SplitEditorModal from './SplitEditorModal';
@@ -88,10 +88,10 @@ interface TransactionCardProps {
     onPayeeChange?: (txId: string, payee: string) => void;
     onNoteChange?: (txId: string, note: string) => void;
     onUpdate?: (txId: string, updates: Partial<Transaction>) => void;
-    onSplit?: (txId: string, splits: { category_name: string, amount: number, description: string }[]) => Promise<any>;
+    onSplit?: (txId: string, splits: { category_name: string, amount: number, description: string }[]) => Promise<boolean>;
     drag?: boolean | "x" | "y";
-    dragConstraints?: any;
-    onDragEnd?: (event: any, info: any) => void;
+    dragConstraints?: React.RefObject<HTMLElement | null> | false | { top?: number; right?: number; bottom?: number; left?: number };
+    onDragEnd?: (event: MouseEvent | TouchEvent | PointerEvent, info: { offset: { x: number; y: number }; velocity: { x: number; y: number } }) => void;
 }
 
 export default function TransactionCard({
@@ -218,7 +218,7 @@ export default function TransactionCard({
     };
 
     return (
-        <motion.div
+        <m.div
             layout
             drag={drag}
             dragConstraints={dragConstraints}
@@ -232,7 +232,7 @@ export default function TransactionCard({
             <div className="p-4 md:p-5 relative z-10">
                 {/* 0. Duplicate Warning Banner */}
                 {(tx.status === 'potential_duplicate' || (tx.duplicate_confidence && tx.duplicate_confidence > 0.8)) && (
-                    <motion.div
+                    <m.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         className="mb-4 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 flex items-start gap-3 overflow-hidden"
@@ -247,7 +247,7 @@ export default function TransactionCard({
                                 Confirming this may create a double entry.
                             </p>
                         </div>
-                    </motion.div>
+                    </m.div>
                 )}
 
                 {/* 1. High-Fidelity Header */}
@@ -278,7 +278,7 @@ export default function TransactionCard({
                     {/* Right Side: Confidence & Amount */}
                     <div className="flex items-center justify-end shrink-0 gap-2 sm:gap-4 pt-1">
                         {/* Confidence Circle (esk) */}
-                        <motion.div
+                        <m.div
                             className="relative w-10 h-10 flex items-center justify-center shrink-0"
                             animate={tx.confidence > 0.9 ? {
                                 filter: ["drop-shadow(0 0 2px var(--color-brand-accent))", "drop-shadow(0 0 8px var(--color-brand-accent))", "drop-shadow(0 0 2px var(--color-brand-accent))"],
@@ -295,7 +295,7 @@ export default function TransactionCard({
                                     strokeWidth="2.5"
                                     className="text-white/5"
                                 />
-                                <motion.circle
+                                <m.circle
                                     cx="20"
                                     cy="20"
                                     r="16"
@@ -312,7 +312,7 @@ export default function TransactionCard({
                             <span className={`text-[10px] font-black relative z-10 ${tx.confidence > 0.8 ? "text-emerald-500" : tx.confidence > 0.5 ? "text-amber-500" : "text-rose-500"}`}>
                                 {Math.round(tx.confidence * 100)}%
                             </span>
-                        </motion.div>
+                        </m.div>
 
                         <span className="text-xl font-black text-white/90 whitespace-nowrap">
                             {tx.amount === 0 ? '' : (isExpense ? '-' : '+')} {Math.abs(tx.amount).toLocaleString('en-US', { style: 'currency', currency: tx.currency })}
@@ -407,7 +407,7 @@ export default function TransactionCard({
 
                 {/* 3. AI Intelligence Module */}
                 {(isAnalyzing || tx.vendor_reasoning || tx.category_reasoning || tx.tax_deduction_note) && (
-                    <motion.div
+                    <m.div
                         initial={{ opacity: 0, x: -10 }}
                         animate={{
                             opacity: 1,
@@ -429,7 +429,7 @@ export default function TransactionCard({
                         className={`border rounded-2xl p-4 mb-4 relative overflow-hidden group/ai-module`}
                     >
                         {isAnalyzing && (
-                            <motion.div
+                            <m.div
                                 initial={{ x: "-100%" }}
                                 animate={{ x: "200%" }}
                                 transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
@@ -453,7 +453,7 @@ export default function TransactionCard({
                                         ? "bg-brand-accent/10 border-brand-accent/30 shadow-[0_0_10px_-2px_var(--glow-brand)]"
                                         : "bg-brand-accent/5 border-brand-accent/10 group-hover/ai-module:border-brand-accent/30"
                                     }`}>
-                                    <motion.div
+                                    <m.div
                                         animate={{
                                             opacity: [0.5, 1, 0.5]
                                         }}
@@ -468,7 +468,7 @@ export default function TransactionCard({
                                         ) : (
                                             <Sparkles size={14} className="text-brand-accent" />
                                         )}
-                                    </motion.div>
+                                    </m.div>
                                 </div>
                                 <div className="space-y-2 pt-0.5">
                                     {tx.vendor_reasoning && (
@@ -517,11 +517,11 @@ export default function TransactionCard({
                                 </div>
                             )}
                         </div>
-                    </motion.div>
+                    </m.div>
                 )}
 
                 {/* 4. Collaboration Drawer */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3 }}
@@ -604,7 +604,7 @@ export default function TransactionCard({
                             )}
                         </div>
                     </div>
-                </motion.div>
+                </m.div>
 
                 {/* 5. Master Actions */}
                 <div className="space-y-3">
@@ -684,7 +684,7 @@ export default function TransactionCard({
                             }}
                             className="flex-1 bg-[#061a18] border border-brand-accent/10 hover:border-brand-accent/40 rounded-xl flex items-center justify-center text-brand-trend font-bold text-[10px] uppercase tracking-[0.15em] transition-all active:scale-95 group/ai hover:bg-[#0a2825] hover:shadow-[0_0_25px_-10px_var(--glow-brand)]"
                         >
-                            <motion.div
+                            <m.div
                                 animate={{
                                     opacity: [0.5, 1, 0.5]
                                 }}
@@ -696,7 +696,7 @@ export default function TransactionCard({
                                 className="mr-2"
                             >
                                 <Sparkles size={14} className="text-brand-accent" />
-                            </motion.div>
+                            </m.div>
                             {isAnalyzing ? "..." : "AI Analyze"}
                         </button>
 
@@ -767,14 +767,14 @@ export default function TransactionCard({
                 <AnimatePresence>
                     {showReceipt && (
                         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-                            <motion.div
+                            <m.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
                                 onClick={() => setShowReceipt(false)}
                                 className="absolute inset-0 bg-black/95 backdrop-blur-xl"
                             />
-                            <motion.div
+                            <m.div
                                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                                 animate={{ scale: 1, opacity: 1, y: 0 }}
                                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -799,14 +799,14 @@ export default function TransactionCard({
                                         className="max-w-full h-auto rounded-xl shadow-lg ring-1 ring-white/10"
                                     />
                                 </div>
-                            </motion.div>
+                            </m.div>
                         </div>
                     )}
                 </AnimatePresence>
 
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
             </div>
-        </motion.div >
+        </m.div >
     );
 
 }
@@ -825,7 +825,7 @@ function IconButton({
     loading?: boolean
 }) {
     return (
-        <motion.button
+        <m.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={onClick}
@@ -839,6 +839,6 @@ function IconButton({
             {loading ? (
                 <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" />
             ) : icon}
-        </motion.button>
+        </m.button>
     );
 }

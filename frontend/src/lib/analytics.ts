@@ -15,10 +15,7 @@ declare global {
 export const track = async (event: AnalyticsEvent, properties?: Record<string, unknown>, userId?: string) => {
     const timestamp = new Date().toISOString();
 
-    // 1. Console Log (Dev)
-    console.log(`[Analytics] ${timestamp} | ${event}`, properties || '');
-
-    // 2. Google Analytics (GA4)
+    // 1. Google Analytics (GA4)
     if (typeof window !== 'undefined' && window.gtag) {
         window.gtag('event', event, {
             ...properties,
@@ -41,8 +38,8 @@ export const track = async (event: AnalyticsEvent, properties?: Record<string, u
                     user_id: userId
                 })
             });
-        } catch (error) {
-            console.error('[Analytics] Backend sync failed:', error);
+        } catch {
+            // Backend sync failed — non-critical
         }
     }
 };

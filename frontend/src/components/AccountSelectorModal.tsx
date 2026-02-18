@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { Loader2, Building2, Crown, Check, X, Sparkles } from 'lucide-react';
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run') + '/api/v1';
@@ -59,8 +59,8 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
             setLimit(data.limit);
             setTier(data.tier);
             setSelectedIds(data.accounts.filter((a: Account) => a.is_active).map((a: Account) => a.id));
-        } catch (error) {
-            console.error("Error fetching accounts:", error);
+        } catch {
+            // Account fetch failed
         } finally {
             setLoading(false);
         }
@@ -80,7 +80,6 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
     const handlePreview = async () => {
         setPreviewLoading(true);
         try {
-            console.log('Fetching preview for accounts:', selectedIds);
             const res = await fetch(`${API_BASE_URL}/qbo/accounts/preview`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -92,7 +91,6 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
             }
 
             const data = await res.json();
-            console.log('Preview data received:', data);
 
             if (data && typeof data.total_transactions === 'number') {
                 setPreviewStats(data);
@@ -101,7 +99,6 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
                 throw new Error('Invalid preview data structure');
             }
         } catch (error) {
-            console.error("Preview error:", error);
             alert(`Failed to generate preview: ${error instanceof Error ? error.message : 'Unknown error'}`);
             setPreviewLoading(false);
         } finally {
@@ -124,8 +121,7 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
             }
             onSuccess();
             onClose();
-        } catch (error) {
-            console.error("Save error:", error);
+        } catch {
             alert("Failed to save selection. Please try again.");
         } finally {
             setSubmitting(false);
@@ -139,7 +135,7 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     {/* Backdrop */}
-                    <motion.div
+                    <m.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -148,7 +144,7 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
                     />
 
                     {/* Modal */}
-                    <motion.div
+                    <m.div
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -312,7 +308,7 @@ export function AccountSelectorModal({ isOpen, onClose, onSuccess, realmId }: Ac
                                 </div>
                             )}
                         </div>
-                    </motion.div>
+                    </m.div>
                 </div>
             )}
         </AnimatePresence>

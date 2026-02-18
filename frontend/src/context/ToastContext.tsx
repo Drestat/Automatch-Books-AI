@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { CheckCircle, AlertCircle, Info, X } from 'lucide-react';
 
 type ToastType = 'success' | 'error' | 'info';
@@ -49,7 +49,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
             <div className="fixed bottom-8 right-8 z-[100] flex flex-col gap-3 pointer-events-none">
                 <AnimatePresence>
                     {toasts.map(toast => (
-                        <motion.div
+                        <m.div
                             key={toast.id}
                             initial={{ opacity: 0, x: 20, scale: 0.9 }}
                             animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -61,7 +61,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
                                 }`}>
                                 {/* Progress Bar */}
                                 {toast.action && (
-                                    <motion.div
+                                    <m.div
                                         initial={{ width: "100%" }}
                                         animate={{ width: "0%" }}
                                         transition={{ duration: (toast.duration || 10000) / 1000, ease: "linear" }}
@@ -97,7 +97,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
                                     <X size={16} />
                                 </button>
                             </div>
-                        </motion.div>
+                        </m.div>
                     ))}
                 </AnimatePresence>
             </div>

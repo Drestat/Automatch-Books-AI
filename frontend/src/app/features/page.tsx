@@ -1,9 +1,11 @@
 "use client";
 
 import React from 'react';
+import Image from 'next/image';
 import Footer from '@/components/Footer';
 import Navbar from '@/components/Navbar';
-import { motion } from 'framer-motion';
+import { FeaturesJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
+import { m } from 'framer-motion';
 import {
     Sparkles,
     Cpu,
@@ -31,11 +33,13 @@ import {
 export default function FeaturesPage() {
     return (
         <div className="min-h-screen bg-black text-white selection:bg-brand selection:text-white pt-20">
+            <FeaturesJsonLd />
+            <BreadcrumbJsonLd items={[{ name: "Home", url: "/" }, { name: "Features", url: "/features" }]} />
             <Navbar />
             <main className="py-24 px-6 md:px-12 max-w-7xl mx-auto">
 
                 {/* Hero section */}
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-24 text-center"
@@ -50,7 +54,7 @@ export default function FeaturesPage() {
                     <p className="text-white/40 text-xl max-w-2xl mx-auto leading-relaxed">
                         Your Books, on Smart Autopilot. Experience the power of <strong>Auditable Intelligence</strong>.
                     </p>
-                </motion.div>
+                </m.div>
 
                 {/* New Section: The Trust Bridge */}
                 <section className="mb-32">
@@ -414,7 +418,7 @@ function FeatureBlock({ title, description }: { title: string, description: stri
 
 function VisionCard({ title, icon, description }: { title: string, icon: React.ReactNode, description: string }) {
     return (
-        <motion.div
+        <m.div
             whileHover={{ y: -5 }}
             className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 group hover:border-brand/30 transition-all"
         >
@@ -423,7 +427,7 @@ function VisionCard({ title, icon, description }: { title: string, icon: React.R
             </div>
             <h4 className="font-bold mb-2">{title}</h4>
             <p className="text-xs text-white/40 leading-relaxed">{description}</p>
-        </motion.div>
+        </m.div>
     );
 }
 
@@ -443,13 +447,13 @@ function TestStep({ number, title, children, icon, image }: { number: string, ti
                     </div>
                 </div>
 
-                <div className="text-sm text-white/40 leading-relaxed min-h-[4rem]">
+                <div className="text-sm text-white/60 leading-relaxed min-h-[4rem]">
                     {children}
                 </div>
 
                 {image && (
-                    <div className="mt-6 rounded-xl overflow-hidden border border-white/5 opacity-80 hover:opacity-100 transition-all hover:scale-[1.02] cursor-zoom-in">
-                        <img src={image} alt={title} className="w-full object-cover max-h-[200px]" />
+                    <div className="mt-6 rounded-xl overflow-hidden border border-white/5 opacity-80 hover:opacity-100 transition-all hover:scale-[1.02] cursor-zoom-in relative h-[200px]">
+                        <Image src={image} alt={`Step ${number}: ${title}`} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" loading="lazy" />
                     </div>
                 )}
             </div>

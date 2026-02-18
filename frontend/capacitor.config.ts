@@ -5,9 +5,17 @@ const config: CapacitorConfig = {
   appName: 'AutoMatch Books AI',
   webDir: 'out',
   server: {
-    // Use the live URL so Clerk, API calls, etc. work correctly
-    url: 'https://www.automatchbooksai.com',
+    // Production URL
+    url: 'https://automatchbooksai.com/dashboard',
     cleartext: false,
+    allowNavigation: [
+      'automatchbooksai.com',
+      '*.automatchbooksai.com',
+      'accounts.google.com',
+      '*.google.com',
+      '*.clerk.com',
+      '*.clerk.accounts.dev'
+    ],
   },
   plugins: {
     SplashScreen: {

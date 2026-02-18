@@ -3,12 +3,9 @@ import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import { clerkClient } from '@clerk/nextjs/server';
 
-// @ts-ignore - Some Stripe versions use custom identifiers
 const stripe = process.env.STRIPE_SECRET_KEY
-    ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-        apiVersion: '2024-06-20' as any,
-    })
-    : null as any;
+    ? new Stripe(process.env.STRIPE_SECRET_KEY)
+    : null! as Stripe;
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ifvckinglovef1--qbo-sync-engine-fastapi-app.modal.run';
@@ -22,8 +19,7 @@ export async function POST(req: Request) {
     try {
         event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } catch (err: unknown) {
-        console.error(`Webhook signature verification failed: ${(err as Error).message}`);
-        return NextResponse.json({ error: (err as Error).message }, { status: 400 });
+        return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 });
     }
 
     // Handle checkout completion — user just paid
@@ -33,7 +29,6 @@ export async function POST(req: Request) {
         const tierName = session.metadata?.tierName;
 
         if (!clerkId) {
-            console.error('Stripe webhook: Missing clerkId in session metadata');
             return NextResponse.json({ error: 'Missing clerkId' }, { status: 400 });
         }
 
@@ -51,9 +46,8 @@ export async function POST(req: Request) {
                     subscription_status: 'active',
                 }),
             });
-            console.log(`Stripe webhook: Synced user ${clerkId} → tier=${tierName}, status=${syncRes.status}`);
-        } catch (error) {
-            console.error('Stripe webhook: Error syncing user with backend:', error);
+        } catch {
+            // Sync failed — Stripe will retry via webhook
         }
 
         // 2. Update Clerk public metadata so frontend can read tier immediately
@@ -65,8 +59,8 @@ export async function POST(req: Request) {
                     subscription_tier: tierName || 'personal',
                 }
             });
-        } catch (error) {
-            console.error('Stripe webhook: Error updating Clerk metadata:', error);
+        } catch {
+            // Clerk metadata update failed — non-critical
         }
     }
 
@@ -102,17 +96,14 @@ export async function POST(req: Request) {
                     }
                 });
 
-                console.log(`Stripe webhook: Downgraded user ${clerkId} to free tier`);
             }
-        } catch (error) {
-            console.error('Stripe webhook: Error handling subscription deletion:', error);
+        } catch {
+            // Subscription deletion handling failed — non-critical
         }
     }
 
     // Handle payment failure — notify but don't downgrade immediately
     if (event.type === 'invoice.payment_failed') {
-        const invoice = event.data.object as Stripe.Invoice;
-        console.warn(`Stripe webhook: Payment failed for customer ${invoice.customer}`);
         // Stripe will retry — downgrade happens on subscription.deleted
     }
 

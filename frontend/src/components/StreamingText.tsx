@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 
 interface StreamingTextProps {
     text: string;
@@ -54,7 +54,7 @@ export default function StreamingText({ text, speed = 20, className = "", startD
         <span className={className}>
             {displayedText}
             {!isComplete && (
-                <motion.span
+                <m.span
                     animate={{ opacity: [1, 0] }}
                     transition={{ duration: 0.8, repeat: Infinity }}
                     className="inline-block w-1 h-3 bg-brand-accent ml-0.5 align-middle"

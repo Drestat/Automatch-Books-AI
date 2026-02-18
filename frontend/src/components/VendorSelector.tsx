@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { Search, Plus, Sparkles, Building2, X, Command, Check } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
@@ -113,7 +113,7 @@ export default function VendorSelector({
         <AnimatePresence>
             {isOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <motion.div
+                    <m.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -121,7 +121,7 @@ export default function VendorSelector({
                         className="absolute inset-0 bg-black/60 backdrop-blur-md"
                     />
 
-                    <motion.div
+                    <m.div
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -218,7 +218,7 @@ export default function VendorSelector({
                                 <span className="flex items-center gap-1"><Command size={10} /> Esc to Close</span>
                             </div>
                         </div>
-                    </motion.div>
+                    </m.div>
                 </div>
             )}
         </AnimatePresence>,

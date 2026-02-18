@@ -46,15 +46,14 @@ export const useAnalytics = () => {
                 if (res.ok) {
                     const data = await res.json();
                     if (data.error) {
-                        console.error('Analytics Error:', data.error);
                         return;
                     }
                     setSpendTrend(data.trend || []);
                     setCategoryData(data.categories || []);
                     setKpi(data.kpi || { totalSpend: 0, totalIncome: 0, netFlow: 0 });
                 }
-            } catch (error) {
-                console.error("Failed to fetch analytics:", error);
+            } catch {
+                // Analytics fetch failed silently
             } finally {
                 setLoading(false);
             }

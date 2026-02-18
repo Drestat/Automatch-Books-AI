@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { BentoGrid } from '@/components/BentoGrid';
 import { BentoTile } from '@/components/BentoTile';
 import { Users, BarChart3, Database, RefreshCw, Trophy, Activity, Globe, DollarSign, PieChart as PieChartIcon, Map } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { TierDistributionChart, LocationBarChart } from '@/components/admin/AdminCharts';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
@@ -45,8 +45,8 @@ export default function AdminDashboard() {
             if (json.kpi) {
                 setData(json);
             }
-        } catch (e) {
-            console.error("Failed to fetch usage data", e);
+        } catch {
+            // Usage data fetch failed
         } finally {
             setLoading(false);
         }
@@ -75,7 +75,7 @@ export default function AdminDashboard() {
     return (
         <div className="min-h-screen py-12 px-6 lg:px-12 max-w-7xl mx-auto">
             <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                 >
@@ -91,9 +91,9 @@ export default function AdminDashboard() {
                     <p className="text-white/40 text-lg max-w-md">
                         Real-time telemetry, revenue metrics, and fleet status associated with the AutoMatch Books AI network.
                     </p>
-                </motion.div>
+                </m.div>
 
-                <motion.div
+                <m.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     className="flex gap-4"
@@ -106,7 +106,7 @@ export default function AdminDashboard() {
                         <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
                         <span className="font-bold">{loading ? 'Refreshing...' : 'Refresh Uplink'}</span>
                     </button>
-                </motion.div>
+                </m.div>
             </header>
 
             <main>
@@ -248,7 +248,7 @@ export default function AdminDashboard() {
                                 <tbody className="divide-y divide-white/5">
                                     {data?.leaderboard && data.leaderboard.length > 0 ? (
                                         data.leaderboard.sort((a, b) => b.totalTransactions - a.totalTransactions).map((user, idx) => (
-                                            <motion.tr
+                                            <m.tr
                                                 key={user.realmId}
                                                 initial={{ opacity: 0, y: 10 }}
                                                 animate={{ opacity: 1, y: 0 }}
@@ -278,7 +278,7 @@ export default function AdminDashboard() {
                                                         <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
                                                     </div>
                                                 </td>
-                                            </motion.tr>
+                                            </m.tr>
                                         ))
                                     ) : (
                                         <tr>
